@@ -1,33 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Session Name="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/mib_module.workspace">
-  <int Value="0" Name="m_selectedTab"/>
+  <int Value="2" Name="m_selectedTab"/>
   <wxString Value="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/mib_module.workspace" Name="m_workspaceName"/>
   <TabInfoArray Name="TabInfoArray">
     <TabInfo>
       <wxString Value="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/main.c" Name="FileName"/>
-      <int Value="0" Name="FirstVisibleLine"/>
-      <int Value="9" Name="CurrentLine"/>
-      <wxArrayString Name="Bookmarks"/>
-      <IntVector Name="CollapsedFolds"/>
-    </TabInfo>
-    <TabInfo>
-      <wxString Value="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/scalar_int.c" Name="FileName"/>
-      <int Value="36" Name="FirstVisibleLine"/>
-      <int Value="53" Name="CurrentLine"/>
+      <int Value="3" Name="FirstVisibleLine"/>
+      <int Value="19" Name="CurrentLine"/>
       <wxArrayString Name="Bookmarks"/>
       <IntVector Name="CollapsedFolds"/>
     </TabInfo>
     <TabInfo>
       <wxString Value="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeLists.txt" Name="FileName"/>
-      <int Value="21" Name="FirstVisibleLine"/>
-      <int Value="43" Name="CurrentLine"/>
+      <int Value="35" Name="FirstVisibleLine"/>
+      <int Value="33" Name="CurrentLine"/>
       <wxArrayString Name="Bookmarks"/>
       <IntVector Name="CollapsedFolds"/>
     </TabInfo>
     <TabInfo>
-      <wxString Value="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/nstAgentSubagentObject.h" Name="FileName"/>
+      <wxString Value="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/SubagentRWObject.c" Name="FileName"/>
       <int Value="0" Name="FirstVisibleLine"/>
-      <int Value="9" Name="CurrentLine"/>
+      <int Value="0" Name="CurrentLine"/>
+      <wxArrayString Name="Bookmarks"/>
+      <IntVector Name="CollapsedFolds"/>
+    </TabInfo>
+    <TabInfo>
+      <wxString Value="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/SubagentRWObject.h" Name="FileName"/>
+      <int Value="0" Name="FirstVisibleLine"/>
+      <int Value="13" Name="CurrentLine"/>
       <wxArrayString Name="Bookmarks"/>
       <IntVector Name="CollapsedFolds"/>
     </TabInfo>

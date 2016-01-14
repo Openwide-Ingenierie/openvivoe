@@ -6,19 +6,17 @@
 
 #IncludeRegexTransform: 
 
-/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/nstAgentSubagentObject.h
-
-/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/main.c
-stdio.h
--
-
-/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/nstAgentSubagentObject.c
+/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/deviceType.h
 net-snmp/net-snmp-config.h
 -
 net-snmp/net-snmp-includes.h
 -
 net-snmp/agent/net-snmp-agent-includes.h
 -
-../include/nstAgentSubagentObject.h
-/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/nstAgentSubagentObject.h
+
+/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/main.c
+stdio.h
+-
+../include/deviceType.h
+/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/deviceType.h
 

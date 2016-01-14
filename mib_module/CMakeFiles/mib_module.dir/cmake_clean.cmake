@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
   "CMakeFiles/mib_module.dir/src/main.c.o"
-  "CMakeFiles/mib_module.dir/src/nstAgentSubagentObject.c.o"
+  "CMakeFiles/mib_module.dir/src/SubagentRWObject.c.o"
   "bin/Debug/mib_module.pdb"
   "bin/Debug/mib_module"
 )

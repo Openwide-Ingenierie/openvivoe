@@ -1,1 +1,1 @@
-/usr/bin/cc   -Wall -g   CMakeFiles/mib_module.dir/src/main.c.o CMakeFiles/mib_module.dir/src/nstAgentSubagentObject.c.o  -o bin/Debug/mib_module -rdynamic -I/usr/lib -Wl,-O1,--sort-common,--as-needed,-z,relro -L/usr/lib -lnetsnmp -lcrypto -lnl-3 -lm -lnetsnmpmibs -lnetsnmpagent 
+/usr/bin/cc   -Wall -g   CMakeFiles/mib_module.dir/src/main.c.o CMakeFiles/mib_module.dir/src/SubagentRWObject.c.o  -o bin/Debug/mib_module -rdynamic -I/usr/lib -Wl,-O1,--sort-common,--as-needed,-z,relro -L/usr/lib -lnetsnmp -lcrypto -lnl-3 -lm -lnetsnmpmibs -lnetsnmpagent 

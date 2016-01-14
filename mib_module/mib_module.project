@@ -2,13 +2,11 @@
 <CodeLite_Project Name="mib_module" InternalType="">
   <VirtualDirectory Name="src">
     <File Name="src/main.c"/>
-    <File Name="src/nstAgentSubagentObject.c"/>
+    <File Name="src/deviceType.c"/>
   </VirtualDirectory>
   <VirtualDirectory Name="include">
-    <File Name="include/nstAgentSubagentObject.h"/>
-    <File Name="src/mysubagent"/>
+    <File Name="include/deviceType.h"/>
   </VirtualDirectory>
-
   <Settings Type="Executable">
     <Configuration Name="DEBUG" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-g" Required="yes" PreCompiledHeader="">

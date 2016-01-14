@@ -123,6 +123,33 @@ mib_module/fast:
 	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/build
 .PHONY : mib_module/fast
 
+src/SubagentRWObject.o: src/SubagentRWObject.c.o
+
+.PHONY : src/SubagentRWObject.o
+
+# target to build an object file
+src/SubagentRWObject.c.o:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/SubagentRWObject.c.o
+.PHONY : src/SubagentRWObject.c.o
+
+src/SubagentRWObject.i: src/SubagentRWObject.c.i
+
+.PHONY : src/SubagentRWObject.i
+
+# target to preprocess a source file
+src/SubagentRWObject.c.i:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/SubagentRWObject.c.i
+.PHONY : src/SubagentRWObject.c.i
+
+src/SubagentRWObject.s: src/SubagentRWObject.c.s
+
+.PHONY : src/SubagentRWObject.s
+
+# target to generate assembly for a file
+src/SubagentRWObject.c.s:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/SubagentRWObject.c.s
+.PHONY : src/SubagentRWObject.c.s
+
 src/main.o: src/main.c.o
 
 .PHONY : src/main.o
@@ -150,33 +177,6 @@ src/main.c.s:
 	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/main.c.s
 .PHONY : src/main.c.s
 
-src/nstAgentSubagentObject.o: src/nstAgentSubagentObject.c.o
-
-.PHONY : src/nstAgentSubagentObject.o
-
-# target to build an object file
-src/nstAgentSubagentObject.c.o:
-	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/nstAgentSubagentObject.c.o
-.PHONY : src/nstAgentSubagentObject.c.o
-
-src/nstAgentSubagentObject.i: src/nstAgentSubagentObject.c.i
-
-.PHONY : src/nstAgentSubagentObject.i
-
-# target to preprocess a source file
-src/nstAgentSubagentObject.c.i:
-	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/nstAgentSubagentObject.c.i
-.PHONY : src/nstAgentSubagentObject.c.i
-
-src/nstAgentSubagentObject.s: src/nstAgentSubagentObject.c.s
-
-.PHONY : src/nstAgentSubagentObject.s
-
-# target to generate assembly for a file
-src/nstAgentSubagentObject.c.s:
-	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/nstAgentSubagentObject.c.s
-.PHONY : src/nstAgentSubagentObject.c.s
-
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -186,12 +186,12 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... mib_module"
+	@echo "... src/SubagentRWObject.o"
+	@echo "... src/SubagentRWObject.i"
+	@echo "... src/SubagentRWObject.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
-	@echo "... src/nstAgentSubagentObject.o"
-	@echo "... src/nstAgentSubagentObject.i"
-	@echo "... src/nstAgentSubagentObject.s"
 .PHONY : help
 
 

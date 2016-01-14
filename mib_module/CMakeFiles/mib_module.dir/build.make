@@ -81,40 +81,40 @@ CMakeFiles/mib_module.dir/src/main.c.o.provides: CMakeFiles/mib_module.dir/src/m
 CMakeFiles/mib_module.dir/src/main.c.o.provides.build: CMakeFiles/mib_module.dir/src/main.c.o
 
 
-CMakeFiles/mib_module.dir/src/nstAgentSubagentObject.c.o: CMakeFiles/mib_module.dir/flags.make
-CMakeFiles/mib_module.dir/src/nstAgentSubagentObject.c.o: src/nstAgentSubagentObject.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/mib_module.dir/src/nstAgentSubagentObject.c.o"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/mib_module.dir/src/nstAgentSubagentObject.c.o   -c /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/nstAgentSubagentObject.c
+CMakeFiles/mib_module.dir/src/SubagentRWObject.c.o: CMakeFiles/mib_module.dir/flags.make
+CMakeFiles/mib_module.dir/src/SubagentRWObject.c.o: src/SubagentRWObject.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/mib_module.dir/src/SubagentRWObject.c.o"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/mib_module.dir/src/SubagentRWObject.c.o   -c /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/SubagentRWObject.c
 
-CMakeFiles/mib_module.dir/src/nstAgentSubagentObject.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/mib_module.dir/src/nstAgentSubagentObject.c.i"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/nstAgentSubagentObject.c > CMakeFiles/mib_module.dir/src/nstAgentSubagentObject.c.i
+CMakeFiles/mib_module.dir/src/SubagentRWObject.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/mib_module.dir/src/SubagentRWObject.c.i"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/SubagentRWObject.c > CMakeFiles/mib_module.dir/src/SubagentRWObject.c.i
 
-CMakeFiles/mib_module.dir/src/nstAgentSubagentObject.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/mib_module.dir/src/nstAgentSubagentObject.c.s"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/nstAgentSubagentObject.c -o CMakeFiles/mib_module.dir/src/nstAgentSubagentObject.c.s
+CMakeFiles/mib_module.dir/src/SubagentRWObject.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/mib_module.dir/src/SubagentRWObject.c.s"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/SubagentRWObject.c -o CMakeFiles/mib_module.dir/src/SubagentRWObject.c.s
 
-CMakeFiles/mib_module.dir/src/nstAgentSubagentObject.c.o.requires:
+CMakeFiles/mib_module.dir/src/SubagentRWObject.c.o.requires:
 
-.PHONY : CMakeFiles/mib_module.dir/src/nstAgentSubagentObject.c.o.requires
+.PHONY : CMakeFiles/mib_module.dir/src/SubagentRWObject.c.o.requires
 
-CMakeFiles/mib_module.dir/src/nstAgentSubagentObject.c.o.provides: CMakeFiles/mib_module.dir/src/nstAgentSubagentObject.c.o.requires
-	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/nstAgentSubagentObject.c.o.provides.build
-.PHONY : CMakeFiles/mib_module.dir/src/nstAgentSubagentObject.c.o.provides
+CMakeFiles/mib_module.dir/src/SubagentRWObject.c.o.provides: CMakeFiles/mib_module.dir/src/SubagentRWObject.c.o.requires
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/SubagentRWObject.c.o.provides.build
+.PHONY : CMakeFiles/mib_module.dir/src/SubagentRWObject.c.o.provides
 
-CMakeFiles/mib_module.dir/src/nstAgentSubagentObject.c.o.provides.build: CMakeFiles/mib_module.dir/src/nstAgentSubagentObject.c.o
+CMakeFiles/mib_module.dir/src/SubagentRWObject.c.o.provides.build: CMakeFiles/mib_module.dir/src/SubagentRWObject.c.o
 
 
 # Object files for target mib_module
 mib_module_OBJECTS = \
 "CMakeFiles/mib_module.dir/src/main.c.o" \
-"CMakeFiles/mib_module.dir/src/nstAgentSubagentObject.c.o"
+"CMakeFiles/mib_module.dir/src/SubagentRWObject.c.o"
 
 # External object files for target mib_module
 mib_module_EXTERNAL_OBJECTS =
 
 bin/Debug/mib_module: CMakeFiles/mib_module.dir/src/main.c.o
-bin/Debug/mib_module: CMakeFiles/mib_module.dir/src/nstAgentSubagentObject.c.o
+bin/Debug/mib_module: CMakeFiles/mib_module.dir/src/SubagentRWObject.c.o
 bin/Debug/mib_module: CMakeFiles/mib_module.dir/build.make
 bin/Debug/mib_module: CMakeFiles/mib_module.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking C executable bin/Debug/mib_module"
@@ -126,7 +126,7 @@ CMakeFiles/mib_module.dir/build: bin/Debug/mib_module
 .PHONY : CMakeFiles/mib_module.dir/build
 
 CMakeFiles/mib_module.dir/requires: CMakeFiles/mib_module.dir/src/main.c.o.requires
-CMakeFiles/mib_module.dir/requires: CMakeFiles/mib_module.dir/src/nstAgentSubagentObject.c.o.requires
+CMakeFiles/mib_module.dir/requires: CMakeFiles/mib_module.dir/src/SubagentRWObject.c.o.requires
 
 .PHONY : CMakeFiles/mib_module.dir/requires
 
