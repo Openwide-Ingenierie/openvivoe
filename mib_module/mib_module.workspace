@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CodeLite_Workspace Name="mib_module" >
+  <Project Name="mib_module" Path="mib_module.project" Active="No"/>
+  <BuildMatrix>
+    <WorkspaceConfiguration Name="DEBUG" Selected="yes">
+      <Project Name="mib_module" ConfigName="DEBUG"/>
+    </WorkspaceConfiguration>
+  </BuildMatrix>
+</CodeLite_Workspace>

@@ -1,0 +1,24 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/nstAgentSubagentObject.h
+
+/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/main.c
+stdio.h
+-
+
+/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/nstAgentSubagentObject.c
+net-snmp/net-snmp-config.h
+-
+net-snmp/net-snmp-includes.h
+-
+net-snmp/agent/net-snmp-agent-includes.h
+-
+../include/nstAgentSubagentObject.h
+/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/nstAgentSubagentObject.h
+
