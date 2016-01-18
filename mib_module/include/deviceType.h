@@ -1,22 +1,15 @@
 /*
  * Licence: GPL
- * Created: Thu, 14 Jan 2016 12:05:31 +0100
+ * Created: Fri, 15 Jan 2016 14:28:28 +0100
  * Main authors:
  *     - hoel <hvasseur@openwide.fr>
  */
-#ifndef NSTAGENTSUBAGENTOBJECT_H
-#define NSTAGENTSUBAGENTOBJECT_H
+#ifndef DEVICETYPE_H
+# define DEVICETYPE_H
 
-/*
- * includes
- */
-#include <net-snmp/net-snmp-config.h>
-#include <net-snmp/net-snmp-includes.h>
-#include <net-snmp/agent/net-snmp-agent-includes.h>
+/* function declarations */
+static int deviceType = 1;
+void init_deviceType(void);
+Netsnmp_Node_Handler handle_deviceType;
 
-/*
- * function declarations 
- */
-void            init_deviceType(void);
-
-#endif                          /* NSTAGENTSUBAGENTOBJECT_H */
+#endif /* DEVICETYPE_H */

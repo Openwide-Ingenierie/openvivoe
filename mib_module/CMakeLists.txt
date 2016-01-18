@@ -30,9 +30,18 @@ file(GLOB_RECURSE mib_module_HEADER include/*)
 add_executable(mib_module ${mib_module_SRC} ${mib_module_HEADER} )
 
 
-#Link specific libraries to target: here net-snmp, obtain with 
-set(Build_libs "-I/usr/lib -Wl,-O1,--sort-common,--as-needed,-z,relro -L/usr/lib -lnetsnmp -lcrypto -lnl-3 -lm -lnetsnmpmibs -lnetsnmpagent")
-target_link_libraries(mib_module ${Build_libs})
+#Link specific libraries to target: here net-snmp
+#link that need to be set up to use net-snmp API
+execute_process(COMMAND "net-snmp-config" "--libs"
+				WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+				OUTPUT_VARIABLE BUILDLIBS
+				OUTPUT_STRIP_TRAILING_WHITESPACE)
+#link that need to be set up to compile an Agent using net-snmp API
+execute_process(COMMAND "net-snmp-config" "--agent-libs"
+				WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+				OUTPUT_VARIABLE BUILDAGENT_LIBS
+				OUTPUT_STRIP_TRAILING_WHITESPACE)
+target_link_libraries(mib_module ${BUILDLIBS} ${BUILDAGENT_LIBS})
 
 #set debug as default configuration, to buld release run "cmake -DCMAKE_BUILD_TYPE=Release" or simply the alias cmakerelease
 if( NOT CMAKE_BUILD_TYPE )
@@ -42,7 +51,12 @@ if( NOT CMAKE_BUILD_TYPE )
 endif()
 
 #Compilation flags
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall") #always
+#C_FLAGS needed, net-snmp-config provide an option to get the CFLAGS to use for compilation using net-snmp API
+execute_process(COMMAND "net-snmp-config" "--cflags"
+				WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+				OUTPUT_VARIABLE CFLAGS
+				OUTPUT_STRIP_TRAILING_WHITESPACE)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -I. ${CFLAGS}") #always
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} --ggdb") #for debugging
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall")#for release
 
@@ -63,4 +77,8 @@ message(STATUS "BINARY_DIR           : ${EXECUTABLE_OUTPUT_PATH}")
 message(STATUS "SRC_DIR 		: ${PROJECT_SOURCE_DIR}/src")
 message(STATUS "SYSTEM_NAME 		: ${CMAKE_SYSTEM_NAME}")
 message(STATUS "BUILD_TYPE  		: ${CMAKE_BUILD_TYPE}")
+message(STATUS "BUILDLIBS    			: ${BUILDLIBS}")
+message(STATUS "BUILDAGENT_LIBS    			: ${BUILDAGENT_LIBS}")
+message(STATUS "CFLAGS    			: ${CFLAGS}")
+
 

@@ -123,32 +123,167 @@ mib_module/fast:
 	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/build
 .PHONY : mib_module/fast
 
-src/SubagentRWObject.o: src/SubagentRWObject.c.o
+src/deviceDesc.o: src/deviceDesc.c.o
 
-.PHONY : src/SubagentRWObject.o
+.PHONY : src/deviceDesc.o
 
 # target to build an object file
-src/SubagentRWObject.c.o:
-	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/SubagentRWObject.c.o
-.PHONY : src/SubagentRWObject.c.o
+src/deviceDesc.c.o:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceDesc.c.o
+.PHONY : src/deviceDesc.c.o
 
-src/SubagentRWObject.i: src/SubagentRWObject.c.i
+src/deviceDesc.i: src/deviceDesc.c.i
 
-.PHONY : src/SubagentRWObject.i
+.PHONY : src/deviceDesc.i
 
 # target to preprocess a source file
-src/SubagentRWObject.c.i:
-	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/SubagentRWObject.c.i
-.PHONY : src/SubagentRWObject.c.i
+src/deviceDesc.c.i:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceDesc.c.i
+.PHONY : src/deviceDesc.c.i
 
-src/SubagentRWObject.s: src/SubagentRWObject.c.s
+src/deviceDesc.s: src/deviceDesc.c.s
 
-.PHONY : src/SubagentRWObject.s
+.PHONY : src/deviceDesc.s
 
 # target to generate assembly for a file
-src/SubagentRWObject.c.s:
-	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/SubagentRWObject.c.s
-.PHONY : src/SubagentRWObject.c.s
+src/deviceDesc.c.s:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceDesc.c.s
+.PHONY : src/deviceDesc.c.s
+
+src/deviceType.o: src/deviceType.c.o
+
+.PHONY : src/deviceType.o
+
+# target to build an object file
+src/deviceType.c.o:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceType.c.o
+.PHONY : src/deviceType.c.o
+
+src/deviceType.i: src/deviceType.c.i
+
+.PHONY : src/deviceType.i
+
+# target to preprocess a source file
+src/deviceType.c.i:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceType.c.i
+.PHONY : src/deviceType.c.i
+
+src/deviceType.s: src/deviceType.c.s
+
+.PHONY : src/deviceType.s
+
+# target to generate assembly for a file
+src/deviceType.c.s:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceType.c.s
+.PHONY : src/deviceType.c.s
+
+src/ethernetIfIpAddress.o: src/ethernetIfIpAddress.c.o
+
+.PHONY : src/ethernetIfIpAddress.o
+
+# target to build an object file
+src/ethernetIfIpAddress.c.o:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfIpAddress.c.o
+.PHONY : src/ethernetIfIpAddress.c.o
+
+src/ethernetIfIpAddress.i: src/ethernetIfIpAddress.c.i
+
+.PHONY : src/ethernetIfIpAddress.i
+
+# target to preprocess a source file
+src/ethernetIfIpAddress.c.i:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfIpAddress.c.i
+.PHONY : src/ethernetIfIpAddress.c.i
+
+src/ethernetIfIpAddress.s: src/ethernetIfIpAddress.c.s
+
+.PHONY : src/ethernetIfIpAddress.s
+
+# target to generate assembly for a file
+src/ethernetIfIpAddress.c.s:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfIpAddress.c.s
+.PHONY : src/ethernetIfIpAddress.c.s
+
+src/ethernetIfMacAddress.o: src/ethernetIfMacAddress.c.o
+
+.PHONY : src/ethernetIfMacAddress.o
+
+# target to build an object file
+src/ethernetIfMacAddress.c.o:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfMacAddress.c.o
+.PHONY : src/ethernetIfMacAddress.c.o
+
+src/ethernetIfMacAddress.i: src/ethernetIfMacAddress.c.i
+
+.PHONY : src/ethernetIfMacAddress.i
+
+# target to preprocess a source file
+src/ethernetIfMacAddress.c.i:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfMacAddress.c.i
+.PHONY : src/ethernetIfMacAddress.c.i
+
+src/ethernetIfMacAddress.s: src/ethernetIfMacAddress.c.s
+
+.PHONY : src/ethernetIfMacAddress.s
+
+# target to generate assembly for a file
+src/ethernetIfMacAddress.c.s:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfMacAddress.c.s
+.PHONY : src/ethernetIfMacAddress.c.s
+
+src/ethernetIfNumber.o: src/ethernetIfNumber.c.o
+
+.PHONY : src/ethernetIfNumber.o
+
+# target to build an object file
+src/ethernetIfNumber.c.o:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfNumber.c.o
+.PHONY : src/ethernetIfNumber.c.o
+
+src/ethernetIfNumber.i: src/ethernetIfNumber.c.i
+
+.PHONY : src/ethernetIfNumber.i
+
+# target to preprocess a source file
+src/ethernetIfNumber.c.i:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfNumber.c.i
+.PHONY : src/ethernetIfNumber.c.i
+
+src/ethernetIfNumber.s: src/ethernetIfNumber.c.s
+
+.PHONY : src/ethernetIfNumber.s
+
+# target to generate assembly for a file
+src/ethernetIfNumber.c.s:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfNumber.c.s
+.PHONY : src/ethernetIfNumber.c.s
+
+src/ethernetIfSpeed.o: src/ethernetIfSpeed.c.o
+
+.PHONY : src/ethernetIfSpeed.o
+
+# target to build an object file
+src/ethernetIfSpeed.c.o:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfSpeed.c.o
+.PHONY : src/ethernetIfSpeed.c.o
+
+src/ethernetIfSpeed.i: src/ethernetIfSpeed.c.i
+
+.PHONY : src/ethernetIfSpeed.i
+
+# target to preprocess a source file
+src/ethernetIfSpeed.c.i:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfSpeed.c.i
+.PHONY : src/ethernetIfSpeed.c.i
+
+src/ethernetIfSpeed.s: src/ethernetIfSpeed.c.s
+
+.PHONY : src/ethernetIfSpeed.s
+
+# target to generate assembly for a file
+src/ethernetIfSpeed.c.s:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfSpeed.c.s
+.PHONY : src/ethernetIfSpeed.c.s
 
 src/main.o: src/main.c.o
 
@@ -186,9 +321,24 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... mib_module"
-	@echo "... src/SubagentRWObject.o"
-	@echo "... src/SubagentRWObject.i"
-	@echo "... src/SubagentRWObject.s"
+	@echo "... src/deviceDesc.o"
+	@echo "... src/deviceDesc.i"
+	@echo "... src/deviceDesc.s"
+	@echo "... src/deviceType.o"
+	@echo "... src/deviceType.i"
+	@echo "... src/deviceType.s"
+	@echo "... src/ethernetIfIpAddress.o"
+	@echo "... src/ethernetIfIpAddress.i"
+	@echo "... src/ethernetIfIpAddress.s"
+	@echo "... src/ethernetIfMacAddress.o"
+	@echo "... src/ethernetIfMacAddress.i"
+	@echo "... src/ethernetIfMacAddress.s"
+	@echo "... src/ethernetIfNumber.o"
+	@echo "... src/ethernetIfNumber.i"
+	@echo "... src/ethernetIfNumber.s"
+	@echo "... src/ethernetIfSpeed.o"
+	@echo "... src/ethernetIfSpeed.i"
+	@echo "... src/ethernetIfSpeed.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
