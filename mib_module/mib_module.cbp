@@ -91,10 +91,46 @@
       <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/deviceDesc.h">
          <Option target="mib_module"/>
       </Unit>
+      <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/deviceFirmwareVersion.h">
+         <Option target="mib_module"/>
+      </Unit>
+      <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/deviceHardwareVersion.h">
+         <Option target="mib_module"/>
+      </Unit>
+      <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/deviceManufacturer.h">
+         <Option target="mib_module"/>
+      </Unit>
+      <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/deviceMibVersion.h">
+         <Option target="mib_module"/>
+      </Unit>
+      <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/deviceMode.h">
+         <Option target="mib_module"/>
+      </Unit>
+      <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/deviceNatoStockNumber.h">
+         <Option target="mib_module"/>
+      </Unit>
+      <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/devicePartNumber.h">
+         <Option target="mib_module"/>
+      </Unit>
+      <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/deviceReset.h">
+         <Option target="mib_module"/>
+      </Unit>
+      <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/deviceSerialNumber.h">
+         <Option target="mib_module"/>
+      </Unit>
+      <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/deviceSoftwareVersion.h">
+         <Option target="mib_module"/>
+      </Unit>
       <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/deviceType.h">
          <Option target="mib_module"/>
       </Unit>
+      <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/deviceUserDesc.h">
+         <Option target="mib_module"/>
+      </Unit>
       <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfIpAddress.h">
+         <Option target="mib_module"/>
+      </Unit>
+      <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfIpAddressConflict.h">
          <Option target="mib_module"/>
       </Unit>
       <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfMacAddress.h">
@@ -106,13 +142,55 @@
       <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfSpeed.h">
          <Option target="mib_module"/>
       </Unit>
+      <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfSubnetMask.h">
+         <Option target="mib_module"/>
+      </Unit>
+      <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/macro.h">
+         <Option target="mib_module"/>
+      </Unit>
       <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/deviceDesc.c">
+         <Option target="mib_module"/>
+      </Unit>
+      <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/deviceFirmwareVersion.c">
+         <Option target="mib_module"/>
+      </Unit>
+      <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/deviceHardwareVersion.c">
+         <Option target="mib_module"/>
+      </Unit>
+      <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/deviceManufacturer.c">
+         <Option target="mib_module"/>
+      </Unit>
+      <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/deviceMibVersion.c">
+         <Option target="mib_module"/>
+      </Unit>
+      <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/deviceMode.c">
+         <Option target="mib_module"/>
+      </Unit>
+      <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/deviceNatoStockNumber.c">
+         <Option target="mib_module"/>
+      </Unit>
+      <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/devicePartNumber.c">
+         <Option target="mib_module"/>
+      </Unit>
+      <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/deviceReset.c">
+         <Option target="mib_module"/>
+      </Unit>
+      <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/deviceSerialNumber.c">
+         <Option target="mib_module"/>
+      </Unit>
+      <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/deviceSoftwareVersion.c">
          <Option target="mib_module"/>
       </Unit>
       <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/deviceType.c">
          <Option target="mib_module"/>
       </Unit>
+      <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/deviceUserDesc.c">
+         <Option target="mib_module"/>
+      </Unit>
       <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfIpAddress.c">
+         <Option target="mib_module"/>
+      </Unit>
+      <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfIpAddressConflict.c">
          <Option target="mib_module"/>
       </Unit>
       <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfMacAddress.c">
@@ -122,6 +200,9 @@
          <Option target="mib_module"/>
       </Unit>
       <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfSpeed.c">
+         <Option target="mib_module"/>
+      </Unit>
+      <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfSubnetMask.c">
          <Option target="mib_module"/>
       </Unit>
       <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/main.c">

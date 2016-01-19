@@ -57,7 +57,7 @@ execute_process(COMMAND "net-snmp-config" "--cflags"
 				OUTPUT_VARIABLE CFLAGS
 				OUTPUT_STRIP_TRAILING_WHITESPACE)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -I. ${CFLAGS}") #always
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} --ggdb") #for debugging
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} --ggdb -g -00 -v -da -Q") #for debugging
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall")#for release
 
 #set ouput directory based on build type

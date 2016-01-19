@@ -7,10 +7,6 @@
 #ifndef DEVICEDESC_H
 #define DEVICEDESC_H
 
-/*value of parameter*/
-/*only use 32 bytes strings*/
-static char* deviceDesc =  "default";
-
 /*function for internal behaviour*/
 void process_value(char * string);
 

@@ -150,6 +150,276 @@ src/deviceDesc.c.s:
 	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceDesc.c.s
 .PHONY : src/deviceDesc.c.s
 
+src/deviceFirmwareVersion.o: src/deviceFirmwareVersion.c.o
+
+.PHONY : src/deviceFirmwareVersion.o
+
+# target to build an object file
+src/deviceFirmwareVersion.c.o:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceFirmwareVersion.c.o
+.PHONY : src/deviceFirmwareVersion.c.o
+
+src/deviceFirmwareVersion.i: src/deviceFirmwareVersion.c.i
+
+.PHONY : src/deviceFirmwareVersion.i
+
+# target to preprocess a source file
+src/deviceFirmwareVersion.c.i:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceFirmwareVersion.c.i
+.PHONY : src/deviceFirmwareVersion.c.i
+
+src/deviceFirmwareVersion.s: src/deviceFirmwareVersion.c.s
+
+.PHONY : src/deviceFirmwareVersion.s
+
+# target to generate assembly for a file
+src/deviceFirmwareVersion.c.s:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceFirmwareVersion.c.s
+.PHONY : src/deviceFirmwareVersion.c.s
+
+src/deviceHardwareVersion.o: src/deviceHardwareVersion.c.o
+
+.PHONY : src/deviceHardwareVersion.o
+
+# target to build an object file
+src/deviceHardwareVersion.c.o:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceHardwareVersion.c.o
+.PHONY : src/deviceHardwareVersion.c.o
+
+src/deviceHardwareVersion.i: src/deviceHardwareVersion.c.i
+
+.PHONY : src/deviceHardwareVersion.i
+
+# target to preprocess a source file
+src/deviceHardwareVersion.c.i:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceHardwareVersion.c.i
+.PHONY : src/deviceHardwareVersion.c.i
+
+src/deviceHardwareVersion.s: src/deviceHardwareVersion.c.s
+
+.PHONY : src/deviceHardwareVersion.s
+
+# target to generate assembly for a file
+src/deviceHardwareVersion.c.s:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceHardwareVersion.c.s
+.PHONY : src/deviceHardwareVersion.c.s
+
+src/deviceManufacturer.o: src/deviceManufacturer.c.o
+
+.PHONY : src/deviceManufacturer.o
+
+# target to build an object file
+src/deviceManufacturer.c.o:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceManufacturer.c.o
+.PHONY : src/deviceManufacturer.c.o
+
+src/deviceManufacturer.i: src/deviceManufacturer.c.i
+
+.PHONY : src/deviceManufacturer.i
+
+# target to preprocess a source file
+src/deviceManufacturer.c.i:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceManufacturer.c.i
+.PHONY : src/deviceManufacturer.c.i
+
+src/deviceManufacturer.s: src/deviceManufacturer.c.s
+
+.PHONY : src/deviceManufacturer.s
+
+# target to generate assembly for a file
+src/deviceManufacturer.c.s:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceManufacturer.c.s
+.PHONY : src/deviceManufacturer.c.s
+
+src/deviceMibVersion.o: src/deviceMibVersion.c.o
+
+.PHONY : src/deviceMibVersion.o
+
+# target to build an object file
+src/deviceMibVersion.c.o:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceMibVersion.c.o
+.PHONY : src/deviceMibVersion.c.o
+
+src/deviceMibVersion.i: src/deviceMibVersion.c.i
+
+.PHONY : src/deviceMibVersion.i
+
+# target to preprocess a source file
+src/deviceMibVersion.c.i:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceMibVersion.c.i
+.PHONY : src/deviceMibVersion.c.i
+
+src/deviceMibVersion.s: src/deviceMibVersion.c.s
+
+.PHONY : src/deviceMibVersion.s
+
+# target to generate assembly for a file
+src/deviceMibVersion.c.s:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceMibVersion.c.s
+.PHONY : src/deviceMibVersion.c.s
+
+src/deviceMode.o: src/deviceMode.c.o
+
+.PHONY : src/deviceMode.o
+
+# target to build an object file
+src/deviceMode.c.o:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceMode.c.o
+.PHONY : src/deviceMode.c.o
+
+src/deviceMode.i: src/deviceMode.c.i
+
+.PHONY : src/deviceMode.i
+
+# target to preprocess a source file
+src/deviceMode.c.i:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceMode.c.i
+.PHONY : src/deviceMode.c.i
+
+src/deviceMode.s: src/deviceMode.c.s
+
+.PHONY : src/deviceMode.s
+
+# target to generate assembly for a file
+src/deviceMode.c.s:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceMode.c.s
+.PHONY : src/deviceMode.c.s
+
+src/deviceNatoStockNumber.o: src/deviceNatoStockNumber.c.o
+
+.PHONY : src/deviceNatoStockNumber.o
+
+# target to build an object file
+src/deviceNatoStockNumber.c.o:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceNatoStockNumber.c.o
+.PHONY : src/deviceNatoStockNumber.c.o
+
+src/deviceNatoStockNumber.i: src/deviceNatoStockNumber.c.i
+
+.PHONY : src/deviceNatoStockNumber.i
+
+# target to preprocess a source file
+src/deviceNatoStockNumber.c.i:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceNatoStockNumber.c.i
+.PHONY : src/deviceNatoStockNumber.c.i
+
+src/deviceNatoStockNumber.s: src/deviceNatoStockNumber.c.s
+
+.PHONY : src/deviceNatoStockNumber.s
+
+# target to generate assembly for a file
+src/deviceNatoStockNumber.c.s:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceNatoStockNumber.c.s
+.PHONY : src/deviceNatoStockNumber.c.s
+
+src/devicePartNumber.o: src/devicePartNumber.c.o
+
+.PHONY : src/devicePartNumber.o
+
+# target to build an object file
+src/devicePartNumber.c.o:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/devicePartNumber.c.o
+.PHONY : src/devicePartNumber.c.o
+
+src/devicePartNumber.i: src/devicePartNumber.c.i
+
+.PHONY : src/devicePartNumber.i
+
+# target to preprocess a source file
+src/devicePartNumber.c.i:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/devicePartNumber.c.i
+.PHONY : src/devicePartNumber.c.i
+
+src/devicePartNumber.s: src/devicePartNumber.c.s
+
+.PHONY : src/devicePartNumber.s
+
+# target to generate assembly for a file
+src/devicePartNumber.c.s:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/devicePartNumber.c.s
+.PHONY : src/devicePartNumber.c.s
+
+src/deviceReset.o: src/deviceReset.c.o
+
+.PHONY : src/deviceReset.o
+
+# target to build an object file
+src/deviceReset.c.o:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceReset.c.o
+.PHONY : src/deviceReset.c.o
+
+src/deviceReset.i: src/deviceReset.c.i
+
+.PHONY : src/deviceReset.i
+
+# target to preprocess a source file
+src/deviceReset.c.i:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceReset.c.i
+.PHONY : src/deviceReset.c.i
+
+src/deviceReset.s: src/deviceReset.c.s
+
+.PHONY : src/deviceReset.s
+
+# target to generate assembly for a file
+src/deviceReset.c.s:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceReset.c.s
+.PHONY : src/deviceReset.c.s
+
+src/deviceSerialNumber.o: src/deviceSerialNumber.c.o
+
+.PHONY : src/deviceSerialNumber.o
+
+# target to build an object file
+src/deviceSerialNumber.c.o:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceSerialNumber.c.o
+.PHONY : src/deviceSerialNumber.c.o
+
+src/deviceSerialNumber.i: src/deviceSerialNumber.c.i
+
+.PHONY : src/deviceSerialNumber.i
+
+# target to preprocess a source file
+src/deviceSerialNumber.c.i:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceSerialNumber.c.i
+.PHONY : src/deviceSerialNumber.c.i
+
+src/deviceSerialNumber.s: src/deviceSerialNumber.c.s
+
+.PHONY : src/deviceSerialNumber.s
+
+# target to generate assembly for a file
+src/deviceSerialNumber.c.s:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceSerialNumber.c.s
+.PHONY : src/deviceSerialNumber.c.s
+
+src/deviceSoftwareVersion.o: src/deviceSoftwareVersion.c.o
+
+.PHONY : src/deviceSoftwareVersion.o
+
+# target to build an object file
+src/deviceSoftwareVersion.c.o:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceSoftwareVersion.c.o
+.PHONY : src/deviceSoftwareVersion.c.o
+
+src/deviceSoftwareVersion.i: src/deviceSoftwareVersion.c.i
+
+.PHONY : src/deviceSoftwareVersion.i
+
+# target to preprocess a source file
+src/deviceSoftwareVersion.c.i:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceSoftwareVersion.c.i
+.PHONY : src/deviceSoftwareVersion.c.i
+
+src/deviceSoftwareVersion.s: src/deviceSoftwareVersion.c.s
+
+.PHONY : src/deviceSoftwareVersion.s
+
+# target to generate assembly for a file
+src/deviceSoftwareVersion.c.s:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceSoftwareVersion.c.s
+.PHONY : src/deviceSoftwareVersion.c.s
+
 src/deviceType.o: src/deviceType.c.o
 
 .PHONY : src/deviceType.o
@@ -177,6 +447,33 @@ src/deviceType.c.s:
 	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceType.c.s
 .PHONY : src/deviceType.c.s
 
+src/deviceUserDesc.o: src/deviceUserDesc.c.o
+
+.PHONY : src/deviceUserDesc.o
+
+# target to build an object file
+src/deviceUserDesc.c.o:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceUserDesc.c.o
+.PHONY : src/deviceUserDesc.c.o
+
+src/deviceUserDesc.i: src/deviceUserDesc.c.i
+
+.PHONY : src/deviceUserDesc.i
+
+# target to preprocess a source file
+src/deviceUserDesc.c.i:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceUserDesc.c.i
+.PHONY : src/deviceUserDesc.c.i
+
+src/deviceUserDesc.s: src/deviceUserDesc.c.s
+
+.PHONY : src/deviceUserDesc.s
+
+# target to generate assembly for a file
+src/deviceUserDesc.c.s:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceUserDesc.c.s
+.PHONY : src/deviceUserDesc.c.s
+
 src/ethernetIfIpAddress.o: src/ethernetIfIpAddress.c.o
 
 .PHONY : src/ethernetIfIpAddress.o
@@ -203,6 +500,33 @@ src/ethernetIfIpAddress.s: src/ethernetIfIpAddress.c.s
 src/ethernetIfIpAddress.c.s:
 	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfIpAddress.c.s
 .PHONY : src/ethernetIfIpAddress.c.s
+
+src/ethernetIfIpAddressConflict.o: src/ethernetIfIpAddressConflict.c.o
+
+.PHONY : src/ethernetIfIpAddressConflict.o
+
+# target to build an object file
+src/ethernetIfIpAddressConflict.c.o:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfIpAddressConflict.c.o
+.PHONY : src/ethernetIfIpAddressConflict.c.o
+
+src/ethernetIfIpAddressConflict.i: src/ethernetIfIpAddressConflict.c.i
+
+.PHONY : src/ethernetIfIpAddressConflict.i
+
+# target to preprocess a source file
+src/ethernetIfIpAddressConflict.c.i:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfIpAddressConflict.c.i
+.PHONY : src/ethernetIfIpAddressConflict.c.i
+
+src/ethernetIfIpAddressConflict.s: src/ethernetIfIpAddressConflict.c.s
+
+.PHONY : src/ethernetIfIpAddressConflict.s
+
+# target to generate assembly for a file
+src/ethernetIfIpAddressConflict.c.s:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfIpAddressConflict.c.s
+.PHONY : src/ethernetIfIpAddressConflict.c.s
 
 src/ethernetIfMacAddress.o: src/ethernetIfMacAddress.c.o
 
@@ -285,6 +609,33 @@ src/ethernetIfSpeed.c.s:
 	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfSpeed.c.s
 .PHONY : src/ethernetIfSpeed.c.s
 
+src/ethernetIfSubnetMask.o: src/ethernetIfSubnetMask.c.o
+
+.PHONY : src/ethernetIfSubnetMask.o
+
+# target to build an object file
+src/ethernetIfSubnetMask.c.o:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfSubnetMask.c.o
+.PHONY : src/ethernetIfSubnetMask.c.o
+
+src/ethernetIfSubnetMask.i: src/ethernetIfSubnetMask.c.i
+
+.PHONY : src/ethernetIfSubnetMask.i
+
+# target to preprocess a source file
+src/ethernetIfSubnetMask.c.i:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfSubnetMask.c.i
+.PHONY : src/ethernetIfSubnetMask.c.i
+
+src/ethernetIfSubnetMask.s: src/ethernetIfSubnetMask.c.s
+
+.PHONY : src/ethernetIfSubnetMask.s
+
+# target to generate assembly for a file
+src/ethernetIfSubnetMask.c.s:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfSubnetMask.c.s
+.PHONY : src/ethernetIfSubnetMask.c.s
+
 src/main.o: src/main.c.o
 
 .PHONY : src/main.o
@@ -324,12 +675,48 @@ help:
 	@echo "... src/deviceDesc.o"
 	@echo "... src/deviceDesc.i"
 	@echo "... src/deviceDesc.s"
+	@echo "... src/deviceFirmwareVersion.o"
+	@echo "... src/deviceFirmwareVersion.i"
+	@echo "... src/deviceFirmwareVersion.s"
+	@echo "... src/deviceHardwareVersion.o"
+	@echo "... src/deviceHardwareVersion.i"
+	@echo "... src/deviceHardwareVersion.s"
+	@echo "... src/deviceManufacturer.o"
+	@echo "... src/deviceManufacturer.i"
+	@echo "... src/deviceManufacturer.s"
+	@echo "... src/deviceMibVersion.o"
+	@echo "... src/deviceMibVersion.i"
+	@echo "... src/deviceMibVersion.s"
+	@echo "... src/deviceMode.o"
+	@echo "... src/deviceMode.i"
+	@echo "... src/deviceMode.s"
+	@echo "... src/deviceNatoStockNumber.o"
+	@echo "... src/deviceNatoStockNumber.i"
+	@echo "... src/deviceNatoStockNumber.s"
+	@echo "... src/devicePartNumber.o"
+	@echo "... src/devicePartNumber.i"
+	@echo "... src/devicePartNumber.s"
+	@echo "... src/deviceReset.o"
+	@echo "... src/deviceReset.i"
+	@echo "... src/deviceReset.s"
+	@echo "... src/deviceSerialNumber.o"
+	@echo "... src/deviceSerialNumber.i"
+	@echo "... src/deviceSerialNumber.s"
+	@echo "... src/deviceSoftwareVersion.o"
+	@echo "... src/deviceSoftwareVersion.i"
+	@echo "... src/deviceSoftwareVersion.s"
 	@echo "... src/deviceType.o"
 	@echo "... src/deviceType.i"
 	@echo "... src/deviceType.s"
+	@echo "... src/deviceUserDesc.o"
+	@echo "... src/deviceUserDesc.i"
+	@echo "... src/deviceUserDesc.s"
 	@echo "... src/ethernetIfIpAddress.o"
 	@echo "... src/ethernetIfIpAddress.i"
 	@echo "... src/ethernetIfIpAddress.s"
+	@echo "... src/ethernetIfIpAddressConflict.o"
+	@echo "... src/ethernetIfIpAddressConflict.i"
+	@echo "... src/ethernetIfIpAddressConflict.s"
 	@echo "... src/ethernetIfMacAddress.o"
 	@echo "... src/ethernetIfMacAddress.i"
 	@echo "... src/ethernetIfMacAddress.s"
@@ -339,6 +726,9 @@ help:
 	@echo "... src/ethernetIfSpeed.o"
 	@echo "... src/ethernetIfSpeed.i"
 	@echo "... src/ethernetIfSpeed.s"
+	@echo "... src/ethernetIfSubnetMask.o"
+	@echo "... src/ethernetIfSubnetMask.i"
+	@echo "... src/ethernetIfSubnetMask.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"

@@ -17,12 +17,25 @@
 /*
  * Personal header
  */
-#include "../include/deviceType.h"
 #include "../include/deviceDesc.h"
-#include "../include/ethernetIfSpeed.h"
+#include "../include/deviceManufacturer.h"
+#include "../include/devicePartNumber.h"
+#include "../include/deviceSerialNumber.h"
+#include "../include/deviceHardwareVersion.h"
+#include "../include/deviceSoftwareVersion.h"
+#include "../include/deviceFirmwareVersion.h"
+#include "../include/deviceMibVersion.h"
+#include "../include/deviceType.h"
+#include "../include/deviceUserDesc.h"
 #include "../include/ethernetIfNumber.h"
+#include "../include/ethernetIfSpeed.h"
 #include "../include/ethernetIfMacAddress.h"
 #include "../include/ethernetIfIpAddress.h"
+#include "../include/ethernetIfSubnetMask.h"
+#include "../include/ethernetIfIpAddressConflict.h"
+#include "../include/deviceNatoStockNumber.h"
+#include "../include/deviceMode.h"
+#include "../include/deviceReset.h"
 
 
 
@@ -63,12 +76,25 @@ main (int argc, char **argv) {
   /* initialize mib code here */
   /* this is where we initialize each init_parameterOfMIB routine to be handle by the agent
    */
-    init_deviceType();
     init_deviceDesc();
+    init_deviceManufacturer();
+    init_devicePartNumber();
+    init_deviceSerialNumber();
+    init_deviceHardwareVersion();
+    init_deviceSoftwareVersion();
+    init_deviceFirmwareVersion();
+    init_deviceMibVersion();
+    init_deviceType();
+    init_deviceUserDesc();
     init_ethernetIfNumber();
     init_ethernetIfSpeed();
     init_ethernetIfMacAddress();
     init_ethernetIfIpAddress();
+    init_ethernetIfSubnetMask();
+    init_ethernetIfIpAddressConflict();
+    init_deviceNatoStockNumber();
+    init_deviceMode();
+    init_deviceReset();
 
   /* initialize vacm/usm access control  */
   if (!agentx_subagent) {

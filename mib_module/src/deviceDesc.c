@@ -10,21 +10,17 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "../include/deviceDesc.h"
+#include "../include/macro.h"
 
-/* Function to pad the string use as a value for deviceDesc to 32 bytes*/
-void process_value(char * string){
-    char * pad = "                                ";
-    if(strlen(string) < 32)
-        strncat(string, pad, 32 - strlen(string));
-}
+
+/*value of parameter*/
+/*only use 32 bytes strings*/
+char* deviceDesc =  "default";
 
 /** Initializes the deviceDesc module */
 void init_deviceDesc(void)
 {
     const oid deviceDesc_oid[] = { 1,3,6,1,4,1,35990,3,1,1,1 };
-
-    /*check the value we want to assigned to deviceDesc*/
-   // process_value(deviceDesc);
 
     DEBUGMSGTL(("deviceDesc", "Initializing\n"));
     netsnmp_register_read_only_instance( netsnmp_create_handler_registration("deviceDesc", handle_deviceDesc, deviceDesc_oid, OID_LENGTH(deviceDesc_oid), HANDLER_CAN_RONLY));
@@ -44,7 +40,7 @@ int handle_deviceDesc(  netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR, deviceDesc, 32);
+            snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR, deviceDesc, MIN(strlen(deviceDesc), 32));
             break;
 
 

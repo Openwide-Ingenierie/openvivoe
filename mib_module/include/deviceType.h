@@ -8,7 +8,7 @@
 # define DEVICETYPE_H
 
 /* function declarations */
-static int deviceType = 1;
+
 void init_deviceType(void);
 Netsnmp_Node_Handler handle_deviceType;
 

@@ -6,47 +6,44 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
-#include "../include/ethernetIfIpAddress.h"
+#include "../include/ethernetIfSubnetMask.h"
 
-/*value of ethernetIfIpAddress*/
+/*value of ethernetIfSubnetMask*/
 /* It should be a string of exactly 4 bytes*/
-u_char ethernetIfIpAddress[4] = {00,00,00,00};
+u_char ethernetIfSubnetMask[4] = {00, 00, 00, 00};
 
-/** Initializes the ethernetIfIpAddress module */
-void
-init_ethernetIfIpAddress(void)
+/** Initializes the ethernetIfSubnetMask module */
+void init_ethernetIfSubnetMask(void)
 {
-    const oid ethernetIfIpAddress_oid[] = { 1,3,6,1,4,1,35990,3,1,1,12,1,4 };
+    const oid ethernetIfSubnetMask_oid[] = { 1,3,6,1,4,1,35990,3,1,1,12,1,5 };
 
-  DEBUGMSGTL(("ethernetIfIpAddress", "Initializing\n"));
+  DEBUGMSGTL(("ethernetIfSubnetMask", "Initializing\n"));
 
     netsnmp_register_instance(
-        netsnmp_create_handler_registration("ethernetIfIpAddress", handle_ethernetIfIpAddress,
-                               ethernetIfIpAddress_oid, OID_LENGTH(ethernetIfIpAddress_oid),
-                               HANDLER_CAN_RWRITE ));
+        netsnmp_create_handler_registration("ethernetIfSubnetMask", handle_ethernetIfSubnetMask,
+                               ethernetIfSubnetMask_oid, OID_LENGTH(ethernetIfSubnetMask_oid),
+                               HANDLER_CAN_RWRITE
+        ));
 }
 
-int
-handle_ethernetIfIpAddress(netsnmp_mib_handler *handler,
-                          netsnmp_handler_registration *reginfo,
-                          netsnmp_agent_request_info   *reqinfo,
-                          netsnmp_request_info         *requests)
+int handle_ethernetIfSubnetMask(netsnmp_mib_handler *handler,
+                                netsnmp_handler_registration *reginfo,
+                                netsnmp_agent_request_info   *reqinfo,
+                                netsnmp_request_info         *requests)
 {
-    int ret; /*this will be used to get the data from the set*/
-    u_char * old_ethernetIfIpAddress = NULL; /* this will be used to perform UNDO*/
-    int i=0; /*this is needed as a loop variable to fill our array ethernetIfIpAddress with the value the user send through snmp set*/
-
+    u_char * old_ethernetIfSubnetMask = NULL; /* this will be used to perform UNDO*/
+    int i=0; /*this is needed as a loop variable to fill our array ethernetIfSubnetMask with the value the user send through snmp set*/
+    int ret;
     /* We are never called for a GETNEXT if it's registered as a
        "instance", as it's "magically" handled for us.  */
 
     /* a instance handler also only hands us one request at a time, so
        we don't need to loop over a list of requests; we'll only get one. */
-
     switch(reqinfo->mode) {
 
         case MODE_GET:
             snmp_set_var_typed_value(requests->requestvb, ASN_IPADDRESS,
-                                     ethernetIfIpAddress, 4);
+                                     ethernetIfSubnetMask, 4);
             break;
 
         /*
@@ -56,7 +53,7 @@ handle_ethernetIfIpAddress(netsnmp_mib_handler *handler,
          * http://www.net-snmp.org/tutorial-5/toolkit/mib_module/set-actions.jpg
          */
         case MODE_SET_RESERVE1:
-                /* or you could use netsnmp_check_vb_type_and_size instead */
+            /* or you could use netsnmp_check_vb_type_and_size instead */
             ret = netsnmp_check_vb_type(requests->requestvb, ASN_IPADDRESS);
             if ( ret != SNMP_ERR_NOERROR ) {
                 netsnmp_set_request_error(reqinfo, requests, ret);
@@ -64,20 +61,13 @@ handle_ethernetIfIpAddress(netsnmp_mib_handler *handler,
             break;
 
         case MODE_SET_RESERVE2:
-            /* store the old value previously contained in ethernetIfIpAddress into buffer, so
-            we can reset it in case of undo*/
-           old_ethernetIfIpAddress =  (u_char*) netsnmp_memdup((u_char *) & ethernetIfIpAddress,  sizeof(ethernetIfIpAddress));
-            if (old_ethernetIfIpAddress == NULL) {
+            /* XXX malloc "undo" storage buffer */
+            old_ethernetIfSubnetMask =  (u_char*) netsnmp_memdup((u_char *) & ethernetIfSubnetMask,  sizeof(ethernetIfSubnetMask));
+            if (old_ethernetIfSubnetMask == NULL) {
                 netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_RESOURCEUNAVAILABLE);
             }else{
-                old_ethernetIfIpAddress = ethernetIfIpAddress;
+                old_ethernetIfSubnetMask = ethernetIfSubnetMask;
             }
-            /*
-            * Add our temporary information to the request itself.
-            * This is then retrivable later.  The free function
-            * passed auto-frees it when the request is later
-            * deleted.
-            */
             break;
 
 
@@ -86,27 +76,26 @@ handle_ethernetIfIpAddress(netsnmp_mib_handler *handler,
             /* XXX: free resources allocated in RESERVE1 and/or
                RESERVE2.  Something failed somewhere, and the states
                below won't be called. */
-               free(old_ethernetIfIpAddress); /*free resources allocated in RESERVE2*/
+            free(old_ethernetIfSubnetMask); /*free resources allocated in RESERVE2*/
             break;
 
         case MODE_SET_ACTION:
             /* XXX: perform the value change here */
-            for(i=0; i<sizeof(ethernetIfIpAddress)/sizeof(u_char); i++){
-                ethernetIfIpAddress[i] = requests->requestvb->val.string[i];
+            for(i=0; i<sizeof(ethernetIfSubnetMask)/sizeof(u_char); i++){
+                ethernetIfSubnetMask[i] = requests->requestvb->val.string[i];
             }
             /*Send a message during debug to inform the update had been performed*/
-           DEBUGMSGTL(("ethernetIfIpAddress", "updated delay_time -> %s\n", ethernetIfIpAddress));
+            DEBUGMSGTL(("ethernetIfSubnetMask", "updated delay_time -> %s\n", ethernetIfSubnetMask));
             /*get possible errors*/
             ret = netsnmp_check_requests_error(requests);
-           if (ret != SNMP_ERR_NOERROR) {
+            if (ret != SNMP_ERR_NOERROR) {
                 netsnmp_set_request_error(reqinfo, requests, ret);
             }
             break;
 
         case MODE_SET_COMMIT:
             /* XXX: delete temporary storage
-            Actually we do not need thus part for now
-            if (XXX: error? ) {
+            if ( XXX: error? ) {
                  try _really_really_ hard to never get to this point
                 netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_COMMITFAILED);
             }*/
@@ -114,8 +103,8 @@ handle_ethernetIfIpAddress(netsnmp_mib_handler *handler,
 
         case MODE_SET_UNDO:
             /* XXX: UNDO and return to previous value for the object */
-            memcpy(ethernetIfIpAddress, old_ethernetIfIpAddress, 4);
-            ret = netsnmp_check_requests_error(requests);
+            memcpy(ethernetIfSubnetMask, old_ethernetIfSubnetMask, 4);
+             ret = netsnmp_check_requests_error(requests);
             if (ret != SNMP_ERR_NOERROR) {
                 /* try _really_really_ hard to never get to this point */
                 netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_UNDOFAILED);
@@ -124,9 +113,8 @@ handle_ethernetIfIpAddress(netsnmp_mib_handler *handler,
 
         default:
             /* we should never get here, so this is a really bad error */
-            snmp_log(LOG_ERR, "unknown mode (%d) in handle_ethernetIfIpAddress\n", reqinfo->mode );
+            snmp_log(LOG_ERR, "unknown mode (%d) in handle_ethernetIfSubnetMask\n", reqinfo->mode );
             return SNMP_ERR_GENERR;
     }
-
     return SNMP_ERR_NOERROR;
 }

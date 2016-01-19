@@ -15,6 +15,16 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "../include/deviceType.h"
 
+
+/*value of deviceType*/
+/* It should be an integer
+ * serviceProvider(1),
+ * serviceUser(2),
+ * both(3)
+ */
+ /*by default it is set to normal serviceProvider*/
+static int deviceType = 1;
+
 void init_deviceType(void)
 {
     static oid      deviceType_oid[] = { 1,3,6,1,4,1,35990,3,1,1,9 };
