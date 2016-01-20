@@ -153,9 +153,33 @@ CMakeFiles/mib_module.dir/src/deviceManufacturer.c.o.provides: CMakeFiles/mib_mo
 CMakeFiles/mib_module.dir/src/deviceManufacturer.c.o.provides.build: CMakeFiles/mib_module.dir/src/deviceManufacturer.c.o
 
 
+CMakeFiles/mib_module.dir/src/ethernetIfTable.c.o: CMakeFiles/mib_module.dir/flags.make
+CMakeFiles/mib_module.dir/src/ethernetIfTable.c.o: src/ethernetIfTable.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building C object CMakeFiles/mib_module.dir/src/ethernetIfTable.c.o"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/mib_module.dir/src/ethernetIfTable.c.o   -c /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfTable.c
+
+CMakeFiles/mib_module.dir/src/ethernetIfTable.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/mib_module.dir/src/ethernetIfTable.c.i"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfTable.c > CMakeFiles/mib_module.dir/src/ethernetIfTable.c.i
+
+CMakeFiles/mib_module.dir/src/ethernetIfTable.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/mib_module.dir/src/ethernetIfTable.c.s"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfTable.c -o CMakeFiles/mib_module.dir/src/ethernetIfTable.c.s
+
+CMakeFiles/mib_module.dir/src/ethernetIfTable.c.o.requires:
+
+.PHONY : CMakeFiles/mib_module.dir/src/ethernetIfTable.c.o.requires
+
+CMakeFiles/mib_module.dir/src/ethernetIfTable.c.o.provides: CMakeFiles/mib_module.dir/src/ethernetIfTable.c.o.requires
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfTable.c.o.provides.build
+.PHONY : CMakeFiles/mib_module.dir/src/ethernetIfTable.c.o.provides
+
+CMakeFiles/mib_module.dir/src/ethernetIfTable.c.o.provides.build: CMakeFiles/mib_module.dir/src/ethernetIfTable.c.o
+
+
 CMakeFiles/mib_module.dir/src/deviceHardwareVersion.c.o: CMakeFiles/mib_module.dir/flags.make
 CMakeFiles/mib_module.dir/src/deviceHardwareVersion.c.o: src/deviceHardwareVersion.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building C object CMakeFiles/mib_module.dir/src/deviceHardwareVersion.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building C object CMakeFiles/mib_module.dir/src/deviceHardwareVersion.c.o"
 	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/mib_module.dir/src/deviceHardwareVersion.c.o   -c /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/deviceHardwareVersion.c
 
 CMakeFiles/mib_module.dir/src/deviceHardwareVersion.c.i: cmake_force
@@ -175,30 +199,6 @@ CMakeFiles/mib_module.dir/src/deviceHardwareVersion.c.o.provides: CMakeFiles/mib
 .PHONY : CMakeFiles/mib_module.dir/src/deviceHardwareVersion.c.o.provides
 
 CMakeFiles/mib_module.dir/src/deviceHardwareVersion.c.o.provides.build: CMakeFiles/mib_module.dir/src/deviceHardwareVersion.c.o
-
-
-CMakeFiles/mib_module.dir/src/ethernetIfMacAddress.c.o: CMakeFiles/mib_module.dir/flags.make
-CMakeFiles/mib_module.dir/src/ethernetIfMacAddress.c.o: src/ethernetIfMacAddress.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building C object CMakeFiles/mib_module.dir/src/ethernetIfMacAddress.c.o"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/mib_module.dir/src/ethernetIfMacAddress.c.o   -c /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfMacAddress.c
-
-CMakeFiles/mib_module.dir/src/ethernetIfMacAddress.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/mib_module.dir/src/ethernetIfMacAddress.c.i"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfMacAddress.c > CMakeFiles/mib_module.dir/src/ethernetIfMacAddress.c.i
-
-CMakeFiles/mib_module.dir/src/ethernetIfMacAddress.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/mib_module.dir/src/ethernetIfMacAddress.c.s"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfMacAddress.c -o CMakeFiles/mib_module.dir/src/ethernetIfMacAddress.c.s
-
-CMakeFiles/mib_module.dir/src/ethernetIfMacAddress.c.o.requires:
-
-.PHONY : CMakeFiles/mib_module.dir/src/ethernetIfMacAddress.c.o.requires
-
-CMakeFiles/mib_module.dir/src/ethernetIfMacAddress.c.o.provides: CMakeFiles/mib_module.dir/src/ethernetIfMacAddress.c.o.requires
-	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfMacAddress.c.o.provides.build
-.PHONY : CMakeFiles/mib_module.dir/src/ethernetIfMacAddress.c.o.provides
-
-CMakeFiles/mib_module.dir/src/ethernetIfMacAddress.c.o.provides.build: CMakeFiles/mib_module.dir/src/ethernetIfMacAddress.c.o
 
 
 CMakeFiles/mib_module.dir/src/deviceSoftwareVersion.c.o: CMakeFiles/mib_module.dir/flags.make
@@ -225,33 +225,9 @@ CMakeFiles/mib_module.dir/src/deviceSoftwareVersion.c.o.provides: CMakeFiles/mib
 CMakeFiles/mib_module.dir/src/deviceSoftwareVersion.c.o.provides.build: CMakeFiles/mib_module.dir/src/deviceSoftwareVersion.c.o
 
 
-CMakeFiles/mib_module.dir/src/ethernetIfSubnetMask.c.o: CMakeFiles/mib_module.dir/flags.make
-CMakeFiles/mib_module.dir/src/ethernetIfSubnetMask.c.o: src/ethernetIfSubnetMask.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building C object CMakeFiles/mib_module.dir/src/ethernetIfSubnetMask.c.o"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/mib_module.dir/src/ethernetIfSubnetMask.c.o   -c /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfSubnetMask.c
-
-CMakeFiles/mib_module.dir/src/ethernetIfSubnetMask.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/mib_module.dir/src/ethernetIfSubnetMask.c.i"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfSubnetMask.c > CMakeFiles/mib_module.dir/src/ethernetIfSubnetMask.c.i
-
-CMakeFiles/mib_module.dir/src/ethernetIfSubnetMask.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/mib_module.dir/src/ethernetIfSubnetMask.c.s"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfSubnetMask.c -o CMakeFiles/mib_module.dir/src/ethernetIfSubnetMask.c.s
-
-CMakeFiles/mib_module.dir/src/ethernetIfSubnetMask.c.o.requires:
-
-.PHONY : CMakeFiles/mib_module.dir/src/ethernetIfSubnetMask.c.o.requires
-
-CMakeFiles/mib_module.dir/src/ethernetIfSubnetMask.c.o.provides: CMakeFiles/mib_module.dir/src/ethernetIfSubnetMask.c.o.requires
-	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfSubnetMask.c.o.provides.build
-.PHONY : CMakeFiles/mib_module.dir/src/ethernetIfSubnetMask.c.o.provides
-
-CMakeFiles/mib_module.dir/src/ethernetIfSubnetMask.c.o.provides.build: CMakeFiles/mib_module.dir/src/ethernetIfSubnetMask.c.o
-
-
 CMakeFiles/mib_module.dir/src/deviceNatoStockNumber.c.o: CMakeFiles/mib_module.dir/flags.make
 CMakeFiles/mib_module.dir/src/deviceNatoStockNumber.c.o: src/deviceNatoStockNumber.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building C object CMakeFiles/mib_module.dir/src/deviceNatoStockNumber.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building C object CMakeFiles/mib_module.dir/src/deviceNatoStockNumber.c.o"
 	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/mib_module.dir/src/deviceNatoStockNumber.c.o   -c /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/deviceNatoStockNumber.c
 
 CMakeFiles/mib_module.dir/src/deviceNatoStockNumber.c.i: cmake_force
@@ -275,7 +251,7 @@ CMakeFiles/mib_module.dir/src/deviceNatoStockNumber.c.o.provides.build: CMakeFil
 
 CMakeFiles/mib_module.dir/src/deviceSerialNumber.c.o: CMakeFiles/mib_module.dir/flags.make
 CMakeFiles/mib_module.dir/src/deviceSerialNumber.c.o: src/deviceSerialNumber.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building C object CMakeFiles/mib_module.dir/src/deviceSerialNumber.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building C object CMakeFiles/mib_module.dir/src/deviceSerialNumber.c.o"
 	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/mib_module.dir/src/deviceSerialNumber.c.o   -c /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/deviceSerialNumber.c
 
 CMakeFiles/mib_module.dir/src/deviceSerialNumber.c.i: cmake_force
@@ -297,57 +273,9 @@ CMakeFiles/mib_module.dir/src/deviceSerialNumber.c.o.provides: CMakeFiles/mib_mo
 CMakeFiles/mib_module.dir/src/deviceSerialNumber.c.o.provides.build: CMakeFiles/mib_module.dir/src/deviceSerialNumber.c.o
 
 
-CMakeFiles/mib_module.dir/src/ethernetIfIpAddressConflict.c.o: CMakeFiles/mib_module.dir/flags.make
-CMakeFiles/mib_module.dir/src/ethernetIfIpAddressConflict.c.o: src/ethernetIfIpAddressConflict.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building C object CMakeFiles/mib_module.dir/src/ethernetIfIpAddressConflict.c.o"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/mib_module.dir/src/ethernetIfIpAddressConflict.c.o   -c /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfIpAddressConflict.c
-
-CMakeFiles/mib_module.dir/src/ethernetIfIpAddressConflict.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/mib_module.dir/src/ethernetIfIpAddressConflict.c.i"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfIpAddressConflict.c > CMakeFiles/mib_module.dir/src/ethernetIfIpAddressConflict.c.i
-
-CMakeFiles/mib_module.dir/src/ethernetIfIpAddressConflict.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/mib_module.dir/src/ethernetIfIpAddressConflict.c.s"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfIpAddressConflict.c -o CMakeFiles/mib_module.dir/src/ethernetIfIpAddressConflict.c.s
-
-CMakeFiles/mib_module.dir/src/ethernetIfIpAddressConflict.c.o.requires:
-
-.PHONY : CMakeFiles/mib_module.dir/src/ethernetIfIpAddressConflict.c.o.requires
-
-CMakeFiles/mib_module.dir/src/ethernetIfIpAddressConflict.c.o.provides: CMakeFiles/mib_module.dir/src/ethernetIfIpAddressConflict.c.o.requires
-	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfIpAddressConflict.c.o.provides.build
-.PHONY : CMakeFiles/mib_module.dir/src/ethernetIfIpAddressConflict.c.o.provides
-
-CMakeFiles/mib_module.dir/src/ethernetIfIpAddressConflict.c.o.provides.build: CMakeFiles/mib_module.dir/src/ethernetIfIpAddressConflict.c.o
-
-
-CMakeFiles/mib_module.dir/src/ethernetIfIpAddress.c.o: CMakeFiles/mib_module.dir/flags.make
-CMakeFiles/mib_module.dir/src/ethernetIfIpAddress.c.o: src/ethernetIfIpAddress.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building C object CMakeFiles/mib_module.dir/src/ethernetIfIpAddress.c.o"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/mib_module.dir/src/ethernetIfIpAddress.c.o   -c /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfIpAddress.c
-
-CMakeFiles/mib_module.dir/src/ethernetIfIpAddress.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/mib_module.dir/src/ethernetIfIpAddress.c.i"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfIpAddress.c > CMakeFiles/mib_module.dir/src/ethernetIfIpAddress.c.i
-
-CMakeFiles/mib_module.dir/src/ethernetIfIpAddress.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/mib_module.dir/src/ethernetIfIpAddress.c.s"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfIpAddress.c -o CMakeFiles/mib_module.dir/src/ethernetIfIpAddress.c.s
-
-CMakeFiles/mib_module.dir/src/ethernetIfIpAddress.c.o.requires:
-
-.PHONY : CMakeFiles/mib_module.dir/src/ethernetIfIpAddress.c.o.requires
-
-CMakeFiles/mib_module.dir/src/ethernetIfIpAddress.c.o.provides: CMakeFiles/mib_module.dir/src/ethernetIfIpAddress.c.o.requires
-	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfIpAddress.c.o.provides.build
-.PHONY : CMakeFiles/mib_module.dir/src/ethernetIfIpAddress.c.o.provides
-
-CMakeFiles/mib_module.dir/src/ethernetIfIpAddress.c.o.provides.build: CMakeFiles/mib_module.dir/src/ethernetIfIpAddress.c.o
-
-
 CMakeFiles/mib_module.dir/src/devicePartNumber.c.o: CMakeFiles/mib_module.dir/flags.make
 CMakeFiles/mib_module.dir/src/devicePartNumber.c.o: src/devicePartNumber.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building C object CMakeFiles/mib_module.dir/src/devicePartNumber.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building C object CMakeFiles/mib_module.dir/src/devicePartNumber.c.o"
 	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/mib_module.dir/src/devicePartNumber.c.o   -c /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/devicePartNumber.c
 
 CMakeFiles/mib_module.dir/src/devicePartNumber.c.i: cmake_force
@@ -371,7 +299,7 @@ CMakeFiles/mib_module.dir/src/devicePartNumber.c.o.provides.build: CMakeFiles/mi
 
 CMakeFiles/mib_module.dir/src/deviceType.c.o: CMakeFiles/mib_module.dir/flags.make
 CMakeFiles/mib_module.dir/src/deviceType.c.o: src/deviceType.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building C object CMakeFiles/mib_module.dir/src/deviceType.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building C object CMakeFiles/mib_module.dir/src/deviceType.c.o"
 	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/mib_module.dir/src/deviceType.c.o   -c /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/deviceType.c
 
 CMakeFiles/mib_module.dir/src/deviceType.c.i: cmake_force
@@ -395,7 +323,7 @@ CMakeFiles/mib_module.dir/src/deviceType.c.o.provides.build: CMakeFiles/mib_modu
 
 CMakeFiles/mib_module.dir/src/deviceReset.c.o: CMakeFiles/mib_module.dir/flags.make
 CMakeFiles/mib_module.dir/src/deviceReset.c.o: src/deviceReset.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building C object CMakeFiles/mib_module.dir/src/deviceReset.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building C object CMakeFiles/mib_module.dir/src/deviceReset.c.o"
 	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/mib_module.dir/src/deviceReset.c.o   -c /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/deviceReset.c
 
 CMakeFiles/mib_module.dir/src/deviceReset.c.i: cmake_force
@@ -419,7 +347,7 @@ CMakeFiles/mib_module.dir/src/deviceReset.c.o.provides.build: CMakeFiles/mib_mod
 
 CMakeFiles/mib_module.dir/src/main.c.o: CMakeFiles/mib_module.dir/flags.make
 CMakeFiles/mib_module.dir/src/main.c.o: src/main.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building C object CMakeFiles/mib_module.dir/src/main.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building C object CMakeFiles/mib_module.dir/src/main.c.o"
 	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/mib_module.dir/src/main.c.o   -c /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/main.c
 
 CMakeFiles/mib_module.dir/src/main.c.i: cmake_force
@@ -441,33 +369,9 @@ CMakeFiles/mib_module.dir/src/main.c.o.provides: CMakeFiles/mib_module.dir/src/m
 CMakeFiles/mib_module.dir/src/main.c.o.provides.build: CMakeFiles/mib_module.dir/src/main.c.o
 
 
-CMakeFiles/mib_module.dir/src/ethernetIfSpeed.c.o: CMakeFiles/mib_module.dir/flags.make
-CMakeFiles/mib_module.dir/src/ethernetIfSpeed.c.o: src/ethernetIfSpeed.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building C object CMakeFiles/mib_module.dir/src/ethernetIfSpeed.c.o"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/mib_module.dir/src/ethernetIfSpeed.c.o   -c /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfSpeed.c
-
-CMakeFiles/mib_module.dir/src/ethernetIfSpeed.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/mib_module.dir/src/ethernetIfSpeed.c.i"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfSpeed.c > CMakeFiles/mib_module.dir/src/ethernetIfSpeed.c.i
-
-CMakeFiles/mib_module.dir/src/ethernetIfSpeed.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/mib_module.dir/src/ethernetIfSpeed.c.s"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfSpeed.c -o CMakeFiles/mib_module.dir/src/ethernetIfSpeed.c.s
-
-CMakeFiles/mib_module.dir/src/ethernetIfSpeed.c.o.requires:
-
-.PHONY : CMakeFiles/mib_module.dir/src/ethernetIfSpeed.c.o.requires
-
-CMakeFiles/mib_module.dir/src/ethernetIfSpeed.c.o.provides: CMakeFiles/mib_module.dir/src/ethernetIfSpeed.c.o.requires
-	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfSpeed.c.o.provides.build
-.PHONY : CMakeFiles/mib_module.dir/src/ethernetIfSpeed.c.o.provides
-
-CMakeFiles/mib_module.dir/src/ethernetIfSpeed.c.o.provides.build: CMakeFiles/mib_module.dir/src/ethernetIfSpeed.c.o
-
-
 CMakeFiles/mib_module.dir/src/deviceMibVersion.c.o: CMakeFiles/mib_module.dir/flags.make
 CMakeFiles/mib_module.dir/src/deviceMibVersion.c.o: src/deviceMibVersion.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building C object CMakeFiles/mib_module.dir/src/deviceMibVersion.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building C object CMakeFiles/mib_module.dir/src/deviceMibVersion.c.o"
 	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/mib_module.dir/src/deviceMibVersion.c.o   -c /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/deviceMibVersion.c
 
 CMakeFiles/mib_module.dir/src/deviceMibVersion.c.i: cmake_force
@@ -491,7 +395,7 @@ CMakeFiles/mib_module.dir/src/deviceMibVersion.c.o.provides.build: CMakeFiles/mi
 
 CMakeFiles/mib_module.dir/src/deviceUserDesc.c.o: CMakeFiles/mib_module.dir/flags.make
 CMakeFiles/mib_module.dir/src/deviceUserDesc.c.o: src/deviceUserDesc.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building C object CMakeFiles/mib_module.dir/src/deviceUserDesc.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building C object CMakeFiles/mib_module.dir/src/deviceUserDesc.c.o"
 	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/mib_module.dir/src/deviceUserDesc.c.o   -c /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/deviceUserDesc.c
 
 CMakeFiles/mib_module.dir/src/deviceUserDesc.c.i: cmake_force
@@ -515,7 +419,7 @@ CMakeFiles/mib_module.dir/src/deviceUserDesc.c.o.provides.build: CMakeFiles/mib_
 
 CMakeFiles/mib_module.dir/src/deviceDesc.c.o: CMakeFiles/mib_module.dir/flags.make
 CMakeFiles/mib_module.dir/src/deviceDesc.c.o: src/deviceDesc.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building C object CMakeFiles/mib_module.dir/src/deviceDesc.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building C object CMakeFiles/mib_module.dir/src/deviceDesc.c.o"
 	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/mib_module.dir/src/deviceDesc.c.o   -c /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/deviceDesc.c
 
 CMakeFiles/mib_module.dir/src/deviceDesc.c.i: cmake_force
@@ -543,19 +447,15 @@ mib_module_OBJECTS = \
 "CMakeFiles/mib_module.dir/src/deviceFirmwareVersion.c.o" \
 "CMakeFiles/mib_module.dir/src/ethernetIfNumber.c.o" \
 "CMakeFiles/mib_module.dir/src/deviceManufacturer.c.o" \
+"CMakeFiles/mib_module.dir/src/ethernetIfTable.c.o" \
 "CMakeFiles/mib_module.dir/src/deviceHardwareVersion.c.o" \
-"CMakeFiles/mib_module.dir/src/ethernetIfMacAddress.c.o" \
 "CMakeFiles/mib_module.dir/src/deviceSoftwareVersion.c.o" \
-"CMakeFiles/mib_module.dir/src/ethernetIfSubnetMask.c.o" \
 "CMakeFiles/mib_module.dir/src/deviceNatoStockNumber.c.o" \
 "CMakeFiles/mib_module.dir/src/deviceSerialNumber.c.o" \
-"CMakeFiles/mib_module.dir/src/ethernetIfIpAddressConflict.c.o" \
-"CMakeFiles/mib_module.dir/src/ethernetIfIpAddress.c.o" \
 "CMakeFiles/mib_module.dir/src/devicePartNumber.c.o" \
 "CMakeFiles/mib_module.dir/src/deviceType.c.o" \
 "CMakeFiles/mib_module.dir/src/deviceReset.c.o" \
 "CMakeFiles/mib_module.dir/src/main.c.o" \
-"CMakeFiles/mib_module.dir/src/ethernetIfSpeed.c.o" \
 "CMakeFiles/mib_module.dir/src/deviceMibVersion.c.o" \
 "CMakeFiles/mib_module.dir/src/deviceUserDesc.c.o" \
 "CMakeFiles/mib_module.dir/src/deviceDesc.c.o"
@@ -567,25 +467,21 @@ bin/Debug/mib_module: CMakeFiles/mib_module.dir/src/deviceMode.c.o
 bin/Debug/mib_module: CMakeFiles/mib_module.dir/src/deviceFirmwareVersion.c.o
 bin/Debug/mib_module: CMakeFiles/mib_module.dir/src/ethernetIfNumber.c.o
 bin/Debug/mib_module: CMakeFiles/mib_module.dir/src/deviceManufacturer.c.o
+bin/Debug/mib_module: CMakeFiles/mib_module.dir/src/ethernetIfTable.c.o
 bin/Debug/mib_module: CMakeFiles/mib_module.dir/src/deviceHardwareVersion.c.o
-bin/Debug/mib_module: CMakeFiles/mib_module.dir/src/ethernetIfMacAddress.c.o
 bin/Debug/mib_module: CMakeFiles/mib_module.dir/src/deviceSoftwareVersion.c.o
-bin/Debug/mib_module: CMakeFiles/mib_module.dir/src/ethernetIfSubnetMask.c.o
 bin/Debug/mib_module: CMakeFiles/mib_module.dir/src/deviceNatoStockNumber.c.o
 bin/Debug/mib_module: CMakeFiles/mib_module.dir/src/deviceSerialNumber.c.o
-bin/Debug/mib_module: CMakeFiles/mib_module.dir/src/ethernetIfIpAddressConflict.c.o
-bin/Debug/mib_module: CMakeFiles/mib_module.dir/src/ethernetIfIpAddress.c.o
 bin/Debug/mib_module: CMakeFiles/mib_module.dir/src/devicePartNumber.c.o
 bin/Debug/mib_module: CMakeFiles/mib_module.dir/src/deviceType.c.o
 bin/Debug/mib_module: CMakeFiles/mib_module.dir/src/deviceReset.c.o
 bin/Debug/mib_module: CMakeFiles/mib_module.dir/src/main.c.o
-bin/Debug/mib_module: CMakeFiles/mib_module.dir/src/ethernetIfSpeed.c.o
 bin/Debug/mib_module: CMakeFiles/mib_module.dir/src/deviceMibVersion.c.o
 bin/Debug/mib_module: CMakeFiles/mib_module.dir/src/deviceUserDesc.c.o
 bin/Debug/mib_module: CMakeFiles/mib_module.dir/src/deviceDesc.c.o
 bin/Debug/mib_module: CMakeFiles/mib_module.dir/build.make
 bin/Debug/mib_module: CMakeFiles/mib_module.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Linking C executable bin/Debug/mib_module"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Linking C executable bin/Debug/mib_module"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/mib_module.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -597,19 +493,15 @@ CMakeFiles/mib_module.dir/requires: CMakeFiles/mib_module.dir/src/deviceMode.c.o
 CMakeFiles/mib_module.dir/requires: CMakeFiles/mib_module.dir/src/deviceFirmwareVersion.c.o.requires
 CMakeFiles/mib_module.dir/requires: CMakeFiles/mib_module.dir/src/ethernetIfNumber.c.o.requires
 CMakeFiles/mib_module.dir/requires: CMakeFiles/mib_module.dir/src/deviceManufacturer.c.o.requires
+CMakeFiles/mib_module.dir/requires: CMakeFiles/mib_module.dir/src/ethernetIfTable.c.o.requires
 CMakeFiles/mib_module.dir/requires: CMakeFiles/mib_module.dir/src/deviceHardwareVersion.c.o.requires
-CMakeFiles/mib_module.dir/requires: CMakeFiles/mib_module.dir/src/ethernetIfMacAddress.c.o.requires
 CMakeFiles/mib_module.dir/requires: CMakeFiles/mib_module.dir/src/deviceSoftwareVersion.c.o.requires
-CMakeFiles/mib_module.dir/requires: CMakeFiles/mib_module.dir/src/ethernetIfSubnetMask.c.o.requires
 CMakeFiles/mib_module.dir/requires: CMakeFiles/mib_module.dir/src/deviceNatoStockNumber.c.o.requires
 CMakeFiles/mib_module.dir/requires: CMakeFiles/mib_module.dir/src/deviceSerialNumber.c.o.requires
-CMakeFiles/mib_module.dir/requires: CMakeFiles/mib_module.dir/src/ethernetIfIpAddressConflict.c.o.requires
-CMakeFiles/mib_module.dir/requires: CMakeFiles/mib_module.dir/src/ethernetIfIpAddress.c.o.requires
 CMakeFiles/mib_module.dir/requires: CMakeFiles/mib_module.dir/src/devicePartNumber.c.o.requires
 CMakeFiles/mib_module.dir/requires: CMakeFiles/mib_module.dir/src/deviceType.c.o.requires
 CMakeFiles/mib_module.dir/requires: CMakeFiles/mib_module.dir/src/deviceReset.c.o.requires
 CMakeFiles/mib_module.dir/requires: CMakeFiles/mib_module.dir/src/main.c.o.requires
-CMakeFiles/mib_module.dir/requires: CMakeFiles/mib_module.dir/src/ethernetIfSpeed.c.o.requires
 CMakeFiles/mib_module.dir/requires: CMakeFiles/mib_module.dir/src/deviceMibVersion.c.o.requires
 CMakeFiles/mib_module.dir/requires: CMakeFiles/mib_module.dir/src/deviceUserDesc.c.o.requires
 CMakeFiles/mib_module.dir/requires: CMakeFiles/mib_module.dir/src/deviceDesc.c.o.requires

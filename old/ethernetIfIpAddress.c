@@ -10,7 +10,7 @@
 
 /*value of ethernetIfIpAddress*/
 /* It should be a string of exactly 4 bytes*/
-u_char ethernetIfIpAddress[4] = {00,00,00,00};
+u_char* ethernetIfIpAddress[4] = {00,00,00,00};
 
 /** Initializes the ethernetIfIpAddress module */
 void

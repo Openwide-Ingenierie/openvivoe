@@ -9,12 +9,14 @@
 void init_ethernetIfTable(void);
 void initialize_table_ethernetIfTable(void);
 Netsnmp_Node_Handler ethernetIfTable_handler;
+Netsnmp_First_Data_Point  ethernetIfTable_get_first_data_point;
+Netsnmp_Next_Data_Point   ethernetIfTable_get_next_data_point;
 
 /* column number definitions for table ethernetIfTable */
-       #define COLUMN_ETHERNETIFINDEX		1
-       #define COLUMN_ETHERNETIFSPEED		2
-       #define COLUMN_ETHERNETIFMACADDRESS		3
-       #define COLUMN_ETHERNETIFIPADDRESS		4
-       #define COLUMN_ETHERNETIFSUBNETMASK		5
+       #define COLUMN_ETHERNETIFINDEX                   1
+       #define COLUMN_ETHERNETIFSPEED		            2
+       #define COLUMN_ETHERNETIFMACADDRESS	        	3
+       #define COLUMN_ETHERNETIFIPADDRESS	           	4
+       #define COLUMN_ETHERNETIFSUBNETMASK	        	5
        #define COLUMN_ETHERNETIFIPADDRESSCONFLICT		6
 #endif /* ETHERNETIFTABLE_H */

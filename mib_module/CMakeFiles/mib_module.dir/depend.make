@@ -50,23 +50,11 @@ CMakeFiles/mib_module.dir/src/deviceUserDesc.c.o: include/deviceUserDesc.h
 CMakeFiles/mib_module.dir/src/deviceUserDesc.c.o: include/macro.h
 CMakeFiles/mib_module.dir/src/deviceUserDesc.c.o: src/deviceUserDesc.c
 
-CMakeFiles/mib_module.dir/src/ethernetIfIpAddress.c.o: include/ethernetIfIpAddress.h
-CMakeFiles/mib_module.dir/src/ethernetIfIpAddress.c.o: src/ethernetIfIpAddress.c
-
-CMakeFiles/mib_module.dir/src/ethernetIfIpAddressConflict.c.o: include/ethernetIfIpAddressConflict.h
-CMakeFiles/mib_module.dir/src/ethernetIfIpAddressConflict.c.o: src/ethernetIfIpAddressConflict.c
-
-CMakeFiles/mib_module.dir/src/ethernetIfMacAddress.c.o: include/ethernetIfMacAddress.h
-CMakeFiles/mib_module.dir/src/ethernetIfMacAddress.c.o: src/ethernetIfMacAddress.c
-
 CMakeFiles/mib_module.dir/src/ethernetIfNumber.c.o: include/ethernetIfNumber.h
 CMakeFiles/mib_module.dir/src/ethernetIfNumber.c.o: src/ethernetIfNumber.c
 
-CMakeFiles/mib_module.dir/src/ethernetIfSpeed.c.o: include/ethernetIfSpeed.h
-CMakeFiles/mib_module.dir/src/ethernetIfSpeed.c.o: src/ethernetIfSpeed.c
-
-CMakeFiles/mib_module.dir/src/ethernetIfSubnetMask.c.o: include/ethernetIfSubnetMask.h
-CMakeFiles/mib_module.dir/src/ethernetIfSubnetMask.c.o: src/ethernetIfSubnetMask.c
+CMakeFiles/mib_module.dir/src/ethernetIfTable.c.o: include/ethernetIfTable.h
+CMakeFiles/mib_module.dir/src/ethernetIfTable.c.o: src/ethernetIfTable.c
 
 CMakeFiles/mib_module.dir/src/main.c.o: include/deviceDesc.h
 CMakeFiles/mib_module.dir/src/main.c.o: include/deviceFirmwareVersion.h
@@ -81,11 +69,7 @@ CMakeFiles/mib_module.dir/src/main.c.o: include/deviceSerialNumber.h
 CMakeFiles/mib_module.dir/src/main.c.o: include/deviceSoftwareVersion.h
 CMakeFiles/mib_module.dir/src/main.c.o: include/deviceType.h
 CMakeFiles/mib_module.dir/src/main.c.o: include/deviceUserDesc.h
-CMakeFiles/mib_module.dir/src/main.c.o: include/ethernetIfIpAddress.h
-CMakeFiles/mib_module.dir/src/main.c.o: include/ethernetIfIpAddressConflict.h
-CMakeFiles/mib_module.dir/src/main.c.o: include/ethernetIfMacAddress.h
 CMakeFiles/mib_module.dir/src/main.c.o: include/ethernetIfNumber.h
-CMakeFiles/mib_module.dir/src/main.c.o: include/ethernetIfSpeed.h
-CMakeFiles/mib_module.dir/src/main.c.o: include/ethernetIfSubnetMask.h
+CMakeFiles/mib_module.dir/src/main.c.o: include/ethernetIfTable.h
 CMakeFiles/mib_module.dir/src/main.c.o: src/main.c
 

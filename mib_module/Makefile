@@ -474,87 +474,6 @@ src/deviceUserDesc.c.s:
 	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/deviceUserDesc.c.s
 .PHONY : src/deviceUserDesc.c.s
 
-src/ethernetIfIpAddress.o: src/ethernetIfIpAddress.c.o
-
-.PHONY : src/ethernetIfIpAddress.o
-
-# target to build an object file
-src/ethernetIfIpAddress.c.o:
-	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfIpAddress.c.o
-.PHONY : src/ethernetIfIpAddress.c.o
-
-src/ethernetIfIpAddress.i: src/ethernetIfIpAddress.c.i
-
-.PHONY : src/ethernetIfIpAddress.i
-
-# target to preprocess a source file
-src/ethernetIfIpAddress.c.i:
-	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfIpAddress.c.i
-.PHONY : src/ethernetIfIpAddress.c.i
-
-src/ethernetIfIpAddress.s: src/ethernetIfIpAddress.c.s
-
-.PHONY : src/ethernetIfIpAddress.s
-
-# target to generate assembly for a file
-src/ethernetIfIpAddress.c.s:
-	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfIpAddress.c.s
-.PHONY : src/ethernetIfIpAddress.c.s
-
-src/ethernetIfIpAddressConflict.o: src/ethernetIfIpAddressConflict.c.o
-
-.PHONY : src/ethernetIfIpAddressConflict.o
-
-# target to build an object file
-src/ethernetIfIpAddressConflict.c.o:
-	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfIpAddressConflict.c.o
-.PHONY : src/ethernetIfIpAddressConflict.c.o
-
-src/ethernetIfIpAddressConflict.i: src/ethernetIfIpAddressConflict.c.i
-
-.PHONY : src/ethernetIfIpAddressConflict.i
-
-# target to preprocess a source file
-src/ethernetIfIpAddressConflict.c.i:
-	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfIpAddressConflict.c.i
-.PHONY : src/ethernetIfIpAddressConflict.c.i
-
-src/ethernetIfIpAddressConflict.s: src/ethernetIfIpAddressConflict.c.s
-
-.PHONY : src/ethernetIfIpAddressConflict.s
-
-# target to generate assembly for a file
-src/ethernetIfIpAddressConflict.c.s:
-	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfIpAddressConflict.c.s
-.PHONY : src/ethernetIfIpAddressConflict.c.s
-
-src/ethernetIfMacAddress.o: src/ethernetIfMacAddress.c.o
-
-.PHONY : src/ethernetIfMacAddress.o
-
-# target to build an object file
-src/ethernetIfMacAddress.c.o:
-	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfMacAddress.c.o
-.PHONY : src/ethernetIfMacAddress.c.o
-
-src/ethernetIfMacAddress.i: src/ethernetIfMacAddress.c.i
-
-.PHONY : src/ethernetIfMacAddress.i
-
-# target to preprocess a source file
-src/ethernetIfMacAddress.c.i:
-	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfMacAddress.c.i
-.PHONY : src/ethernetIfMacAddress.c.i
-
-src/ethernetIfMacAddress.s: src/ethernetIfMacAddress.c.s
-
-.PHONY : src/ethernetIfMacAddress.s
-
-# target to generate assembly for a file
-src/ethernetIfMacAddress.c.s:
-	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfMacAddress.c.s
-.PHONY : src/ethernetIfMacAddress.c.s
-
 src/ethernetIfNumber.o: src/ethernetIfNumber.c.o
 
 .PHONY : src/ethernetIfNumber.o
@@ -582,59 +501,32 @@ src/ethernetIfNumber.c.s:
 	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfNumber.c.s
 .PHONY : src/ethernetIfNumber.c.s
 
-src/ethernetIfSpeed.o: src/ethernetIfSpeed.c.o
+src/ethernetIfTable.o: src/ethernetIfTable.c.o
 
-.PHONY : src/ethernetIfSpeed.o
-
-# target to build an object file
-src/ethernetIfSpeed.c.o:
-	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfSpeed.c.o
-.PHONY : src/ethernetIfSpeed.c.o
-
-src/ethernetIfSpeed.i: src/ethernetIfSpeed.c.i
-
-.PHONY : src/ethernetIfSpeed.i
-
-# target to preprocess a source file
-src/ethernetIfSpeed.c.i:
-	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfSpeed.c.i
-.PHONY : src/ethernetIfSpeed.c.i
-
-src/ethernetIfSpeed.s: src/ethernetIfSpeed.c.s
-
-.PHONY : src/ethernetIfSpeed.s
-
-# target to generate assembly for a file
-src/ethernetIfSpeed.c.s:
-	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfSpeed.c.s
-.PHONY : src/ethernetIfSpeed.c.s
-
-src/ethernetIfSubnetMask.o: src/ethernetIfSubnetMask.c.o
-
-.PHONY : src/ethernetIfSubnetMask.o
+.PHONY : src/ethernetIfTable.o
 
 # target to build an object file
-src/ethernetIfSubnetMask.c.o:
-	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfSubnetMask.c.o
-.PHONY : src/ethernetIfSubnetMask.c.o
+src/ethernetIfTable.c.o:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfTable.c.o
+.PHONY : src/ethernetIfTable.c.o
 
-src/ethernetIfSubnetMask.i: src/ethernetIfSubnetMask.c.i
+src/ethernetIfTable.i: src/ethernetIfTable.c.i
 
-.PHONY : src/ethernetIfSubnetMask.i
+.PHONY : src/ethernetIfTable.i
 
 # target to preprocess a source file
-src/ethernetIfSubnetMask.c.i:
-	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfSubnetMask.c.i
-.PHONY : src/ethernetIfSubnetMask.c.i
+src/ethernetIfTable.c.i:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfTable.c.i
+.PHONY : src/ethernetIfTable.c.i
 
-src/ethernetIfSubnetMask.s: src/ethernetIfSubnetMask.c.s
+src/ethernetIfTable.s: src/ethernetIfTable.c.s
 
-.PHONY : src/ethernetIfSubnetMask.s
+.PHONY : src/ethernetIfTable.s
 
 # target to generate assembly for a file
-src/ethernetIfSubnetMask.c.s:
-	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfSubnetMask.c.s
-.PHONY : src/ethernetIfSubnetMask.c.s
+src/ethernetIfTable.c.s:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/ethernetIfTable.c.s
+.PHONY : src/ethernetIfTable.c.s
 
 src/main.o: src/main.c.o
 
@@ -711,24 +603,12 @@ help:
 	@echo "... src/deviceUserDesc.o"
 	@echo "... src/deviceUserDesc.i"
 	@echo "... src/deviceUserDesc.s"
-	@echo "... src/ethernetIfIpAddress.o"
-	@echo "... src/ethernetIfIpAddress.i"
-	@echo "... src/ethernetIfIpAddress.s"
-	@echo "... src/ethernetIfIpAddressConflict.o"
-	@echo "... src/ethernetIfIpAddressConflict.i"
-	@echo "... src/ethernetIfIpAddressConflict.s"
-	@echo "... src/ethernetIfMacAddress.o"
-	@echo "... src/ethernetIfMacAddress.i"
-	@echo "... src/ethernetIfMacAddress.s"
 	@echo "... src/ethernetIfNumber.o"
 	@echo "... src/ethernetIfNumber.i"
 	@echo "... src/ethernetIfNumber.s"
-	@echo "... src/ethernetIfSpeed.o"
-	@echo "... src/ethernetIfSpeed.i"
-	@echo "... src/ethernetIfSpeed.s"
-	@echo "... src/ethernetIfSubnetMask.o"
-	@echo "... src/ethernetIfSubnetMask.i"
-	@echo "... src/ethernetIfSubnetMask.s"
+	@echo "... src/ethernetIfTable.o"
+	@echo "... src/ethernetIfTable.i"
+	@echo "... src/ethernetIfTable.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"

@@ -32,17 +32,9 @@
 
 /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/deviceUserDesc.h
 
-/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfIpAddress.h
-
-/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfIpAddressConflict.h
-
-/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfMacAddress.h
-
 /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfNumber.h
 
-/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfSpeed.h
-
-/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfSubnetMask.h
+/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfTable.h
 
 /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/macro.h
 
@@ -196,36 +188,6 @@ net-snmp/agent/net-snmp-agent-includes.h
 ../include/macro.h
 /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/macro.h
 
-/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfIpAddress.c
-net-snmp/net-snmp-config.h
--
-net-snmp/net-snmp-includes.h
--
-net-snmp/agent/net-snmp-agent-includes.h
--
-../include/ethernetIfIpAddress.h
-/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfIpAddress.h
-
-/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfIpAddressConflict.c
-net-snmp/net-snmp-config.h
--
-net-snmp/net-snmp-includes.h
--
-net-snmp/agent/net-snmp-agent-includes.h
--
-../include/ethernetIfIpAddressConflict.h
-/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfIpAddressConflict.h
-
-/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfMacAddress.c
-net-snmp/net-snmp-config.h
--
-net-snmp/net-snmp-includes.h
--
-net-snmp/agent/net-snmp-agent-includes.h
--
-../include/ethernetIfMacAddress.h
-/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfMacAddress.h
-
 /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfNumber.c
 net-snmp/net-snmp-config.h
 -
@@ -236,25 +198,17 @@ net-snmp/agent/net-snmp-agent-includes.h
 ../include/ethernetIfNumber.h
 /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfNumber.h
 
-/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfSpeed.c
+/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfTable.c
 net-snmp/net-snmp-config.h
 -
 net-snmp/net-snmp-includes.h
 -
 net-snmp/agent/net-snmp-agent-includes.h
 -
-../include/ethernetIfSpeed.h
-/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfSpeed.h
-
-/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfSubnetMask.c
-net-snmp/net-snmp-config.h
+../include/ethernetIfTable.h
+/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfTable.h
+arpa/inet.h
 -
-net-snmp/net-snmp-includes.h
--
-net-snmp/agent/net-snmp-agent-includes.h
--
-../include/ethernetIfSubnetMask.h
-/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfSubnetMask.h
 
 /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/main.c
 stdio.h
@@ -289,8 +243,8 @@ signal.h
 /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/deviceUserDesc.h
 ../include/ethernetIfNumber.h
 /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfNumber.h
-../include/ethernetIfSpeed.h
-/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfSpeed.h
+../include/ethernetIfTable.h
+/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfTable.h
 ../include/ethernetIfMacAddress.h
 /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfMacAddress.h
 ../include/ethernetIfIpAddress.h

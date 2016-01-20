@@ -50,24 +50,12 @@ CMakeFiles/mib_module.dir/src/deviceUserDesc.c.o
  /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/deviceUserDesc.h
  /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/macro.h
  /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/deviceUserDesc.c
-CMakeFiles/mib_module.dir/src/ethernetIfIpAddress.c.o
- /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfIpAddress.h
- /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfIpAddress.c
-CMakeFiles/mib_module.dir/src/ethernetIfIpAddressConflict.c.o
- /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfIpAddressConflict.h
- /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfIpAddressConflict.c
-CMakeFiles/mib_module.dir/src/ethernetIfMacAddress.c.o
- /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfMacAddress.h
- /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfMacAddress.c
 CMakeFiles/mib_module.dir/src/ethernetIfNumber.c.o
  /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfNumber.h
  /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfNumber.c
-CMakeFiles/mib_module.dir/src/ethernetIfSpeed.c.o
- /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfSpeed.h
- /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfSpeed.c
-CMakeFiles/mib_module.dir/src/ethernetIfSubnetMask.c.o
- /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfSubnetMask.h
- /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfSubnetMask.c
+CMakeFiles/mib_module.dir/src/ethernetIfTable.c.o
+ /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfTable.h
+ /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/ethernetIfTable.c
 CMakeFiles/mib_module.dir/src/main.c.o
  /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/deviceDesc.h
  /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/deviceFirmwareVersion.h
@@ -82,10 +70,6 @@ CMakeFiles/mib_module.dir/src/main.c.o
  /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/deviceSoftwareVersion.h
  /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/deviceType.h
  /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/deviceUserDesc.h
- /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfIpAddress.h
- /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfIpAddressConflict.h
- /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfMacAddress.h
  /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfNumber.h
- /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfSpeed.h
- /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfSubnetMask.h
+ /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfTable.h
  /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/main.c

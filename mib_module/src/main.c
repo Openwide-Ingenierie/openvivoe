@@ -28,11 +28,14 @@
 #include "../include/deviceType.h"
 #include "../include/deviceUserDesc.h"
 #include "../include/ethernetIfNumber.h"
-#include "../include/ethernetIfSpeed.h"
+#include "../include/ethernetIfTable.h"
+
+/*#include "../include/ethernetIfSpeed.h"
 #include "../include/ethernetIfMacAddress.h"
 #include "../include/ethernetIfIpAddress.h"
 #include "../include/ethernetIfSubnetMask.h"
-#include "../include/ethernetIfIpAddressConflict.h"
+#include "../include/ethernetIfIpAddressConflict.h"*/
+
 #include "../include/deviceNatoStockNumber.h"
 #include "../include/deviceMode.h"
 #include "../include/deviceReset.h"
@@ -87,11 +90,15 @@ main (int argc, char **argv) {
     init_deviceType();
     init_deviceUserDesc();
     init_ethernetIfNumber();
-    init_ethernetIfSpeed();
+
+
+    init_ethernetIfTable();
+    /*init_ethernetIfSpeed();
     init_ethernetIfMacAddress();
     init_ethernetIfIpAddress();
     init_ethernetIfSubnetMask();
-    init_ethernetIfIpAddressConflict();
+    init_ethernetIfIpAddressConflict();*/
+
     init_deviceNatoStockNumber();
     init_deviceMode();
     init_deviceReset();
