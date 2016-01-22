@@ -8,11 +8,12 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "../include/devicePartNumber.h"
 #include "../include/macro.h"
+#include "../include/mibParameters.h"
 
 
 /*value of parameter*/
 /*only use 32 bytes strings*/
-char* devicePartNumber =  "default";
+//char* devicePartNumber =  "default";
 
 /** Initializes the devicePartNumber module */
 void

@@ -7,10 +7,12 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "../include/ethernetIfNumber.h"
+#include "../include/mibParameters.h"
+
 
 /*value of ethernetIfNumber*/
 /* By default, it is set to one*/
-long int ethernetIfNumber = 1;
+//long int ethernetIfNumber = 1;
 
 /** Initializes the ethernetIfNumber module */
 void init_ethernetIfNumber(void)

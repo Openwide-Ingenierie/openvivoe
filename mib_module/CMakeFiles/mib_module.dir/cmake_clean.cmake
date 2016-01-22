@@ -13,6 +13,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/mib_module.dir/src/deviceReset.c.o"
   "CMakeFiles/mib_module.dir/src/main.c.o"
   "CMakeFiles/mib_module.dir/src/deviceMibVersion.c.o"
+  "CMakeFiles/mib_module.dir/src/config.c.o"
   "CMakeFiles/mib_module.dir/src/deviceUserDesc.c.o"
   "CMakeFiles/mib_module.dir/src/deviceDesc.c.o"
   "bin/Debug/mib_module.pdb"

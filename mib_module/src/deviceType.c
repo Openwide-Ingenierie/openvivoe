@@ -14,6 +14,7 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "../include/deviceType.h"
+#include "../include/mibParameters.h"
 
 
 /*value of deviceType*/
@@ -23,7 +24,7 @@
  * both(3)
  */
  /*by default it is set to normal serviceProvider*/
-static int deviceType = 1;
+//static int deviceType = 1;
 
 void init_deviceType(void)
 {

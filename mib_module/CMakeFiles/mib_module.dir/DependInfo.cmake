@@ -4,6 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
+  "/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/config.c" "/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles/mib_module.dir/src/config.c.o"
   "/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/deviceDesc.c" "/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles/mib_module.dir/src/deviceDesc.c.o"
   "/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/deviceFirmwareVersion.c" "/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles/mib_module.dir/src/deviceFirmwareVersion.c.o"
   "/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/deviceHardwareVersion.c" "/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles/mib_module.dir/src/deviceHardwareVersion.c.o"

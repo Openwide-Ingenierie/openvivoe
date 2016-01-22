@@ -8,11 +8,12 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "../include/deviceUserDesc.h"
 #include "../include/macro.h"
+#include "../include/mibParameters.h"
 
 
 /*value of parameter*/
 /*only use 64 bytes strings*/
-char* deviceUserDesc;
+//char* deviceUserDesc;
 
 
 /** Initializes the deviceUserDesc module */

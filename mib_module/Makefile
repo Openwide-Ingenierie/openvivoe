@@ -123,6 +123,33 @@ mib_module/fast:
 	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/build
 .PHONY : mib_module/fast
 
+src/config.o: src/config.c.o
+
+.PHONY : src/config.o
+
+# target to build an object file
+src/config.c.o:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/config.c.o
+.PHONY : src/config.c.o
+
+src/config.i: src/config.c.i
+
+.PHONY : src/config.i
+
+# target to preprocess a source file
+src/config.c.i:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/config.c.i
+.PHONY : src/config.c.i
+
+src/config.s: src/config.c.s
+
+.PHONY : src/config.s
+
+# target to generate assembly for a file
+src/config.c.s:
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/config.c.s
+.PHONY : src/config.c.s
+
 src/deviceDesc.o: src/deviceDesc.c.o
 
 .PHONY : src/deviceDesc.o
@@ -564,6 +591,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... mib_module"
+	@echo "... src/config.o"
+	@echo "... src/config.i"
+	@echo "... src/config.s"
 	@echo "... src/deviceDesc.o"
 	@echo "... src/deviceDesc.i"
 	@echo "... src/deviceDesc.s"

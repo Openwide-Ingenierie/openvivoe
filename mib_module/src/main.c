@@ -39,9 +39,18 @@
 #include "../include/deviceNatoStockNumber.h"
 #include "../include/deviceMode.h"
 #include "../include/deviceReset.h"
+#include "../include/config.h"
 
+/* main for the configuration file */
+int
+main (int argc, char **argv) {
+    int i = get_check_configuration();
+    printf("return: %d\n", i);
+    return 0;
+}
 
-
+ /* main deamon for the MIB */
+#if 0
 static int keep_running;
 
 RETSIGTYPE
@@ -135,3 +144,4 @@ main (int argc, char **argv) {
 
   return 0;
 }
+#endif

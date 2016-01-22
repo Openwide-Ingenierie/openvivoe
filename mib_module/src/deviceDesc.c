@@ -11,11 +11,12 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "../include/deviceDesc.h"
 #include "../include/macro.h"
+#include "../include/mibParameters.h"
 
 
 /*value of parameter*/
 /*only use 32 bytes strings*/
-char* deviceDesc =  "default";
+//char* deviceDesc =  "default";
 
 /** Initializes the deviceDesc module */
 void init_deviceDesc(void)

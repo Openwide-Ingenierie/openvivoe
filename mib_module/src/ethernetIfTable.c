@@ -7,7 +7,7 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "../include/ethernetIfTable.h"
-#include <arpa/inet.h>
+#include "../include/mibParameters.h"
 
 /* This is the initialization of the default values content
  * of the ethernetIfTable. This is only temporary. In a further
@@ -15,16 +15,16 @@
  * associated to the subagent
  */
 
-    long ethernetIfIndex =                      1; /*default index*/
-    long ethernetIfSpeed =                      1000; /*default speed value, set here as an example*/
-    u_char ethernetIfMacAddress[6] =            {0x00,0x00,0x00,0x00,0x00,0x00};
-    size_t ethernetIfMacAddress_len =           6; /*default size for representing ethernet MAC addresses, it should always be set to 6, otherwise an error will occur*/
-    u_char ethernetIfIpAddress[4] =             {127, 0, 0, 1}; /*by default, loopback address is used*/
-    size_t ethernetIfIpAddress_len =            4; /*default size for representing Internet IP addresses, it should always be set to 4, otherwise an error will occur*/
-    u_char ethernetIfSubnetMask[4] =            {255, 255, 255, 0};
-    size_t ethernetIfSubnetMask_len =           4; /*default size for representing Internet IP addresses, it should always be set to 4, otherwise an error will occur*/
-    u_char ethernetIfIpAddressConflict[4] =     {0, 0, 0, 0};
-    size_t ethernetIfIpAddressConflict_len =    4; /*default size for representing Internet IP addresses, it should always be set to 4, otherwise an error will occur*/
+  //  long ethernetIfIndex =                      1; /*default index*/
+  //  long ethernetIfSpeed =                      1000; /*default speed value, set here as an example*/
+  //  u_char ethernetIfMacAddress[6] =            {0x00,0x00,0x00,0x00,0x00,0x00};
+  //  size_t ethernetIfMacAddress_len =           6; /*default size for representing ethernet MAC addresses, it should always be set to 6, otherwise an error will occur*/
+  //  u_char ethernetIfIpAddress[4] =             {127, 0, 0, 1}; /*by default, loopback address is used*/
+  //  size_t ethernetIfIpAddress_len =            4; /*default size for representing Internet IP addresses, it should always be set to 4, otherwise an error will occur*/
+  //  u_char ethernetIfSubnetMask[4] =            {255, 255, 255, 0};
+  //  size_t ethernetIfSubnetMask_len =           4; /*default size for representing Internet IP addresses, it should always be set to 4, otherwise an error will occur*/
+  //  u_char ethernetIfIpAddressConflict[4] =     {0, 0, 0, 0};
+  //  size_t ethernetIfIpAddressConflict_len =    4; /*default size for representing Internet IP addresses, it should always be set to 4, otherwise an error will occur*/
 
 
 /** Initializes the ethernetIfTable module */
@@ -137,12 +137,22 @@ initialize_table_ethernetIfTable(void)
     netsnmp_register_table_iterator( reg, iinfo );
 
     /* Initialize the contents of the table here */
+    /*
+     * use several time the function ethernetIfTableEntry_create
+     * to create several lines in the table ethernetIfTable
+     */
 
     ethernetIfTableEntry_create(ethernetIfIndex, ethernetIfSpeed,
                                 ethernetIfMacAddress, ethernetIfMacAddress_len,
                                 ethernetIfIpAddress, ethernetIfIpAddress_len,
                                 ethernetIfSubnetMask, ethernetIfSubnetMask_len,
                                 ethernetIfIpAddressConflict, ethernetIfIpAddressConflict_len);
+
+    /* ethernetIfTableEntry_create(2, ethernetIfSpeed,
+                                ethernetIfMacAddress, ethernetIfMacAddress_len,
+                                ethernetIfIpAddress, ethernetIfIpAddress_len,
+                                ethernetIfSubnetMask, ethernetIfSubnetMask_len,
+                                ethernetIfIpAddressConflict, ethernetIfIpAddressConflict_len); */
 }
 
 

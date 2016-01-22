@@ -8,11 +8,12 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "../include/deviceManufacturer.h"
 #include "../include/macro.h"
+#include "../include/mibParameters.h"
 
 
 /*value of deviceManufacturer*/
 /* It should be a string less or equal to 64 bytes*/
-char* deviceManufacturer = "default";
+//char* deviceManufacturer = "default";
 
 /** Initializes the deviceManufacturer module */
 void

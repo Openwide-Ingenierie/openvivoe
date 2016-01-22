@@ -7,6 +7,8 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "../include/deviceMode.h"
+#include "../include/mibParameters.h"
+
 
 /*value of deviceMode*/
 /* It should be an integer*/
@@ -15,7 +17,7 @@
  * maintenanceMode(3)
  */
  /*by default it is set to normal mode*/
-int deviceMode = 1;
+//int deviceMode = 1;
 
 /** Initializes the deviceMode module */
 void

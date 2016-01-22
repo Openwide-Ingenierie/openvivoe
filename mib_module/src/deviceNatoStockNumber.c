@@ -8,10 +8,12 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "../include/deviceNatoStockNumber.h"
 #include "../include/macro.h"
+#include "../include/mibParameters.h"
+
 
 /*value of deviceNatoStockNumber*/
 /* It should be a string less or equal to 32 bytes*/
-char* deviceNatoStockNumber = "default";
+//char* deviceNatoStockNumber = "default";
 
 
 /** Initializes the deviceNatoStockNumber module */

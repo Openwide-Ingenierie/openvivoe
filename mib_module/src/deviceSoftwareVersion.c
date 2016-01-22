@@ -8,10 +8,12 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "../include/deviceSoftwareVersion.h"
 #include "../include/macro.h"
+#include "../include/mibParameters.h"
+
 
 /*value of parameter*/
 /*only use 16 bytes strings*/
-char* deviceSoftwareVersion =  "default";
+//char* deviceSoftwareVersion =  "default";
 
 /** Initializes the deviceSoftwareVersion module */
 void

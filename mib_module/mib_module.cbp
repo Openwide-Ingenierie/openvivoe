@@ -88,6 +88,9 @@
          </MakeCommands>
       </Target>
       </Build>
+      <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/config.h">
+         <Option target="mib_module"/>
+      </Unit>
       <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/deviceDesc.h">
          <Option target="mib_module"/>
       </Unit>
@@ -134,6 +137,12 @@
          <Option target="mib_module"/>
       </Unit>
       <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/macro.h">
+         <Option target="mib_module"/>
+      </Unit>
+      <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/mibParameters.h">
+         <Option target="mib_module"/>
+      </Unit>
+      <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/config.c">
          <Option target="mib_module"/>
       </Unit>
       <Unit filename="/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/deviceDesc.c">

@@ -393,9 +393,33 @@ CMakeFiles/mib_module.dir/src/deviceMibVersion.c.o.provides: CMakeFiles/mib_modu
 CMakeFiles/mib_module.dir/src/deviceMibVersion.c.o.provides.build: CMakeFiles/mib_module.dir/src/deviceMibVersion.c.o
 
 
+CMakeFiles/mib_module.dir/src/config.c.o: CMakeFiles/mib_module.dir/flags.make
+CMakeFiles/mib_module.dir/src/config.c.o: src/config.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building C object CMakeFiles/mib_module.dir/src/config.c.o"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/mib_module.dir/src/config.c.o   -c /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/config.c
+
+CMakeFiles/mib_module.dir/src/config.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/mib_module.dir/src/config.c.i"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/config.c > CMakeFiles/mib_module.dir/src/config.c.i
+
+CMakeFiles/mib_module.dir/src/config.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/mib_module.dir/src/config.c.s"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/config.c -o CMakeFiles/mib_module.dir/src/config.c.s
+
+CMakeFiles/mib_module.dir/src/config.c.o.requires:
+
+.PHONY : CMakeFiles/mib_module.dir/src/config.c.o.requires
+
+CMakeFiles/mib_module.dir/src/config.c.o.provides: CMakeFiles/mib_module.dir/src/config.c.o.requires
+	$(MAKE) -f CMakeFiles/mib_module.dir/build.make CMakeFiles/mib_module.dir/src/config.c.o.provides.build
+.PHONY : CMakeFiles/mib_module.dir/src/config.c.o.provides
+
+CMakeFiles/mib_module.dir/src/config.c.o.provides.build: CMakeFiles/mib_module.dir/src/config.c.o
+
+
 CMakeFiles/mib_module.dir/src/deviceUserDesc.c.o: CMakeFiles/mib_module.dir/flags.make
 CMakeFiles/mib_module.dir/src/deviceUserDesc.c.o: src/deviceUserDesc.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building C object CMakeFiles/mib_module.dir/src/deviceUserDesc.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building C object CMakeFiles/mib_module.dir/src/deviceUserDesc.c.o"
 	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/mib_module.dir/src/deviceUserDesc.c.o   -c /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/deviceUserDesc.c
 
 CMakeFiles/mib_module.dir/src/deviceUserDesc.c.i: cmake_force
@@ -419,7 +443,7 @@ CMakeFiles/mib_module.dir/src/deviceUserDesc.c.o.provides.build: CMakeFiles/mib_
 
 CMakeFiles/mib_module.dir/src/deviceDesc.c.o: CMakeFiles/mib_module.dir/flags.make
 CMakeFiles/mib_module.dir/src/deviceDesc.c.o: src/deviceDesc.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building C object CMakeFiles/mib_module.dir/src/deviceDesc.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building C object CMakeFiles/mib_module.dir/src/deviceDesc.c.o"
 	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/mib_module.dir/src/deviceDesc.c.o   -c /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/deviceDesc.c
 
 CMakeFiles/mib_module.dir/src/deviceDesc.c.i: cmake_force
@@ -457,6 +481,7 @@ mib_module_OBJECTS = \
 "CMakeFiles/mib_module.dir/src/deviceReset.c.o" \
 "CMakeFiles/mib_module.dir/src/main.c.o" \
 "CMakeFiles/mib_module.dir/src/deviceMibVersion.c.o" \
+"CMakeFiles/mib_module.dir/src/config.c.o" \
 "CMakeFiles/mib_module.dir/src/deviceUserDesc.c.o" \
 "CMakeFiles/mib_module.dir/src/deviceDesc.c.o"
 
@@ -477,11 +502,12 @@ bin/Debug/mib_module: CMakeFiles/mib_module.dir/src/deviceType.c.o
 bin/Debug/mib_module: CMakeFiles/mib_module.dir/src/deviceReset.c.o
 bin/Debug/mib_module: CMakeFiles/mib_module.dir/src/main.c.o
 bin/Debug/mib_module: CMakeFiles/mib_module.dir/src/deviceMibVersion.c.o
+bin/Debug/mib_module: CMakeFiles/mib_module.dir/src/config.c.o
 bin/Debug/mib_module: CMakeFiles/mib_module.dir/src/deviceUserDesc.c.o
 bin/Debug/mib_module: CMakeFiles/mib_module.dir/src/deviceDesc.c.o
 bin/Debug/mib_module: CMakeFiles/mib_module.dir/build.make
 bin/Debug/mib_module: CMakeFiles/mib_module.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Linking C executable bin/Debug/mib_module"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/hoel/Documents/VIVOE-project/openvivoe/mib_module/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Linking C executable bin/Debug/mib_module"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/mib_module.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -503,6 +529,7 @@ CMakeFiles/mib_module.dir/requires: CMakeFiles/mib_module.dir/src/deviceType.c.o
 CMakeFiles/mib_module.dir/requires: CMakeFiles/mib_module.dir/src/deviceReset.c.o.requires
 CMakeFiles/mib_module.dir/requires: CMakeFiles/mib_module.dir/src/main.c.o.requires
 CMakeFiles/mib_module.dir/requires: CMakeFiles/mib_module.dir/src/deviceMibVersion.c.o.requires
+CMakeFiles/mib_module.dir/requires: CMakeFiles/mib_module.dir/src/config.c.o.requires
 CMakeFiles/mib_module.dir/requires: CMakeFiles/mib_module.dir/src/deviceUserDesc.c.o.requires
 CMakeFiles/mib_module.dir/requires: CMakeFiles/mib_module.dir/src/deviceDesc.c.o.requires
 

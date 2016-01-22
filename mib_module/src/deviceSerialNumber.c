@@ -8,11 +8,12 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "../include/deviceSerialNumber.h"
 #include "../include/macro.h"
+#include "../include/mibParameters.h"
 
 
 /*value of parameter*/
 /*only use 32 bytes strings*/
-char* deviceSerialNumber =  "default";
+//char* deviceSerialNumber =  "default";
 
 /** Initializes the deviceSerialNumber module */
 void

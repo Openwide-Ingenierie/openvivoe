@@ -7,6 +7,8 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "../include/deviceReset.h"
+#include "../include/mibParameters.h"
+
 
 /*value of deviceReset*/
 /* It should be an integer*/
@@ -14,7 +16,7 @@
  * reset(2)
  */
  /*by default it is set to normal mode*/
-int deviceReset = 1;
+//int deviceReset = 1;
 
 /** Initializes the deviceReset module */
 void
