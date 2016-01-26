@@ -70,7 +70,7 @@ execute_process(COMMAND "pkg-config" "--cflags" "glib-2.0"
 set( CFLAGS "${CFLAGS} ${SNMP_FLAGS} ${GLIBC_FLAGS}")
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -I. ${CFLAGS}") #always
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} --ggdb -g -00 -v -da -Q") #for debugging
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -00 -v -da -Q") #for debugging
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall")#for release
 
 #set ouput directory based on build type

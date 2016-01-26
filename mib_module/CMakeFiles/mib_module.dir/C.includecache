@@ -53,6 +53,8 @@ stdlib.h
 -
 string.h
 -
+ctype.h
+-
 ../include/mibParameters.h
 /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/mibParameters.h
 

@@ -67,15 +67,51 @@ struct ethernetIfTableEntry * ethernetIfTableEntry_create(  long  ethernetIfInde
     return entry;
 }
 
+/* This function converts a char* representing a MacAddress to an array of bytes.
+ * As the char* represent a MAC address it should have a pattern as:
+ * 'XX:XX:XX:XX:XX:XX\0'
+ * It will be used to convert the ethernetIfMacAddress
+ * from the initial char* value to an array of 6 bytes
+ * using the character to creates the right bytes
+ */
+void MAC_to_byte_array(char dest[6], char* source){
+    /*we declare a byte that will be used to fill our destination array*/
+   u_char result;
+    int i=0;
+    int j = 0;
+    /* The format of a Mac address is XX:XX:XX:XX:XX:XX, so we access
+     * character number 0, then 3, then 6, then 9, then 11 and finally 15
+     */
+    for(i=0; i<strlen(source); i=i+3){
+        result = toupper(source[i]);
+        if ( (result >= 'A') && (result<= 'F')){
+            result = result - 55 ; //get the corresponding hexadecimal value of the character
+        }
+        else{ /*if result is not a letter, it a number*/
+            result = result - 48;
+        }
+        result = (result<<4);
+        if (toupper(source[i+1]) <= 'F' && toupper(source[i+1]) >= 'A'){
+            result += (toupper(source[i+1]) -55);
+        }else{
+            result += source[i+1] - 48;
+        }
+        dest[j] = result;
+        j++;
+    }
+}
+
 /* This function initialize the content of the Entry of he ethernetIfTable
  * with the content of the array defined in mib_parameter.h, and initialize
  * with the configuration file
  */
 void init_ethernetIfTable_content(int entryNumber){
     int i=0; /*loop variable*/
+    u_char Mac[6];
     for(i=0; i < entryNumber; i++){
+        MAC_to_byte_array(Mac, ethernetIfMacAddress[i]);
         struct ethernetIfTableEntry* entry = ethernetIfTableEntry_create(i, ethernetIfSpeed[i],
-                                                                         ethernetIfMacAddress[i], 6,
+                                                                         Mac, 6,
                                                                          inet_addr(ethernetIfIpAddress[i]), inet_addr(ethernetIfSubnetMask[i]),
                                                                          inet_addr(ethernetIfIpAddressConflict[i]));
         entry->valid = 1;

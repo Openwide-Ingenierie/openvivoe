@@ -10,8 +10,38 @@
 #include <glib-2.0/glib.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "../include/mibParameters.h"
 
+
+int check_MAC_format(char** mac){
+    int i=0;
+    int j =0;
+    int Mac_size;
+    /* The number of Mac addresses passed into the configuration file have already been tested at this point
+     * there are no need to check it again. However, for every one of them we should check their size and their content
+     */
+     for(i=0; i<ethernetIfNumber; i++){
+        /*get the size of a mac address, should be 18*/
+        Mac_size = strlen(mac[i]);
+        if(Mac_size != 17){
+            return EXIT_FAILURE;
+        }else{
+            /*if we are here, the length should be good, but we need to check if it's parsed correctly*/
+            if( mac[i][2] != ':' || mac[i][5] != ':' || mac[i][8] != ':' || mac[i][11] != ':' ||mac[i][14] != ':'){
+                return EXIT_FAILURE;
+            }else{
+                for(j=0; j<Mac_size; j=j+3){
+                    if(mac[i][j] < '0' || (mac[i][j] > '9' && toupper(mac[i][j]) < 'A') || toupper(mac[i][j]) > 'F')
+                        return EXIT_FAILURE;
+                    else if (mac[i][j+1] < '0' || (mac[i][j+1] > '9' && toupper(mac[i][j+1]) < 'A') || toupper(mac[i][j+1]) > 'F')
+                        return EXIT_FAILURE;
+                }
+            }
+        }
+    }
+    return EXIT_SUCCESS;
+}
 
 /*this function is used to get the information to place in the VIVOE MIB
  * from the configuration file associated to it: "vivoe-mib.conf". It will
@@ -261,6 +291,13 @@ int get_check_configuration(){
             fprintf(stderr, "Invalid number of values for %s, there should be %ld value(s)\n", "ethernetIfMacAddress", ethernetIfNumber);
             error_occured = TRUE; /*set the error boolean to*/
         }
+        else if(check_MAC_format(ethernetIfMacAddress)){
+            fprintf(stderr, "Invalid format for %s, it should something like: XX:XX:XX:XX:XX:XX\n", "ethernetIfMacAddress");
+            error_occured = TRUE; /*set the error boolean to*/
+        /* For every MAC address we check the format of the string passed into the config file: it should be a 18 bytes string
+          * including the '\0' character, and parsed every two characters with ':'
+          */
+          }
     }else{
         fprintf(stderr, "Parameter %s compulsory and not found: %s\n", (const gchar*) "deviceUserDesc", error->message);
         return EXIT_FAILURE;
@@ -361,3 +398,7 @@ int get_check_configuration(){
         return EXIT_SUCCESS;
     }
 }
+
+
+
+

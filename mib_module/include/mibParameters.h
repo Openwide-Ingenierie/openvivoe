@@ -82,8 +82,8 @@
     * implementation, those values will be set from the .conf file
     * associated to the subagent
     */
-    long* ethernetIfSpeed;                           /*default speed value, set here as an example*/
-    u_char** ethernetIfMacAddress;                 /* This is the default subNet Mask of the internet Interface*/
+    int* ethernetIfSpeed;                           /*default speed value, set here as an example*/
+    u_char** ethernetIfMacAddress;                   /* This is the default subNet Mask of the internet Interface*/
     char** ethernetIfIpAddress;                      /*by default, loopback address is used*/
     char** ethernetIfSubnetMask;                     /*this is the SubnetMask used for this network interface*/
     char** ethernetIfIpAddressConflict;              /* This is the default Ip Conflict address, normally, it should not be initialize at the start-up of the subAgent*/
