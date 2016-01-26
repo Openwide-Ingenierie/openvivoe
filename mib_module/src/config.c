@@ -22,6 +22,9 @@ int get_check_configuration(){
 
     /* Declaration of a pointer that will contain our configuration file*/
     GKeyFile* gkf;
+    /*Declaration of a  gsize variable, that will be used to get the size of the list associated to some keys*/
+     gsize length;
+
     /* Declaration of an array of gstring (gchar**) that will contain the name of the different groups
      * declared in the configuration file
      */
@@ -29,6 +32,10 @@ int get_check_configuration(){
 
     /* Define the error pointer we will be using to check for errors in the configuration file */
     GError* error = NULL;
+    /* This is a boolean used to check if everything went ok, otherwise the function will return EXIT_FAILURE
+     * This will allow to print all the synthax errors to the user before exiting the program
+     */
+    int error_occured = FALSE;
 
     /*defined the paths from were we should retrieve our configuration files */
 
@@ -36,29 +43,13 @@ int get_check_configuration(){
     /*define a pointer to the full path were the vivoe-mib.conf file is located*/
     gchar* gkf_path = NULL;
 
+
     /* Define the parameters that should be in deviceInfo group of the configuration file
      * the parameters should be ordered the same as as the MIB, and the same way as the
      * the configuration file. Indeed, this will allow the user to refer only the MIB's parameter
      * he wants to initialize. If he does not need to initialize some parameters, he will just no
      * put them as keys into the MIB.
      */
-    //const gchar* deviceInfo_param[] = { (gchar*)"deviceDesc",                   /*0 - sting32*/
-    //                                    (gchar*)"deviceManufacturer",           /*1 - string64*/
-    //                                    (gchar*)"devicePartNumber",             /*2 - string32*/
-    //                                    (gchar*)"deviceSerialNumber",           /*3 - string32*/
-    //                                    (gchar*)"deviceHardwareVersion",        /*4 - string16*/
-    //                                    (gchar*)"deviceSoftwareVersion",        /*5 - string16*/
-    //                                    (gchar*)"deviceFirmwareVersion",        /*6 - string16*/
-    //                                    (gchar*)"deviceMibVersion",             /*7 - string16*/
-    //                                    (gchar*)"deviceType",                   /*8 - integer*/
-    //                                   (gchar*)"deviceUserDesc",               /*9 - string64*/
-    //                                    (gchar*)"ethernetIfNumber",             /*10 - integer*/
-    //                                    (gchar*)"ethernetIfSpeed",              /*11 - integer*/
-    //                                    (gchar*)"ethernetIfMacAddress",         /*12 - string MAC*/
-    //                                    (gchar*)"ethernetIfIpAddress",          /*13 - string IP*/
-    //                                    (gchar*)"ethernetIfSubnetMask",         /*14 - string IP*/
-    //                                    (gchar*)"ethernetIfIpAddressConflict",  /*15 - string IP*/
-    //                                    NULL};
 
     /*initialization of the variable */
     gkf = g_key_file_new();
@@ -85,27 +76,27 @@ int get_check_configuration(){
      * _ViveoNotification
      * _VivoeGroups
      */
-    if( !(g_strv_contains(groups, (gchar*) "deviceInfo"))){
+    if( !(g_strv_contains(groups, (const gchar*) "deviceInfo"))){
         fprintf (stderr, "Group %s not found in configuration file\nIt should be written in the form [%s]\n", "deviceInfo", "deviceInfo");
         return EXIT_FAILURE;
     }
 
-    if( !(g_strv_contains(groups , (gchar*) "VideoFormatInfo"))){
+    if( !(g_strv_contains(groups , (const gchar*) "VideoFormatInfo"))){
         fprintf (stderr, "Group %s not found in configuration file\nIt should be written in the form [%s]\n", "VideoFormatInfo", "VideoFormatInfo");
         return EXIT_FAILURE;
     }
 
-    if( !(g_strv_contains(groups , (gchar*) "ChannelControl"))){
+    if( !(g_strv_contains(groups , (const gchar*) "ChannelControl"))){
         fprintf (stderr, "Group %s not found in configuration file\nIt should be written in the form [%s]\n", "ChannelControl", "ChannelControl");
         return EXIT_FAILURE;
     }
 
-    if( !(g_strv_contains(groups , (gchar*) "VivoeNotification"))){
+    if( !(g_strv_contains(groups , (const gchar*) "VivoeNotification"))){
         fprintf (stderr, "Group %s not found in configuration file\nIt should be written in the form [%s]\n", "VivoeNotification", "VivoeNotification");
         return EXIT_FAILURE;
     }
 
-    if( !(g_strv_contains(groups , (gchar*) "VivoeGroups"))){
+    if( !(g_strv_contains(groups , (const gchar*) "VivoeGroups"))){
         fprintf (stderr, "Group %s not found in configuration file\nIt should be written in the form [%s]\n", "VivoeGroups", "VivoeGroups");
         return EXIT_FAILURE;
     }
@@ -113,122 +104,260 @@ int get_check_configuration(){
     /* Once we have check that all groups were present in the configuration file
      * we assign the values to the different MIB's parameters
      */
-    /*deviceDesc*/
-    if(g_key_file_has_key(gkf, groups[0], (const gchar*) "deviceType", &error)){
-        deviceDesc = (char*) g_key_file_get_string(gkf, groups[0], (const gchar*) "deviceType", &error);
+    /*deviceDesc - optional*/
+    if(g_key_file_has_key(gkf, groups[0], (const gchar*) "deviceDesc", &error)){
+        deviceDesc = (char*) g_key_file_get_string(gkf, groups[0], (const gchar*) "deviceDesc", &error);
         if(error != NULL){
-            fprintf(stderr, "Invalid format for%s: %s\n", (const gchar*) "deviceType", error->message);
-            }
+            fprintf(stderr, "Invalid format for %s: %s\n", (const gchar*) "deviceDesc", error->message);
+            error = NULL; /* resetting the error pointer*/
+            error_occured = TRUE; /*set the error boolean to*/
+        }
     }
-    /*deviceManufacturer*/
+
+    /*deviceManufacturer - optional*/
     if(g_key_file_has_key(gkf, groups[0], (const gchar*) "deviceManufacturer", &error)){
         deviceManufacturer = (char*) g_key_file_get_string(gkf, groups[0], (const gchar*) "deviceManufacturer", &error);
         if(error != NULL){
-                printf(stderr, "Invalid format for%s: %s\n", (const gchar*) "deviceManufacturer", error->message);
+            fprintf(stderr, "Invalid format for %s: %s\n", (const gchar*) "deviceManufacturer", error->message);
+            error = NULL; /* resetting the error pointer*/
+            error_occured = TRUE; /*set the error boolean to*/
         }
     }
-    /*devicePartNumber*/
+    /*devicePartNumber - optional*/
     if(g_key_file_has_key(gkf, groups[0], (const gchar*)"devicePartNumber", &error)){
         devicePartNumber = (char*) g_key_file_get_string(gkf, groups[0], (const gchar*)"devicePartNumber", &error);
         if(error != NULL){
-            fprintf(stderr, "Invalid format for%s: %s\n", (const gchar*)"devicePartNumber", error->message);
+            fprintf(stderr, "Invalid format for %s: %s\n", (const gchar*)"devicePartNumber", error->message);
+            error = NULL; /* resetting the error pointer*/
+            error_occured = TRUE; /*set the error boolean to*/
         }
     }
-   /*deviceSerialNumber*/
+   /*deviceSerialNumber - optional*/
     if(g_key_file_has_key(gkf, groups[0], (const gchar*) "deviceSerialNumber", &error)){
         deviceSerialNumber = (char*) g_key_file_get_string(gkf, groups[0], (const char*) "deviceSerialNumber", &error);
         if(error != NULL){
-            fprintf(stderr, "Invalid format for%s: %s\n", (const char*) "deviceSerialNumber", error->message);
+            fprintf(stderr, "Invalid format for %s: %s\n", (const char*) "deviceSerialNumber", error->message);
+            error = NULL; /* resetting the error pointer*/
+            error_occured = TRUE; /*set the error boolean to*/
         }
     }
-    /*deviceHardwareVersion*/
+    /*deviceHardwareVersion - optional*/
     if(g_key_file_has_key(gkf, groups[0], (const gchar*)"deviceHardwareVersion", &error)){
         deviceHardwareVersion = (char*) g_key_file_get_string(gkf, groups[0], (const gchar*)"deviceHardwareVersion", &error);
         if(error != NULL){
-            fprintf(stderr, "Invalid format for%s: %s\n", (const gchar*)"deviceHardwareVersion", error->message);
+            fprintf(stderr, "Invalid format for %s: %s\n", (const gchar*)"deviceHardwareVersion", error->message);
+            error = NULL; /* resetting the error pointer*/
+            error_occured = TRUE; /*set the error boolean to*/
         }
     }
-    /*deviceSoftwareVersion*/
+    /*deviceSoftwareVersion - optional*/
     if(g_key_file_has_key(gkf, groups[0], (const gchar*) "deviceSoftwareVersion", &error)){
         deviceSoftwareVersion = (char*) g_key_file_get_string(gkf, groups[0], (const gchar*) "deviceSoftwareVersion", &error);
         if(error != NULL){
-            fprintf(stderr, "Invalid format for%s: %s\n", (const gchar*) "deviceSoftwareVersion", error->message);
+            fprintf(stderr, "Invalid format for %s: %s\n", (const gchar*) "deviceSoftwareVersion", error->message);
+            error = NULL; /* resetting the error pointer*/
+            error_occured = TRUE; /*set the error boolean to*/
         }
     }
-    /*deviceFirmwareVersion*/
+    /*deviceFirmwareVersion - optional*/
     if(g_key_file_has_key(gkf, groups[0], (const gchar*) "deviceFirmwareVersion", &error)){
         deviceFirmwareVersion = (char*) g_key_file_get_string(gkf, groups[0], (const gchar*) "deviceFirmwareVersion", &error);
         if(error != NULL){
-            fprintf(stderr, "Invalid format for%s: %s\n", (const gchar*) "deviceFirmwareVersion", error->message);
+            fprintf(stderr, "Invalid format for %s: %s\n", (const gchar*) "deviceFirmwareVersion", error->message);
+            error = NULL; /* resetting the error pointer*/
+            error_occured = TRUE; /*set the error boolean to*/
         }
     }
-    /*deviceMibVersion*/
+    /*deviceMibVersion - optional*/
     if(g_key_file_has_key(gkf, groups[0], (const gchar*) "deviceMibVersion", &error)){
         deviceMibVersion = (char*) g_key_file_get_string(gkf, groups[0], (const gchar*) "deviceMibVersion", &error);
         if(error != NULL){
-            fprintf(stderr, "Invalid format for%s: %s\n", (const gchar*) "deviceMibVersion", error->message);
+            fprintf(stderr, "Invalid format for %s: %s\n", (const gchar*) "deviceMibVersion", error->message);
+            error = NULL; /* resetting the error pointer*/
+            error_occured = TRUE; /*set the error boolean to*/
         }
     }
-    /*deviceType*/
+    /*deviceType - compulsory*/
     if(g_key_file_has_key(gkf, groups[0], (const gchar*) "deviceType", &error)){
         deviceType = (int) g_key_file_get_integer(gkf, groups[0], (const gchar*) "deviceType", &error);
         if(error != NULL){
-            fprintf(stderr, "Invalid format for%s: %s\n", (const gchar*) "deviceType", error->message);
+            fprintf(stderr, "Invalid format for %s: %s\n", (const gchar*) "deviceType", error->message);
+            error = NULL; /* resetting the error pointer*/
+            error_occured = TRUE; /*set the error boolean to*/
         }
+    }else{
+        fprintf(stderr, "Parameter %s compulsory and not found: %s\n", (const gchar*) "deviceUserDesc", error->message);
+        return EXIT_FAILURE;
     }
-    /*deviceUserDesc*/
+
+    /*deviceUserDesc - optional*/
     if(g_key_file_has_key(gkf, groups[0], (const gchar*) "deviceUserDesc", &error)){
         deviceUserDesc = (char*) g_key_file_get_string(gkf, groups[0], (const gchar*) "deviceUserDesc", &error);
         if(error != NULL){
-            fprintf(stderr, "Invalid format for%s: %s\n", (const gchar*) "deviceUserDesc", error->message);
+            fprintf(stderr, "Invalid format for %s: %s\n", (const gchar*) "deviceUserDesc", error->message);
+            error = NULL; /* resetting the error pointer*/
+            error_occured = TRUE; /*set the error boolean to*/
         }
     }
-    /*ethernetIfNumber*/
+    /*ethernetIfNumber - compulsory*/
     if(g_key_file_has_key(gkf, groups[0], (const gchar*) "ethernetIfNumber", &error)){
         ethernetIfNumber = (int) g_key_file_get_integer(gkf, groups[0], (const gchar*) "ethernetIfNumber", &error);
         if(error != NULL){
-            fprintf(stderr, "Invalid format for%s: %s\n", (const gchar*) "ethernetIfNumber", error->message);
+            fprintf(stderr, "Invalid format for %s: %s\n", (const gchar*) "ethernetIfNumber", error->message);
+            error = NULL; /* resetting the error pointer*/
+            error_occured = TRUE; /*set the error boolean to*/
         }
+    }else{
+        fprintf(stderr, "Parameter %s compulsory and not found: %s\n", (const gchar*) "deviceUserDesc", error->message);
+        return EXIT_FAILURE;
     }
-    /*ethernetIfSpeed*/
+
+    /* Depending on the number of interface associated to the VIVOE protocol
+     * we check for all the compulsory parameters:
+     * _ ethernetIfSpeed
+     * _ ethernetIfMacAddress
+     * _ ethernetIfIpAddress
+     * _ ethernetIfSubnetMask
+     * The different values for each Ethernet Interface's parameter must be set
+     * int the configuration as a list of values separated by ";"
+     */
+
+    /*First we defined what separator will be used*/
+    g_key_file_set_list_separator (gkf, (gchar) ';');
+
+    /* After each initialization:
+     * Check if one parameter is missing for one of the Ethernet Interface associated to the VIVOE protocol
+     * As explained before, all the parameters: ethernetIfSpeed, ethernetIfMacAddress, ethernetIfIpAddress, ethernetIfSubnetMask
+     * should be initialize for all ethernet Interface that is used by the VIVOE protocol. So there should be as many
+     * values in the list of the parameters described above as the number stored by ethernetIfNumber.
+     */
+
+    /*ethernetIfSpeed - compulsory*/
     if(g_key_file_has_key(gkf, groups[0], (const gchar*) "ethernetIfSpeed", &error)){
-        ethernetIfSpeed = (int) g_key_file_get_integer(gkf, groups[0], (const gchar*) "ethernetIfSpeed", &error);
+        ethernetIfSpeed = (long*) g_key_file_get_integer_list(gkf, groups[0], (const gchar*) "ethernetIfSpeed", &length,  &error);
         if(error != NULL){
-            fprintf(stderr, "Invalid format for%s: %s\n", (const gchar*) "ethernetIfSpeed", error->message);
+            fprintf(stderr, "Invalid format for %s: %s\n", (const gchar*) "ethernetIfSpeed", error->message);
+            error = NULL; /* resetting the error pointer*/
+            error_occured = TRUE; /*set the error boolean to*/
         }
+        if(length != ethernetIfNumber){
+            fprintf(stderr, "Invalid number of values for %s, there should be %ld value(s)\n", "ethernetIfSpeed", ethernetIfNumber);
+            error_occured = TRUE; /*set the error boolean to*/
+        }
+    }else{
+        fprintf(stderr, "Parameter %s compulsory and not found: %s\n", (const gchar*) "deviceUserDesc", error->message);
+        return EXIT_FAILURE;
     }
-    /*ethernetIfMacAddress*/
+
+    /*ethernetIfMacAddress - compulsory*/
     if(g_key_file_has_key(gkf, groups[0], (const gchar*) "ethernetIfMacAddress", &error)){
-        strncpy((char*)ethernetIfMacAddress, (char*) g_key_file_get_string(gkf, groups[0], (const gchar*) "ethernetIfMacAddress", &error), 6);
+        ethernetIfMacAddress = (u_char**) g_key_file_get_string_list(gkf, groups[0], (const gchar*) "ethernetIfMacAddress", &length, &error);
         if(error != NULL){
-            fprintf(stderr, "Invalid format for%s: %s\n", (const gchar*) "ethernetIfMacAddress", error->message);
+            fprintf(stderr, "Invalid format for %s: %s\n", (const gchar*) "ethernetIfMacAddress", error->message);
+            error = NULL; /* resetting the error pointer*/
+            error_occured = TRUE; /*set the error boolean to*/
         }
+        if(length != ethernetIfNumber){
+            fprintf(stderr, "Invalid number of values for %s, there should be %ld value(s)\n", "ethernetIfMacAddress", ethernetIfNumber);
+            error_occured = TRUE; /*set the error boolean to*/
+        }
+    }else{
+        fprintf(stderr, "Parameter %s compulsory and not found: %s\n", (const gchar*) "deviceUserDesc", error->message);
+        return EXIT_FAILURE;
     }
-    /*ethernetIfIpAddress*/
+
+    /*ethernetIfIpAddress - compulsory*/
     if(g_key_file_has_key(gkf, groups[0], (const gchar*) "ethernetIfIpAddress", &error)){
-        strncpy(ethernetIfIpAddress, (char*) g_key_file_get_string(gkf, groups[0], (const gchar*) "ethernetIfIpAddress", &error), 4);
+        ethernetIfIpAddress=  (char**) g_key_file_get_string_list(gkf, groups[0], (const gchar*) "ethernetIfIpAddress", &length, &error);
         if(error != NULL){
-            fprintf(stderr, "Invalid format for%s: %s\n", (const gchar*) "ethernetIfIpAddress", error->message);
+            fprintf(stderr, "Invalid format for %s: %s\n", (const gchar*) "ethernetIfIpAddress", error->message);
+            error = NULL; /* resetting the error pointer*/
+            error_occured = TRUE; /*set the error boolean to*/
         }
+        if(length != ethernetIfNumber){
+            fprintf(stderr, "Invalid number of values for %s, there should be %ld value(s)\n", "ethernetIfIpAddress", ethernetIfNumber);
+            error_occured = TRUE; /*set the error boolean to*/
+        }
+    }else{
+        fprintf(stderr, "Parameter %s compulsory and not found: %s\n", (const gchar*) "deviceUserDesc", error->message);
+        return EXIT_FAILURE;
     }
-    /*ethernetIfSubnetMask*/
+
+    /*ethernetIfSubnetMask - compulsory*/
     if(g_key_file_has_key(gkf, groups[0],(const gchar*) "ethernetIfSubnetMask", &error)){
-        strncpy(ethernetIfSubnetMask, (char*) g_key_file_get_string(gkf, groups[0], (const gchar*) "ethernetIfSubnetMask", &error), 4);
+        ethernetIfSubnetMask = (char**) g_key_file_get_string_list(gkf, groups[0], (const gchar*) "ethernetIfSubnetMask", &length, &error);
         if(error != NULL){
             fprintf(stderr, "Invalid format for%s: %s\n", (const gchar*) "ethernetIfSubnetMask", error->message);
+            error = NULL; /* resetting the error pointer*/
+            error_occured = TRUE; /*set the error boolean to*/
         }
+        if(length != ethernetIfNumber){
+            fprintf(stderr, "Invalid number of values for %s, there should be %ld value(s)\n", "ethernetIfSubnetMask", ethernetIfNumber);
+            error_occured = 1; /*set the error boolean to*/
+        }
+    }else{
+        fprintf(stderr, "Parameter %s compulsory and not found: %s\n", (const gchar*) "deviceUserDesc", error->message);
+        return EXIT_FAILURE;
     }
-    /*ethernetIfIpAddressConflict*/
+    /*ethernetIfIpAddressConflict - compulsory*/
     if(g_key_file_has_key(gkf, groups[0], (const gchar*) "ethernetIfIpAddressConflict", &error)){
-        strncpy(ethernetIfIpAddressConflict,(char*) g_key_file_get_string(gkf, groups[0], (const gchar*) "ethernetIfIpAddressConflict", &error), 4);
+        ethernetIfIpAddressConflict = (char**) g_key_file_get_string_list(gkf, groups[0], (const gchar*) "ethernetIfIpAddressConflict", &length, &error);
         if(error != NULL){
             fprintf(stderr, "Invalid format for%s: %s\n", (const gchar*) "ethernetIfIpAddressConflict", error->message);
+            error = NULL; /* resetting the error pointer*/
+            error_occured = TRUE; /*set the error boolean to*/
         }
+        if(length != ethernetIfNumber){
+            fprintf(stderr, "Invalid number of values for %s, there should be %ld value(s)\n", (const gchar*) "ethernetIfIpAddressConflict", ethernetIfNumber);
+            error_occured = TRUE; /*set the error boolean to*/
+        }
+    }else{
+        fprintf(stderr, "Parameter %s compulsory and not found: %s\n", (const gchar*) "deviceUserDesc", error->message);
+        return EXIT_FAILURE;
+    }
+
+    /*deviceNatoStockNumber - optional*/
+    if(g_key_file_has_key(gkf, groups[0], (const gchar*) "deviceNatoStockNumber", &error)){
+        deviceNatoStockNumber = (char*) g_key_file_get_string(gkf, groups[0], (const gchar*) "deviceNatoStockNumber", &error);
+        if(error != NULL){
+            fprintf(stderr, "Invalid format for %s: %s\n", (const gchar*) "deviceNatoStockNumber", error->message);
+            error = NULL; /* resetting the error pointer*/
+            error_occured = TRUE; /*set the error boolean to*/
+        }
+    }
+    /*deviceMode - compulsory*/
+    if(g_key_file_has_key(gkf, groups[0], (const gchar*) "deviceMode", &error)){
+        deviceMode = (int) g_key_file_get_integer(gkf, groups[0], (const gchar*) "deviceMode", &error);
+        if(error != NULL){
+            fprintf(stderr, "Invalid format for %s: %s\n", (const gchar*) "deviceMode", error->message);
+            error = NULL; /* resetting the error pointer*/
+            error_occured = TRUE; /*set the error boolean to*/
+        }
+    }else{
+        fprintf(stderr, "Parameter %s compulsory and not found: %s\n", (const gchar*) "deviceUserDesc", error->message);
+        return EXIT_FAILURE;
+    }
+
+    /*deviceReset - compulsory*/
+    if(g_key_file_has_key(gkf, groups[0], (const gchar*) "deviceReset", &error)){
+        deviceReset = (int) g_key_file_get_integer(gkf, groups[0], (const gchar*) "deviceReset", &error);
+        if(error != NULL){
+            fprintf(stderr, "Invalid format for %s: %s\n", (const gchar*) "deviceReset", error->message);
+            error = NULL; /* resetting the error pointer*/
+            error_occured = TRUE; /*set the error boolean to*/
+        }
+    }else{
+        fprintf(stderr, "Parameter %s compulsory and not found: %s\n", (const gchar*) "deviceUserDesc", error->message);
+        return EXIT_FAILURE;
     }
 
     /* free the GKeyFile before leaving the function*/
     g_key_file_free (gkf);
 
-    return EXIT_SUCCESS;
 
+    if(error_occured==FALSE){
+        return EXIT_FAILURE;
+    }else{
+        return EXIT_SUCCESS;
+    }
 }

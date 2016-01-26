@@ -255,6 +255,10 @@ net-snmp/agent/net-snmp-agent-includes.h
 /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/ethernetIfTable.h
 ../include/mibParameters.h
 /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/include/mibParameters.h
+arpa/inet.h
+-
+sys/socket.h
+-
 
 /home/hoel/Documents/VIVOE-project/openvivoe/mib_module/src/main.c
 stdio.h

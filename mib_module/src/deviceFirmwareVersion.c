@@ -13,7 +13,7 @@
 
 /*value of parameter*/
 /*only use 16 bytes strings*/
-//char* deviceFirmwareVersion =  "default";
+/*char* deviceFirmwareVersion =  "default";*/
 
 
 /** Initializes the deviceFirmwareVersion module */

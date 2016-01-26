@@ -9,23 +9,23 @@
 
     /*value of parameter*/
     /*only use 32 bytes strings*/
-    char* deviceDesc =  "default";
+    char* deviceDesc;
 
     /*value of parameter*/
     /*only use 16 bytes strings*/
-    char* deviceFirmwareVersion =  "default";
+    char* deviceFirmwareVersion;
 
     /*value of parameter*/
     /*only use 16 bytes strings*/
-    char* deviceHardwareVersion =  "default";
+    char* deviceHardwareVersion ;
 
     /*value of deviceManufacturer*/
     /* It should be a string less or equal to 64 bytes*/
-    char* deviceManufacturer = "default";
+    char* deviceManufacturer;
 
     /*value of parameter*/
     /*only use 16 bytes strings*/
-    char* deviceMibVersion =  "default";
+    char* deviceMibVersion ;
 
     /*value of deviceMode*/
     /* It should be an integer*/
@@ -34,15 +34,15 @@
      * maintenanceMode(3)
      */
      /*by default it is set to normal mode*/
-    int deviceMode = 1;
+    int deviceMode;
 
     /*value of deviceNatoStockNumber*/
     /* It should be a string less or equal to 32 bytes*/
-    char* deviceNatoStockNumber = "default";
+    char* deviceNatoStockNumber;
 
     /*value of parameter*/
     /*only use 32 bytes strings*/
-    char* devicePartNumber =  "default";
+    char* devicePartNumber;
 
     /*value of deviceReset*/
     /* It should be an integer*/
@@ -50,15 +50,15 @@
      * reset(2)
      */
      /*by default it is set to normal mode*/
-    int deviceReset = 1;
+    int deviceReset;
 
     /*value of parameter*/
     /*only use 32 bytes strings*/
-    char* deviceSerialNumber =  "default";
+    char* deviceSerialNumber;
 
     /*value of parameter*/
     /*only use 16 bytes strings*/
-    char* deviceSoftwareVersion =  "default";
+    char* deviceSoftwareVersion;
 
     /*value of deviceType*/
     /* It should be an integer
@@ -67,7 +67,7 @@
      * both(3)
      */
      /*by default it is set to normal serviceProvider*/
-    static int deviceType = 1;
+    int deviceType;
 
     /*value of parameter*/
     /*only use 64 bytes strings*/
@@ -75,25 +75,18 @@
 
     /*value of ethernetIfNumber*/
     /* By default, it is set to one*/
-    long int ethernetIfNumber = 1;
+    long int ethernetIfNumber;
 
-     /* This is the initialization of the default values content
-     * of the ethernetIfTable. This is only temporary. In a further
-     * implementation, those values will be set from the .conf file
-     * associated to the subagent
-     */
-    long ethernetIfIndex =                      1; /*default index*/
-    long ethernetIfSpeed =                      1000; /*default speed value, set here as an example*/
-    u_char ethernetIfMacAddress[6] =            {0x00,0x00,0x00,0x00,0x00,0x00};
-    size_t ethernetIfMacAddress_len =           6; /*default size for representing ethernet MAC addresses, it should always be set to 6, otherwise an error will occur*/
-    u_char ethernetIfIpAddress[4] =             {127, 0, 0, 1}; /*by default, loopback address is used*/
-    size_t ethernetIfIpAddress_len =            4; /*default size for representing Internet IP addresses, it should always be set to 4, otherwise an error will occur*/
-    u_char ethernetIfSubnetMask[4] =            {255, 255, 255, 0};
-    size_t ethernetIfSubnetMask_len =           4; /*default size for representing Internet IP addresses, it should always be set to 4, otherwise an error will occur*/
-    u_char ethernetIfIpAddressConflict[4] =     {0, 0, 0, 0};
-    size_t ethernetIfIpAddressConflict_len =    4; /*default size for representing Internet IP addresses, it should always be set to 4, otherwise an error will occur*/
-
-
+    /* This is the initialization of the default values content
+    * of the ethernetIfTable. This is only temporary. In a further
+    * implementation, those values will be set from the .conf file
+    * associated to the subagent
+    */
+    long* ethernetIfSpeed;                           /*default speed value, set here as an example*/
+    u_char** ethernetIfMacAddress;                 /* This is the default subNet Mask of the internet Interface*/
+    char** ethernetIfIpAddress;                      /*by default, loopback address is used*/
+    char** ethernetIfSubnetMask;                     /*this is the SubnetMask used for this network interface*/
+    char** ethernetIfIpAddressConflict;              /* This is the default Ip Conflict address, normally, it should not be initialize at the start-up of the subAgent*/
 
 
 #endif /* MIBPARAMETERS_H */

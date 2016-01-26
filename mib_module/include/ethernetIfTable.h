@@ -8,6 +8,7 @@
 /* function declarations */
 void init_ethernetIfTable(void);
 void initialize_table_ethernetIfTable(void);
+void initialize_ethernetIfTableEntry();
 Netsnmp_Node_Handler ethernetIfTable_handler;
 Netsnmp_First_Data_Point  ethernetIfTable_get_first_data_point;
 Netsnmp_Next_Data_Point   ethernetIfTable_get_next_data_point;

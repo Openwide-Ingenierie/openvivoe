@@ -23,9 +23,6 @@ init_deviceUserDesc(void)
     const oid deviceUserDesc_oid[] = { 1,3,6,1,4,1,35990,3,1,1,10 };
 
     DEBUGMSGTL(("deviceUserDesc", "Initializing\n"));
-    /*initialize dynamically the default value ofdeviceUserDesc*/
-    deviceUserDesc = malloc(64*sizeof(char));
-    strcpy(deviceUserDesc, "default");
     netsnmp_register_instance(
         netsnmp_create_handler_registration("deviceUserDesc", handle_deviceUserDesc,
                                deviceUserDesc_oid, OID_LENGTH(deviceUserDesc_oid),

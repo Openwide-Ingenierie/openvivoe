@@ -53,10 +53,11 @@ void init_deviceType(void)
                 "Initalizing deviceType scalar integer.  Default value = %d\n",
                 deviceType));
 
-    netsnmp_register_read_only_int_instance("deviceType",
-                                            deviceType_oid,
-                                            OID_LENGTH(deviceType_oid),
-                                            NULL, handle_deviceType);
+    netsnmp_register_read_only_instance(
+        netsnmp_create_handler_registration("deviceType", handle_deviceType,
+                               deviceType_oid, OID_LENGTH(deviceType_oid),
+                               HANDLER_CAN_RONLY
+        ));
 
     DEBUGMSGTL(("deviceType",
                 "Done initalizing deviceType module\n"));

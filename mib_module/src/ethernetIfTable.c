@@ -8,62 +8,31 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "../include/ethernetIfTable.h"
 #include "../include/mibParameters.h"
-
-/* This is the initialization of the default values content
- * of the ethernetIfTable. This is only temporary. In a further
- * implementation, those values will be set from the .conf file
- * associated to the subagent
- */
-
-  //  long ethernetIfIndex =                      1; /*default index*/
-  //  long ethernetIfSpeed =                      1000; /*default speed value, set here as an example*/
-  //  u_char ethernetIfMacAddress[6] =            {0x00,0x00,0x00,0x00,0x00,0x00};
-  //  size_t ethernetIfMacAddress_len =           6; /*default size for representing ethernet MAC addresses, it should always be set to 6, otherwise an error will occur*/
-  //  u_char ethernetIfIpAddress[4] =             {127, 0, 0, 1}; /*by default, loopback address is used*/
-  //  size_t ethernetIfIpAddress_len =            4; /*default size for representing Internet IP addresses, it should always be set to 4, otherwise an error will occur*/
-  //  u_char ethernetIfSubnetMask[4] =            {255, 255, 255, 0};
-  //  size_t ethernetIfSubnetMask_len =           4; /*default size for representing Internet IP addresses, it should always be set to 4, otherwise an error will occur*/
-  //  u_char ethernetIfIpAddressConflict[4] =     {0, 0, 0, 0};
-  //  size_t ethernetIfIpAddressConflict_len =    4; /*default size for representing Internet IP addresses, it should always be set to 4, otherwise an error will occur*/
+#include <arpa/inet.h>
+#include <sys/socket.h>
 
 
-/** Initializes the ethernetIfTable module */
-void
-init_ethernetIfTable(void)
-{
-  /* here we initialize all the tables we're planning on supporting */
-    initialize_table_ethernetIfTable();
-}
-
-/* Determine the first/last column names */
-
-
-    /* Typical data structure for a row which is, refering to the MIB, ethernetIfTableEntry */
+    /* Typical data structure for a row entry */
 struct ethernetIfTableEntry {
     /* Index values */
     long ethernetIfIndex;
 
     /* Column values */
     long ethernetIfSpeed;
-    u_char ethernetIfMacAddress[6];
+    char ethernetIfMacAddress[6];
     size_t ethernetIfMacAddress_len;
-    u_char ethernetIfIpAddress[4];
-    u_char old_ethernetIfIpAddress[4]; /* used for UNDO purposes*/
-    size_t ethernetIfIpAddress_len;
-    u_char ethernetIfSubnetMask[4];
-    u_char old_ethernetIfSubnetMask[4]; /* used for UNDO purposes*/
-    size_t ethernetIfSubnetMask_len;
-    u_char ethernetIfIpAddressConflict[4];
-    u_char old_ethernetIfIpAddressConflict[4]; /* used for UNDO purposes*/
-    size_t ethernetIfIpAddressConflict_len;
-
+    in_addr_t ethernetIfIpAddress;
+    in_addr_t old_ethernetIfIpAddress;
+    in_addr_t ethernetIfSubnetMask;
+    in_addr_t old_ethernetIfSubnetMask;
+    in_addr_t ethernetIfIpAddressConflict;
+    in_addr_t old_ethernetIfIpAddressConflict;
 
     /* Illustrate using a simple linked list */
     int   valid;
     struct ethernetIfTableEntry *next;
 };
 
-/*this always represent the First row of the table*/
 struct ethernetIfTableEntry  *ethernetIfTable_head;
 
 /* create a new row in the (unsorted) table */
@@ -71,12 +40,9 @@ struct ethernetIfTableEntry * ethernetIfTableEntry_create(  long  ethernetIfInde
                                                             long ethernetIfSpeed,
                                                             u_char ethernetIfMacAddress[6],
                                                             size_t ethernetIfMacAddress_len,
-                                                            u_char ethernetIfIpAddress[4],
-                                                            size_t ethernetIfIpAddress_len,
-                                                            u_char ethernetIfSubnetMask[4],
-                                                             size_t ethernetIfSubnetMask_len,
-                                                            u_char ethernetIfIpAddressConflict[4],
-                                                            size_t ethernetIfIpAddressConflict_len )
+                                                            in_addr_t ethernetIfIpAddress,
+                                                            in_addr_t ethernetIfSubnetMask,
+                                                            in_addr_t ethernetIfIpAddressConflict)
 {
     struct ethernetIfTableEntry *entry;
 
@@ -88,21 +54,49 @@ struct ethernetIfTableEntry * ethernetIfTableEntry_create(  long  ethernetIfInde
     entry->next = ethernetIfTable_head;
     entry->ethernetIfSpeed = ethernetIfSpeed;
 
-    strcpy(entry->ethernetIfMacAddress, (char*)ethernetIfMacAddress);
+    memcpy(entry->ethernetIfMacAddress, ethernetIfMacAddress,ethernetIfMacAddress_len );
     entry->ethernetIfMacAddress_len = ethernetIfMacAddress_len;
 
-    strcpy((char*)entry->ethernetIfIpAddress,  (char*)ethernetIfIpAddress);
-    entry->ethernetIfIpAddress_len = ethernetIfIpAddress_len;
+    entry->ethernetIfIpAddress = ethernetIfIpAddress;
 
-    strcpy((char*)entry->ethernetIfSubnetMask,  (char*)ethernetIfSubnetMask);
-    entry->ethernetIfSubnetMask_len = ethernetIfSubnetMask_len;
+    entry->ethernetIfSubnetMask = ethernetIfSubnetMask;
 
-    strcpy((char*)entry->ethernetIfIpAddressConflict,  (char*)ethernetIfIpAddressConflict);
-    entry->ethernetIfIpAddressConflict_len  = ethernetIfIpAddressConflict_len ;
+    entry->ethernetIfIpAddressConflict = ethernetIfIpAddressConflict;
 
     ethernetIfTable_head = entry;
     return entry;
 }
+
+/* This function initialize the content of the Entry of he ethernetIfTable
+ * with the content of the array defined in mib_parameter.h, and initialize
+ * with the configuration file
+ */
+void init_ethernetIfTable_content(int entryNumber){
+    int i=0; /*loop variable*/
+    for(i=0; i < entryNumber; i++){
+        struct ethernetIfTableEntry* entry = ethernetIfTableEntry_create(i, ethernetIfSpeed[i],
+                                                                         ethernetIfMacAddress[i], 6,
+                                                                         inet_addr(ethernetIfIpAddress[i]), inet_addr(ethernetIfSubnetMask[i]),
+                                                                         inet_addr(ethernetIfIpAddressConflict[i]));
+        entry->valid = 1;
+    }
+    /*u_char ethernetIfMacAddress[6] = {00,00,00,00,00,00};
+    in_addr_t ethernetIfIpAddress = inet_addr("127.0.0.1");
+    in_addr_t ethernetIfSubnetMask = inet_addr("255.255.255.0");
+    in_addr_t ethernetIfIpAddressConflict = inet_addr("0.0.0.0");
+    struct ethernetIfTableEntry* entry = ethernetIfTableEntry_create(1, 1000, ethernetIfMacAddress , 6,  ethernetIfIpAddress, ethernetIfSubnetMask, ethernetIfIpAddressConflict);
+    entry->valid = 1;*/
+}
+
+/** Initializes the ethernetIfTable module */
+void
+init_ethernetIfTable(void)
+{
+  /* here we initialize all the tables we're planning on supporting */
+    initialize_table_ethernetIfTable();
+}
+
+//# Determine the first/last column names
 
 /** Initialize the ethernetIfTable table by defining its contents and how it's structured */
 void
@@ -124,7 +118,7 @@ initialize_table_ethernetIfTable(void)
 
     table_info = SNMP_MALLOC_TYPEDEF( netsnmp_table_registration_info );
     netsnmp_table_helper_add_indexes(table_info,
-                           ASN_INTEGER, /*index: ethernetIfIndex*/
+                           ASN_INTEGER,  /* index: ethernetIfIndex */
                            0);
     table_info->min_column = COLUMN_ETHERNETIFSPEED;
     table_info->max_column = COLUMN_ETHERNETIFIPADDRESSCONFLICT;
@@ -136,34 +130,18 @@ initialize_table_ethernetIfTable(void)
 
     netsnmp_register_table_iterator( reg, iinfo );
 
-    /* Initialize the contents of the table here */
-    /*
-     * use several time the function ethernetIfTableEntry_create
-     * to create several lines in the table ethernetIfTable
-     */
+    /* Initialise the contents of the table here */
+    init_ethernetIfTable_content(ethernetIfNumber);
 
-    ethernetIfTableEntry_create(ethernetIfIndex, ethernetIfSpeed,
-                                ethernetIfMacAddress, ethernetIfMacAddress_len,
-                                ethernetIfIpAddress, ethernetIfIpAddress_len,
-                                ethernetIfSubnetMask, ethernetIfSubnetMask_len,
-                                ethernetIfIpAddressConflict, ethernetIfIpAddressConflict_len);
-
-    /* ethernetIfTableEntry_create(2, ethernetIfSpeed,
-                                ethernetIfMacAddress, ethernetIfMacAddress_len,
-                                ethernetIfIpAddress, ethernetIfIpAddress_len,
-                                ethernetIfSubnetMask, ethernetIfSubnetMask_len,
-                                ethernetIfIpAddressConflict, ethernetIfIpAddressConflict_len); */
 }
 
 
-
 /* remove a row from the table */
-void
-ethernetIfTable_removeEntry( struct ethernetIfTableEntry *entry ) {
+/*void ethernetIfTable_removeEntry( struct ethernetIfTableEntry *entry ) {
     struct ethernetIfTableEntry *ptr, *prev;
 
     if (!entry)
-        return;    /* Nothing to remove */
+        return;    /* Nothing to remove
 
     for ( ptr  = ethernetIfTable_head, prev = NULL;
           ptr != NULL;
@@ -172,32 +150,21 @@ ethernetIfTable_removeEntry( struct ethernetIfTableEntry *entry ) {
             break;
     }
     if ( !ptr )
-        return;    /* Can't find it */
+        return;    /* Can't find it
 
     if ( prev == NULL )
         ethernetIfTable_head = ptr->next;
     else
         prev->next = ptr->next;
 
-    SNMP_FREE( entry );   /* XXX - release any other internal resources */
-}
+    SNMP_FREE( entry );   /* XXX - release any other internal resources
+}*/
 
-
-/* Example iterator hook routines - using 'get_next' to do most of the work */
-netsnmp_variable_list *  ethernetIfTable_get_first_data_point(  void **my_loop_context,
-                                                                void **my_data_context,
-                                                                netsnmp_variable_list *put_index_data,
-                                                                netsnmp_iterator_info *mydata)
-{
-    *my_loop_context = ethernetIfTable_head;
-    return ethernetIfTable_get_next_data_point(my_loop_context, my_data_context,
-                                    put_index_data,  mydata );
-}
-
-netsnmp_variable_list * ethernetIfTable_get_next_data_point(void **my_loop_context,
-                                                            void **my_data_context,
-                                                            netsnmp_variable_list *put_index_data,
-                                                            netsnmp_iterator_info *mydata)
+netsnmp_variable_list *
+ethernetIfTable_get_next_data_point(void **my_loop_context,
+                          void **my_data_context,
+                          netsnmp_variable_list *put_index_data,
+                          netsnmp_iterator_info *mydata)
 {
     struct ethernetIfTableEntry *entry = (struct ethernetIfTableEntry *)*my_loop_context;
     netsnmp_variable_list *idx = put_index_data;
@@ -213,19 +180,33 @@ netsnmp_variable_list * ethernetIfTable_get_next_data_point(void **my_loop_conte
     }
 }
 
+/* Example iterator hook routines - using 'get_next' to do most of the work */
+netsnmp_variable_list *
+ethernetIfTable_get_first_data_point(void **my_loop_context,
+                          void **my_data_context,
+                          netsnmp_variable_list *put_index_data,
+                          netsnmp_iterator_info *mydata)
+{
+    *my_loop_context = ethernetIfTable_head;
+    return ethernetIfTable_get_next_data_point(my_loop_context, my_data_context,
+                                    put_index_data,  mydata );
+}
+
+
+
 
 /** handles requests for the ethernetIfTable table */
-int     ethernetIfTable_handler(    netsnmp_mib_handler               *handler,
-                                    netsnmp_handler_registration      *reginfo,
-                                    netsnmp_agent_request_info        *reqinfo,
-                                    netsnmp_request_info              *requests) {
+int
+ethernetIfTable_handler(
+    netsnmp_mib_handler               *handler,
+    netsnmp_handler_registration      *reginfo,
+    netsnmp_agent_request_info        *reqinfo,
+    netsnmp_request_info              *requests) {
 
-    netsnmp_request_info          *request;
-    netsnmp_table_request_info    *table_info;
-    struct ethernetIfTableEntry   *table_entry;
-    int ret; /* it will be used to get the error and print it to the user*/
-    int i; /*this is our loop variable*/
-
+    netsnmp_request_info       *request;
+    netsnmp_table_request_info *table_info;
+    struct ethernetIfTableEntry          *table_entry;
+    int ret;
     DEBUGMSGTL(("ethernetIfTable:handler", "Processing request (%d)\n", reqinfo->mode));
 
     switch (reqinfo->mode) {
@@ -234,30 +215,30 @@ int     ethernetIfTable_handler(    netsnmp_mib_handler               *handler,
          */
     case MODE_GET:
         for (request=requests; request; request=request->next) {
-            table_entry = (struct ethernetIfTableEntry *) netsnmp_extract_iterator_context(request);
+            table_entry = (struct ethernetIfTableEntry *)
+                              netsnmp_extract_iterator_context(request);
             table_info  =     netsnmp_extract_table_info(      request);
-
             switch (table_info->colnum) {
             case COLUMN_ETHERNETIFSPEED:
                 if ( !table_entry ) {
-                    netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHINSTANCE);
+                    netsnmp_set_request_error(reqinfo, request,
+                                              SNMP_NOSUCHINSTANCE);
                     continue;
                 }
-                snmp_set_var_typed_integer( request->requestvb,
-                                            ASN_INTEGER, table_entry->ethernetIfSpeed);
-                break;
+                snmp_set_var_typed_integer( request->requestvb, ASN_INTEGER,
+                                            table_entry->ethernetIfSpeed);
 
-
+            break;
             case COLUMN_ETHERNETIFMACADDRESS:
                 if ( !table_entry ) {
-                    netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHINSTANCE);
+                    netsnmp_set_request_error(reqinfo, request,
+                                              SNMP_NOSUCHINSTANCE);
                     continue;
                 }
                 snmp_set_var_typed_value( request->requestvb, ASN_OCTET_STR,
-                                          table_entry->ethernetIfMacAddress, table_entry->ethernetIfMacAddress_len);
+                                          table_entry->ethernetIfMacAddress,
+                                          table_entry->ethernetIfMacAddress_len);
                 break;
-
-
             case COLUMN_ETHERNETIFIPADDRESS:
                 if ( !table_entry ) {
                     netsnmp_set_request_error(reqinfo, request,
@@ -265,10 +246,8 @@ int     ethernetIfTable_handler(    netsnmp_mib_handler               *handler,
                     continue;
                 }
                 snmp_set_var_typed_value( request->requestvb, ASN_IPADDRESS,
-                                            table_entry->ethernetIfIpAddress, table_entry->ethernetIfIpAddress_len);
+                                         (u_char*) &table_entry->ethernetIfIpAddress, 4 );
                 break;
-
-
             case COLUMN_ETHERNETIFSUBNETMASK:
                 if ( !table_entry ) {
                     netsnmp_set_request_error(reqinfo, request,
@@ -276,10 +255,8 @@ int     ethernetIfTable_handler(    netsnmp_mib_handler               *handler,
                     continue;
                 }
                 snmp_set_var_typed_value( request->requestvb, ASN_IPADDRESS,
-                                            table_entry->ethernetIfSubnetMask, table_entry->ethernetIfSubnetMask_len);
+                                         (u_char*) &table_entry->ethernetIfSubnetMask, 4 );
                 break;
-
-
             case COLUMN_ETHERNETIFIPADDRESSCONFLICT:
                 if ( !table_entry ) {
                     netsnmp_set_request_error(reqinfo, request,
@@ -287,10 +264,8 @@ int     ethernetIfTable_handler(    netsnmp_mib_handler               *handler,
                     continue;
                 }
                 snmp_set_var_typed_value( request->requestvb, ASN_IPADDRESS,
-                                            table_entry->ethernetIfIpAddressConflict, table_entry->ethernetIfIpAddressConflict_len);
+                                         (u_char*) &table_entry->ethernetIfIpAddressConflict, 4 );
                 break;
-
-
             default:
                 netsnmp_set_request_error(reqinfo, request,
                                           SNMP_NOSUCHOBJECT);
@@ -298,19 +273,17 @@ int     ethernetIfTable_handler(    netsnmp_mib_handler               *handler,
             }
         }
         break;
-
         /*
          * Write-support
          */
     case MODE_SET_RESERVE1:
         for (request=requests; request; request=request->next) {
-            table_entry = (struct ethernetIfTableEntry *) netsnmp_extract_iterator_context(request);
-            table_info  =                                 netsnmp_extract_table_info      (request);
-
+            table_entry = (struct ethernetIfTableEntry *)
+                              netsnmp_extract_iterator_context(request);
+            table_info  =     netsnmp_extract_table_info(      request);
             switch (table_info->colnum) {
             case COLUMN_ETHERNETIFIPADDRESS:
-                /* or possibly 'netsnmp_check_vb_int_range' */
-                ret = netsnmp_check_vb_type(requests->requestvb, ASN_IPADDRESS);
+                ret = netsnmp_check_vb_type( request->requestvb, ASN_IPADDRESS );
                 if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;
@@ -318,7 +291,7 @@ int     ethernetIfTable_handler(    netsnmp_mib_handler               *handler,
                 break;
             case COLUMN_ETHERNETIFSUBNETMASK:
                 /* or possibly 'netsnmp_check_vb_int_range' */
-                ret = netsnmp_check_vb_type(requests->requestvb, ASN_IPADDRESS);
+                ret = netsnmp_check_vb_type( request->requestvb, ASN_IPADDRESS );
                 if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;
@@ -326,7 +299,7 @@ int     ethernetIfTable_handler(    netsnmp_mib_handler               *handler,
                 break;
             case COLUMN_ETHERNETIFIPADDRESSCONFLICT:
                 /* or possibly 'netsnmp_check_vb_int_range' */
-                ret = netsnmp_check_vb_type(requests->requestvb, ASN_IPADDRESS);
+                ret = netsnmp_check_vb_type( request->requestvb, ASN_IPADDRESS );
                 if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;
@@ -347,26 +320,28 @@ int     ethernetIfTable_handler(    netsnmp_mib_handler               *handler,
         break;
 
     case MODE_SET_ACTION:
+                        /* or possibly 'netsnmp_check_vb_int_range' */
+        /* On i386 the host Byte order is Least significant Byte first (Litlle Endian), whereas the
+        * network byte order, as used on the Internet is Most Significant byte first (Big Endian)
+        * to check the integer type of the value send to the subAgent, we must first convert
+        * the integer received from Little Endian to Big Endian
+        */
         for (request=requests; request; request=request->next) {
-            table_entry = (struct ethernetIfTableEntry *) netsnmp_extract_iterator_context  (request);
-            table_info  =                                 netsnmp_extract_table_info        (request);
-
+            table_entry = (struct ethernetIfTableEntry *)
+                              netsnmp_extract_iterator_context(request);
+            table_info  =     netsnmp_extract_table_info(      request);
             switch (table_info->colnum) {
             case COLUMN_ETHERNETIFIPADDRESS:
-                strcpy(table_entry->old_ethernetIfIpAddress, table_entry->ethernetIfIpAddress);
-                for(i=0; i<sizeof(table_entry->ethernetIfIpAddress)/sizeof(u_char); i++)
-                    table_entry->ethernetIfIpAddress[i] = requests->requestvb->val.string[i];
+                table_entry->old_ethernetIfIpAddress = table_entry->ethernetIfIpAddress;
+                table_entry->ethernetIfIpAddress     = *request->requestvb->val.integer;
                 break;
             case COLUMN_ETHERNETIFSUBNETMASK:
-                strcpy(table_entry->old_ethernetIfSubnetMask, table_entry->ethernetIfSubnetMask);
-                for(i=0; i<sizeof(table_entry->ethernetIfSubnetMask )/sizeof(u_char); i++)
-                    table_entry->ethernetIfSubnetMask [i] = requests->requestvb->val.string[i];
+                table_entry->old_ethernetIfSubnetMask = table_entry->ethernetIfSubnetMask;
+                table_entry->ethernetIfSubnetMask     = *request->requestvb->val.integer;
                 break;
             case COLUMN_ETHERNETIFIPADDRESSCONFLICT:
-                strcpy(table_entry->old_ethernetIfIpAddressConflict, table_entry->ethernetIfIpAddressConflict);
-                for(i=0; i<sizeof(table_entry->ethernetIfIpAddressConflict )/sizeof(u_char); i++){
-                    table_entry->ethernetIfIpAddressConflict [i] = requests->requestvb->val.string[i];
-                }
+                table_entry->old_ethernetIfIpAddressConflict = table_entry->ethernetIfIpAddressConflict;
+                table_entry->ethernetIfIpAddressConflict     = *request->requestvb->val.integer;
                 break;
             }
         }
@@ -380,19 +355,16 @@ int     ethernetIfTable_handler(    netsnmp_mib_handler               *handler,
 
             switch (table_info->colnum) {
             case COLUMN_ETHERNETIFIPADDRESS:
-                strcpy( table_entry->ethernetIfIpAddress, table_entry->old_ethernetIfIpAddress);
-                 for(i=0; i<sizeof(table_entry->old_ethernetIfIpAddress )/sizeof(u_char); i++)
-                    table_entry->old_ethernetIfIpAddress[i] = 0;
+                table_entry->ethernetIfIpAddress     = table_entry->old_ethernetIfIpAddress;
+                table_entry->old_ethernetIfIpAddress = 0;
                 break;
             case COLUMN_ETHERNETIFSUBNETMASK:
-                strcpy(table_entry->ethernetIfIpAddress,table_entry->old_ethernetIfIpAddress);
-                for(i=0; i<sizeof(table_entry->old_ethernetIfSubnetMask )/sizeof(u_char); i++)
-                    table_entry->old_ethernetIfSubnetMask[i] = 0;
+                table_entry->ethernetIfSubnetMask     = table_entry->old_ethernetIfSubnetMask;
+                table_entry->old_ethernetIfSubnetMask = 0;
                 break;
             case COLUMN_ETHERNETIFIPADDRESSCONFLICT:
-                strcpy(table_entry->ethernetIfIpAddress,table_entry->old_ethernetIfIpAddress );
-                 for(i=0; i<sizeof(table_entry->old_ethernetIfIpAddressConflict )/sizeof(u_char); i++)
-                    table_entry->old_ethernetIfIpAddressConflict[i] = 0;
+                table_entry->ethernetIfIpAddressConflict     = table_entry->old_ethernetIfIpAddressConflict;
+                table_entry->old_ethernetIfIpAddressConflict = 0;
                 break;
             }
         }

@@ -41,16 +41,18 @@
 #include "../include/deviceReset.h"
 #include "../include/config.h"
 
+#if 0
 /* main for the configuration file */
 int
 main (int argc, char **argv) {
-    int i = get_check_configuration();
-    printf("return: %d\n", i);
+    convert_IP();
     return 0;
 }
+#endif
+
 
  /* main deamon for the MIB */
-#if 0
+
 static int keep_running;
 
 RETSIGTYPE
@@ -60,34 +62,41 @@ stop_server(int a) {
 
 int
 main (int argc, char **argv) {
-  int agentx_subagent=1; /* change this if you want to be a SNMP master agent */
-  int background = 0; /* change this if you want to run in the background */
-  int syslog = 0; /* change this if you want to use syslog */
+    int agentx_subagent=1; /* change this if you want to be a SNMP master agent */
+    int background = 0; /* change this if you want to run in the background */
+    int syslog = 0; /* change this if you want to use syslog */
 
-  /* print log errors to syslog or stderr */
-  if (syslog)
-    snmp_enable_calllog();
-  else
-    snmp_enable_stderrlog();
+    /* print log errors to syslog or stderr */
+    if (syslog)
+        snmp_enable_calllog();
+    else
+        snmp_enable_stderrlog();
 
   /* we're an agentx subagent? */
 
-  if (agentx_subagent) {
-    /* make us a agentx client. */
-    netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE, 1);
-  }
+    if (agentx_subagent) {
+        /* make us a agentx client. */
+        netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE, 1);
+    }
 
-  /* run in background, if requested */
-  if (background && netsnmp_daemonize(1, !syslog))
-      exit(1);
+    /* run in background, if requested */
+    if (background && netsnmp_daemonize(1, !syslog))
+        exit(1);
 
+    /* Before starting the agent, we should initialize the MIB's parameters
+     * from the configuration file vivoe-mib.conf
+     */
+    if ( !get_check_configuration() ){
+        return EXIT_FAILURE;
+    }
 
-  /* initialize the agent library */
-  init_agent("mib_module");
+    /* initialize the agent library */
+    init_agent("mib_module");
 
-  /* initialize mib code here */
-  /* this is where we initialize each init_parameterOfMIB routine to be handle by the agent
-   */
+    /* initialize mib code here
+     * this is where we initialize each init_parameterOfMIB routine to be handle by the agent
+     */
+
     init_deviceDesc();
     init_deviceManufacturer();
     init_devicePartNumber();
@@ -100,17 +109,20 @@ main (int argc, char **argv) {
     init_deviceUserDesc();
     init_ethernetIfNumber();
 
-
     init_ethernetIfTable();
+
+    init_deviceNatoStockNumber();
+    init_deviceMode();
+    init_deviceReset();
+
+
     /*init_ethernetIfSpeed();
     init_ethernetIfMacAddress();
     init_ethernetIfIpAddress();
     init_ethernetIfSubnetMask();
     init_ethernetIfIpAddressConflict();*/
 
-    init_deviceNatoStockNumber();
-    init_deviceMode();
-    init_deviceReset();
+
 
   /* initialize vacm/usm access control  */
   if (!agentx_subagent) {
@@ -142,6 +154,7 @@ main (int argc, char **argv) {
   /* at shutdown time */
   snmp_shutdown("mib_module");
 
-  return 0;
+  return EXIT_SUCCESS;
 }
-#endif
+
+

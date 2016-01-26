@@ -52,7 +52,7 @@ target_link_libraries(mib_module ${BUILDLIBS} ${BUILDAGENT_LIBS} ${GLIB})
 #set debug as default configuration, to buld release run "cmake -DCMAKE_BUILD_TYPE=Release" or simply the alias cmakerelease
 if( NOT CMAKE_BUILD_TYPE )
 	set( CMAKE_BUILD_TYPE DEBUG CACHE STRING
-		"Build type set default as not specified."
+		"Build type set to default as not specified."
 		FORCE )
 endif()
 
@@ -75,7 +75,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall")#for release
 
 #set ouput directory based on build type
 if( CMAKE_BUILD_TYPE STREQUAL DEBUG)
-	SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin/Debug) #debug VERSION
+	SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin/Debug) #debug version
 elseif ( CMAKE_BUILD_TYPE STREQUAL RELEASE)
 	SET( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin/Release)#release version
 else()
