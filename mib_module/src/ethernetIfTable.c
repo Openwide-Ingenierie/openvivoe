@@ -105,23 +105,17 @@ void MAC_to_byte_array(char dest[6], char* source){
  * with the content of the array defined in mib_parameter.h, and initialize
  * with the configuration file
  */
-void init_ethernetIfTable_content(int entryNumber){
+void ethernetIfTable_fill(int entryCount){
     int i=0; /*loop variable*/
     u_char Mac[6];
     for(i=0; i < entryNumber; i++){
         MAC_to_byte_array(Mac, ethernetIfMacAddress[i]);
-        struct ethernetIfTableEntry* entry = ethernetIfTableEntry_create(i, ethernetIfSpeed[i],
+        struct ethernetIfTableEntry* entry = ethernetIfTableEntry_create(i+1, ethernetIfSpeed[i],
                                                                          Mac, 6,
                                                                          inet_addr(ethernetIfIpAddress[i]), inet_addr(ethernetIfSubnetMask[i]),
                                                                          inet_addr(ethernetIfIpAddressConflict[i]));
         entry->valid = 1;
     }
-    /*u_char ethernetIfMacAddress[6] = {00,00,00,00,00,00};
-    in_addr_t ethernetIfIpAddress = inet_addr("127.0.0.1");
-    in_addr_t ethernetIfSubnetMask = inet_addr("255.255.255.0");
-    in_addr_t ethernetIfIpAddressConflict = inet_addr("0.0.0.0");
-    struct ethernetIfTableEntry* entry = ethernetIfTableEntry_create(1, 1000, ethernetIfMacAddress , 6,  ethernetIfIpAddress, ethernetIfSubnetMask, ethernetIfIpAddressConflict);
-    entry->valid = 1;*/
 }
 
 /** Initializes the ethernetIfTable module */
@@ -132,7 +126,6 @@ init_ethernetIfTable(void)
     initialize_table_ethernetIfTable();
 }
 
-//# Determine the first/last column names
 
 /** Initialize the ethernetIfTable table by defining its contents and how it's structured */
 void
@@ -167,12 +160,16 @@ initialize_table_ethernetIfTable(void)
     netsnmp_register_table_iterator( reg, iinfo );
 
     /* Initialise the contents of the table here */
-    init_ethernetIfTable_content(ethernetIfNumber);
+    ethernetIfTable_fill(ethernetIfNumber);
 
 }
 
 
-/* remove a row from the table */
+/* Remove a row from the table
+ * I leave the code here, however for our application, there is not possibility
+ * to remove a row from the table.
+ * the functionnality exits, but should not be implemented for now
+ */
 /*void ethernetIfTable_removeEntry( struct ethernetIfTableEntry *entry ) {
     struct ethernetIfTableEntry *ptr, *prev;
 

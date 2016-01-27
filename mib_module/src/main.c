@@ -41,17 +41,8 @@
 #include "../include/deviceReset.h"
 #include "../include/config.h"
 
-#if 0
-/* main for the configuration file */
-int
-main (int argc, char **argv) {
-    convert_IP();
-    return 0;
-}
-#endif
 
-
- /* main deamon for the MIB */
+/* main deamon for the MIB */
 
 static int keep_running;
 
@@ -108,19 +99,12 @@ main (int argc, char **argv) {
     init_deviceType();
     init_deviceUserDesc();
     init_ethernetIfNumber();
-
     init_ethernetIfTable();
-
     init_deviceNatoStockNumber();
     init_deviceMode();
     init_deviceReset();
 
 
-    /*init_ethernetIfSpeed();
-    init_ethernetIfMacAddress();
-    init_ethernetIfIpAddress();
-    init_ethernetIfSubnetMask();
-    init_ethernetIfIpAddressConflict();*/
 
 
 
