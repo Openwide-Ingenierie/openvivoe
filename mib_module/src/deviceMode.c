@@ -10,19 +10,8 @@
 #include "../include/mibParameters.h"
 
 
-/*value of deviceMode*/
-/* It should be an integer*/
-/* normal(1),
- * defaultStartUp(2),
- * maintenanceMode(3)
- */
- /*by default it is set to normal mode*/
-//int deviceMode = 1;
-
-/** Initializes the deviceMode module */
-void
-init_deviceMode(void)
-{
+/* Initializes the deviceMode module */
+void init_deviceMode(void){
     const oid deviceMode_oid[] = { 1,3,6,1,4,1,35990,3,1,1,14 };
 
   DEBUGMSGTL(("deviceMode", "Initializing\n"));
@@ -52,7 +41,7 @@ handle_deviceMode(netsnmp_mib_handler *handler,
 
         case MODE_GET:
             snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                     &deviceMode, 2);
+                                     &(deviceInfo.deviceMode), 2);
             break;
 
         /*
@@ -71,11 +60,11 @@ handle_deviceMode(netsnmp_mib_handler *handler,
 
         case MODE_SET_RESERVE2:
             /* XXX malloc "undo" storage buffer */
-            old_deviceMode =  (int*) netsnmp_memdup((int *) & deviceMode,  sizeof(deviceMode));
+            old_deviceMode =  (int*) netsnmp_memdup((int *) &(deviceInfo.deviceMode),  sizeof(deviceInfo.deviceMode));
             if (old_deviceMode == NULL) {
                 netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_RESOURCEUNAVAILABLE);
             }else{
-                *old_deviceMode = deviceMode;
+                *old_deviceMode = deviceInfo.deviceMode;
             }
             /*checking type as it is done in MODE_SET_RESERVE1
              * is not enough, here we also want to check if
@@ -96,9 +85,9 @@ handle_deviceMode(netsnmp_mib_handler *handler,
 
         case MODE_SET_ACTION:
             /* XXX: perform the value change here */
-            deviceMode = *(requests->requestvb->val.integer);
+            deviceInfo.deviceMode = *(requests->requestvb->val.integer);
             /*Send a message during debug to inform the update had been performed*/
-            DEBUGMSGTL(("deviceMode", "updated delay_time -> %d\n", deviceMode));
+            DEBUGMSGTL(("deviceMode", "updated delay_time -> %d\n", deviceInfo.deviceMode));
             /*get possible errors*/
             ret = netsnmp_check_requests_error(requests);
             if (ret != SNMP_ERR_NOERROR) {
@@ -116,7 +105,7 @@ handle_deviceMode(netsnmp_mib_handler *handler,
 
         case MODE_SET_UNDO:
             /* XXX: UNDO and return to previous value for the object */
-            memcpy(&deviceMode, old_deviceMode, 2);
+            memcpy(&(deviceInfo.deviceMode), old_deviceMode, 2);
             ret = netsnmp_check_requests_error(requests);
             if (ret != SNMP_ERR_NOERROR) {
                 /* try _really_really_ hard to never get to this point */

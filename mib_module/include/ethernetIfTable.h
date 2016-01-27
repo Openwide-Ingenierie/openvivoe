@@ -7,7 +7,7 @@
 
 /* function declarations */
 void init_ethernetIfTable(void);
-void MAC_to_byte_array(char dest[6], char* source);
+void MAC_to_byte_array(u_char dest[6], u_char* source);
 void init_ethernetIfTable_content(int entryNumber);
 void initialize_table_ethernetIfTable(void);
 void initialize_ethernetIfTableEntry();

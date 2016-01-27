@@ -11,10 +11,6 @@
 #include "../include/mibParameters.h"
 
 
-/*value of parameter*/
-/*only use 32 bytes strings*/
-//char* devicePartNumber =  "default";
-
 /** Initializes the devicePartNumber module */
 void
 init_devicePartNumber(void)
@@ -46,7 +42,7 @@ handle_devicePartNumber(netsnmp_mib_handler *handler,
 
         case MODE_GET:
             snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
-                                     devicePartNumber, MIN(strlen(devicePartNumber), 32));
+                                     deviceInfo.devicePartNumber, MIN(strlen(deviceInfo.devicePartNumber), 32));
             break;
 
 

@@ -10,14 +10,6 @@
 #include "../include/mibParameters.h"
 
 
-/*value of deviceReset*/
-/* It should be an integer*/
-/* normal(1),
- * reset(2)
- */
- /*by default it is set to normal mode*/
-//int deviceReset = 1;
-
 /** Initializes the deviceReset module */
 void
 init_deviceReset(void)
@@ -51,7 +43,7 @@ handle_deviceReset(netsnmp_mib_handler *handler,
 
         case MODE_GET:
             snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                     &deviceReset, 2);
+                                     &(deviceInfo.deviceReset), 2);
             break;
 
         /*
@@ -70,11 +62,11 @@ handle_deviceReset(netsnmp_mib_handler *handler,
 
         case MODE_SET_RESERVE2:
             /* XXX malloc "undo" storage buffer */
-            old_deviceReset =  (int*) netsnmp_memdup((int *) & deviceReset,  sizeof(deviceReset));
+            old_deviceReset =  (int*) netsnmp_memdup((int *) & (deviceInfo.deviceReset),  sizeof(deviceInfo.deviceReset));
             if (old_deviceReset == NULL) {
                 netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_RESOURCEUNAVAILABLE);
             }else{
-                *old_deviceReset = deviceReset;
+                *old_deviceReset = deviceInfo.deviceReset;
             }
             /*checking type as it is done in MODE_SET_RESERVE1
              * is not enough, here we also want to check if
@@ -95,9 +87,9 @@ handle_deviceReset(netsnmp_mib_handler *handler,
 
         case MODE_SET_ACTION:
             /* XXX: perform the value change here */
-            deviceReset = *(requests->requestvb->val.integer);
+            deviceInfo.deviceReset = *(requests->requestvb->val.integer);
             /*Send a message during debug to inform the update had been performed*/
-            DEBUGMSGTL(("deviceReset", "updated delay_time -> %d\n", deviceReset));
+            DEBUGMSGTL(("deviceReset", "updated delay_time -> %d\n", deviceInfo.deviceReset));
             /*get possible errors*/
             ret = netsnmp_check_requests_error(requests);
             if (ret != SNMP_ERR_NOERROR) {
@@ -115,7 +107,7 @@ handle_deviceReset(netsnmp_mib_handler *handler,
 
         case MODE_SET_UNDO:
             /* XXX: UNDO and return to previous value for the object */
-            memcpy(&deviceReset, old_deviceReset, 2);
+            memcpy(&(deviceInfo.deviceReset), old_deviceReset, 2);
             ret = netsnmp_check_requests_error(requests);
             if (ret != SNMP_ERR_NOERROR) {
                 /* try _really_really_ hard to never get to this point */

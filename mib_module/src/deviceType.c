@@ -51,7 +51,7 @@ void init_deviceType(void)
      */
     DEBUGMSGTL(("deviceType",
                 "Initalizing deviceType scalar integer.  Default value = %d\n",
-                deviceType));
+                deviceInfo.deviceType));
 
     netsnmp_register_read_only_instance(
         netsnmp_create_handler_registration("deviceType", handle_deviceType,
@@ -78,7 +78,7 @@ handle_deviceType(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER, &deviceType, 2);
+            snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER, &(deviceInfo.deviceType), 2);
             break;
         /*there are no other case to code as this is a Read-only parameter*/
 

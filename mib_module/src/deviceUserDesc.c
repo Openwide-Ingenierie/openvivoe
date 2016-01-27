@@ -50,7 +50,7 @@ handle_deviceUserDesc(netsnmp_mib_handler *handler,
 
         case MODE_GET:
             snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
-                                     deviceUserDesc,MIN(strlen(deviceUserDesc), 64));
+                                     deviceInfo.deviceUserDesc,MIN(strlen(deviceInfo.deviceUserDesc), 64));
             break;
 
         /*
@@ -69,11 +69,11 @@ handle_deviceUserDesc(netsnmp_mib_handler *handler,
 
         case MODE_SET_RESERVE2:
             /* XXX malloc "undo" storage buffer */
-             old_deviceUserDesc =  (char*) netsnmp_memdup((char *) & deviceUserDesc,  sizeof(deviceUserDesc));
+             old_deviceUserDesc =  (char*) netsnmp_memdup((char *) & (deviceInfo.deviceUserDesc),  sizeof(deviceInfo.deviceUserDesc));
             if (old_deviceUserDesc == NULL) {
                 netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_RESOURCEUNAVAILABLE);
             }else{
-                old_deviceUserDesc = deviceUserDesc;
+                old_deviceUserDesc = deviceInfo.deviceUserDesc;
             }
              if( strlen((char*) requests->requestvb->val.string) > 64 )
                 netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_TOOBIG);
@@ -89,15 +89,15 @@ handle_deviceUserDesc(netsnmp_mib_handler *handler,
         case MODE_SET_ACTION:
             /* XXX: perform the value change here */
             /*realloc to the size of the string entered bu the user*/
-            temp_deviceUserDesc = (char*) realloc( deviceUserDesc, strlen((char*) requests->requestvb->val.string)*sizeof(char));
+            temp_deviceUserDesc = (char*) realloc( deviceInfo.deviceUserDesc, strlen((char*) requests->requestvb->val.string)*sizeof(char));
             if(temp_deviceUserDesc == NULL){
                 netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_RESOURCEUNAVAILABLE);
             }else{
-                deviceUserDesc = temp_deviceUserDesc;
-                strcpy(deviceUserDesc,(char*)requests->requestvb->val.string);
+                deviceInfo.deviceUserDesc = temp_deviceUserDesc;
+                strcpy(deviceInfo.deviceUserDesc,(char*)requests->requestvb->val.string);
             }
             /*Send a message during debug to inform the update had been performed*/
-           DEBUGMSGTL(("deviceUserDesc", "updated delay_time -> %s\n", deviceUserDesc));
+           DEBUGMSGTL(("deviceUserDesc", "updated delay_time -> %s\n", deviceInfo.deviceUserDesc));
             /*get possible errors*/
             ret = netsnmp_check_requests_error(requests);
            if (ret != SNMP_ERR_NOERROR) {
@@ -115,7 +115,7 @@ handle_deviceUserDesc(netsnmp_mib_handler *handler,
 
         case MODE_SET_UNDO:
             /* XXX: UNDO and return to previous value for the object */
-            memcpy(deviceUserDesc, old_deviceUserDesc, sizeof(*old_deviceUserDesc));
+            memcpy(deviceInfo.deviceUserDesc, old_deviceUserDesc, sizeof(*old_deviceUserDesc));
             ret = netsnmp_check_requests_error(requests);
             if (ret != SNMP_ERR_NOERROR) {
                 /* try _really_really_ hard to never get to this point */

@@ -46,7 +46,7 @@ handle_deviceSoftwareVersion(netsnmp_mib_handler *handler,
 
         case MODE_GET:
             snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
-                                     deviceSoftwareVersion,MIN(strlen(deviceSoftwareVersion), 16));
+                                     deviceInfo.deviceSoftwareVersion,MIN(strlen(deviceInfo.deviceSoftwareVersion), 16));
             break;
 
 

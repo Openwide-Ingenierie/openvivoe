@@ -11,10 +11,6 @@
 #include "../include/mibParameters.h"
 
 
-/*value of deviceNatoStockNumber*/
-/* It should be a string less or equal to 32 bytes*/
-//char* deviceNatoStockNumber = "default";
-
 
 /** Initializes the deviceNatoStockNumber module */
 void
@@ -46,7 +42,7 @@ handle_deviceNatoStockNumber(netsnmp_mib_handler *handler,
 
         case MODE_GET:
             snmp_set_var_typed_value(   requests->requestvb, ASN_OCTET_STR,
-                                        deviceNatoStockNumber, MIN(strlen(deviceNatoStockNumber), 32));
+                                        deviceInfo.deviceNatoStockNumber, MIN(strlen(deviceInfo.deviceNatoStockNumber), 32));
             break;
 
 

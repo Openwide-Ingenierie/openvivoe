@@ -11,10 +11,6 @@
 #include "../include/mibParameters.h"
 
 
-/*value of deviceManufacturer*/
-/* It should be a string less or equal to 64 bytes*/
-//char* deviceManufacturer = "default";
-
 /** Initializes the deviceManufacturer module */
 void
 init_deviceManufacturer(void)
@@ -45,7 +41,7 @@ handle_deviceManufacturer(netsnmp_mib_handler *handler,
 
         case MODE_GET:
             snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
-                                     deviceManufacturer,MIN(strlen(deviceManufacturer), 64));
+                                     deviceInfo.deviceManufacturer,MIN(strlen(deviceInfo.deviceManufacturer), 64));
             break;
 
 

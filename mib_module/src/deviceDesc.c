@@ -14,10 +14,6 @@
 #include "../include/mibParameters.h"
 
 
-/*value of parameter*/
-/*only use 32 bytes strings*/
-//char* deviceDesc =  "default";
-
 /** Initializes the deviceDesc module */
 void init_deviceDesc(void)
 {
@@ -41,7 +37,7 @@ int handle_deviceDesc(  netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR, deviceDesc, MIN(strlen(deviceDesc), 32));
+            snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR, deviceInfo.deviceDesc, MIN(strlen(deviceInfo.deviceDesc), 32));
             break;
 
 

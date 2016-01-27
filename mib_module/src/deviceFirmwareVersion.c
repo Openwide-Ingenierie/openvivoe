@@ -11,11 +11,6 @@
 #include "../include/mibParameters.h"
 
 
-/*value of parameter*/
-/*only use 16 bytes strings*/
-/*char* deviceFirmwareVersion =  "default";*/
-
-
 /** Initializes the deviceFirmwareVersion module */
 void
 init_deviceFirmwareVersion(void)
@@ -47,7 +42,7 @@ handle_deviceFirmwareVersion(netsnmp_mib_handler *handler,
 
         case MODE_GET:
             snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
-                                      deviceFirmwareVersion,MIN(strlen(deviceFirmwareVersion), 16));
+                                      deviceInfo.deviceFirmwareVersion,MIN(strlen(deviceInfo.deviceFirmwareVersion), 16));
             break;
 
 

@@ -11,10 +11,6 @@
 #include "../include/mibParameters.h"
 
 
-/*value of parameter*/
-/*only use 16 bytes strings*/
-///char* deviceHardwareVersion =  "default";
-
 
 /** Initializes the deviceHardwareVersion module */
 void
@@ -47,7 +43,7 @@ handle_deviceHardwareVersion(netsnmp_mib_handler *handler,
 
         case MODE_GET:
             snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
-                                     deviceHardwareVersion,MIN(strlen(deviceHardwareVersion), 16));
+                                     deviceInfo.deviceHardwareVersion,MIN(strlen(deviceInfo.deviceHardwareVersion), 16));
             break;
 
 

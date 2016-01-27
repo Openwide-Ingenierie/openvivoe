@@ -12,6 +12,10 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+
+#include <net-snmp/library/vacm.h> /*for init_vacms_vars()*/
+#include <net-snmp/library/snmpusm.h> /*for init_usmUser()*/
+
 #include <signal.h>
 
 /*
@@ -29,13 +33,6 @@
 #include "../include/deviceUserDesc.h"
 #include "../include/ethernetIfNumber.h"
 #include "../include/ethernetIfTable.h"
-
-/*#include "../include/ethernetIfSpeed.h"
-#include "../include/ethernetIfMacAddress.h"
-#include "../include/ethernetIfIpAddress.h"
-#include "../include/ethernetIfSubnetMask.h"
-#include "../include/ethernetIfIpAddressConflict.h"*/
-
 #include "../include/deviceNatoStockNumber.h"
 #include "../include/deviceMode.h"
 #include "../include/deviceReset.h"
@@ -103,10 +100,6 @@ main (int argc, char **argv) {
     init_deviceNatoStockNumber();
     init_deviceMode();
     init_deviceReset();
-
-
-
-
 
   /* initialize vacm/usm access control  */
   if (!agentx_subagent) {

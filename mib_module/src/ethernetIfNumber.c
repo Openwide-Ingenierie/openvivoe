@@ -35,7 +35,7 @@ int handle_ethernetIfNumber(netsnmp_mib_handler *handler, netsnmp_handler_regist
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER, &ethernetIfNumber,4);
+            snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER, &(deviceInfo.ethernetIfNumber),4);
             break;
 
 

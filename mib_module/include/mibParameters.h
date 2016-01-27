@@ -7,8 +7,7 @@
 #ifndef MIBPARAMETERS_H
 # define MIBPARAMETERS_H
 
-typedef struct device_Info{
-
+typedef struct device_info{
     /*value of parameter*/
     /*only use 32 bytes strings*/
     char* deviceDesc;
@@ -89,7 +88,11 @@ typedef struct device_Info{
     char** ethernetIfIpAddress;                      /*by default, loopback address is used*/
     char** ethernetIfSubnetMask;                     /*this is the SubnetMask used for this network interface*/
     char** ethernetIfIpAddressConflict;              /* This is the default Ip Conflict address, normally, it should not be initialize at the start-up of the subAgent*/
-}
+};
+
+
+/*declared the global variable deviceInfo which will be used to initialize the deviceInfo node of the MIB*/
+struct device_info deviceInfo;
 
 #endif /* MIBPARAMETERS_H */
 

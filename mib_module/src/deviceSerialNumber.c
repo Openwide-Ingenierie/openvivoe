@@ -11,10 +11,6 @@
 #include "../include/mibParameters.h"
 
 
-/*value of parameter*/
-/*only use 32 bytes strings*/
-//char* deviceSerialNumber =  "default";
-
 /** Initializes the deviceSerialNumber module */
 void
 init_deviceSerialNumber(void)
@@ -46,7 +42,7 @@ handle_deviceSerialNumber(netsnmp_mib_handler *handler,
 
         case MODE_GET:
             snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
-                                     deviceSerialNumber,MIN(strlen(deviceSerialNumber), 32));
+                                     deviceInfo.deviceSerialNumber,MIN(strlen(deviceInfo.deviceSerialNumber), 32));
             break;
 
 

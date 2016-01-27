@@ -10,7 +10,7 @@
 #include "../include/mibParameters.h"
 #include <arpa/inet.h>
 #include <sys/socket.h>
-
+#include <ctype.h>
 
     /* Typical data structure for a row entry */
 struct ethernetIfTableEntry {
@@ -74,7 +74,7 @@ struct ethernetIfTableEntry * ethernetIfTableEntry_create(  long  ethernetIfInde
  * from the initial char* value to an array of 6 bytes
  * using the character to creates the right bytes
  */
-void MAC_to_byte_array(char dest[6], char* source){
+void MAC_to_byte_array(u_char dest[6], u_char* source){
     /*we declare a byte that will be used to fill our destination array*/
    u_char result;
     int i=0;
@@ -82,7 +82,7 @@ void MAC_to_byte_array(char dest[6], char* source){
     /* The format of a Mac address is XX:XX:XX:XX:XX:XX, so we access
      * character number 0, then 3, then 6, then 9, then 11 and finally 15
      */
-    for(i=0; i<strlen(source); i=i+3){
+    for(i=0; i<strlen((char*) source); i=i+3){
         result = toupper(source[i]);
         if ( (result >= 'A') && (result<= 'F')){
             result = result - 55 ; //get the corresponding hexadecimal value of the character
@@ -108,12 +108,12 @@ void MAC_to_byte_array(char dest[6], char* source){
 void ethernetIfTable_fill(int entryCount){
     int i=0; /*loop variable*/
     u_char Mac[6];
-    for(i=0; i < entryNumber; i++){
-        MAC_to_byte_array(Mac, ethernetIfMacAddress[i]);
-        struct ethernetIfTableEntry* entry = ethernetIfTableEntry_create(i+1, ethernetIfSpeed[i],
+    for(i=0; i < entryCount; i++){
+        MAC_to_byte_array( Mac, deviceInfo.ethernetIfMacAddress[i]);
+        struct ethernetIfTableEntry* entry = ethernetIfTableEntry_create(i+1, deviceInfo.ethernetIfSpeed[i],
                                                                          Mac, 6,
-                                                                         inet_addr(ethernetIfIpAddress[i]), inet_addr(ethernetIfSubnetMask[i]),
-                                                                         inet_addr(ethernetIfIpAddressConflict[i]));
+                                                                         inet_addr(deviceInfo.ethernetIfIpAddress[i]), inet_addr(deviceInfo.ethernetIfSubnetMask[i]),
+                                                                         inet_addr(deviceInfo.ethernetIfIpAddressConflict[i]));
         entry->valid = 1;
     }
 }
@@ -160,7 +160,7 @@ initialize_table_ethernetIfTable(void)
     netsnmp_register_table_iterator( reg, iinfo );
 
     /* Initialise the contents of the table here */
-    ethernetIfTable_fill(ethernetIfNumber);
+    ethernetIfTable_fill(deviceInfo.ethernetIfNumber);
 
 }
 
@@ -170,11 +170,13 @@ initialize_table_ethernetIfTable(void)
  * to remove a row from the table.
  * the functionnality exits, but should not be implemented for now
  */
-/*void ethernetIfTable_removeEntry( struct ethernetIfTableEntry *entry ) {
+#define ALLOW_REMOVING_ROW 0
+#if ALLOW_REMOVING_ROW
+void ethernetIfTable_removeEntry( struct ethernetIfTableEntry *entry ) {
     struct ethernetIfTableEntry *ptr, *prev;
 
     if (!entry)
-        return;    /* Nothing to remove
+        return;    /* Nothing to remove */
 
     for ( ptr  = ethernetIfTable_head, prev = NULL;
           ptr != NULL;
@@ -183,15 +185,16 @@ initialize_table_ethernetIfTable(void)
             break;
     }
     if ( !ptr )
-        return;    /* Can't find it
+        return;    /* Can't find it */
 
     if ( prev == NULL )
         ethernetIfTable_head = ptr->next;
     else
         prev->next = ptr->next;
 
-    SNMP_FREE( entry );   /* XXX - release any other internal resources
-}*/
+    SNMP_FREE( entry );   /* XXX - release any other internal resources */
+}
+#endif // ALLOW_REMOVING_ROW
 
 netsnmp_variable_list *
 ethernetIfTable_get_next_data_point(void **my_loop_context,
