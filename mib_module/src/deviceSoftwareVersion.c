@@ -7,7 +7,7 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "../include/deviceSoftwareVersion.h"
-#include "../include/macro.h"
+#include "../include/handler.h"
 #include "../include/mibParameters.h"
 
 
@@ -36,25 +36,5 @@ handle_deviceSoftwareVersion(netsnmp_mib_handler *handler,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
 {
-    /* We are never called for a GETNEXT if it's registered as a
-       "instance", as it's "magically" handled for us.  */
-
-    /* a instance handler also only hands us one request at a time, so
-       we don't need to loop over a list of requests; we'll only get one. */
-
-    switch(reqinfo->mode) {
-
-        case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
-                                     deviceInfo.deviceSoftwareVersion,MIN(strlen(deviceInfo.deviceSoftwareVersion), 16));
-            break;
-
-
-        default:
-            /* we should never get here, so this is a really bad error */
-            snmp_log(LOG_ERR, "unknown mode (%d) in handle_deviceSoftwareVersion\n", reqinfo->mode );
-            return SNMP_ERR_GENERR;
-    }
-
-    return SNMP_ERR_NOERROR;
+    return handle_ROstring16(handler, reginfo, reqinfo, requests, "deviceSoftwareVersion" , deviceInfo.deviceSoftwareVersion);
 }

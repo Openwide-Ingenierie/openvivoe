@@ -7,13 +7,9 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "../include/deviceUserDesc.h"
-#include "../include/macro.h"
+#include "../include/handler.h"
 #include "../include/mibParameters.h"
 
-
-/*value of parameter*/
-/*only use 64 bytes strings*/
-//char* deviceUserDesc;
 
 
 /** Initializes the deviceUserDesc module */
@@ -31,103 +27,11 @@ init_deviceUserDesc(void)
 }
 
 int
-handle_deviceUserDesc(netsnmp_mib_handler *handler,
-                          netsnmp_handler_registration *reginfo,
-                          netsnmp_agent_request_info   *reqinfo,
-                          netsnmp_request_info         *requests)
+handle_deviceUserDesc(  netsnmp_mib_handler *handler,
+                        netsnmp_handler_registration *reginfo,
+                        netsnmp_agent_request_info   *reqinfo,
+                        netsnmp_request_info         *requests)
 {
-    int ret;
-    char * old_deviceUserDesc = NULL; /* this will be used to perform UNDO*/
-    char * temp_deviceUserDesc = NULL; /* this will be used to perform SET ACTION*/
+    return handle_RWstring64(handler, reginfo, reqinfo, requests, "deviceUserDesc", deviceInfo.deviceUserDesc);
 
-    /* We are never called for a GETNEXT if it's registered as a
-       "instance", as it's "magically" handled for us.  */
-
-    /* a instance handler also only hands us one request at a time, so
-       we don't need to loop over a list of requests; we'll only get one. */
-
-    switch(reqinfo->mode) {
-
-        case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
-                                     deviceInfo.deviceUserDesc,MIN(strlen(deviceInfo.deviceUserDesc), 64));
-            break;
-
-        /*
-         * SET REQUEST
-         *
-         * multiple states in the transaction.  See:
-         * http://www.net-snmp.org/tutorial-5/toolkit/mib_module/set-actions.jpg
-         */
-        case MODE_SET_RESERVE1:
-            /* or you could use netsnmp_check_vb_type_and_size instead */
-            ret = netsnmp_check_vb_type(requests->requestvb, ASN_OCTET_STR);
-            if ( ret != SNMP_ERR_NOERROR ) {
-                netsnmp_set_request_error(reqinfo, requests, ret );
-            }
-            break;
-
-        case MODE_SET_RESERVE2:
-            /* XXX malloc "undo" storage buffer */
-             old_deviceUserDesc =  (char*) netsnmp_memdup((char *) & (deviceInfo.deviceUserDesc),  sizeof(deviceInfo.deviceUserDesc));
-            if (old_deviceUserDesc == NULL) {
-                netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_RESOURCEUNAVAILABLE);
-            }else{
-                old_deviceUserDesc = deviceInfo.deviceUserDesc;
-            }
-             if( strlen((char*) requests->requestvb->val.string) > 64 )
-                netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_TOOBIG);
-            break;
-
-        case MODE_SET_FREE:
-            /* XXX: free resources allocated in RESERVE1 and/or
-               RESERVE2.  Something failed somewhere, and the states
-               below won't be called. */
-               free(old_deviceUserDesc); /*free resources allocated in RESERVE2*/
-            break;
-
-        case MODE_SET_ACTION:
-            /* XXX: perform the value change here */
-            /*realloc to the size of the string entered bu the user*/
-            temp_deviceUserDesc = (char*) realloc( deviceInfo.deviceUserDesc, strlen((char*) requests->requestvb->val.string)*sizeof(char));
-            if(temp_deviceUserDesc == NULL){
-                netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_RESOURCEUNAVAILABLE);
-            }else{
-                deviceInfo.deviceUserDesc = temp_deviceUserDesc;
-                strcpy(deviceInfo.deviceUserDesc,(char*)requests->requestvb->val.string);
-            }
-            /*Send a message during debug to inform the update had been performed*/
-           DEBUGMSGTL(("deviceUserDesc", "updated delay_time -> %s\n", deviceInfo.deviceUserDesc));
-            /*get possible errors*/
-            ret = netsnmp_check_requests_error(requests);
-           if (ret != SNMP_ERR_NOERROR) {
-                netsnmp_set_request_error(reqinfo, requests, ret);
-            }
-            break;
-
-        case MODE_SET_COMMIT:
-            /* XXX: delete temporary storage
-            if ( XXX: error? ) {
-                try _really_really_ hard to never get to this point
-                netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_COMMITFAILED);
-            }*/
-            break;
-
-        case MODE_SET_UNDO:
-            /* XXX: UNDO and return to previous value for the object */
-            memcpy(deviceInfo.deviceUserDesc, old_deviceUserDesc, sizeof(*old_deviceUserDesc));
-            ret = netsnmp_check_requests_error(requests);
-            if (ret != SNMP_ERR_NOERROR) {
-                /* try _really_really_ hard to never get to this point */
-                netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_UNDOFAILED);
-            }
-            break;
-
-        default:
-            /* we should never get here, so this is a really bad error */
-            snmp_log(LOG_ERR, "unknown mode (%d) in handle_deviceUserDesc\n", reqinfo->mode );
-            return SNMP_ERR_GENERR;
-    }
-
-    return SNMP_ERR_NOERROR;
 }

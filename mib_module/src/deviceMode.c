@@ -8,6 +8,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "../include/deviceMode.h"
 #include "../include/mibParameters.h"
+#include "../include/handler.h"
 
 
 /* Initializes the deviceMode module */
@@ -29,95 +30,14 @@ handle_deviceMode(netsnmp_mib_handler *handler,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
 {
-    int * old_deviceMode = NULL;
-    int ret;
-    /* We are never called for a GETNEXT if it's registered as a
-       "instance", as it's "magically" handled for us.  */
 
-    /* a instance handler also only hands us one request at a time, so
-       we don't need to loop over a list of requests; we'll only get one. */
-
-    switch(reqinfo->mode) {
-
-        case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                     &(deviceInfo.deviceMode), 2);
-            break;
-
-        /*
-         * SET REQUEST
-         *
-         * multiple states in the transaction.  See:
-         * http://www.net-snmp.org/tutorial-5/toolkit/mib_module/set-actions.jpg
-         */
-        case MODE_SET_RESERVE1:
-            /* or you could use netsnmp_check_vb_type_and_size instead */
-            ret = netsnmp_check_vb_type(requests->requestvb, ASN_INTEGER);
-            if ( ret != SNMP_ERR_NOERROR ) {
-                netsnmp_set_request_error(reqinfo, requests, ret );
-            }
-            break;
-
-        case MODE_SET_RESERVE2:
-            /* XXX malloc "undo" storage buffer */
-            old_deviceMode =  (int*) netsnmp_memdup((int *) &(deviceInfo.deviceMode),  sizeof(deviceInfo.deviceMode));
-            if (old_deviceMode == NULL) {
-                netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_RESOURCEUNAVAILABLE);
-            }else{
-                *old_deviceMode = deviceInfo.deviceMode;
-            }
-            /*checking type as it is done in MODE_SET_RESERVE1
-             * is not enough, here we also want to check if
-             * the integer is 1, 2 or 3. Otherwise, we return an error
-             * indicating ot the user that the integer used is a ba value
-             * for our deviceMode parameter.
-             */
-            if( *(requests->requestvb->val.integer) <=0 || *(requests->requestvb->val.integer) >3)
-                netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_BADVALUE);
-            break;
-
-        case MODE_SET_FREE:
-            /* XXX: free resources allocated in RESERVE1 and/or
-            RESERVE2.  Something failed somewhere, and the states
-            below won't be called. */
-            free(old_deviceMode); /*free resources allocated in RESERVE2*/
-            break;
-
-        case MODE_SET_ACTION:
-            /* XXX: perform the value change here */
-            deviceInfo.deviceMode = *(requests->requestvb->val.integer);
-            /*Send a message during debug to inform the update had been performed*/
-            DEBUGMSGTL(("deviceMode", "updated delay_time -> %d\n", deviceInfo.deviceMode));
-            /*get possible errors*/
-            ret = netsnmp_check_requests_error(requests);
-            if (ret != SNMP_ERR_NOERROR) {
-                netsnmp_set_request_error(reqinfo, requests, ret);
-            }
-            break;
-
-        case MODE_SET_COMMIT:
-            /* XXX: delete temporary storage
-            if ( XXX: error? ) {
-                 try _really_really_ hard to never get to this point
-                netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_COMMITFAILED);
-            }*/
-            break;
-
-        case MODE_SET_UNDO:
-            /* XXX: UNDO and return to previous value for the object */
-            memcpy(&(deviceInfo.deviceMode), old_deviceMode, 2);
-            ret = netsnmp_check_requests_error(requests);
-            if (ret != SNMP_ERR_NOERROR) {
-                /* try _really_really_ hard to never get to this point */
-                netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_UNDOFAILED);
-            }
-            break;
-
-        default:
-            /* we should never get here, so this is a really bad error */
-            snmp_log(LOG_ERR, "unknown mode (%d) in handle_deviceMode\n", reqinfo->mode );
-            return SNMP_ERR_GENERR;
-    }
-
-    return SNMP_ERR_NOERROR;
+   /*checking type as it is done in MODE_SET_RESERVE1
+    * is not enough, here we also want to check if
+    * the integer is 1, 2 or 3. Otherwise, we return an error
+    * indicating ot the user that the integer used is a bad value
+    * for our deviceMode parameter.
+    */
+    if( (reqinfo->mode == MODE_SET_RESERVE2) &&( *(requests->requestvb->val.integer) <=0 || *(requests->requestvb->val.integer) >3))
+        netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_BADVALUE);
+    return handle_RWinteger(handler, reginfo, reqinfo, requests, "deviceMode" , &(deviceInfo.deviceMode));
 }
