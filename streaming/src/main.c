@@ -20,8 +20,9 @@ int main (int   argc,  char *argv[])
   gst_init (&argc, &argv);
    
   /* Build the pipeline */
-  pipeline = gst_parse_launch ("gst-launch-1.0 videotestsrc ! autovideosink", NULL);
-   
+//  pipeline = gst_parse_launch ("gst-launch-1.0 videotestsrc ! autovideosink", NULL);
+    pipeline = gst_parse_launch ("gst-launch-1.0 -v videotestsrc ! rtpvrawpay ! udpsink host=127.0.0.1 port=1993", NULL);
+  
   /* Start playing */
   gst_element_set_state (pipeline, GST_STATE_PLAYING);
    
