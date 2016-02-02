@@ -32,6 +32,6 @@ handle_deviceMibVersion(netsnmp_mib_handler *handler,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
 {
-    return handle_ROstring16(handler, reginfo, reqinfo, requests, "deviceMibVersion" , deviceInfo.deviceMibVersion);
+    return handle_ROstring16(handler, reginfo, reqinfo, requests, "deviceMibVersion" , deviceInfo.parameters[num_DeviceMibV]._value.string_val);
 
 }

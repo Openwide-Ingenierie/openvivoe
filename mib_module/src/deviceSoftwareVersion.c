@@ -11,6 +11,8 @@
 #include "../include/mibParameters.h"
 
 
+
+
 /*value of parameter*/
 /*only use 16 bytes strings*/
 //char* deviceSoftwareVersion =  "default";
@@ -36,5 +38,5 @@ handle_deviceSoftwareVersion(netsnmp_mib_handler *handler,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
 {
-    return handle_ROstring16(handler, reginfo, reqinfo, requests, "deviceSoftwareVersion" , deviceInfo.deviceSoftwareVersion);
+    return handle_ROstring16(handler, reginfo, reqinfo, requests, "deviceSoftwareVersion" , deviceInfo.parameters[num_DeviceSWV]._value.string_val );
 }

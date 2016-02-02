@@ -11,6 +11,7 @@
 #include "../include/mibParameters.h"
 
 
+
 /** Initializes the devicePartNumber module */
 void
 init_devicePartNumber(void)
@@ -32,5 +33,5 @@ handle_devicePartNumber(netsnmp_mib_handler *handler,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
 {
-    return handle_ROstring32(handler, reginfo, reqinfo, requests, "devicePartNumber" , deviceInfo.devicePartNumber);
+    return handle_ROstring32(handler, reginfo, reqinfo, requests, "devicePartNumber" , deviceInfo.parameters[num_DevicePartNum]._value.string_val);
 }

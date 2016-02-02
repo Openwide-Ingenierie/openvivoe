@@ -10,7 +10,6 @@
 #include "../include/mibParameters.h"
 #include "../include/handler.h"
 
-
 /* Initializes the deviceMode module */
 void init_deviceMode(void){
     const oid deviceMode_oid[] = { 1,3,6,1,4,1,35990,3,1,1,14 };
@@ -24,8 +23,7 @@ void init_deviceMode(void){
         ));
 }
 
-int
-handle_deviceMode(netsnmp_mib_handler *handler,
+int handle_deviceMode(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -37,7 +35,10 @@ handle_deviceMode(netsnmp_mib_handler *handler,
     * indicating ot the user that the integer used is a bad value
     * for our deviceMode parameter.
     */
-    if( (reqinfo->mode == MODE_SET_RESERVE2) &&( *(requests->requestvb->val.integer) <=0 || *(requests->requestvb->val.integer) >3))
+    if( (reqinfo->mode == MODE_SET_RESERVE2) &&( *(requests->requestvb->val.integer) <=0 || *(requests->requestvb->val.integer) >3)){
         netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_BADVALUE);
-    return handle_RWinteger(handler, reginfo, reqinfo, requests, "deviceMode" , &(deviceInfo.deviceMode));
+        return SNMP_ERR_BADVALUE;
+    }else{
+        return handle_RWinteger(handler, reginfo, reqinfo, requests, "deviceMode" , &(deviceInfo.parameters[num_DeviceMode]._value.int_val));
+    }
 }

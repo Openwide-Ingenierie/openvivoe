@@ -33,5 +33,5 @@ handle_deviceSerialNumber(netsnmp_mib_handler *handler,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
 {
-    return handle_ROstring32(handler, reginfo, reqinfo, requests, "deviceSerialNumber" , deviceInfo.deviceSerialNumber);
+    return handle_ROstring32(handler, reginfo, reqinfo, requests, "deviceSerialNumber" , deviceInfo.parameters[num_deviceSN]._value.string_val );
 }

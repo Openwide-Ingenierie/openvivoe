@@ -133,7 +133,7 @@ int handle_RWinteger(netsnmp_mib_handler *handler,
 }
 
 
-/*--------------------------------STRING--------------------------------*
+/*--------------------------------STRING--------------------------------*/
 
 /*this is the handler for all RO strings in the program*/
 int handle_ROstring(netsnmp_mib_handler *handler,

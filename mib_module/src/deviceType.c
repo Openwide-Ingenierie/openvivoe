@@ -17,14 +17,6 @@
 #include "../include/mibParameters.h"
 #include "../include/handler.h"
 
-/*value of deviceType*/
-/* It should be an integer
- * serviceProvider(1),
- * serviceUser(2),
- * both(3)
- */
- /*by default it is set to normal serviceProvider*/
-//static int deviceType = 1;
 
 void init_deviceType(void)
 {
@@ -51,7 +43,7 @@ void init_deviceType(void)
      */
     DEBUGMSGTL(("deviceType",
                 "Initalizing deviceType scalar integer.  Default value = %d\n",
-                deviceInfo.deviceType));
+                deviceInfo.parameters[num_DeviceType]._value.int_val ));
 
     netsnmp_register_read_only_instance(
         netsnmp_create_handler_registration("deviceType", handle_deviceType,
@@ -70,6 +62,6 @@ handle_deviceType(netsnmp_mib_handler *handler,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
 {
-    return handle_ROinteger(handler, reginfo, reqinfo, requests, "deviceType" ,(int*) &(deviceInfo.deviceType));
+    return handle_ROinteger(handler, reginfo, reqinfo, requests, "deviceType" , &(deviceInfo.parameters[num_DeviceType]._value.int_val) );
 }
 

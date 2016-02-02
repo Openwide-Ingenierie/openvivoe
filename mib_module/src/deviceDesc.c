@@ -20,7 +20,11 @@ void init_deviceDesc(void)
     const oid deviceDesc_oid[] = { 1,3,6,1,4,1,35990,3,1,1,1 };
 
     DEBUGMSGTL(("deviceDesc", "Initializing\n"));
-    netsnmp_register_read_only_instance( netsnmp_create_handler_registration("deviceDesc", handle_deviceDesc, deviceDesc_oid, OID_LENGTH(deviceDesc_oid), HANDLER_CAN_RONLY));
+    netsnmp_register_read_only_instance(
+                    netsnmp_create_handler_registration(
+                            "deviceDesc", handle_deviceDesc,
+                            deviceDesc_oid, OID_LENGTH(deviceDesc_oid),
+                    HANDLER_CAN_RONLY));
 }
 
 int handle_deviceDesc(  netsnmp_mib_handler *handler,
@@ -28,6 +32,7 @@ int handle_deviceDesc(  netsnmp_mib_handler *handler,
                         netsnmp_agent_request_info   *reqinfo,
                         netsnmp_request_info         *requests)
 {
-        return handle_ROstring32(handler, reginfo, reqinfo, requests, "deviceDesc" , deviceInfo.deviceDesc);
+        printf("%s\n", deviceInfo.parameters[num_DeviceDesc]._value.string_val);
+        return handle_ROstring32(handler, reginfo, reqinfo, requests, "deviceDesc" , deviceInfo.parameters[num_DeviceDesc]._value.string_val);
 
 }

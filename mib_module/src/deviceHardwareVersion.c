@@ -11,7 +11,6 @@
 #include "../include/mibParameters.h"
 
 
-
 /** Initializes the deviceHardwareVersion module */
 void
 init_deviceHardwareVersion(void)
@@ -33,5 +32,5 @@ handle_deviceHardwareVersion(netsnmp_mib_handler *handler,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
 {
-    return handle_ROstring16(handler, reginfo, reqinfo, requests, "deviceHardwareVersion" , deviceInfo.deviceHardwareVersion);
+    return handle_ROstring16(handler, reginfo, reqinfo, requests, "deviceHardwareVersion" , deviceInfo.parameters[num_DeviceHV]._value.string_val);
 }

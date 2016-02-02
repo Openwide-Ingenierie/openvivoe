@@ -31,5 +31,5 @@ handle_deviceManufacturer(netsnmp_mib_handler *handler,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
 {
-    return handle_ROstring64(handler, reginfo, reqinfo, requests, "deviceManufacturer" , deviceInfo.deviceManufacturer);
+    return handle_ROstring64(handler, reginfo, reqinfo, requests, "deviceManufacturer" , deviceInfo.parameters[num_DeviceManu]._value.string_val);
 }

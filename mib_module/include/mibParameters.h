@@ -4,95 +4,78 @@
  * Main authors:
  *     - hoel <hvasseur@openwide.fr>
  */
-#ifndef MIBPARAMETERS_H
+# ifndef MIBPARAMETERS_H
 # define MIBPARAMETERS_H
 
-typedef struct device_info{
-    /*value of parameter*/
-    /*only use 32 bytes strings*/
-    char* deviceDesc;
 
-    /*value of parameter*/
-    /*only use 16 bytes strings*/
-    char* deviceFirmwareVersion;
+/*
+ * Enum for the type of MIB's parameter
+ */
 
-    /*value of parameter*/
-    /*only use 16 bytes strings*/
-    char* deviceHardwareVersion ;
+typedef enum {INTEGER, STRING, T_INTEGER, T_STRING} type;
 
-    /*value of deviceManufacturer*/
-    /* It should be a string less or equal to 64 bytes*/
-    char* deviceManufacturer;
+/*
+ * Structure of a MIB's parameter
+ */
 
-    /*value of parameter*/
-    /*only use 16 bytes strings*/
-    char* deviceMibVersion ;
+ /*
+  *  The member "_value" of the structure parameter should be an union as it can be several different type, int, int*, char*, char**
+  *  When the code is extand to initialize the MIB, it is adviced to add the differents type of value needed in this union
+  */
 
-    /*value of deviceMode*/
-    /* It should be an integer*/
-    /* normal(1),
-     * defaultStartUp(2),
-     * maintenanceMode(3)
-     */
-     /*by default it is set to normal mode*/
-    int deviceMode;
+typedef union{
+    int     int_val;
+    int*    array_int_val;
+    char*   string_val;
+    char**  array_string_val;
+}value;
 
-    /*value of deviceNatoStockNumber*/
-    /* It should be a string less or equal to 32 bytes*/
-    char* deviceNatoStockNumber;
+typedef struct {
+    char*   _name; /*name of the parameter as it is stored in the vivoe-mib.conf file*/
+    int     _type; /*type of the parameter: INT or STRING*/
+    int     _optional;/*Specify of the parameter is optional or not (can be leaved empty, or should have a default value: 1 it is optional, 0 it is mand.*/
+    value   _value; /*the value of tha parameter*/
+}parameter;
 
-    /*value of parameter*/
-    /*only use 32 bytes strings*/
-    char* devicePartNumber;
-
-    /*value of deviceReset*/
-    /* It should be an integer*/
-    /* normal(1),
-     * reset(2)
-     */
-     /*by default it is set to normal mode*/
-    int deviceReset;
-
-    /*value of parameter*/
-    /*only use 32 bytes strings*/
-    char* deviceSerialNumber;
-
-    /*value of parameter*/
-    /*only use 16 bytes strings*/
-    char* deviceSoftwareVersion;
-
-    /*value of deviceType*/
-    /* It should be an integer
-     * serviceProvider(1),
-     * serviceUser(2),
-     * both(3)
-     */
-     /*by default it is set to normal serviceProvider*/
-    int deviceType;
-
-    /*value of parameter*/
-    /*only use 64 bytes strings*/
-    char* deviceUserDesc;
-
-    /*value of ethernetIfNumber*/
-    /* By default, it is set to one*/
-    long int ethernetIfNumber;
-
-    /* This is the initialization of the default values content
-    * of the ethernetIfTable. This is only temporary. In a further
-    * implementation, those values will be set from the .conf file
-    * associated to the subagent
-    */
-    int* ethernetIfSpeed;                           /*default speed value, set here as an example*/
-    u_char** ethernetIfMacAddress;                   /* This is the default subNet Mask of the internet Interface*/
-    char** ethernetIfIpAddress;                      /*by default, loopback address is used*/
-    char** ethernetIfSubnetMask;                     /*this is the SubnetMask used for this network interface*/
-    char** ethernetIfIpAddressConflict;              /* This is the default Ip Conflict address, normally, it should not be initialize at the start-up of the subAgent*/
-};
+/*
+ * Define the structure for the MIB Groups: deviceInfo, VideoControl, ChannelGroup, VivoeNotification
+ */
+typedef struct {
+    parameter*  parameters; /*an array of the different parameter that belong to the group*/
+    int         number; /*the number of parameters in that group*/
+}MIB_group;
 
 
-/*declared the global variable deviceInfo which will be used to initialize the deviceInfo node of the MIB*/
-struct device_info deviceInfo;
+
+
+/* define the number of deviceInfo's parameters in a MACRO, so it is more evolutive! */
+#define DEVICEINFO_NUM_PARAM 19
+
+MIB_group deviceInfo;
+
+
+/*set the declaration of the position of each parameter in the array parameters of deviceInfo MIB_group*/
+#define num_DeviceDesc                  0
+#define num_DeviceManu                  1
+#define num_DevicePartNum               2
+#define num_deviceSN                    3
+#define num_DeviceHV                    4
+#define num_DeviceSWV                   5
+#define num_DeviceFV                    6
+#define num_DeviceMibV                  7
+#define num_DeviceType                  8
+#define num_DeviceUD                    9
+#define num_ethernetIFnumber            10
+#define num_ethernetIfSpeed             11
+#define num_ethernetIfMacAddress        12
+#define num_ethernetIfIpAddress         13
+#define num_ethernetIfSubnetMask        14
+#define num_ethernetIfIpAddressConflict 15
+#define num_DeviceNato                  16
+#define num_DeviceMode                  17
+#define num_DeviceReset                 18
+
+
 
 #endif /* MIBPARAMETERS_H */
 

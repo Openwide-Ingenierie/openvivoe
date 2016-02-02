@@ -32,5 +32,5 @@ handle_deviceReset(netsnmp_mib_handler *handler,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
 {
-        return handle_RWinteger(handler, reginfo, reqinfo, requests, "deviceReset" , &(deviceInfo.deviceReset));
+        return handle_RWinteger(handler, reginfo, reqinfo, requests, "deviceReset" ,&(deviceInfo.parameters[num_DeviceReset]._value.int_val));
 }

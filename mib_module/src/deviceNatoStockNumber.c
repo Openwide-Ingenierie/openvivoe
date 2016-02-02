@@ -12,6 +12,7 @@
 
 
 
+
 /** Initializes the deviceNatoStockNumber module */
 void
 init_deviceNatoStockNumber(void)
@@ -32,6 +33,5 @@ handle_deviceNatoStockNumber(netsnmp_mib_handler *handler,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
 {
-    return handle_ROstring32(handler, reginfo, reqinfo, requests, "deviceNatoStockNumber" , deviceInfo.deviceNatoStockNumber);
-
+    return handle_ROstring32(handler, reginfo, reqinfo, requests, "deviceNatoStockNumber" ,  deviceInfo.parameters[num_DeviceNato]._value.string_val);
 }

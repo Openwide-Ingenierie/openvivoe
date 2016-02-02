@@ -39,6 +39,7 @@
 #include "../include/config.h"
 
 
+
 /* main deamon for the MIB */
 
 static int keep_running;
@@ -77,14 +78,12 @@ main (int argc, char **argv) {
     if ( !get_check_configuration() ){
         return EXIT_FAILURE;
     }
-
     /* initialize the agent library */
     init_agent("mib_module");
 
     /* initialize mib code here
      * this is where we initialize each init_parameterOfMIB routine to be handle by the agent
      */
-
     init_deviceDesc();
     init_deviceManufacturer();
     init_devicePartNumber();

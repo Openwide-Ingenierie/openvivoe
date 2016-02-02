@@ -12,6 +12,7 @@
 
 
 
+
 /** Initializes the deviceUserDesc module */
 void
 init_deviceUserDesc(void)
@@ -32,6 +33,6 @@ handle_deviceUserDesc(  netsnmp_mib_handler *handler,
                         netsnmp_agent_request_info   *reqinfo,
                         netsnmp_request_info         *requests)
 {
-    return handle_RWstring64(handler, reginfo, reqinfo, requests, "deviceUserDesc", deviceInfo.deviceUserDesc);
+    return handle_RWstring64(handler, reginfo, reqinfo, requests, "deviceUserDesc", deviceInfo.parameters[num_DeviceUD]._value.string_val  );
 
 }

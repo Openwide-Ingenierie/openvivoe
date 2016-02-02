@@ -12,6 +12,9 @@
 #include <sys/socket.h>
 #include <ctype.h>
 
+
+
+
     /* Typical data structure for a row entry */
 struct ethernetIfTableEntry {
     /* Index values */
@@ -109,11 +112,12 @@ void ethernetIfTable_fill(int entryCount){
     int i=0; /*loop variable*/
     u_char Mac[6];
     for(i=0; i < entryCount; i++){
-        MAC_to_byte_array( Mac, deviceInfo.ethernetIfMacAddress[i]);
-        struct ethernetIfTableEntry* entry = ethernetIfTableEntry_create(i+1, deviceInfo.ethernetIfSpeed[i],
+        MAC_to_byte_array( Mac,(u_char*) deviceInfo.parameters[num_ethernetIfMacAddress]._value.array_string_val[i]);
+        struct ethernetIfTableEntry* entry = ethernetIfTableEntry_create(i+1, deviceInfo.parameters[num_ethernetIfSpeed]._value.array_int_val[i],
                                                                          Mac, 6,
-                                                                         inet_addr(deviceInfo.ethernetIfIpAddress[i]), inet_addr(deviceInfo.ethernetIfSubnetMask[i]),
-                                                                         inet_addr(deviceInfo.ethernetIfIpAddressConflict[i]));
+                                                                         inet_addr(deviceInfo.parameters[num_ethernetIfIpAddress]._value.array_string_val[i]),
+                                                                         inet_addr(deviceInfo.parameters[num_ethernetIfSubnetMask]._value.array_string_val[i]),
+                                                                         inet_addr(deviceInfo.parameters[num_ethernetIfIpAddressConflict]._value.array_string_val[i]));
         entry->valid = 1;
     }
 }
@@ -160,7 +164,7 @@ initialize_table_ethernetIfTable(void)
     netsnmp_register_table_iterator( reg, iinfo );
 
     /* Initialise the contents of the table here */
-    ethernetIfTable_fill(deviceInfo.ethernetIfNumber);
+    ethernetIfTable_fill(deviceInfo.parameters[num_ethernetIFnumber]._value.int_val);
 
 }
 
@@ -356,7 +360,6 @@ ethernetIfTable_handler(
         break;
 
     case MODE_SET_ACTION:
-                        /* or possibly 'netsnmp_check_vb_int_range' */
         /* On i386 the host Byte order is Least significant Byte first (Litlle Endian), whereas the
         * network byte order, as used on the Internet is Most Significant byte first (Big Endian)
         * to check the integer type of the value send to the subAgent, we must first convert
