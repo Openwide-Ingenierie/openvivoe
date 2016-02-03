@@ -51,11 +51,10 @@ int main (int   argc,  char *argv[])
 {
     /* Initialization of elements needed */
     GstElementFactory *sourceFactory;
-    GstElement *pipeline, *source, *parse;
+    GstElement *pipeline, *source, *rtp, *udpsink;
     GstBus *bus;
     guint bus_watch_id;    
     GMainLoop *loop;
-    GError *error = NULL;
 
     /* Initialize GStreamer */
     gst_init (&argc, &argv);
@@ -80,13 +79,23 @@ int main (int   argc,  char *argv[])
        fprintf (stderr, "error cannot create element from factory for: %s\n", (char*) g_type_name (gst_element_factory_get_element_type (sourceFactory)));
        EXIT_FAILURE;        
     }
-    
-    /* Parse the command line to automatically link rtppay to udpsink */
-   parse = gst_parse_bin_from_description("rtpvrawpay ! udpsink host=127.0.0.1 port=1993",TRUE , &error);
-   if( error != NULL){
-       fprintf (stderr, "error in parsing command line: %s\n",error->message);       
+   
+    rtp = gst_element_factory_make ("rtpvrawpay", "rtp");
+    if( rtp == NULL){
+       fprintf (stderr, "error cannot create element for: %s\n","rtp");
        EXIT_FAILURE;        
     }
+    
+    udpsink = gst_element_factory_make ("udpsink", "udpsink");
+    if( udpsink == NULL){
+       fprintf (stderr, "error cannot create element for: %s\n","udpsink");
+       EXIT_FAILURE;        
+    }
+    
+    g_object_set(   G_OBJECT(udpsink),
+                    "host", "127.0.0.1",
+                    "port", 5000,
+                    NULL);
 
     /* we add a message handler */
     bus = gst_pipeline_get_bus (GST_PIPELINE (pipeline));
@@ -96,12 +105,13 @@ int main (int   argc,  char *argv[])
     /* add elements to pipeline (and bin if necessary) before linking them */
     gst_bin_add_many(GST_BIN (pipeline),
                      source,
-                     parse,
+                     rtp, 
+                     udpsink,
                      NULL);
     
     /* we link the elements together */
     /* videosrctest -> parse ("rtpvrawpay ! udpsink host=127.0.0.1 port=1993") */
-    gst_element_link (source, parse);
+    gst_element_link_many (source, /*parse*/ rtp, udpsink, NULL);
    
     /* Set the pipeline to "playing" state*/
     g_print ("Now playing\n");
