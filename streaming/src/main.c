@@ -14,7 +14,38 @@
 #define IP 127.0.0.1 /*this is the address of the server to sink the UPD datagrams*/
 #define PORT 1993 /*this is the port number associated to the udp socket created for th sink*/
 
+static gboolean bus_call (GstBus     *bus,
+                          GstMessage *msg,
+                          gpointer    data)
+{
+        GMainLoop *loop = (GMainLoop *) data;
 
+        switch (GST_MESSAGE_TYPE (msg)) {
+
+                case GST_MESSAGE_EOS:
+                        g_print ("End of stream\n");
+                        g_main_loop_quit (loop);
+                        break;
+
+                case GST_MESSAGE_ERROR: {
+                                                gchar  *debug;
+                                                GError *error;
+
+                                                gst_message_parse_error (msg, &error, &debug);
+                                                g_free (debug);
+
+                                                g_printerr ("Error: %s\n", error->message);
+                                                g_error_free (error);
+
+                                                g_main_loop_quit (loop);
+                                                break;
+                                        }
+                default:
+                                        break;
+        }
+
+        return TRUE;
+}
 
 int main (int   argc,  char *argv[])
 {
@@ -22,7 +53,7 @@ int main (int   argc,  char *argv[])
     GstElementFactory *sourceFactory;
     GstElement *pipeline, *source, *parse;
     GstBus *bus;
-    GstMessage *msg;   
+    guint bus_watch_id;    
     GMainLoop *loop;
     GError *error = NULL;
 
@@ -37,7 +68,7 @@ int main (int   argc,  char *argv[])
             fprintf (stderr, "error cannot create: %s\n","pipeline" );
             EXIT_FAILURE;        
     }
-    
+
     /* Create the source, for now we use videosrctest */ 
     sourceFactory = gst_element_factory_find("videotestsrc");
     if( sourceFactory == NULL){
@@ -56,8 +87,12 @@ int main (int   argc,  char *argv[])
        fprintf (stderr, "error in parsing command line: %s\n",error->message);       
        EXIT_FAILURE;        
     }
-    
-   
+
+    /* we add a message handler */
+    bus = gst_pipeline_get_bus (GST_PIPELINE (pipeline));
+    bus_watch_id = gst_bus_add_watch (bus, bus_call, loop);
+    gst_object_unref (bus);
+
     /* add elements to pipeline (and bin if necessary) before linking them */
     gst_bin_add_many(GST_BIN (pipeline),
                      source,
@@ -69,25 +104,21 @@ int main (int   argc,  char *argv[])
     gst_element_link (source, parse);
    
     /* Set the pipeline to "playing" state*/
-    g_print ("Now playing\n" );
+    g_print ("Now playing\n");
     gst_element_set_state (pipeline, GST_STATE_PLAYING);
-
-
-    /* Wait until error or EOS */
-    bus = gst_element_get_bus (pipeline);
-    msg = gst_bus_timed_pop_filtered (bus, GST_CLOCK_TIME_NONE, GST_MESSAGE_ERROR | GST_MESSAGE_EOS);
 
     /* Iterate */
     g_print ("Running...\n");
     g_main_loop_run (loop);
 
-    /* Free resources */
 
-    gst_message_unref (msg);
-    gst_object_unref (bus);
+    /* Out of the main loop, clean up nicely */
+    g_print ("Returned, stopping playback\n");
     gst_element_set_state (pipeline, GST_STATE_NULL);
-    gst_object_unref (pipeline);
+
+    g_print ("Deleting pipeline\n");
+    gst_object_unref (GST_OBJECT (pipeline));
+    g_source_remove (bus_watch_id);
     g_main_loop_unref (loop);
-    printf("end\n");
     return 0;
 }
