@@ -10,41 +10,86 @@
 #include <gstreamer-1.0/gst/gst.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <arpa/inet.h> 
+#include "../include/streaming.h"
 
-#define IP 127.0.0.1 /*this is the address of the server to sink the UPD datagrams*/
-#define PORT 1993 /*this is the port number associated to the udp socket created for th sink*/
+#define IP "127.0.0.1" /*this is the address of the server to sink the UPD datagrams*/
+#define PORT 5004 /*this is the port number associated to the udp socket created for th sink*/
 
-static gboolean bus_call (GstBus     *bus,
-                          GstMessage *msg,
-                          gpointer    data)
+#define MIN_PORT 1024
+#define MAX_PORT 65535
+
+static gboolean bus_call (  GstBus     *bus,
+							GstMessage *msg,
+							gpointer    data)
 {
-        GMainLoop *loop = (GMainLoop *) data;
+	GMainLoop *loop = (GMainLoop *) data;
 
-        switch (GST_MESSAGE_TYPE (msg)) {
+	switch (GST_MESSAGE_TYPE (msg)) {
 
-                case GST_MESSAGE_EOS:
-                        g_print ("End of stream\n");
-                        g_main_loop_quit (loop);
-                        break;
+		case GST_MESSAGE_EOS:
+			g_print ("End of stream\n");
+			g_main_loop_quit (loop);
+			break;
 
-                case GST_MESSAGE_ERROR: {
-                                                gchar  *debug;
-                                                GError *error;
+		case GST_MESSAGE_ERROR:{ 
+								   gchar  *debug;
+								   GError *error;
+								   gst_message_parse_error (msg, &error, &debug);
+								   g_free (debug);
 
-                                                gst_message_parse_error (msg, &error, &debug);
-                                                g_free (debug);
+								   g_printerr ("Error: %s\n", error->message);
+								   g_error_free (error);
 
-                                                g_printerr ("Error: %s\n", error->message);
-                                                g_error_free (error);
+								   g_main_loop_quit (loop);
+								   break;
+							   }
+		default:
+			break;
+	}
 
-                                                g_main_loop_quit (loop);
-                                                break;
-                                        }
-                default:
-                                        break;
-        }
+	return TRUE;
+}
+/* 
+ * This function is used to check the parameters used for intialize the stream
+ */
+static int check_param(int argc, char* argv[], char** ip, gint* port){
 
-        return TRUE;
+	/* this will be used to check wether the IP address has a goot format or not */
+	struct in_addr* check_addr = malloc(sizeof(struct in_addr));
+	if (argc != 3) {
+		g_printerr ("Usage: %sip=ddd.ddd.ddd.ddd port=[1024,65535]\n", argv[0]);
+		g_print ("Default settings taken: ip=%s port=%d\n",(char*) *ip, *port);
+		return EXIT_FAILURE;
+	/*Check that parameters are indeed: ip= and port= */	
+	}else if( strncmp("ip=", argv[1], strlen("ip=")) || strncmp("port=", argv[2], strlen("port="))) {
+		g_printerr ("Usage: %s ip=ddd.ddd.ddd.ddd port=[1024,65535]\n", argv[0]);		
+		g_print ("Default settings taken: ip=%s port=%d\n",(char*) *ip, *port);
+		return EXIT_FAILURE;
+	}
+	/*Here, the fromat of the command line entered is good, we just need te check the format of the IP Address given, and the port number */
+
+	/* First check IP address format */
+	char* temp_ip = strdup(argv[1] + strlen("ip="));
+	if (! inet_pton(AF_INET, temp_ip, check_addr)){
+		g_printerr ("Ip should be Ipv4 dotted-decimal format\n");
+		g_print ("Default settings taken: ip=%s port=%d\n",(char*) *ip, *port);
+		return EXIT_FAILURE;
+	}
+
+	/* Then, chek port number ( should be greater than 1024 and less than 65535 as it is coded on a short int (16-bits) */
+	char* temp_port = strdup(argv[2] + strlen("port="));
+	int temp_numport = atoi(temp_port);
+	if(temp_numport< MIN_PORT || temp_numport>MAX_PORT){
+		g_printerr ("Port number should in the range: %d -> %d\n", MIN_PORT, MAX_PORT);
+		g_print ("Default settings taken: ip=%s port=%d\n",(char*) *ip, *port);
+		return EXIT_FAILURE;
+	}
+	/* replace ip's value by the value entered by the user */
+	strcpy(*ip, temp_ip);
+	*port = (gint) temp_numport;
+	return EXIT_SUCCESS;
 }
 
 int main (int   argc,  char *argv[])
@@ -55,46 +100,51 @@ int main (int   argc,  char *argv[])
     GstBus *bus;
     guint bus_watch_id;    
     GMainLoop *loop;
-
-    /* Initialize GStreamer */
+	gchar* ip = g_strdup( (gchar*) IP);
+	gint port 	= PORT;
+	
+	/* Initialize GStreamer */
     gst_init (&argc, &argv);
+	/* Check input arguments */
+	check_param(argc, argv, &ip, &port);
+    
     /* Initialize the main loop, (replace gst-launch) */
     loop = g_main_loop_new (NULL, FALSE);
     
     /* Create the pipeline */
     pipeline  = gst_pipeline_new ("pipeline");
-    if(pipeline  == NULL){
-            fprintf (stderr, "error cannot create: %s\n","pipeline" );
-            EXIT_FAILURE;        
-    }
+	if(pipeline  == NULL){
+		g_printerr ( "error cannot create: %s\n","pipeline" );
+		EXIT_FAILURE;        
+	}
 
     /* Create the source, for now we use videosrctest */ 
     sourceFactory = gst_element_factory_find("videotestsrc");
     if( sourceFactory == NULL){
-        fprintf (stderr, "error cannot create Factory for: %s\n","videotestsrc" );
+        g_printerr ( "error cannot create Factory for: %s\n","videotestsrc" );
         EXIT_FAILURE;        
     }
     source = gst_element_factory_create (sourceFactory, "source");
     if( source == NULL){
-       fprintf (stderr, "error cannot create element from factory for: %s\n", (char*) g_type_name (gst_element_factory_get_element_type (sourceFactory)));
+       g_printerr ( "error cannot create element from factory for: %s\n", (char*) g_type_name (gst_element_factory_get_element_type (sourceFactory)));
        EXIT_FAILURE;        
     }
    
     rtp = gst_element_factory_make ("rtpvrawpay", "rtp");
     if( rtp == NULL){
-       fprintf (stderr, "error cannot create element for: %s\n","rtp");
+       g_printerr ( "error cannot create element for: %s\n","rtp");
        EXIT_FAILURE;        
     }
     
     udpsink = gst_element_factory_make ("udpsink", "udpsink");
     if( udpsink == NULL){
-       fprintf (stderr, "error cannot create element for: %s\n","udpsink");
+       g_printerr ( "error cannot create element for: %s\n","udpsink");
        EXIT_FAILURE;        
     }
     
     g_object_set(   G_OBJECT(udpsink),
-                    "host", "127.0.0.1",
-                    "port", 5000,
+                    "host", ip,
+                    "port", port,
                     NULL);
 
     /* we add a message handler */
