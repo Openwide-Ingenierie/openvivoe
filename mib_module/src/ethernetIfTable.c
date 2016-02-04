@@ -371,16 +371,16 @@ ethernetIfTable_handler(
             table_info  =     netsnmp_extract_table_info(      request);
             switch (table_info->colnum) {
             case COLUMN_ETHERNETIFIPADDRESS:
-                table_entry->old_ethernetIfIpAddress = table_entry->ethernetIfIpAddress;
-                table_entry->ethernetIfIpAddress     = *request->requestvb->val.integer;
+                table_entry->old_ethernetIfIpAddress 			= table_entry->ethernetIfIpAddress;
+                table_entry->ethernetIfIpAddress     			= *request->requestvb->val.integer;
                 break;
             case COLUMN_ETHERNETIFSUBNETMASK:
-                table_entry->old_ethernetIfSubnetMask = table_entry->ethernetIfSubnetMask;
-                table_entry->ethernetIfSubnetMask     = *request->requestvb->val.integer;
+                table_entry->old_ethernetIfSubnetMask 			= table_entry->ethernetIfSubnetMask;
+                table_entry->ethernetIfSubnetMask     			= *request->requestvb->val.integer;
                 break;
             case COLUMN_ETHERNETIFIPADDRESSCONFLICT:
-                table_entry->old_ethernetIfIpAddressConflict = table_entry->ethernetIfIpAddressConflict;
-                table_entry->ethernetIfIpAddressConflict     = *request->requestvb->val.integer;
+                table_entry->old_ethernetIfIpAddressConflict 	= table_entry->ethernetIfIpAddressConflict;
+                table_entry->ethernetIfIpAddressConflict     	= *request->requestvb->val.integer;
                 break;
             }
         }
@@ -394,16 +394,16 @@ ethernetIfTable_handler(
 
             switch (table_info->colnum) {
             case COLUMN_ETHERNETIFIPADDRESS:
-                table_entry->ethernetIfIpAddress     = table_entry->old_ethernetIfIpAddress;
-                table_entry->old_ethernetIfIpAddress = 0;
+                table_entry->ethernetIfIpAddress     			= table_entry->old_ethernetIfIpAddress;
+                table_entry->old_ethernetIfIpAddress 			= 0;
                 break;
             case COLUMN_ETHERNETIFSUBNETMASK:
-                table_entry->ethernetIfSubnetMask     = table_entry->old_ethernetIfSubnetMask;
-                table_entry->old_ethernetIfSubnetMask = 0;
+                table_entry->ethernetIfSubnetMask     			= table_entry->old_ethernetIfSubnetMask;
+                table_entry->old_ethernetIfSubnetMask 			= 0;
                 break;
             case COLUMN_ETHERNETIFIPADDRESSCONFLICT:
-                table_entry->ethernetIfIpAddressConflict     = table_entry->old_ethernetIfIpAddressConflict;
-                table_entry->old_ethernetIfIpAddressConflict = 0;
+                table_entry->ethernetIfIpAddressConflict     	= table_entry->old_ethernetIfIpAddressConflict;
+                table_entry->old_ethernetIfIpAddressConflict 	= 0;
                 break;
             }
         }
