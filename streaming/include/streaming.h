@@ -10,7 +10,7 @@
 /* Handle bus messages */ 
 static gboolean bus_call (GstBus *bus, GstMessage *msg, gpointer data);
 /* Check validity of parameters passed to program */
-static int check_param(int argc, char* argv[], char** ip, gint *port);
+static int check_param(int argc, char* argv[], char** ip, gint *port, char** format);
 
 #endif /* STREAMING_H */
 
