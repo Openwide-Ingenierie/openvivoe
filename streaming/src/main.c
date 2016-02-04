@@ -8,6 +8,7 @@
 
 #include <glib-2.0/glib.h>
 #include <gstreamer-1.0/gst/gst.h>
+//#include <gstreamer-0.10/gst/gst.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -96,7 +97,7 @@ int main (int   argc,  char *argv[])
 {
     /* Initialization of elements needed */
     GstElementFactory *sourceFactory;
-    GstElement *pipeline, *source, *rtp, *udpsink;
+    GstElement *pipeline, *source, *rtp, *enc, *udpsink;
     GstBus *bus;
     guint bus_watch_id;    
     GMainLoop *loop;
@@ -115,31 +116,49 @@ int main (int   argc,  char *argv[])
     pipeline  = gst_pipeline_new ("pipeline");
 	if(pipeline  == NULL){
 		g_printerr ( "error cannot create: %s\n","pipeline" );
-		EXIT_FAILURE;        
+		return EXIT_FAILURE;        
 	}
 
     /* Create the source, for now we use videosrctest */ 
     sourceFactory = gst_element_factory_find("videotestsrc");
-    if( sourceFactory == NULL){
+    if(sourceFactory == NULL){
         g_printerr ( "error cannot create Factory for: %s\n","videotestsrc" );
-        EXIT_FAILURE;        
+       return EXIT_FAILURE;        
     }
     source = gst_element_factory_create (sourceFactory, "source");
-    if( source == NULL){
+    if(source == NULL){
        g_printerr ( "error cannot create element from factory for: %s\n", (char*) g_type_name (gst_element_factory_get_element_type (sourceFactory)));
-       EXIT_FAILURE;        
+      return EXIT_FAILURE;        
     }
-   
+
+	/* For MPEG-4 enc */
+    enc = gst_element_factory_make ("avenc_mpeg4", "enc");
+    if(enc == NULL){
+       g_printerr ( "error cannot create element for: %s\n","enc");
+      return EXIT_FAILURE;        
+    }
+
+#if 0
+
+	/* For Raw video */
     rtp = gst_element_factory_make ("rtpvrawpay", "rtp");
     if( rtp == NULL){
        g_printerr ( "error cannot create element for: %s\n","rtp");
        EXIT_FAILURE;        
     }
-    
+#endif 
+	
+	/* For MPEG-4 video */
+    rtp = gst_element_factory_make ("rtpmp4vpay", "rtp");
+    if(rtp == NULL){
+       g_printerr ( "error cannot create element for: %s\n","rtp");
+      return EXIT_FAILURE;        
+    }
+
     udpsink = gst_element_factory_make ("udpsink", "udpsink");
-    if( udpsink == NULL){
+    if(udpsink == NULL){
        g_printerr ( "error cannot create element for: %s\n","udpsink");
-       EXIT_FAILURE;        
+      return EXIT_FAILURE;        
     }
     
     g_object_set(   G_OBJECT(udpsink),
@@ -155,13 +174,14 @@ int main (int   argc,  char *argv[])
     /* add elements to pipeline (and bin if necessary) before linking them */
     gst_bin_add_many(GST_BIN (pipeline),
                      source,
+					 enc,
                      rtp, 
                      udpsink,
                      NULL);
     
     /* we link the elements together */
     /* videosrctest -> parse ("rtpvrawpay ! udpsink host=127.0.0.1 port=1993") */
-    gst_element_link_many (source, /*parse*/ rtp, udpsink, NULL);
+    gst_element_link_many (source,enc,/* pare*/ rtp, udpsink, NULL);
    
     /* Set the pipeline to "playing" state*/
     g_print ("Now playing\n");

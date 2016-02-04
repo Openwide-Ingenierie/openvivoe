@@ -35,12 +35,18 @@ execute_process(COMMAND "pkg-config" "--libs" "glib-2.0"
 		OUTPUT_VARIABLE GLIB				
 		OUTPUT_STRIP_TRAILING_WHITESPACE)
 
+#link for Gstreamer-1.0
 execute_process(COMMAND "pkg-config" "--libs" "gstreamer-1.0"
-		WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-		OUTPUT_VARIABLE GST_LIBS				
-		OUTPUT_STRIP_TRAILING_WHITESPACE)
+	WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+	OUTPUT_VARIABLE GST_LIBS				
+	OUTPUT_STRIP_TRAILING_WHITESPACE)
+#link fir Gstreamer-0.10
+#execute_process(COMMAND "pkg-config" "--libs" "gstreamer-0.10"
+#		WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+#		OUTPUT_VARIABLE GST0_LIBS				
+#		OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-target_link_libraries(streaming ${GLIB} ${GST_LIBS})
+target_link_libraries(streaming ${GLIB} ${GST_LIBS} ${GST0_LIBS})
 
 #set debug as default configuration, to buld release run "cmake -DCMAKE_BUILD_TYPE=Release" or simply the alias cmakerelease
 if( NOT CMAKE_BUILD_TYPE )
@@ -49,17 +55,27 @@ if( NOT CMAKE_BUILD_TYPE )
 		FORCE )
 endif()
 
+#clags for Glib-2.0
 execute_process(COMMAND "pkg-config" "--cflags" "glib-2.0"
 		WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 		OUTPUT_VARIABLE GLIBC_FLAGS
 		OUTPUT_STRIP_TRAILING_WHITESPACE)
 
+#Cflags for Gstreamer-1.0
 execute_process(COMMAND "pkg-config" "--cflags" "gstreamer-1.0"
-		WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 		OUTPUT_VARIABLE GST_FLAGS
 		OUTPUT_STRIP_TRAILING_WHITESPACE)
 
+#Cflags for Gstreamer-0.10
+#execute_process(COMMAND "pkg-config" "--cflags" "gstreamer-0.10"
+#		WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+#		OUTPUT_VARIABLE GST0_FLAGS
+#		OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+	#set( CFLAGS "${CFLAGS} ${GLIBC_FLAGS} ${GST_FLAGS} ${GST0_FLAGS}")
 set( CFLAGS "${CFLAGS} ${GLIBC_FLAGS} ${GST_FLAGS}")
+
 
 #Compilation flags
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -I. ${CFLAGS}") #always
