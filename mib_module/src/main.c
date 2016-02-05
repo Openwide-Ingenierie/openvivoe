@@ -21,21 +21,29 @@
 /*
  * Personal header
  */
-#include "../include/deviceDesc.h"
-#include "../include/deviceManufacturer.h"
-#include "../include/devicePartNumber.h"
-#include "../include/deviceSerialNumber.h"
-#include "../include/deviceHardwareVersion.h"
-#include "../include/deviceSoftwareVersion.h"
-#include "../include/deviceFirmwareVersion.h"
-#include "../include/deviceMibVersion.h"
-#include "../include/deviceType.h"
-#include "../include/deviceUserDesc.h"
-#include "../include/ethernetIfNumber.h"
-#include "../include/ethernetIfTable.h"
-#include "../include/deviceNatoStockNumber.h"
-#include "../include/deviceMode.h"
-#include "../include/deviceReset.h"
+
+/*
+ * DeviceInfo header
+ */
+#include "../include/deviceInfo/deviceDesc.h"
+#include "../include/deviceInfo/deviceManufacturer.h"
+#include "../include/deviceInfo/devicePartNumber.h"
+#include "../include/deviceInfo/deviceSerialNumber.h"
+#include "../include/deviceInfo/deviceHardwareVersion.h"
+#include "../include/deviceInfo/deviceSoftwareVersion.h"
+#include "../include/deviceInfo/deviceFirmwareVersion.h"
+#include "../include/deviceInfo/deviceMibVersion.h"
+#include "../include/deviceInfo/deviceType.h"
+#include "../include/deviceInfo/deviceUserDesc.h"
+#include "../include/deviceInfo/ethernetIfNumber.h"
+#include "../include/deviceInfo/ethernetIfTable.h"
+#include "../include/deviceInfo/deviceNatoStockNumber.h"
+#include "../include/deviceInfo/deviceMode.h"
+#include "../include/deviceInfo/deviceReset.h"
+
+/*
+ * Configuration - Initialization of the MIB header
+ */
 #include "../include/config.h"
 
 

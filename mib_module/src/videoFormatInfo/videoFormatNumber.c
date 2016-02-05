@@ -6,9 +6,9 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
-#include "../include/videoFormatNumber.h"
-#include "../include/mibParameters.h"
-#include "../include/handler.h"
+#include "../../include/videoFormatInfo/videoFormatNumber.h"
+#include "../../include/mibParameters.h"
+#include "../../include/handler.h"
 
 /** Initializes the videoFormatNumber module */
 void
@@ -31,7 +31,7 @@ handle_videoFormatNumber(netsnmp_mib_handler *handler,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
 {
-    return handle_rointeger(handler, reginfo, reqinfo, requests, "videoFormatNumber" , &(/*videoFormatInfo*/.parameters[/*num_videoformatNumber*/]._value.int_val));	
+   // return handle_rointeger(handler, reginfo, reqinfo, requests, "videoFormatNumber" , &(/*videoFormatInfo*/.parameters[/*num_videoformatNumber*/]._value.int_val));	
 }
 
 
