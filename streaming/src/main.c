@@ -125,7 +125,7 @@ int main (int   argc,  char *argv[])
 	/*
 	 * For now, the source is created manually, directly into the code
 	 * */
-    GstElement *source, *capsfilter;	
+    GstElement *source, *capsfilter, *enc;	
 	GstCaps* caps;
 
 	/* Initialize GStreamer */
@@ -169,10 +169,21 @@ int main (int   argc,  char *argv[])
 	bus = gst_pipeline_get_bus ( GST_PIPELINE(pipeline));
     bus_watch_id = gst_bus_add_watch (bus, bus_call, loop);
     gst_object_unref (bus);
+
 	
 	if( !strcmp(format, "mp4")){
+		/* For test puposes, if we wanna test our program with a fake mpeg-4 source, it necessary to create is mannually with an encoder */
+		/*create the MPEG-4 encoder */
+		enc = gst_element_factory_make ("avenc_mpeg4", "enc");
+		if(enc == NULL){
+			g_printerr ( "error cannot create element for: %s\n","enc");
+			return EXIT_FAILURE;        
+    	}
+		/* add encryptor to pipeline, link it to the source */
+		gst_bin_add (GST_BIN(pipeline), enc); 
+		gst_element_link (capsfilter, enc); 
 		/* Create the VIVOE pipeline for MPEG-4 videos */	
-		if(! mp4_pipeline(pipeline, bus, bus_watch_id,loop, capsfilter,  ip,  port)){
+		if(! mp4_pipeline(pipeline, bus, bus_watch_id,loop, enc,  ip,  port)){
 			g_printerr ( "Failed to create pipeline for MPEG-4 video\n");
 			return EXIT_FAILURE; 
 		}

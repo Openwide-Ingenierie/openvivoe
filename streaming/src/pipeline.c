@@ -72,14 +72,9 @@ int mp4_pipeline(GstElement*pipeline, GstBus *bus,
 						GstElement* input, char* ip, gint port){
 	
 	/*Create element that will be add to the pipeline */
-	GstElement *rtp, *enc, *udpsink;
+	GstElement *rtp, *udpsink;
 
-	 /*create the MPEG-4 encoder */
-    enc = gst_element_factory_make ("avenc_mpeg4", "enc");
-    if(enc == NULL){
-       g_printerr ( "error cannot create element for: %s\n","enc");
-      return EXIT_FAILURE;        
-    }
+
 	/* Create the RTP payload*/
     rtp = gst_element_factory_make ("rtpmp4vpay", "rtp");
     if(rtp == NULL){
