@@ -110,19 +110,22 @@ static int check_param(int argc, char* argv[], char** ip, gint* port, char** for
 	return EXIT_SUCCESS;
 }
 
-
 int main (int   argc,  char *argv[])
 {
     /* Initialization of elements needed */
-    GstElementFactory *sourceFactory;
-    GstElement *pipeline, *source, *capsfilter;
-	GError* error;
+    GstElement *pipeline;
     GstBus *bus;
     guint bus_watch_id;    
     GMainLoop *loop;
 	gchar* ip = g_strdup( (gchar*) DEFAULT_IP);
 	gint port 	= DEFAULT_PORT;
 	char* format = strdup(DEFAULT_FORMAT);
+
+
+	/*
+	 * For now, the source is created manually, directly into the code
+	 * */
+    GstElement *source, *capsfilter;	
 	GstCaps* caps;
 
 	/* Initialize GStreamer */
@@ -140,23 +143,28 @@ int main (int   argc,  char *argv[])
 		return EXIT_FAILURE;        
 	}
 
-    /* Create the source, for now we use videosrctest */ 
-    sourceFactory = gst_element_factory_find("videotestsrc");
-    if(sourceFactory == NULL){
-        g_printerr ( "error cannot create Factory for: %s\n","videotestsrc" );
-       return EXIT_FAILURE;        
-    }
-    source = gst_element_factory_create (sourceFactory, "source");
+	/*
+	 * For now, the source is created manually, directly into the code
+	 * */
+	/* --------------------------------------------------------------------------- */
+	source = gst_element_factory_make ("videotestsrc", "source");
     if(source == NULL){
-       g_printerr ( "error cannot create element from factory for: %s\n", (char*) g_type_name (gst_element_factory_get_element_type (sourceFactory)));
+       g_printerr ("error cannot create element: %s\n", "videotestsrc" );
       return EXIT_FAILURE;        
     }
-	capsfilter = gst_element_factory_make ("capsfilter", NULL);
-	caps = gst_caps_from_string("video/x-raw, format=RGB");
+
+	capsfilter = gst_element_factory_make ("capsfilter","capsfilter");
+	if(capsfilter == NULL){
+		g_printerr ( "error cannot create element: %s\n", "capsfilter" );
+		return EXIT_FAILURE;        
+	}
+	caps = gst_caps_from_string("video/x-raw, format=I420");
 	g_object_set (capsfilter, "caps", caps, NULL); 
 	gst_bin_add_many (GST_BIN(pipeline), source, capsfilter, NULL); 
 	gst_element_link (source, capsfilter); 
-	
+	/* ---------------------------------------------------------------------------- */
+
+
 	/* we add a message handler */
 	bus = gst_pipeline_get_bus ( GST_PIPELINE(pipeline));
     bus_watch_id = gst_bus_add_watch (bus, bus_call, loop);
@@ -164,13 +172,13 @@ int main (int   argc,  char *argv[])
 	
 	if( !strcmp(format, "mp4")){
 		/* Create the VIVOE pipeline for MPEG-4 videos */	
-		if( mp4_pipeline(pipeline, bus, bus_watch_id,loop, source,  ip,  port)){
+		if(! mp4_pipeline(pipeline, bus, bus_watch_id,loop, capsfilter,  ip,  port)){
 			g_printerr ( "Failed to create pipeline for MPEG-4 video\n");
 			return EXIT_FAILURE; 
 		}
 	}else{
 		/* Create the VIVOE pipeline for RAW videos */	
-		if(raw_pipeline(pipeline, bus, bus_watch_id,loop, capsfilter ,  ip,  port)){
+		if(! raw_pipeline(pipeline, bus, bus_watch_id,loop, capsfilter ,  ip,  port)){
 			g_printerr ( "Failed to create pipeline for RAW video\n");
 			return EXIT_FAILURE; 
 		}

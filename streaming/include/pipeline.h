@@ -13,7 +13,7 @@ int mp4_pipeline(GstElement*pipeline, GstBus *bus,
 						GstElement* source, char* ip, gint port);
 
 /* Create the pipeline for RAW Videos */
-int raw_pipeline(GstElement*pipeline, GstBus *bus,
+gboolean raw_pipeline(GstElement*pipeline, GstBus *bus,
 						guint bus_watch_id, GMainLoop *loop,
 						GstElement* source, char* ip, gint port);
 #endif /* PIPELINE_H */
