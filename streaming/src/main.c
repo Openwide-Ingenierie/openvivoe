@@ -158,7 +158,7 @@ int main (int   argc,  char *argv[])
 		g_printerr ( "error cannot create element: %s\n", "capsfilter" );
 		return EXIT_FAILURE;        
 	}
-	caps = gst_caps_from_string("video/x-raw, format=I420");
+	caps = gst_caps_from_string("video/x-raw, format=I420, width=320, height=240");
 	g_object_set (capsfilter, "caps", caps, NULL); 
 	gst_bin_add_many (GST_BIN(pipeline), source, capsfilter, NULL); 
 	gst_element_link (source, capsfilter); 
