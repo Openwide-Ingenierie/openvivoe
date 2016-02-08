@@ -5,15 +5,13 @@
  *     - hoel <hoel.vasseur@openwide.fr>
  */
 
-
 #include <glib-2.0/glib.h>
 #include <gstreamer-1.0/gst/gst.h>
-//#include <gstreamer-0.10/gst/gst.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <arpa/inet.h> 
-#include "../include/streaming.h"
+#include "../include/pipeline.h"
 
 #define DEFAULT_IP "127.0.0.1" /*this is the address of the server to sink the UPD datagrams*/
 #define DEFAULT_PORT 5004 /*this is the port number associated to the udp socket created for the sink*/
@@ -21,6 +19,14 @@
 
 #define MIN_DEFAULT_PORT 1024
 #define MAX_DEFAULT_PORT 65535
+
+/*
+ *  Pad templates
+ *  Limitate the source pads of the RTP payloader to only
+ *  VIVOE format. Refer to the DEfStan-0082 to see which video
+ *  format are allowed in VIVOE
+ *  */
+
 
 static gboolean bus_call (  GstBus     *bus,
 							GstMessage *msg,
@@ -104,121 +110,26 @@ static int check_param(int argc, char* argv[], char** ip, gint* port, char** for
 	return EXIT_SUCCESS;
 }
 
-/* This function create the VIVOE pipeline for RAW videos
- * On the server side (udpsink)
- */
-static int raw_pipeline(GstElement*pipeline, GstBus *bus,
-						guint bus_watch_id, GMainLoop *loop,
-						GstElement* source, char* ip, gint port){
-	
-	/*Create element that will be add to the pipeline */
-	GstElement *rtp, *udpsink;
-
-	/* For Raw video */
-	rtp = gst_element_factory_make ("rtpvrawpay", "rtp");
-	if( rtp == NULL){
-		g_printerr ( "error cannot create element for: %s\n","rtp");
-		EXIT_FAILURE;        
-	}
-
-	/* Create the UDP sink */
-    udpsink = gst_element_factory_make ("udpsink", "udpsink");
-    if(udpsink == NULL){
-       g_printerr ( "error cannot create element for: %s\n","udpsink");
-      return EXIT_FAILURE;        
-    }
-    /*Set UDP sink properties */
-    g_object_set(   G_OBJECT(udpsink),
-                    "host", ip,
-                    "port", port,
-                    NULL);
-
-    /* add elements to pipeline (and bin if necessary) before linking them */
-    gst_bin_add_many(GST_BIN (pipeline),
-                     source,
-                     rtp, 
-                     udpsink,
-                     NULL);
-
-	/* we link the elements together */
-	if ( !gst_element_link_many (source,rtp, udpsink, NULL)){
-		g_print ("Failed to link one or more elements for RAW streaming!\n");
-	    return EXIT_FAILURE;
-  	}else{
-		return EXIT_SUCCESS;
-	}
-}
-
-/* This function create the VIVOE pipeline for MPEG-4 videos
- * On the server side (udpsink)
- */
-static int mp4_pipeline(GstElement*pipeline, GstBus *bus,
-						guint bus_watch_id,GMainLoop *loop,
-						GstElement* source, char* ip, gint port){
-	
-	/*Create element that will be add to the pipeline */
-	GstElement *rtp, *enc, *udpsink;
-
-	 /*create the MPEG-4 encoder */
-    enc = gst_element_factory_make ("avenc_mpeg4", "enc");
-    if(enc == NULL){
-       g_printerr ( "error cannot create element for: %s\n","enc");
-      return EXIT_FAILURE;        
-    }
-	/* Create the RTP payload*/
-    rtp = gst_element_factory_make ("rtpmp4vpay", "rtp");
-    if(rtp == NULL){
-       g_printerr ( "error cannot create element for: %s\n","rtp");
-      return EXIT_FAILURE;        
-    }
-	
-	/* Create the UDP sink */
-    udpsink = gst_element_factory_make ("udpsink", "udpsink");
-    if(udpsink == NULL){
-       g_printerr ( "error cannot create element for: %s\n","udpsink");
-      return EXIT_FAILURE;        
-    }
-    /*Set UDP sink properties */
-    g_object_set(   G_OBJECT(udpsink),
-                    "host", ip,
-                    "port", port,
-                    NULL);
-
-    /* add elements to pipeline (and bin if necessary) before linking them */
-    gst_bin_add_many(GST_BIN (pipeline),
-                     source,
-					 enc,
-                     rtp, 
-                     udpsink,
-                     NULL);
-
-	/* we link the elements together */
-	if ( !gst_element_link_many (source,enc,rtp, udpsink, NULL)){
-		g_print ("Failed to link one or more elements for MPEG-4 streaming!\n");
-	    return EXIT_FAILURE;
-  	}else{
-		return EXIT_SUCCESS;
-	}
-}
 
 int main (int   argc,  char *argv[])
 {
     /* Initialization of elements needed */
     GstElementFactory *sourceFactory;
-    GstElement *pipeline, *source;
+    GstElement *pipeline, *source, *capsfilter;
+	GError* error;
     GstBus *bus;
     guint bus_watch_id;    
     GMainLoop *loop;
 	gchar* ip = g_strdup( (gchar*) DEFAULT_IP);
 	gint port 	= DEFAULT_PORT;
 	char* format = strdup(DEFAULT_FORMAT);
-	
+	GstCaps* caps;
 
 	/* Initialize GStreamer */
     gst_init (&argc, &argv);
 	/* Check input arguments */
 	check_param(argc, argv, &ip, &port, &format);
-    
+   
     /* Initialize the main loop, (replace gst-launch) */
     loop = g_main_loop_new (NULL, FALSE);
 
@@ -240,6 +151,11 @@ int main (int   argc,  char *argv[])
        g_printerr ( "error cannot create element from factory for: %s\n", (char*) g_type_name (gst_element_factory_get_element_type (sourceFactory)));
       return EXIT_FAILURE;        
     }
+	capsfilter = gst_element_factory_make ("capsfilter", NULL);
+	caps = gst_caps_from_string("video/x-raw, format=RGB");
+	g_object_set (capsfilter, "caps", caps, NULL); 
+	gst_bin_add_many (GST_BIN(pipeline), source, capsfilter, NULL); 
+	gst_element_link (source, capsfilter); 
 	
 	/* we add a message handler */
 	bus = gst_pipeline_get_bus ( GST_PIPELINE(pipeline));
@@ -254,7 +170,7 @@ int main (int   argc,  char *argv[])
 		}
 	}else{
 		/* Create the VIVOE pipeline for RAW videos */	
-		if(raw_pipeline(pipeline, bus, bus_watch_id,loop, source,  ip,  port)){
+		if(raw_pipeline(pipeline, bus, bus_watch_id,loop, capsfilter ,  ip,  port)){
 			g_printerr ( "Failed to create pipeline for RAW video\n");
 			return EXIT_FAILURE; 
 		}
