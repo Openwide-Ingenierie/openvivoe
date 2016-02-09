@@ -16,50 +16,7 @@ init_videoFormatTable(void)
     initialize_table_videoFormatTable();
 }
 
-/* Typical data structure for a row entry */
-struct videoFormatTable_entry {
-	/* Index values */
-	long videoFormatIndex;
 
-	/* Column values */
-	long videoFormatType;
-	long videoFormatStatus;
-	char* videoFormatBase; /* Should be a 16 bytes string */
-	size_t videoFormatBase_len;
-	char* videoFormatSampling; /* Should be a 16 bytes string */
-	size_t videoFormatSampling_len;
-	long videoFormatBitDepth;
-	long videoFormatFps;
-	char* videoFormatColorimetry; /* Should be a 16 bytes string */
-	size_t videoFormatColorimetry_len;
-	long videoFormatInterlaced;
-	long videoFormatCompressionFactor;
-	long old_videoFormatCompressionFactor;
-	long videoFormatCompressionRate;
-	long old_videoFormatCompressionRate;
-	long videoFormatMaxHorzRes;
-	long videoFormatMaxVertRes;
-	long videoFormatRoiHorzRes;
-	long old_videoFormatRoiHorzRes;
-	long videoFormatRoiVertRes;
-	long old_videoFormatRoiVertRes;
-	long videoFormatRoiOriginTop;
-	long old_videoFormatRoiOriginTop;
-	long videoFormatRoiOriginLeft;
-	long old_videoFormatRoiOriginLeft;
-	long videoFormatRoiExtentBottom;
-	long old_videoFormatRoiExtentBottom;
-	long videoFormatRoiExtentRight;
-	long old_videoFormatRoiExtentRight;
-	long videoFormatRtpPt;
-	long old_videoFormatRtpPt;
-
-	/* Illustrate using a simple linked list */
-	int   valid;
-	struct videoFormatTable_entry *next;
-};
-
-struct videoFormatTable_entry  *videoFormatTable_head;
 
 /* create a new row in the (unsorted) table */
 struct videoFormatTable_entry * videoFormatTable_createEntry( 	long  videoFormatIndex, 			long videoFormatType,

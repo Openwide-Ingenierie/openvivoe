@@ -14,6 +14,12 @@
 #include "../../include/streaming/pipeline.h"
 #include "../../include/streaming/stream.h"
 
+/* In order to initialize the MIB */
+#include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+#include "../../include/mibParameters.h"
+#include "../../include/videoFormatInfo/videoFormatTable.h"
 
 /*
  * Macro for testing purposes
@@ -69,7 +75,6 @@ static gboolean bus_call (  GstBus     *bus,
 
 	return TRUE;
 }
-
 
 /* 
  * This is needed to exit the video type detection function
@@ -189,6 +194,8 @@ static const char* type_detection(GstBin *pipeline, GstElement *input_video, GMa
 	free(data);	
 	return return_type;
 }
+
+
 /*
  * For test purposes
  */
@@ -235,6 +242,69 @@ static int source_creation(GstElement* pipeline, char* format){
 	}
 	return EXIT_SUCCESS;
 
+}
+
+initialize_videoFormat(GstStructure* source_str_caps){
+	struct videoFormatTable_entry temp_videoFormat;
+	
+	/*
+	 * Get from the caps all parameters that we need,
+	 * if there not in the caps, set them to null
+	 * maybe that for further implementation we should 
+	 * make it necessary to specify them all
+	 */
+	/*videoFormatBase*/
+	const char* videoFormatBase = strdup(gst_structure_get_name_id(source_str_caps));
+	size_t videoFormatBase_len 	= strlen( videoFormatBase );
+	const char* videoFormatSampling; /* Should be a 16 bytes string */
+	size_t videoFormatSampling_len;
+	long videoFormatBitDepth;
+	long videoFormatFps;
+	char* videoFormatColorimetry; /* Should be a 16 bytes string */
+	size_t videoFormatColorimetry_len;
+	long videoFormatInterlaced;
+	long videoFormatCompressionFactor;
+	if( gst_structure_has_field(source_str_caps, "sampling")){
+		videoFormatSampling 	= strdup(gst_structure_get_value(source_str_caps, "sampling"));
+		videoFormatSampling_len = strlen(videoFormatSampling);
+	}else{
+		
+	}
+	
+	if( gst_structure_has_field(source_str_caps, "depth")){
+		videoFormatBitDepth = *((long*) gst_structure_get_value(source_str_caps, "depth"));
+	}else{
+	}
+	
+	if( gst_structure_has_field(source_str_caps, "framerate")){
+		videoFormatFps = *( (long*) gst_structure_get_value(source_str_caps, "framerate"));
+	}else{
+
+	}
+
+	if( gst_structure_has_field(source_str_caps, "colorimetry")){
+		videoFormatColorimetry = strdup(gst_structure_get_value(source_str_caps, "colorimetry"));
+		videoFormatColorimetry_len = strlen(videoFormatColorimetry);
+	}else{
+
+	}
+	
+	if( gst_structure_has_field(source_str_caps, "interlaced")){
+		videoFormatInterlaced = *( (long*) gst_structure_get_value(source_str_caps, "interlaced "));
+	}else{
+
+	}
+	/*
+	 * Check if videoFormatTable is empty or not.
+	 * if it is, it means that we ar the first to add a format into it for this device
+	 */
+/*	if(videoFormatTable_head == NULL){
+		temp_videoFormat = videoFormatTable_createEntry(0, 															videoChannel,
+			   											enable, 													(char*) gst_structure_get_name_id(source_str_caps), 
+														strlen((char*) gst_structure_get_name_id(source_str_caps)),  
+	}
+
+	temp_videoFormat*/
 }
 
 int stream (int   argc,  char *argv[])
@@ -291,27 +361,22 @@ int stream (int   argc,  char *argv[])
 		}
 	}
 	
-	/* For test purposes, if user specify mp4 as format, encrypt the vidoe */
-//	if( !strcmp(format, "mp4")){
-	   /* Media stream Type detection */
-		media_type = strdup (type_detection(GST_BIN(pipeline), last, loop));
-/*	}else{
-	    /* Media stream Type detection */
-//		media_type = strdup (type_detection(GST_BIN(pipeline), capsfilter, loop));  
-//	}
-
-
+   	/* Media stream Type detection */
+	media_type = strdup (type_detection(GST_BIN(pipeline), last, loop));
 	/* Create the VIVOE pipeline for MPEG-4 videos */
 	GstCaps 		*detected 		= gst_caps_from_string(media_type);
 	GstStructure 	*str_detected 	= gst_caps_get_structure(detected, 0);
+
+	/* Initialize the MIB */
+
 	if ( gst_structure_has_name( str_detected, "video/mpeg")){
-		if(! mp4_pipeline(pipeline, bus, bus_watch_id,loop,/* enc*/ last,  ip,  port)){
+		if(! mp4_pipeline(pipeline, bus, bus_watch_id,loop, last,  ip,  port)){
 			g_printerr ( "Failed to create pipeline for MPEG-4 video\n");
 			return EXIT_FAILURE; 
 		}
 	}else if( gst_structure_has_name( str_detected, "video/x-raw")){
 	/* Create the VIVOE pipeline for RAW videos */	
-		if (! raw_pipeline(pipeline, bus, bus_watch_id,loop,/* capsfilter*/ last ,  ip,  port)){
+		if (! raw_pipeline(pipeline, bus, bus_watch_id,loop, last ,  ip,  port)){
 			g_printerr ( "Failed to create pipeline for RAW video\n");
 			return EXIT_FAILURE; 
 		}
