@@ -45,14 +45,9 @@ typedef struct {
     int         number; /*the number of parameters in that group*/
 }MIB_group;
 
-
-
-
+/* --------------------------------- Group DeviceInfo --------------------------------- */
 /* define the number of deviceInfo's parameters in a MACRO, so it is more evolutive! */
-#define DEVICEINFO_NUM_PARAM 19
-
-MIB_group deviceInfo;
-
+#define DEVICEINFO_NUM_PARAM 			19
 
 /*set the declaration of the position of each parameter in the array parameters of deviceInfo MIB_group*/
 #define num_DeviceDesc                  0
@@ -75,6 +70,15 @@ MIB_group deviceInfo;
 #define num_DeviceMode                  17
 #define num_DeviceReset                 18
 
+MIB_group deviceInfo;
+/* --------------------------------- end Group DeviceInfo --------------------------------- */
+
+
+/* --------------------------------- Group videoFormatInfo --------------------------------- */
+
+
+MIB_group videoFormatInfo;
+/* --------------------------------- end Group videoFormatInfo --------------------------------- */
 
 
 #endif /* MIBPARAMETERS_H */
