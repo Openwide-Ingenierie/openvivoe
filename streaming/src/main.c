@@ -21,13 +21,17 @@
 #define MAX_DEFAULT_PORT 65535
 
 /*
- *  Pad templates
- *  Limitate the source pads of the RTP payloader to only
- *  VIVOE format. Refer to the DEfStan-0082 to see which video
- *  format are allowed in VIVOE
- *  */
+ * This is a strcuture we need to define in order to get the media type of input source video
+ * */
+typedef struct{
+	GMainLoop 	* loop; /* the GMainLoop to use in the media type detection function */
+	char * type; /* the media type that will be detected */
+}data_type_detection;
 
 
+/*
+ * Handle the Bus: display message, get interruption, etc...
+ * */
 static gboolean bus_call (  GstBus     *bus,
 							GstMessage *msg,
 							gpointer    data)
@@ -59,6 +63,41 @@ static gboolean bus_call (  GstBus     *bus,
 
 	return TRUE;
 }
+
+
+/* 
+ * This is needed to exit the video type detection function
+ * */
+static gboolean
+idle_exit_loop (gpointer data)
+{
+  g_main_loop_quit ((GMainLoop *) data);
+
+  /* once */
+  return FALSE;
+}
+
+/* 
+ * This function is used to detect the capabilities of the video
+ * source of the pipeline.
+ * Return: the name of media stream type, NULL if detection did not work
+ * */
+static void cb_typefound (GstElement 				*typefind,
+					      guint      				probability,
+					      GstCaps    				*caps,
+					      data_type_detection 		*data)
+{
+	GMainLoop *loop = data->loop;
+	data->type = strdup( (const char*) gst_caps_to_string (caps));
+	g_print ("Media type %s found, probability %d%%\n", data->type, probability);
+	/* since we connect to a signal in the pipeline thread context, we need
+	 * to set an idle handler to exit the main loop in the mainloop context.
+	 * Normally, your app should not need to worry about such things. */
+	g_idle_add (idle_exit_loop, loop);
+}
+
+
+
 /* 
  * This function is used to check the parameters used for intialize the stream
  */
@@ -110,6 +149,45 @@ static int check_param(int argc, char* argv[], char** ip, gint* port, char** for
 	return EXIT_SUCCESS;
 }
 
+
+/* 
+ * Media Stream Capabilities detection 
+ * */
+static const char* type_detection(GstBin *pipeline, GstElement *input_video, GMainLoop *loop){
+	GstElement  *typefind,  *fakesink;
+	data_type_detection* data = malloc(sizeof(data_type_detection));
+	const char* return_type;
+	data->loop 	= loop;
+	/* Create typefind element */
+	typefind = gst_element_factory_make ("typefind", "typefinder");	
+	if(typefind == NULL){
+		g_printerr ("Fail to detect Media Stream type\n");
+		return NULL;		
+	}
+	/* Connect typefind element to handler */
+	g_signal_connect (typefind, "have-type", G_CALLBACK (cb_typefound), data);	
+  	fakesink = gst_element_factory_make ("fakesink", "sink");
+	if(fakesink == NULL){
+		g_printerr ("Fail to detect Media Stream type\n");
+		return NULL;	
+	}
+  	gst_bin_add_many (GST_BIN (pipeline), typefind, fakesink, NULL);
+  	gst_element_link_many (input_video, typefind, fakesink, NULL);
+    gst_element_set_state (GST_ELEMENT (pipeline), GST_STATE_PLAYING);
+	g_main_loop_run (loop);
+	/* Video type found */	
+  	gst_element_set_state (GST_ELEMENT (pipeline), GST_STATE_NULL);
+
+	/*Remove typefind and fakesink from pipeline */
+	gst_bin_remove(GST_BIN(pipeline), typefind);
+	gst_bin_remove(GST_BIN(pipeline), fakesink);	
+	return_type = strdup(data->type);
+	free(data);	
+	return return_type;
+}
+
+
+
 int main (int   argc,  char *argv[])
 {
     /* Initialization of elements needed */
@@ -120,7 +198,7 @@ int main (int   argc,  char *argv[])
 	gchar* ip = g_strdup( (gchar*) DEFAULT_IP);
 	gint port 	= DEFAULT_PORT;
 	char* format = strdup(DEFAULT_FORMAT);
-
+	char* media_type; /* this is where we will store the media type detected */
 
 	/*
 	 * For now, the source is created manually, directly into the code
@@ -158,19 +236,21 @@ int main (int   argc,  char *argv[])
 		g_printerr ( "error cannot create element: %s\n", "capsfilter" );
 		return EXIT_FAILURE;        
 	}
-	caps = gst_caps_from_string("video/x-raw, format=I420, width=320, height=240");
-	g_object_set (capsfilter, "caps", caps, NULL); 
-	gst_bin_add_many (GST_BIN(pipeline), source, capsfilter, NULL); 
-	gst_element_link (source, capsfilter); 
+	caps = gst_caps_from_string("video/x-raw, format=I420, width=1920, height=1080");
+	g_return_if_fail (gst_caps_is_fixed (caps));	
 	/* ---------------------------------------------------------------------------- */
-
 
 	/* we add a message handler */
 	bus = gst_pipeline_get_bus ( GST_PIPELINE(pipeline));
     bus_watch_id = gst_bus_add_watch (bus, bus_call, loop);
     gst_object_unref (bus);
 
-	
+	g_object_set (capsfilter, "caps", caps, NULL); 
+	gst_bin_add_many (GST_BIN(pipeline), source, capsfilter, NULL); 
+	gst_element_link (source, capsfilter); 
+
+
+	/* For test purposes, if user specify mp4 as format, encrypt the vidoe */
 	if( !strcmp(format, "mp4")){
 		/* For test puposes, if we wanna test our program with a fake mpeg-4 source, it necessary to create is mannually with an encoder */
 		/*create the MPEG-4 encoder */
@@ -181,20 +261,33 @@ int main (int   argc,  char *argv[])
     	}
 		/* add encryptor to pipeline, link it to the source */
 		gst_bin_add (GST_BIN(pipeline), enc); 
-		gst_element_link (capsfilter, enc); 
-		/* Create the VIVOE pipeline for MPEG-4 videos */	
+		gst_element_link (capsfilter, enc);
+	   /* Media stream Type detection */
+		media_type = strdup (type_detection(GST_BIN(pipeline), enc, loop));
+	}else{
+	    /* Media stream Type detection */
+		media_type = strdup (type_detection(GST_BIN(pipeline), capsfilter, loop));  
+	}
+	/* Create the VIVOE pipeline for MPEG-4 videos */
+	GstCaps 		*detected 		= gst_caps_from_string(media_type);
+	GstStructure 	*str_detected 	= gst_caps_get_structure(detected, 0);
+	if ( gst_structure_has_name( str_detected, "video/mpeg")){
 		if(! mp4_pipeline(pipeline, bus, bus_watch_id,loop, enc,  ip,  port)){
 			g_printerr ( "Failed to create pipeline for MPEG-4 video\n");
 			return EXIT_FAILURE; 
 		}
-	}else{
-		/* Create the VIVOE pipeline for RAW videos */	
-		if(! raw_pipeline(pipeline, bus, bus_watch_id,loop, capsfilter ,  ip,  port)){
+	}else if( gst_structure_has_name( str_detected, "video/x-raw")){
+	/* Create the VIVOE pipeline for RAW videos */	
+		if (! raw_pipeline(pipeline, bus, bus_watch_id,loop, capsfilter ,  ip,  port)){
 			g_printerr ( "Failed to create pipeline for RAW video\n");
 			return EXIT_FAILURE; 
 		}
 	}
-    /* Set the pipeline to "playing" state*/
+	else {
+		g_printerr ( "Unknow video type\n");
+		return EXIT_FAILURE; 
+	}
+	/* Set the pipeline to "playing" state*/
     g_print ("Now playing\n");
     gst_element_set_state (pipeline, GST_STATE_PLAYING);
 
