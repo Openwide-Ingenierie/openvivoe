@@ -73,35 +73,11 @@ typedef struct {
 MIB_group deviceInfo;
 /* --------------------------------- end Group DeviceInfo --------------------------------- */
 
-
-/* --------------------------------- Group videoFormatInfo --------------------------------- */
-/* define the number of videoFormatInfo's parameters in a MACRO, so it is more evolutive! */
-#define VIDEOFORMAT_NUM_PARAM 				20
-
-/*set the declaration of the position of each parameter in the array parameters of videoFormatInfo MIB_group*/
-#define num_videoFormatIndex            	0
-#define num_videoFormatType             	1
-#define num_videoFormatStatus           	2
-#define num_videoFormatBase             	3
-#define num_videoFormatSampling         	4
-#define num_videoFormatBitDepth         	5
-#define num_videoFormatFps              	6
-#define num_videoFormatColorimetry      	7
-#define num_videoFormatInterlaced       	8
-#define num_videoFormatCompressionFactor 	9
-#define num_videoFormatCompressionRate  	10
-#define num_videoFormatMaxHorzRes       	11
-#define num_videoFormatMaxVertRes       	12
-#define num_videoFormatRoiHorzRes       	13
-#define num_videoFormatRoiVertRes       	14
-#define num_videoFormatRoiOriginTop 		15
-#define num_videoFormatRoiOriginLeft    	16
-#define num_videoFormatRoiExtentBottom  	17
-#define num_videoFormatRoiExtentRight   	18
-#define num_videoFormatRtpPt            	19
-
-MIB_group videoFormatInfo;
-/* --------------------------------- end Group videoFormatInfo --------------------------------- */
+/* Initiation of videoFormatNumber to 0, it will be automatically updated each 
+ * time a new videoFormat is detected on the display
+ */
+extern parameter videoFormatNumber;
+/* --------------------------------- end Group videoFormatInfo ---------------------------- */
 
 
 #endif /* MIBPARAMETERS_H */

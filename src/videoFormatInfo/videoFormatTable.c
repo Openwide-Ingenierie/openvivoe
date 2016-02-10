@@ -87,8 +87,8 @@ initialize_table_videoFormatTable(void)
 
     table_info = SNMP_MALLOC_TYPEDEF( netsnmp_table_registration_info );
     netsnmp_table_helper_add_indexes(table_info,
-                           ASN_INTEGER,  /* index: videoFormatIndex */
-                           0);
+                           			 ASN_INTEGER,  /* index: videoFormatIndex */
+                           			 0);
     table_info->min_column = COLUMN_VIDEOFORMATTYPE;
     table_info->max_column = COLUMN_VIDEOFORMATRTPPT;
     
@@ -103,7 +103,7 @@ initialize_table_videoFormatTable(void)
     /* Initialise the contents of the table here */
 }
 
-#if 0 /* NO right to remove a line from the table */
+#if 0 /* No right to remove a line from the table */
 /* remove a row from the table */
 void
 videoFormatTable_removeEntry( struct videoFormatTable_entry *entry ) {

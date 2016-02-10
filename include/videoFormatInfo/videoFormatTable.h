@@ -95,4 +95,17 @@ struct videoFormatTable_entry {
 
 struct videoFormatTable_entry  *videoFormatTable_head;
 
+struct videoFormatTable_entry * videoFormatTable_createEntry( 	long  videoFormatIndex, 			long videoFormatType,
+																long videoFormatStatus,				char* videoFormatBase,
+																size_t videoFormatBase_len,			char* videoFormatSampling,
+																size_t videoFormatSampling_len,		long videoFormatBitDepth,
+																long videoFormatFps,				char* videoFormatColorimetry,
+																size_t videoFormatColorimetry_len, 	long videoFormatInterlaced,
+																long videoFormatCompressionFactor, 	long videoFormatCompressionRate, 	
+																long videoFormatMaxHorzRes,			long videoFormatMaxVertRes,
+																long videoFormatRoiHorzRes,			long videoFormatRoiVertRes, 
+																long videoFormatRoiOriginTop,		long videoFormatRoiOriginLeft,	
+																long videoFormatRoiExtentBottom, 	long videoFormatRoiExtentRight, 	
+																long videoFormatRtpPt);
+
 #endif /* VIDEOFORMATTABLE_H */

@@ -169,72 +169,8 @@ static int source_creation(GstElement* pipeline, char* format){
 	return EXIT_SUCCESS;
 
 }
-#if 0
-initialize_videoFormat(GstStructure* source_str_caps){
-	struct videoFormatTable_entry temp_videoFormat;
-	
-	/*
-	 * Get from the caps all parameters that we need,
-	 * if there not in the caps, set them to null
-	 * maybe that for further implementation we should 
-	 * make it necessary to specify them all
-	 */
-	const char* videoFormatBase = strdup(gst_structure_get_name_id(source_str_caps));
-	size_t videoFormatBase_len 	= strlen( videoFormatBase );
-	const char* videoFormatSampling; /* Should be a 16 bytes string */
-	size_t videoFormatSampling_len;
-	long videoFormatBitDepth;
-	long videoFormatFps;
-	char* videoFormatColorimetry; /* Should be a 16 bytes string */
-	size_t videoFormatColorimetry_len;
-	long videoFormatInterlaced;
-	long videoFormatCompressionFactor;
 
-	/*VideoFormatSampling*/
-	
-	if( gst_structure_has_field(source_str_caps, "sampling")){
-		videoFormatSampling 	= strdup(gst_structure_get_value(source_str_caps, "sampling"));
-		videoFormatSampling_len = strlen(videoFormatSampling);
-	}else{
-		
-	}
-	/*videoFormatBitDepth*/	
-	if( gst_structure_has_field(source_str_caps, "depth")){
-		videoFormatBitDepth = *((long*) gst_structure_get_value(source_str_caps, "depth"));
-	}else{
-	}
-	/*videoFormatFps*/	
-	if( gst_structure_has_field(source_str_caps, "framerate")){
-		videoFormatFps = *( (long*) gst_structure_get_value(source_str_caps, "framerate"));
-	}else{
 
-	}
-	/*videoFormatColorimetry*/	
-	if( gst_structure_has_field(source_str_caps, "colorimetry")){
-		videoFormatColorimetry = strdup(gst_structure_get_value(source_str_caps, "colorimetry"));
-		videoFormatColorimetry_len = strlen(videoFormatColorimetry);
-	}else{
-
-	}
-	/*videoFormatInterlaced*/
-	if( gst_structure_has_field(source_str_caps, "interlaced")){
-		videoFormatInterlaced = *( (long*) gst_structure_get_value(source_str_caps, "interlaced "));
-	}else{
-
-	}
-	/*
-	 * Check if videoFormatTable is empty or not.
-	 * if it is, it means that we ar the first to add a format into it for this device
-	 */
-/*	if(videoFormatTable_head == NULL){
-		temp_videoFormat = videoFormatTable_createEntry(0, 															videoChannel,
-			   											enable, 													(char*) gst_structure_get_name_id(source_str_caps), 
-														strlen((char*) gst_structure_get_name_id(source_str_caps)),  
-	}
-
-	temp_videoFormat*/
-}
-#endif //if 0 
 int stream (int   argc,  char *argv[])
 {
     /* Initialization of elements needed */

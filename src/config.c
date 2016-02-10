@@ -124,7 +124,7 @@ int get_check_configuration(){
 
     for(i=0; i< NUM_GROUP; i++) {
         if( !(g_strv_contains((const gchar* const*) groups,  groupsName_vector[i]))){
-            fprintf (stderr, "Group %s not found in configuration file\nIt should be written in the form [%s]\n", "deviceInfo", "deviceInfo");
+            fprintf (stderr, "Group %s not found in configuration file\nIt should be written in the form [%s]\n",groupsName_vector[i] ,groupsName_vector[i] );
             return EXIT_FAILURE;
         }
     }
@@ -242,7 +242,7 @@ int get_check_configuration(){
     deviceInfo.number       = DEVICEINFO_NUM_PARAM;
     deviceInfo.parameters  = (parameter*) malloc(deviceInfo.number*sizeof(parameter));
     memcpy(deviceInfo.parameters ,deviceInfo_parameters, sizeof(deviceInfo_parameters));
-
+	
     /* free the GKeyFile before leaving the function*/
     g_key_file_free (gkf);
 

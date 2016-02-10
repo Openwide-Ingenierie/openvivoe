@@ -10,6 +10,8 @@
 #include "../../include/mibParameters.h"
 #include "../../include/handler.h"
 
+parameter videoFormatNumber = {"videoFormatNumber",INTEGER,0, {0} };
+
 /** Initializes the videoFormatNumber module */
 void
 init_videoFormatNumber(void)
@@ -31,7 +33,7 @@ handle_videoFormatNumber(netsnmp_mib_handler *handler,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
 {
-   // return handle_rointeger(handler, reginfo, reqinfo, requests, "videoFormatNumber" , &(/*videoFormatInfo*/.parameters[/*num_videoformatNumber*/]._value.int_val));	
+    return handle_ROinteger(handler, reginfo, reqinfo, requests, videoFormatNumber._name , &(videoFormatNumber._value.int_val));	
 }
 
 
