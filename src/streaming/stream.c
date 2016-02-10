@@ -13,6 +13,8 @@
 #include <arpa/inet.h> 
 #include "../../include/streaming/pipeline.h"
 #include "../../include/streaming/stream.h"
+#include "../../include/streaming/detect.h"
+
 
 /* In order to initialize the MIB */
 #include <net-snmp/net-snmp-config.h>
@@ -30,15 +32,6 @@
 
 #define MIN_DEFAULT_PORT 1024
 #define MAX_DEFAULT_PORT 65535
-
-
-/*
- * This is a strcuture we need to define in order to get the media type of input source video
- * */
-typedef struct{
-	GMainLoop 	* loop; /* the GMainLoop to use in the media type detection function */
-	char * type; /* the media type that will be detected */
-}data_type_detection;
 
 
 /*
@@ -74,37 +67,6 @@ static gboolean bus_call (  GstBus     *bus,
 	}
 
 	return TRUE;
-}
-
-/* 
- * This is needed to exit the video type detection function
- * */
-static gboolean
-idle_exit_loop (gpointer data)
-{
-  g_main_loop_quit ((GMainLoop *) data);
-
-  /* once */
-  return FALSE;
-}
-
-/* 
- * This function is used to detect the capabilities of the video
- * source of the pipeline.
- * Return: the name of media stream type, NULL if detection did not work
- * */
-static void cb_typefound (GstElement 				*typefind,
-					      guint      				probability,
-					      GstCaps    				*caps,
-					      data_type_detection 		*data)
-{
-	GMainLoop *loop = data->loop;
-	data->type = strdup( (const char*) gst_caps_to_string (caps));
-	g_print ("Media type %s found, probability %d%%\n", data->type, probability);
-	/* since we connect to a signal in the pipeline thread context, we need
-	 * to set an idle handler to exit the main loop in the mainloop context.
-	 * Normally, your app should not need to worry about such things. */
-	g_idle_add (idle_exit_loop, loop);
 }
 
 /* 
@@ -159,42 +121,6 @@ static int check_param(int argc, char* argv[], char** ip, gint* port, char** for
 }
 
 
-/* 
- * Media Stream Capabilities detection 
- * */
-static const char* type_detection(GstBin *pipeline, GstElement *input_video, GMainLoop *loop){
-	GstElement  *typefind,  *fakesink;
-	data_type_detection* data = malloc(sizeof(data_type_detection));
-	const char* return_type;
-	data->loop 	= loop;
-	/* Create typefind element */
-	typefind = gst_element_factory_make ("typefind", "typefinder");	
-	if(typefind == NULL){
-		g_printerr ("Fail to detect Media Stream type\n");
-		return NULL;		
-	}
-	/* Connect typefind element to handler */
-	g_signal_connect (typefind, "have-type", G_CALLBACK (cb_typefound), data);	
-  	fakesink = gst_element_factory_make ("fakesink", "sink");
-	if(fakesink == NULL){
-		g_printerr ("Fail to detect Media Stream type\n");
-		return NULL;	
-	}
-  	gst_bin_add_many (GST_BIN (pipeline), typefind, fakesink, NULL);
-  	gst_element_link_many (input_video, typefind, fakesink, NULL);
-    gst_element_set_state (GST_ELEMENT (pipeline), GST_STATE_PLAYING);
-	g_main_loop_run (loop);
-	/* Video type found */	
-  	gst_element_set_state (GST_ELEMENT (pipeline), GST_STATE_NULL);
-
-	/*Remove typefind and fakesink from pipeline */
-	gst_bin_remove(GST_BIN(pipeline), typefind);
-	gst_bin_remove(GST_BIN(pipeline), fakesink);	
-	return_type = strdup(data->type);
-	free(data);	
-	return return_type;
-}
-
 
 /*
  * For test purposes
@@ -243,7 +169,7 @@ static int source_creation(GstElement* pipeline, char* format){
 	return EXIT_SUCCESS;
 
 }
-
+#if 0
 initialize_videoFormat(GstStructure* source_str_caps){
 	struct videoFormatTable_entry temp_videoFormat;
 	
@@ -253,7 +179,6 @@ initialize_videoFormat(GstStructure* source_str_caps){
 	 * maybe that for further implementation we should 
 	 * make it necessary to specify them all
 	 */
-	/*videoFormatBase*/
 	const char* videoFormatBase = strdup(gst_structure_get_name_id(source_str_caps));
 	size_t videoFormatBase_len 	= strlen( videoFormatBase );
 	const char* videoFormatSampling; /* Should be a 16 bytes string */
@@ -264,31 +189,34 @@ initialize_videoFormat(GstStructure* source_str_caps){
 	size_t videoFormatColorimetry_len;
 	long videoFormatInterlaced;
 	long videoFormatCompressionFactor;
+
+	/*VideoFormatSampling*/
+	
 	if( gst_structure_has_field(source_str_caps, "sampling")){
 		videoFormatSampling 	= strdup(gst_structure_get_value(source_str_caps, "sampling"));
 		videoFormatSampling_len = strlen(videoFormatSampling);
 	}else{
 		
 	}
-	
+	/*videoFormatBitDepth*/	
 	if( gst_structure_has_field(source_str_caps, "depth")){
 		videoFormatBitDepth = *((long*) gst_structure_get_value(source_str_caps, "depth"));
 	}else{
 	}
-	
+	/*videoFormatFps*/	
 	if( gst_structure_has_field(source_str_caps, "framerate")){
 		videoFormatFps = *( (long*) gst_structure_get_value(source_str_caps, "framerate"));
 	}else{
 
 	}
-
+	/*videoFormatColorimetry*/	
 	if( gst_structure_has_field(source_str_caps, "colorimetry")){
 		videoFormatColorimetry = strdup(gst_structure_get_value(source_str_caps, "colorimetry"));
 		videoFormatColorimetry_len = strlen(videoFormatColorimetry);
 	}else{
 
 	}
-	
+	/*videoFormatInterlaced*/
 	if( gst_structure_has_field(source_str_caps, "interlaced")){
 		videoFormatInterlaced = *( (long*) gst_structure_get_value(source_str_caps, "interlaced "));
 	}else{
@@ -306,7 +234,7 @@ initialize_videoFormat(GstStructure* source_str_caps){
 
 	temp_videoFormat*/
 }
-
+#endif //if 0 
 int stream (int   argc,  char *argv[])
 {
     /* Initialization of elements needed */
@@ -343,7 +271,7 @@ int stream (int   argc,  char *argv[])
 		g_printerr ( "Failed to create videosource\n");	
 		return EXIT_FAILURE;	
 	}
-	
+
 	/* get the last element in pipeline from the source
 	 * For debug purposes, we have create the source: 
 	 * if it is raw video: capsfilter (name "capsfilter) is the last element
@@ -361,22 +289,20 @@ int stream (int   argc,  char *argv[])
 		}
 	}
 	
-   	/* Media stream Type detection */
+  	/* Media stream Type detection */
 	media_type = strdup (type_detection(GST_BIN(pipeline), last, loop));
 	/* Create the VIVOE pipeline for MPEG-4 videos */
 	GstCaps 		*detected 		= gst_caps_from_string(media_type);
 	GstStructure 	*str_detected 	= gst_caps_get_structure(detected, 0);
 
-	/* Initialize the MIB */
-
 	if ( gst_structure_has_name( str_detected, "video/mpeg")){
-		if(! mp4_pipeline(pipeline, bus, bus_watch_id,loop, last,  ip,  port)){
+		if(! mp4_pipeline(pipeline, bus, bus_watch_id, loop, last,  ip,  port)){
 			g_printerr ( "Failed to create pipeline for MPEG-4 video\n");
 			return EXIT_FAILURE; 
 		}
 	}else if( gst_structure_has_name( str_detected, "video/x-raw")){
 	/* Create the VIVOE pipeline for RAW videos */	
-		if (! raw_pipeline(pipeline, bus, bus_watch_id,loop, last ,  ip,  port)){
+		if (! raw_pipeline(pipeline, bus, bus_watch_id, loop, last ,  ip,  port)){
 			g_printerr ( "Failed to create pipeline for RAW video\n");
 			return EXIT_FAILURE; 
 		}
