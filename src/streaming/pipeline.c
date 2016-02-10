@@ -14,6 +14,7 @@
 #include "../../include/streaming/pipeline.h"
 #include "../../include/streaming/filter.h"
 #include "../../include/streaming/detect.h"
+#include "../../include/streaming/stream_registration.h"
 
 
 /* This function create the VIVOE pipeline for RAW videos
@@ -21,8 +22,8 @@
  * Return TRUE is pipeline succed to be constructed, false otherwise
  */
 gboolean raw_pipeline( 	GstElement*pipeline, 	GstBus *bus,
-						guint bus_watch_id, GMainLoop *loop,
-						GstElement* input, 	char* ip, gint port){
+						guint bus_watch_id, 	GMainLoop *loop,
+						GstElement* input, 		char* ip, gint port){
 	
 	/*Create element that will be add to the pipeline */
 	GstElement *rtp, *udpsink;
@@ -64,6 +65,9 @@ gboolean raw_pipeline( 	GstElement*pipeline, 	GstBus *bus,
 	GstCaps 		*detected 		= gst_caps_from_string(mib_caps);
 	GstStructure 	*str_detected 	= gst_caps_get_structure(detected, 0);
 	
+	/* Fill the MIB before launching the pipeline */
+	initialize_videoFormat(str_detected);	
+
  	/* we link the elements together */
 	if ( !gst_element_link_many (rtp, udpsink, NULL)){
 		g_print ("Failed to link one or more elements for RAW streaming!\n");

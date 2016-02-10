@@ -44,55 +44,63 @@ int initialize_videoFormat(GstStructure* source_str_caps){
 	 * make it necessary to specify them all
 	 */
 
-	char* videoFormatBase;
-	size_t videoFormatBase_len;
-	char* videoFormatSampling; /* Should be a 16 bytes string */
-	size_t videoFormatSampling_len;
-	long videoFormatBitDepth;
-	long videoFormatFps;
-	char* videoFormatColorimetry; /* Should be a 16 bytes string */
-	size_t videoFormatColorimetry_len;
-	long videoFormatInterlaced;
-	long videoFormatCompressionFactor = 0;
-	long videoFormatCompressionRate   = 0;
-	long videoFormatMaxHorzRes;
- 	long videoFormatMaxVertRes;
+	char* videoFormatBase 				= NULL;
+	size_t videoFormatBase_len 			= 0;
+	char* videoFormatSampling 			= NULL; /* Should be a 16 bytes string */
+	size_t videoFormatSampling_len 		= 0;
+	long videoFormatBitDepth 			= 0;
+	long videoFormatFps 				= 0;
+	char* videoFormatColorimetry 		= NULL; /* Should be a 16 bytes string */
+	size_t videoFormatColorimetry_len 	= 0;
+	long videoFormatInterlaced 			= 0;
+	long videoFormatCompressionFactor 	= 0;
+	long videoFormatCompressionRate   	= 0;
+	long videoFormatMaxHorzRes 			= 0;
+ 	long videoFormatMaxVertRes 			= 0;
 
-	
+	printf("here\n");	
 	/*videoFormatBase*/
 	if( gst_structure_has_field(source_str_caps, "encoding-name")){
-		videoFormatBase				= strdup((const char*) gst_structure_get_value(source_str_caps, "encoding-name"));
+		videoFormatBase				= (char*) g_value_dup_string (gst_structure_get_value(source_str_caps, "encoding-name"));
 		videoFormatBase_len 		= strlen(videoFormatBase);
+		printf("got it videoFormatBase: %s, length: %ld \n",videoFormatBase, videoFormatBase_len );
 	}
 	/*VideoFormatSampling*/
 	if( gst_structure_has_field(source_str_caps, "sampling")){
-		videoFormatSampling 		= strdup((const char*) gst_structure_get_value(source_str_caps, "sampling"));
+		videoFormatSampling 		= (char*) g_value_dup_string (gst_structure_get_value(source_str_caps, "sampling"));
 		videoFormatSampling_len 	= strlen(videoFormatSampling);
+		printf("got it VideoFormatSampling: %s, length: %ld\n",videoFormatSampling,videoFormatSampling_len  );				
 	}
 	/*videoFormatBitDepth*/	
 	if( gst_structure_has_field(source_str_caps, "depth")){
-		videoFormatBitDepth 		= *((long*) gst_structure_get_value(source_str_caps, "depth"));
+		videoFormatBitDepth 		=  strtol ( (char* ) g_value_dup_string ( gst_structure_get_value(source_str_caps, "depth")), NULL , 10 ); /* the string is converted into long int, basis 10 */
+		printf("got it videoFormatBitDepth: %ld\n", videoFormatBitDepth);		
 	}
 	/*videoFormatFps*/	
 	if( gst_structure_has_field(source_str_caps, "framerate")){
 		videoFormatFps 				= *( (long*) gst_structure_get_value(source_str_caps, "framerate"));
+		printf("got it videoFormatFps\n");				
 	}
 	/*videoFormatColorimetry*/	
 	if( gst_structure_has_field(source_str_caps, "colorimetry")){
-		videoFormatColorimetry 		= strdup( (const char*) gst_structure_get_value(source_str_caps, "colorimetry"));
+		videoFormatColorimetry 		= (char*)g_value_dup_string (gst_structure_get_value(source_str_caps, "colorimetry"));
 		videoFormatColorimetry_len 	= strlen(videoFormatColorimetry);
+		printf("got it videoFormatColorimetry: %s, legnth: %ld\n",videoFormatColorimetry,videoFormatColorimetry_len  );				
 	}
 	/*videoFormatInterlaced*/
 	if( gst_structure_has_field(source_str_caps, "interlaced")){
 		videoFormatInterlaced 		= *( (long*) gst_structure_get_value(source_str_caps, "interlaced "));
+		printf("got it videoFormatInterlaced: %ld\n", videoFormatInterlaced);				
 	}	
 	/*videoFormatMaxHorzRes*/
 	if( gst_structure_has_field(source_str_caps, "height")){
-	 	videoFormatMaxHorzRes	= *( (long*) gst_structure_get_value(source_str_caps, "height"));
+	 	videoFormatMaxHorzRes		= strtol ( (char* ) g_value_dup_string ( gst_structure_get_value(source_str_caps, "height")), NULL , 10 ); /* the string is converted into long int, basis 10 */
+		printf("got it videoFormatMaxHorzRes: %ld\n", videoFormatMaxHorzRes);
 	}	
 	/*videoFormatMaxVertRes*/
 	if( gst_structure_has_field(source_str_caps, "width")){
-	 	videoFormatMaxVertRes	= *( (long*) gst_structure_get_value(source_str_caps, "width"));
+	 	videoFormatMaxVertRes		= strtol ( (char* ) g_value_dup_string ( gst_structure_get_value(source_str_caps, "width")), NULL , 10 ); /* the string is converted into long int, basis 10 */
+		printf("got it videoFormatMaxVertRes: %ld\n",videoFormatMaxVertRes );				
 	}	
 
 	/* Check if entry already exits;
