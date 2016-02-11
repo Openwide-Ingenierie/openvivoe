@@ -16,21 +16,22 @@ init_videoFormatTable(void)
     initialize_table_videoFormatTable();
 }
 
-
-
-/* create a new row in the (unsorted) table */
-struct videoFormatTable_entry * videoFormatTable_createEntry( 	long  videoFormatIndex, 			long videoFormatType,
-																long videoFormatStatus,				char* videoFormatBase,
-																size_t videoFormatBase_len,			char* videoFormatSampling,
-																size_t videoFormatSampling_len,		long videoFormatBitDepth,
-																long videoFormatFps,				char* videoFormatColorimetry,
-																size_t videoFormatColorimetry_len, 	long videoFormatInterlaced,
-																long videoFormatCompressionFactor, 	long videoFormatCompressionRate, 	
-																long videoFormatMaxHorzRes,			long videoFormatMaxVertRes,
-																long videoFormatRoiHorzRes,			long videoFormatRoiVertRes, 
-																long videoFormatRoiOriginTop,		long videoFormatRoiOriginLeft,	
-																long videoFormatRoiExtentBottom, 	long videoFormatRoiExtentRight, 	
-																long videoFormatRtpPt) {
+/*
+ * Only initiate the memeber of the structure but do not add this entry in the table
+ * to add the entry into the table, use the function above
+ */
+struct videoFormatTable_entry * videoFormatTable_initiateEntry( 	long  videoFormatIndex, 			long videoFormatType,
+																	long videoFormatStatus,				char* videoFormatBase,
+																	size_t videoFormatBase_len,			char* videoFormatSampling,
+																	size_t videoFormatSampling_len,		long videoFormatBitDepth,
+																	long videoFormatFps,				char* videoFormatColorimetry,
+																	size_t videoFormatColorimetry_len, 	long videoFormatInterlaced,
+																	long videoFormatCompressionFactor, 	long videoFormatCompressionRate, 	
+																	long videoFormatMaxHorzRes,			long videoFormatMaxVertRes,
+																	long videoFormatRoiHorzRes,			long videoFormatRoiVertRes, 
+																	long videoFormatRoiOriginTop,		long videoFormatRoiOriginLeft,	
+																	long videoFormatRoiExtentBottom, 	long videoFormatRoiExtentRight, 	
+																	long videoFormatRtpPt) {
 
     struct videoFormatTable_entry *entry;
 
@@ -60,14 +61,56 @@ struct videoFormatTable_entry * videoFormatTable_createEntry( 	long  videoFormat
  	entry->videoFormatRoiExtentBottom 	= videoFormatRoiExtentBottom;
 	entry->videoFormatRoiExtentRight 	= videoFormatRoiExtentRight;
 	entry->videoFormatRtpPt 			= videoFormatRtpPt;
+    return entry;
+}
 
+/*
+ * Create a new row in the (unsorted) table.
+ * This create an entry and add it into the table
+ * Howeber we need a function which is juste used to intitiate the entry's members
+ * without adding in into the table: intiation a member but do not set the "next"
+ * parameter.
+ * */
+struct videoFormatTable_entry * videoFormatTable_createEntry( 	long  videoFormatIndex, 			long videoFormatType,
+																long videoFormatStatus,				char* videoFormatBase,
+																size_t videoFormatBase_len,			char* videoFormatSampling,
+																size_t videoFormatSampling_len,		long videoFormatBitDepth,
+																long videoFormatFps,				char* videoFormatColorimetry,
+																size_t videoFormatColorimetry_len, 	long videoFormatInterlaced,
+																long videoFormatCompressionFactor, 	long videoFormatCompressionRate, 	
+																long videoFormatMaxHorzRes,			long videoFormatMaxVertRes,
+																long videoFormatRoiHorzRes,			long videoFormatRoiVertRes, 
+																long videoFormatRoiOriginTop,		long videoFormatRoiOriginLeft,	
+																long videoFormatRoiExtentBottom, 	long videoFormatRoiExtentRight, 	
+																long videoFormatRtpPt) {
+
+    struct videoFormatTable_entry *entry;
+
+    entry = SNMP_MALLOC_TYPEDEF(struct videoFormatTable_entry);
+    if (!entry)
+        return NULL;
+	
+	/* initiate the Entry */
+	videoFormatTable_initiateEntry( videoFormatIndex, 				videoFormatType,
+									videoFormatStatus,				videoFormatBase,
+									videoFormatBase_len,			videoFormatSampling,
+									videoFormatSampling_len,		videoFormatBitDepth,
+									videoFormatFps,				 	videoFormatColorimetry,
+									videoFormatColorimetry_len, 	videoFormatInterlaced,
+									videoFormatCompressionFactor, 	videoFormatCompressionRate, 	
+									videoFormatMaxHorzRes,			videoFormatMaxVertRes,
+									videoFormatRoiHorzRes,			videoFormatRoiVertRes, 
+									videoFormatRoiOriginTop,		videoFormatRoiOriginLeft,	
+									videoFormatRoiExtentBottom, 	videoFormatRoiExtentRight, 	
+									videoFormatRtpPt);
+	/* Link it into the list of entries */ 
     entry->next = videoFormatTable_head;
     videoFormatTable_head = entry;
     return entry;
 }
 
 
-/** Initialize the videoFormatTable table by defining its contents and how it's structured */
+/* Initialize the videoFormatTable table by defining its contents and how it's structured */
 void
 initialize_table_videoFormatTable(void)
 {
