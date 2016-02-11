@@ -116,7 +116,7 @@ struct videoFormatTable_entry * videoFormatTable_createEntry( 	long  videoFormat
 	/* Link it into the list of entries */ 
     entry->next = videoFormatTable_head;
     videoFormatTable_head = entry;
-	//entry->valid = 1;
+	entry->valid = 1;
     return entry;
 }
 

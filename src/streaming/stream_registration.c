@@ -23,7 +23,7 @@
  * if those entries are equal: return TRUE, otherwise return FALSE
  */
 static gboolean compare_entries(struct videoFormatTable_entry* origin, struct videoFormatTable_entry* new){
-	return (( origin->videoFormatBase 				== 	new->videoFormatBase 				) &&
+	 if( 	(( origin->videoFormatBase 				== 	new->videoFormatBase 				) &&
 			( origin->videoFormatSampling 			== 	new->videoFormatSampling 			) &&
 			( origin->videoFormatBitDepth 			== 	new->videoFormatBitDepth 			) &&
 			( origin->videoFormatFps 				== 	new->videoFormatFps 				) &&
@@ -33,7 +33,11 @@ static gboolean compare_entries(struct videoFormatTable_entry* origin, struct vi
 			( origin->videoFormatCompressionRate 	== 	new->videoFormatCompressionRate 	) &&
 			( origin->videoFormatMaxHorzRes 		== 	new->videoFormatMaxHorzRes 			) &&
 			( origin->videoFormatMaxVertRes 		== 	new->videoFormatMaxVertRes 			) 		
-		   );
+		   )){
+		 g_printerr("VideoFormat already exists\n");
+		 return TRUE;		 
+	 }else
+		 return FALSE;
 }
 /* 
  * This function tries to save a maximum of information (in the form of capabilities) 
@@ -143,9 +147,9 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info){
 				/* if their the same: set the status to enable */
 				iterator->videoFormatStatus = enable;
 				exists = TRUE;
-				/* iterator = next entry */
-				iterator = iterator->next;
 			}
+			/* iterator = next entry */
+			iterator = iterator->next;
 		}
 		/* check if the entry does not already exist in the table*/
 		if ( !exists){
