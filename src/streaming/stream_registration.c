@@ -126,6 +126,7 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info){
 											0,											0,	
 											0, 											0, 	
 											0);
+
 			/* increase videoFormatNumber as we added an entry */
 			videoFormatNumber._value.int_val++;
 		}

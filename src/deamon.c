@@ -19,6 +19,7 @@
 #include <net-snmp/library/snmpusm.h> /*for init_usmUser()*/
 
 #include <signal.h>
+
 /*
  * DeviceInfo header
  */
@@ -39,6 +40,12 @@
 #include "../include/deviceInfo/deviceReset.h"
 
 /*
+ * videoFormatInfo header
+ */
+#include "../include/videoFormatInfo/videoFormatNumber.h"
+#include "../include/videoFormatInfo/videoFormatTable.h"
+
+/*
  * Configuration - Initialization of the MIB header
  */
 #include "../include/config.h"
@@ -57,7 +64,6 @@ RETSIGTYPE
 stop_server(int a) {
     keep_running = 0;
 }
-
 
 int deamon () {
     int agentx_subagent=1; /* change this if you want to be a SNMP master agent */
@@ -108,6 +114,8 @@ int deamon () {
     init_deviceNatoStockNumber();
     init_deviceMode();
     init_deviceReset();
+	init_videoFormatNumber();
+	init_videoFormatTable();
 
   /* initialize vacm/usm access control  */
   if (!agentx_subagent) {
@@ -141,5 +149,3 @@ int deamon () {
 
   return EXIT_SUCCESS;
 }
-
-

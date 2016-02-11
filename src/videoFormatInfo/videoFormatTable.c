@@ -61,6 +61,7 @@ struct videoFormatTable_entry * videoFormatTable_initiateEntry( 	long  videoForm
  	entry->videoFormatRoiExtentBottom 	= videoFormatRoiExtentBottom;
 	entry->videoFormatRoiExtentRight 	= videoFormatRoiExtentRight;
 	entry->videoFormatRtpPt 			= videoFormatRtpPt;
+	entry->valid 						= 1;
     return entry;
 }
 
@@ -85,27 +86,37 @@ struct videoFormatTable_entry * videoFormatTable_createEntry( 	long  videoFormat
 																long videoFormatRtpPt) {
 
     struct videoFormatTable_entry *entry;
-
     entry = SNMP_MALLOC_TYPEDEF(struct videoFormatTable_entry);
     if (!entry)
         return NULL;
-	
-	/* initiate the Entry */
-	videoFormatTable_initiateEntry( videoFormatIndex, 				videoFormatType,
-									videoFormatStatus,				videoFormatBase,
-									videoFormatBase_len,			videoFormatSampling,
-									videoFormatSampling_len,		videoFormatBitDepth,
-									videoFormatFps,				 	videoFormatColorimetry,
-									videoFormatColorimetry_len, 	videoFormatInterlaced,
-									videoFormatCompressionFactor, 	videoFormatCompressionRate, 	
-									videoFormatMaxHorzRes,			videoFormatMaxVertRes,
-									videoFormatRoiHorzRes,			videoFormatRoiVertRes, 
-									videoFormatRoiOriginTop,		videoFormatRoiOriginLeft,	
-									videoFormatRoiExtentBottom, 	videoFormatRoiExtentRight, 	
-									videoFormatRtpPt);
+
+    entry->videoFormatIndex 			= videoFormatIndex;
+	entry->videoFormatType 				= videoFormatType;
+	entry->videoFormatStatus 			= videoFormatStatus;
+	entry->videoFormatBase 				= videoFormatBase;
+	entry->videoFormatBase_len 			= videoFormatBase_len;
+	entry->videoFormatSampling 			= videoFormatSampling;
+	entry->videoFormatSampling_len 		= videoFormatSampling_len;
+	entry->videoFormatBitDepth 			= videoFormatBitDepth;
+	entry->videoFormatFps 				= videoFormatFps;
+	entry->videoFormatColorimetry 		= videoFormatColorimetry;
+	entry->videoFormatInterlaced 		= videoFormatInterlaced;
+	entry->videoFormatCompressionFactor = videoFormatCompressionFactor;
+	entry->videoFormatCompressionRate 	= videoFormatCompressionRate;
+	entry->videoFormatMaxHorzRes 		= videoFormatMaxHorzRes;
+ 	entry->videoFormatMaxVertRes 		= videoFormatMaxVertRes;
+	entry->videoFormatRoiHorzRes 		= videoFormatRoiHorzRes;
+ 	entry->videoFormatRoiVertRes 		= videoFormatRoiVertRes;
+	entry->videoFormatRoiOriginTop 		= videoFormatRoiOriginTop;
+ 	entry->videoFormatRoiOriginLeft 	= videoFormatRoiOriginLeft;
+ 	entry->videoFormatRoiExtentBottom 	= videoFormatRoiExtentBottom;
+	entry->videoFormatRoiExtentRight 	= videoFormatRoiExtentRight;
+	entry->videoFormatRtpPt 			= videoFormatRtpPt;
+
 	/* Link it into the list of entries */ 
     entry->next = videoFormatTable_head;
     videoFormatTable_head = entry;
+	//entry->valid = 1;
     return entry;
 }
 

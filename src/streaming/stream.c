@@ -21,7 +21,8 @@
 #include "../../include/streaming/stream_registration.h"
 #include "../../include/streaming/stream.h"
 
-
+/* Just for testing, this should be a different thread*/
+#include "../../include/deamon.h"
 
 /*
  * Macro for testing purposes
@@ -227,10 +228,12 @@ int stream (int   argc,  char *argv[])
 
     /* Iterate */
     g_print ("Running...\n");
+	/* Just for testing for now, this should be a different thread*/
+	 deamon();
     g_main_loop_run (loop);
 
-
-    /* Out of the main loop, clean up nicely */
+	
+	/* Out of the main loop, clean up nicely */
     g_print ("Returned, stopping playback\n");
     gst_element_set_state (pipeline, GST_STATE_NULL);
 
