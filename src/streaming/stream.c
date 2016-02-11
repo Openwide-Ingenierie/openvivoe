@@ -10,18 +10,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <arpa/inet.h> 
-#include "../../include/streaming/pipeline.h"
-#include "../../include/streaming/stream.h"
-#include "../../include/streaming/detect.h"
-
-
+#include <arpa/inet.h>
 /* In order to initialize the MIB */
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "../../include/mibParameters.h"
-#include "../../include/videoFormatInfo/videoFormatTable.h"
+#include "../../include/streaming/pipeline.h"
+#include "../../include/streaming/detect.h"
+#include "../../include/streaming/stream_registration.h"
+#include "../../include/streaming/stream.h"
+
+
 
 /*
  * Macro for testing purposes
@@ -125,11 +125,11 @@ static int check_param(int argc, char* argv[], char** ip, gint* port, char** for
 /*
  * For test purposes
  */
-static int source_creation(GstElement* pipeline, char* format){
+static GstElement* source_creation(GstElement* pipeline, char* format){
 	/*
 	 * For now, the source is created manually, directly into the code
 	 * */
-	GstElement *source, *capsfilter, *enc;	
+	GstElement *source, *capsfilter, *enc, *last;	
 	GstCaps* caps;
 	/*
 	 * For now, the source is created manually, directly into the code
@@ -137,51 +137,53 @@ static int source_creation(GstElement* pipeline, char* format){
 	source = gst_element_factory_make ("videotestsrc", "source");
 	if(source == NULL){
 		g_printerr ("error cannot create element: %s\n", "videotestsrc" );
-		return EXIT_FAILURE;        
+		return NULL;        
 	}
 
 	capsfilter = gst_element_factory_make ("capsfilter","capsfilter");
 	if(capsfilter == NULL){
 		g_printerr ( "error cannot create element: %s\n", "capsfilter" );
-		return EXIT_FAILURE;        
+		return NULL;        
 	}
-	caps = gst_caps_from_string("video/x-raw, format=I420, width=1920, height=1080");
+
+	caps = gst_caps_from_string("video/x-raw, format=I420, width=1280, height=720");
 	g_return_if_fail (gst_caps_is_fixed (caps));	
 
 	/* Put the source in the pipeline */
 	g_object_set (capsfilter, "caps", caps, NULL); 
 	gst_bin_add_many (GST_BIN(pipeline), source, capsfilter, NULL); 
 	gst_element_link (source, capsfilter); 
-
+	/* save last pipeline element*/
+	last = capsfilter;
 	/* For test purposes, if user specify mp4 as format, encrypt the vidoe */
 	if( !strcmp(format, "mp4")){
 		/* For test puposes, if we wanna test our program with a fake mpeg-4 source, it necessary to create is mannually with an encoder */
 		/*create the MPEG-4 encoder */
 		enc = gst_element_factory_make ("avenc_mpeg4", "enc");
+		/* save last pipeline element */
+		last = enc;
 		if(enc == NULL){
 			g_printerr ( "error cannot create element for: %s\n","enc");
-			return EXIT_FAILURE;        
+			return NULL;        
 		}
 		/* add encryptor to pipeline, link it to the source */
 		gst_bin_add (GST_BIN(pipeline), enc); 
 		gst_element_link (capsfilter, enc);
 	}
-	return EXIT_SUCCESS;
-
+	return last;
 }
 
 
 int stream (int   argc,  char *argv[])
 {
     /* Initialization of elements needed */
-    GstElement *pipeline, *last;
+    GstElement *pipeline,*last;
     GstBus *bus;
     guint bus_watch_id;    
     GMainLoop *loop;
 	gchar* ip = g_strdup( (gchar*) DEFAULT_IP);
 	gint port 	= DEFAULT_PORT;
 	char* format = strdup(DEFAULT_FORMAT);
-	char* media_type; /* this is where we will store the media type detected */
 
 	/* Initialize GStreamer */
     gst_init (&argc, &argv);
@@ -202,52 +204,24 @@ int stream (int   argc,  char *argv[])
 	bus = gst_pipeline_get_bus ( GST_PIPELINE(pipeline));
     bus_watch_id = gst_bus_add_watch (bus, bus_call, loop);
     gst_object_unref (bus);
-
-	if ( source_creation(pipeline, format)){
+	
+	/* Source Creation */
+	last = source_creation(pipeline, format);
+	if (last == NULL ){
 		g_printerr ( "Failed to create videosource\n");	
 		return EXIT_FAILURE;	
 	}
 
-	/* get the last element in pipeline from the source
-	 * For debug purposes, we have create the source: 
-	 * if it is raw video: capsfilter (name "capsfilter) is the last element
-	 * otherwise it is avec_mpeg4 (name  "enc")  */
-	last = gst_bin_get_by_name(GST_BIN(pipeline), "enc");
+	/* Create pipeline */
+	last = create_pipeline( pipeline, 		bus, 
+							bus_watch_id, 	loop,
+							last, 			ip,
+					 		port);
+	/* Check if everything went ok */
+	if (last == NULL)
+		return EXIT_FAILURE;
 
-	/* if enc is in the pipeline: type is mp4
-	 * otherwise it is  raw
-	 * */
-	if(last == NULL){
-		last =  gst_bin_get_by_name(GST_BIN(pipeline), "capsfilter");
-		if (last == NULL){
-			g_printerr ( "Failed to get last pipeline element\n");	
-			return EXIT_FAILURE;			
-		}
-	}
-	
-  	/* Media stream Type detection */
-	media_type = strdup (type_detection(GST_BIN(pipeline), last, loop));
-	/* Create the VIVOE pipeline for MPEG-4 videos */
-	GstCaps 		*detected 		= gst_caps_from_string(media_type);
-	GstStructure 	*str_detected 	= gst_caps_get_structure(detected, 0);
-
-	if ( gst_structure_has_name( str_detected, "video/mpeg")){
-		if(! mp4_pipeline(pipeline, bus, bus_watch_id, loop, last,  ip,  port)){
-			g_printerr ( "Failed to create pipeline for MPEG-4 video\n");
-			return EXIT_FAILURE; 
-		}
-	}else if( gst_structure_has_name( str_detected, "video/x-raw")){
-	/* Create the VIVOE pipeline for RAW videos */	
-		if (! raw_pipeline(pipeline, bus, bus_watch_id, loop, last ,  ip,  port)){
-			g_printerr ( "Failed to create pipeline for RAW video\n");
-			return EXIT_FAILURE; 
-		}
-	}
-	else {
-		g_printerr ( "Unknow video type\n");
-		return EXIT_FAILURE; 
-	}
-	/* Set the pipeline to "playing" state*/
+  	/* Set the pipeline to "playing" state*/
     g_print ("Now playing\n");
     gst_element_set_state (pipeline, GST_STATE_PLAYING);
 

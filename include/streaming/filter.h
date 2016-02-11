@@ -33,6 +33,11 @@
     "height = " GST_VIDEO_SIZE_RANGE ", "                       \
     "framerate = " GST_VIDEO_FPS_RANGE
 
+/* Define number associated to a specific format, to know which filter to use */ 
+#define RAW_FILTER 0
+#define MP4_FILTER 1
+#define J2K_FILTER 2
+
 /*#define VIVOE_SIZE_RAW_CAPS { 	"width=576 , height=544", \
 								"width=704 , height=576", \
 								"width=720 , height=576", \
@@ -41,10 +46,10 @@
    								"width=1920 , height=1080"}"*/
 
 
-
+gboolean filter_VIVOE(GstElement* input, GstElement* output, int format);
+#if 0
 gboolean filter_raw( GstElement* input, GstElement* output);
 gboolean filter_mp4( GstElement* input, GstElement* output);
-
+#endif
 
 #endif /* FILTER_H */
-

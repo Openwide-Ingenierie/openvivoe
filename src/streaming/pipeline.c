@@ -17,6 +17,124 @@
 #include "../../include/streaming/stream_registration.h"
 
 
+/*
+ * This function add the RTP element to the pipeline
+ */
+static GstElement* addRTP( GstElement*pipeline, 	GstBus *bus,
+						guint bus_watch_id, 		GMainLoop *loop,
+						GstElement* input, 			char* ip, gint port){
+	/*Create element that will be add to the pipeline */
+	GstElement *rtp = NULL;
+	char* media_type;
+	int format = -1; /* Specify the format to use for filtering*/
+	/* Media stream Type detection */
+	media_type = strdup (type_detection(GST_BIN(pipeline), input, loop));
+	/* Create the VIVOE pipeline for MPEG-4 videos */
+	GstCaps 		*detected 		= gst_caps_from_string(media_type);
+	GstStructure 	*str_detected 	= gst_caps_get_structure(detected, 0);
+	
+	if ( gst_structure_has_name( str_detected, "video/x-raw")){
+		/* For Raw video */
+		rtp 	= gst_element_factory_make ("rtpvrawpay", "rtp");
+		format 	= RAW_FILTER; 
+		/* Check if everything went ok */
+		if( rtp == NULL){
+			g_printerr ( "error cannot create element for: %s\n","rtp");
+			return NULL;        
+		}
+	}else if  (gst_structure_has_name( str_detected, "video/mpeg")){
+		/* For MPEG-4 video */
+		rtp = gst_element_factory_make ("rtpmp4vpay", "rtp");
+		format 	= MP4_FILTER; 		
+		/* Check if everything went ok */
+		if( rtp == NULL){
+			g_printerr ( "error cannot create element for: %s\n","rtp");
+			return NULL;        
+		}
+	}else{
+		g_printerr("unknow type of video stream\n");
+		return NULL;
+	}
+	/* add rtp to pipeline */
+	gst_bin_add(GST_BIN (pipeline), rtp);
+
+	/* Filters out non VIVOE videos, and link input to RTP if video has a valid format*/ 
+	if (!filter_VIVOE(input, rtp, format)){
+		return NULL;
+	}
+	return rtp;
+}
+
+/*
+ * This function add the UDP element to the pipeline
+ */
+static GstElement* addUDP( GstElement*pipeline, GstBus *bus,
+						guint bus_watch_id, 	GMainLoop *loop,
+						GstElement* input, 		char* ip, gint port){
+	/*Create element that will be add to the pipeline */
+	GstElement *udpsink;
+	
+	/* Create the UDP sink */
+    udpsink = gst_element_factory_make ("udpsink", "udpsink");
+    if(udpsink == NULL){
+       g_printerr ( "error cannot create element for: %s\n","udpsink");
+	   return NULL;
+    }
+    /*Set UDP sink properties */
+    g_object_set(   G_OBJECT(udpsink),
+                    "host", ip,
+                    "port", port,
+                    NULL);
+
+	/* add rtp to pipeline */
+	if ( !gst_bin_add(GST_BIN (pipeline),  udpsink )){
+		g_printerr("Unable to add %s to pipeline", gst_element_get_name(udpsink));
+		return NULL;
+	}
+
+	/* we link the elements together */
+	if ( !gst_element_link_many (input, udpsink, NULL)){
+		g_print ("Failed to link one or more elements for RAW streaming!\n");
+	    return NULL;
+	}	
+	return udpsink;
+}
+
+/*
+ * Create the pipeline, add information to MIB at the same time
+ */
+GstElement* create_pipeline( GstElement*pipeline, 	GstBus *bus,
+							 guint bus_watch_id, 	GMainLoop *loop,
+							 GstElement* input, 	char* ip, gint port){
+	GstElement* last;
+   	/* Add RTP element */
+ 	last = addRTP( 	pipeline, 	  bus,
+					bus_watch_id, loop,
+					input, 		  ip,
+					port);
+
+	if(last == NULL){
+		g_printerr("Failed to create pipeline\n");
+		return NULL;
+	}
+	/* FILL MIB */
+
+
+	 /* Add UDP element */
+	last = addUDP( 	pipeline, 	  bus,
+					bus_watch_id, loop,
+					last, ip,     port);
+
+	if (last == NULL){
+		g_printerr("Failed to create pipeline\n");
+		return NULL;
+	}
+	return last;
+
+}
+
+#if 0
+
 /* This function create the VIVOE pipeline for RAW videos
  * On the server side (udpsink)
  * Return TRUE is pipeline succed to be constructed, false otherwise
@@ -66,7 +184,7 @@ gboolean raw_pipeline( 	GstElement*pipeline, 	GstBus *bus,
 	GstStructure 	*str_detected 	= gst_caps_get_structure(detected, 0);
 	
 	/* Fill the MIB before launching the pipeline */
-	initialize_videoFormat(str_detected);	
+//	initialize_videoFormat(str_detected);	
 
  	/* we link the elements together */
 	if ( !gst_element_link_many (rtp, udpsink, NULL)){
@@ -74,7 +192,7 @@ gboolean raw_pipeline( 	GstElement*pipeline, 	GstBus *bus,
 	    return FALSE;
   	}else{
 		return TRUE;
-	}
+	}i
 }
 
 /* This function create the VIVOE pipeline for MPEG-4 videos
@@ -133,4 +251,4 @@ int mp4_pipeline( 	GstElement*pipeline, 	GstBus *bus,
 		return TRUE;
 	}
 }
-
+#endif
