@@ -151,7 +151,10 @@ GstElement* create_pipeline( GstElement*pipeline, 	GstBus *bus,
 	 * Before returning the starting the stream
 	 * Add the entry to the Table, if necessary.
 	 */
-	// initialize_videoFormat(video_stream_info);
+	if( initialize_videoFormat(video_stream_info)){
+		g_printerr("Failed to add entry in the videoFormatTable\n");
+		return NULL;
+	}
 	/* Before returning, free the entry created at the begging*/
 	free(video_stream_info);
 	return last;

@@ -63,7 +63,7 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
 	}
 	/*videoFormatFps*/	
 	if( gst_structure_has_field(source_str_caps, "framerate") && ( video_info->videoFormatFps == 0)){
-		video_info->videoFormatFps 				= *( (long*) gst_structure_get_value(source_str_caps, "framerate"));
+		video_info->videoFormatFps 				= (long) g_value_get_int( gst_structure_get_value(source_str_caps, "framerate"));
 		printf("got it videoFormatFps\n");				
 	}
 	/*videoFormatColorimetry*/	
@@ -98,30 +98,7 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
 }
 
 /* Fill the MIB from information the we success to extract from the pipeline */
-int initialize_videoFormat(struct videoFormatTable_entry *entry){
-	/*
-	 * Get from the caps all parameters that we need,
-	 * if there not in the caps, set them to null
-	 * maybe that for further implementation we should 
-	 * make it necessary to specify them all
-	 */
-
-	static char* 	videoFormatBase 				= NULL;
-	static size_t 	videoFormatBase_len 			= 0;
-	static char* 	videoFormatSampling 			= NULL; /* Should be a 16 bytes string */
-	static size_t 	videoFormatSampling_len 		= 0;
- 	static long 	videoFormatBitDepth 			= 0;
-	static long 	videoFormatFps 					= 0;
-	static char* 	videoFormatColorimetry 			= NULL; /* Should be a 16 bytes string */
-	static size_t 	videoFormatColorimetry_len 		= 0;
-	static long 	videoFormatInterlaced 			= 0;
-	static long 	videoFormatCompressionFactor 	= 0;
-	static long 	videoFormatCompressionRate   	= 0;
-	static long 	videoFormatMaxHorzRes 			= 0;
- 	static long 	videoFormatMaxVertRes 			= 0;
-
-		
-
+int initialize_videoFormat(struct videoFormatTable_entry *video_info){
 	/* Check if entry already exits;
 	 *  _ if yes, do not add a new entry, but set it status to enable if it is not already enable
 	 *  _ if no, increase viodeFormatNumber, and  add a new entry in the table
@@ -137,45 +114,31 @@ int initialize_videoFormat(struct videoFormatTable_entry *entry){
 			return EXIT_FAILURE;
 		}else{
 			/* Then we are sure that we can create a new entry */
-			videoFormatTable_createEntry( 0, 			 					videoChannel,
-						enable, 						videoFormatBase,
-						videoFormatBase_len,			videoFormatSampling,
-						videoFormatSampling_len,		videoFormatBitDepth,
-						videoFormatFps,				 	videoFormatColorimetry,
-						videoFormatColorimetry_len, 	videoFormatInterlaced,
-						videoFormatCompressionFactor, 	videoFormatCompressionRate, 	
-						videoFormatMaxHorzRes,			videoFormatMaxVertRes, 
-						0,								0, 
-						0,								0,	
-						0, 								0, 	
-						0);
+			videoFormatTable_createEntry( 	0, 			 								videoChannel,
+											enable, 									video_info->videoFormatBase,
+											video_info->videoFormatBase_len,			video_info->videoFormatSampling,
+											video_info->videoFormatSampling_len,		video_info->videoFormatBitDepth,
+											video_info->videoFormatFps,				 	video_info->videoFormatColorimetry,
+											video_info->videoFormatColorimetry_len, 	video_info->videoFormatInterlaced,
+											video_info->videoFormatCompressionFactor, 	video_info->videoFormatCompressionRate, 	
+											video_info->videoFormatMaxHorzRes,			video_info->videoFormatMaxVertRes, 
+											0,											0, 
+											0,											0,	
+											0, 											0, 	
+											0);
+			/* increase videoFormatNumber as we added an entry */
+			videoFormatNumber._value.int_val++;
 		}
 	}else{
 		/* if the table of video format is not empty for this device, check if this format is already in the table
 		 * for that, iterate the table
 		 */ 
 		struct videoFormatTable_entry *iterator = videoFormatTable_head ;
-		struct videoFormatTable_entry *temp;
-		temp = SNMP_MALLOC_TYPEDEF(struct videoFormatTable_entry);
-		if (!temp)
-			return EXIT_FAILURE;
-		temp->videoFormatIndex 				= videoFormatNumber._value.int_val +1 ;
-		temp->videoFormatBase 				= videoFormatBase;
-		temp->videoFormatBase_len 			= videoFormatBase_len;
-		temp->videoFormatSampling 			= videoFormatSampling;
-		temp->videoFormatSampling_len 		= videoFormatSampling_len;
-		temp->videoFormatBitDepth 			= videoFormatBitDepth;
-		temp->videoFormatFps 				= videoFormatFps;
-		temp->videoFormatColorimetry 		= videoFormatColorimetry;
-		temp->videoFormatInterlaced 		= videoFormatInterlaced;
-		temp->videoFormatCompressionFactor 	= videoFormatCompressionFactor;
-		temp->videoFormatCompressionRate 	= videoFormatCompressionRate;
-		temp->videoFormatMaxHorzRes 		= videoFormatMaxHorzRes;
-		temp->videoFormatMaxVertRes 		= videoFormatMaxVertRes;
+		video_info->videoFormatIndex = videoFormatNumber._value.int_val +1 ;
 		gboolean exists = FALSE; /* a boolean to indicate weather the entry already exists in the table or not*/
 		while(iterator != NULL && !exists ){
 			/* compare streaming entry format to iterator format*/
-			if(compare_entries(iterator,temp)){
+			if(compare_entries(iterator,video_info)){
 				/* if their the same: set the status to enable */
 				iterator->videoFormatStatus = enable;
 				exists = TRUE;
@@ -187,22 +150,21 @@ int initialize_videoFormat(struct videoFormatTable_entry *entry){
 		if ( !exists){
 			/* So add it!
 			 */
-			videoFormatTable_createEntry( 	videoFormatNumber._value.int_val +1 ,	videoChannel,
-											enable, 								videoFormatBase,
-											videoFormatBase_len,					videoFormatSampling,
-											videoFormatSampling_len,				videoFormatBitDepth,
-											videoFormatFps,				 			videoFormatColorimetry,
-											videoFormatColorimetry_len, 			videoFormatInterlaced,
-											videoFormatCompressionFactor, 			videoFormatCompressionRate, 	
-											videoFormatMaxHorzRes,					videoFormatMaxVertRes, 
-											0,										0, 
-											0,										0,	
-											0, 										0, 	
+			videoFormatTable_createEntry( 	video_info->videoFormatIndex,				videoChannel,
+											enable, 									video_info->videoFormatBase,
+											video_info->videoFormatBase_len,			video_info->videoFormatSampling,
+											video_info->videoFormatSampling_len,		video_info->videoFormatBitDepth,
+											video_info->videoFormatFps,				 	video_info->videoFormatColorimetry,
+											video_info->videoFormatColorimetry_len, 	video_info->videoFormatInterlaced,
+											video_info->videoFormatCompressionFactor, 	video_info->videoFormatCompressionRate, 	
+											video_info->videoFormatMaxHorzRes,			video_info->videoFormatMaxVertRes, 
+											0,											0, 
+											0,											0,	
+											0, 											0, 	
 											0);
 		}
-	/* free temporary entry */
 	/* Do not free iterator, it was positioning on HEAD */
-	free(temp);
+	/* No malloc was done anyway */
 	}
 	return EXIT_SUCCESS;
 }
