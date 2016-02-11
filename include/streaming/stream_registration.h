@@ -6,10 +6,9 @@
  */
 #ifndef STREAM_REGISTRATION_H
 # define STREAM_REGISTRATION_H
-
-#include <glib-2.0/glib.h>
-#include <gstreamer-1.0/gst/gst.h>
-int initialize_videoFormat(GstStructure* source_str_caps);
+struct videoFormatTable_entry; 
+void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *video_info);
+int initialize_videoFormat(struct videoFormatTable_entry *entry);
 
 #endif /* STREAM_REGISTRATION_H */
 

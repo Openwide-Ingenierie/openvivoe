@@ -10,13 +10,14 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "../../include/streaming/detect.h"
 
 /*
  * This is a strcuture we need to define in order to get the media type of input source video
  * */
 typedef struct{
 	GMainLoop 	* loop; /* the GMainLoop to use in the media type detection function */
-	char * type; /* the media type that will be detected */
+	char 		* type; /* the media type that will be detected */
 }data_type_detection;
 
 /* 
@@ -53,10 +54,9 @@ static void cb_typefound (GstElement 				*typefind,
 /* 
  * Media Stream Capabilities detection 
  * */
-const char* type_detection(GstBin *pipeline, GstElement *input_video, GMainLoop *loop){
+GstStructure* type_detection(GstBin *pipeline, GstElement *input_video, GMainLoop *loop){
 	GstElement  *typefind,  *fakesink;
 	data_type_detection* data = malloc(sizeof(data_type_detection));
-	const char* return_type;
 	data->loop 	= loop;
 	/* Create typefind element */
 	typefind = gst_element_factory_make ("typefind", "typefinder");	
@@ -81,7 +81,9 @@ const char* type_detection(GstBin *pipeline, GstElement *input_video, GMainLoop 
 	/*Remove typefind and fakesink from pipeline */
 	gst_bin_remove(GST_BIN(pipeline), typefind);
 	gst_bin_remove(GST_BIN(pipeline), fakesink);
-	return_type = strdup(data->type);
+	/* Create the VIVOE pipeline for MPEG-4 videos */	
+	GstCaps 		*detected 		= gst_caps_from_string(data->type);
+	GstStructure 	*str_detected 	= gst_caps_get_structure(detected, 0);
 	free(data);	
-	return return_type;
+	return str_detected;
 }

@@ -47,9 +47,4 @@
 
 
 gboolean filter_VIVOE(GstElement* input, GstElement* output, int format);
-#if 0
-gboolean filter_raw( GstElement* input, GstElement* output);
-gboolean filter_mp4( GstElement* input, GstElement* output);
-#endif
-
 #endif /* FILTER_H */

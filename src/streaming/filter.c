@@ -39,35 +39,3 @@ gboolean filter_VIVOE(GstElement* input, GstElement* output, int format){
 		return TRUE;	
 	}
 }
-#if 0
-gboolean filter_raw(GstElement* input, GstElement* output, char* format){
-	
-	/* Create a Caps Filter 
-	 * This CapsFilter will be used to limit the 
-	 * video caps in the input pad of RTP payload
-	 * to video format support by VIVOE*/
-	GstCaps *filter = gst_caps_from_string (VIVOE_RAW_CAPS );
-	if ( !gst_element_link_filtered(input, output ,filter)){
-		g_print ("Failed to link one or more elements for RAW streaming!\n");
-	    return FALSE;
-	}else{
-		return TRUE;	
-	}
-}
-
-
-gboolean filter_mp4(GstElement* input, GstElement* output){
-	
-	/* Create a Caps Filter 
-	 * This CapsFilter will be used to limit the 
-	 * video caps in the input pad of RTP payload
-	 * to video format support by VIVOE*/
-	GstCaps *filter = gst_caps_from_string (VIVOE_MPEG4_CAPS );
-	if ( !gst_element_link_filtered(input, output ,filter)){
-		g_print ("Failed to link one or more elements for RAW streaming!\n");
-	    return FALSE;
-	}else{
-		return TRUE;	
-	}
-}
-#endif //if 0

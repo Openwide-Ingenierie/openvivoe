@@ -6,6 +6,7 @@
 #define VIDEOFORMATTABLE_H
 
 /* function declarations */
+
 void init_videoFormatTable(void);
 void initialize_table_videoFormatTable(void);
 Netsnmp_Node_Handler videoFormatTable_handler;
@@ -13,6 +14,7 @@ Netsnmp_First_Data_Point  videoFormatTable_get_first_data_point;
 Netsnmp_Next_Data_Point   videoFormatTable_get_next_data_point;
 NetsnmpCacheLoad videoFormatTable_load;
 NetsnmpCacheFree videoFormatTable_free;
+
 #define VIDEOFORMATTABLE_TIMEOUT  60
 
 /* column number definitions for table videoFormatTable */
