@@ -15,13 +15,13 @@
  * this are the format the came out
  * so their will be the limit formats for VIVOE (with uncompressed videos)
  * */
-#define VIVOE_FORMAT_RAW_FORMATS "{ RGB, RGBA, BGR, BGRA, AYUV, UYVY, I420, Y41B, UYVP }"
+#define VIVOE_FORMAT_RAW_ENCODING "{ RGB, RGBA, BGR, BGRA, AYUV, UYVY, I420, Y41B, UYVP }"
 #define VIVOE_WIDTH_RAW_RANGE "{576, 704, 720, 768, 1280, 1920}"
 #define VIVOE_HEIGHT_RAW_RANGE "{544, 576, 720, 1080}"
 
 #define VIVOE_RAW_CAPS                							\
     "video/x-raw, "                                             \
-    "format = (string) " VIVOE_FORMAT_RAW_FORMATS ", "          \
+    "format = (string) " VIVOE_FORMAT_RAW_ENCODING ", "          \
     "width = " VIVOE_WIDTH_RAW_RANGE ", "                       \
     "height = " VIVOE_HEIGHT_RAW_RANGE ", "                     \
     "framerate = " GST_VIDEO_FPS_RANGE
@@ -37,14 +37,6 @@
 #define RAW_FILTER 0
 #define MP4_FILTER 1
 #define J2K_FILTER 2
-
-/*#define VIVOE_SIZE_RAW_CAPS { 	"width=576 , height=544", \
-								"width=704 , height=576", \
-								"width=720 , height=576", \
-								"width=768 , height=576", \
-								"width=1280 , height=720", \
-   								"width=1920 , height=1080"}"*/
-
 
 gboolean filter_VIVOE(GstElement* input, GstElement* output, int format);
 #endif /* FILTER_H */

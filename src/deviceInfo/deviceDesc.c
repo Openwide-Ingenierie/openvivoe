@@ -32,7 +32,6 @@ int handle_deviceDesc(  netsnmp_mib_handler *handler,
                         netsnmp_agent_request_info   *reqinfo,
                         netsnmp_request_info         *requests)
 {
-        printf("%s\n", deviceInfo.parameters[num_DeviceDesc]._value.string_val);
         return handle_ROstring32(handler, reginfo, reqinfo, requests, "deviceDesc" , deviceInfo.parameters[num_DeviceDesc]._value.string_val);
 
 }

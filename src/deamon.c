@@ -15,9 +15,9 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
+#include <libgen.h>/*for basename*/
 #include <net-snmp/library/vacm.h> /*for init_vacms_vars()*/
 #include <net-snmp/library/snmpusm.h> /*for init_usmUser()*/
-
 #include <signal.h>
 
 /*
@@ -64,7 +64,7 @@ stop_server(int a) {
     keep_running = 0;
 }
 
-int deamon () {
+int deamon (char* deamon_name) {
     int agentx_subagent=1; /* change this if you want to be a SNMP master agent */
     int background = 0; /* change this if you want to run in the background */
     int syslog = 0; /* change this if you want to use syslog */
@@ -93,7 +93,7 @@ int deamon () {
         return EXIT_FAILURE;
     }
     /* initialize the agent library */
-    init_agent("mib_module");
+    init_agent(basename(deamon_name));
 
     /* initialize mib code here
      * this is where we initialize each init_parameterOfMIB routine to be handle by the agent
@@ -123,7 +123,7 @@ int deamon () {
   }
 
   /* example-demon will be used to read example-demon.conf files. */
-  init_snmp("mib_module");
+  init_snmp(basename(deamon_name));
 
   /* If we're going to be a snmp master agent, initial the ports */
   if (!agentx_subagent)
@@ -132,7 +132,7 @@ int deamon () {
   /* In case we receive a request to stop (kill -TERM or kill -INT) */
   keep_running = 1;
   signal(SIGTERM, stop_server);
-  signal(SIGINT, stop_server);
+  signal(SIGINT,  stop_server);
 
   snmp_log(LOG_INFO,"mib_module is up and running.\n");
 

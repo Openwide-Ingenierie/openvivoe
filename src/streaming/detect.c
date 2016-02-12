@@ -44,7 +44,6 @@ static void cb_typefound (GstElement 				*typefind,
 {
 	GMainLoop *loop = data->loop;
 	data->type = strdup( (const char*) gst_caps_to_string (caps));
-	g_print ("Media type %s found, probability %d%%\n", data->type, probability);
 	/* since we connect to a signal in the pipeline thread context, we need
 	 * to set an idle handler to exit the main loop in the mainloop context.
 	 * Normally, your app should not need to worry about such things. */
