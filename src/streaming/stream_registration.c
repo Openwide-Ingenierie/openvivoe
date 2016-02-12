@@ -43,43 +43,50 @@ static gboolean compare_entries(struct videoFormatTable_entry* origin, struct vi
  * This entry should be the same for a given stream, for each time we pass through this function. 
  */
 void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *video_info){
-	
 	/*videoFormatBase*/
-	if( gst_structure_has_field(source_str_caps, "encoding-name") && ( video_info->videoFormatBase == NULL) ){
+	if( gst_structure_has_field(source_str_caps, "encoding-name")){
 		video_info->videoFormatBase				= (char*) g_value_dup_string (gst_structure_get_value(source_str_caps, "encoding-name"));
 		video_info->videoFormatBase_len 		= strlen(video_info->videoFormatBase);
 	}
 	/*VideoFormatSampling*/
-	if( gst_structure_has_field(source_str_caps, "sampling") && ( video_info->videoFormatSampling == NULL) ){
+	if( gst_structure_has_field(source_str_caps, "sampling")){
 		video_info->videoFormatSampling 		= (char*) g_value_dup_string (gst_structure_get_value(source_str_caps, "sampling"));
 		video_info->videoFormatSampling_len 	= strlen(video_info->videoFormatSampling);
 	}
 	/*videoFormatBitDepth*/	
-	if( gst_structure_has_field(source_str_caps, "depth") && ( video_info->videoFormatBitDepth == 0)){
+	if( gst_structure_has_field(source_str_caps, "depth")){
 		video_info->videoFormatBitDepth 		=  strtol ( (char* ) g_value_dup_string ( gst_structure_get_value(source_str_caps, "depth")), NULL , 10 ); /* the string is converted into long int, basis 10 */
 	}
 	/*videoFormatFps*/	
-	if( gst_structure_has_field(source_str_caps, "framerate") && ( video_info->videoFormatFps == 0)){
-		video_info->videoFormatFps 				= (long) g_value_get_int( gst_structure_get_value(source_str_caps, "framerate"));
+	if( gst_structure_has_field(source_str_caps, "framerate")){
+		int numerator 							= gst_value_get_fraction_numerator(gst_structure_get_value(source_str_caps, "framerate"));
+		int denominator 						= gst_value_get_fraction_denominator(gst_structure_get_value(source_str_caps, "framerate"));
+		video_info->videoFormatFps 				= (long) (numerator/denominator);
 	}
 	/*videoFormatColorimetry*/	
-	if( gst_structure_has_field(source_str_caps, "colorimetry") && ( video_info->videoFormatColorimetry == NULL)){
+	if( gst_structure_has_field(source_str_caps, "colorimetry")){
 		video_info->videoFormatColorimetry 		= (char*)g_value_dup_string (gst_structure_get_value(source_str_caps, "colorimetry"));
 		video_info->videoFormatColorimetry_len 	= strlen(video_info->videoFormatColorimetry);
 	}
 	/*videoFormatInterlaced*/
-	if( gst_structure_has_field(source_str_caps, "interlaced") && ( video_info->videoFormatInterlaced == 0)){
-		video_info->videoFormatInterlaced 		= (long) g_value_get_int(gst_structure_get_value(source_str_caps, "interlaced "));
-	}	
+	if( gst_structure_has_field(source_str_caps, "interlace-mode")){
+		 gchar* interlaced_mode					= g_value_dup_string(gst_structure_get_value(source_str_caps, "interlace-mode"));
+		 if 	( !strcmp( (char*)interlaced_mode, "progressive")) 
+		 	video_info->videoFormatInterlaced 		= vivoe_progressive;
+		else if ( !strcmp( (char*)interlaced_mode, "interlaced"))
+			video_info->videoFormatInterlaced 		= vivoe_interlaced;
+	}else{
+			video_info->videoFormatInterlaced 		= vivoe_none;
+	}
 	/*videoFormatMaxHorzRes*/
-	if( gst_structure_has_field(source_str_caps, "height") && ( video_info->videoFormatMaxHorzRes == 0)){
+	if( gst_structure_has_field(source_str_caps, "height")){
 		if (G_VALUE_HOLDS_INT(gst_structure_get_value(source_str_caps, "height")))
 			video_info->videoFormatMaxHorzRes		= (long) g_value_get_int( gst_structure_get_value(source_str_caps, "height"));
 		else
 		 	video_info->videoFormatMaxHorzRes		= strtol ( (char* ) g_value_dup_string ( gst_structure_get_value(source_str_caps, "height")), NULL , 10 ); /* the string is converted into long int, basis 10 */
 	}	
 	/*videoFormatMaxVertRes*/
-	if( gst_structure_has_field(source_str_caps, "width") && ( video_info->videoFormatMaxVertRes == 0)){
+	if( gst_structure_has_field(source_str_caps, "width")){
 		if (G_VALUE_HOLDS_INT(gst_structure_get_value(source_str_caps, "width")))
 			video_info->videoFormatMaxVertRes		= (long) g_value_get_int( gst_structure_get_value(source_str_caps, "width"));			
 		else
@@ -100,7 +107,7 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info){
 		 */
 		if(videoFormatNumber._value.int_val != 0){
 			g_printerr("Invalid videoFormatNumber in MIB\n");
-			g_printerr("No entry found in %s, so %s should be 0","videoFormatTable",videoFormatNumber._name );
+			g_printerr("No entry found in %s, so %s should be 0\n","videoFormatTable",videoFormatNumber._name );
 			return EXIT_FAILURE;
 		}else{
 			/* Then we are sure that we can create a new entry */
@@ -123,7 +130,7 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info){
 	}else{
 		/* if the table of video format is not empty for this device, check if this format is already in the table
 		 * for that, iterate the table
-		 */ 
+		 */	
 		struct videoFormatTable_entry *iterator = videoFormatTable_head ;
 		video_info->videoFormatIndex = videoFormatNumber._value.int_val +1 ;
 		gboolean exists = FALSE; /* a boolean to indicate weather the entry already exists in the table or not*/
@@ -138,8 +145,10 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info){
 			iterator = iterator->next;
 		}
 		/* check if the entry does not already exist in the table*/
-		if ( !exists){
-			/* So add it!
+		if ( !exists && (videoFormatNumber._value.int_val <=255) ){
+			/* 
+			 * So add it!
+			 * But check that the maximum number of video format has not been reached already
 			 */
 			videoFormatTable_createEntry( 	video_info->videoFormatIndex,				videoChannel,
 											enable, 									video_info->videoFormatBase,

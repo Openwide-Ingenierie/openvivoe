@@ -52,6 +52,11 @@ NetsnmpCacheFree videoFormatTable_free;
 #define enable 											1
 #define disable 										0
 
+/*values for videoForamtInterleaced*/
+#define vivoe_interlaced 								1
+#define vivoe_progressive 								2
+#define vivoe_none 										3
+
 /* Typical data structure for a row entry */
 struct videoFormatTable_entry {
 	/* Index values */
