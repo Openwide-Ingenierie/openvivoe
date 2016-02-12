@@ -38,7 +38,6 @@
 #include "../include/deviceInfo/deviceNatoStockNumber.h"
 #include "../include/deviceInfo/deviceMode.h"
 #include "../include/deviceInfo/deviceReset.h"
-
 /*
  * videoFormatInfo header
  */

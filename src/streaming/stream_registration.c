@@ -23,21 +23,17 @@
  * if those entries are equal: return TRUE, otherwise return FALSE
  */
 static gboolean compare_entries(struct videoFormatTable_entry* origin, struct videoFormatTable_entry* new){
-	 if( 	(( origin->videoFormatBase 				== 	new->videoFormatBase 				) &&
-			( origin->videoFormatSampling 			== 	new->videoFormatSampling 			) &&
-			( origin->videoFormatBitDepth 			== 	new->videoFormatBitDepth 			) &&
-			( origin->videoFormatFps 				== 	new->videoFormatFps 				) &&
-			( origin->videoFormatColorimetry 		== 	new->videoFormatColorimetry 		) &&
-			( origin->videoFormatInterlaced 		== 	new->videoFormatInterlaced 			) &&
-			( origin->videoFormatCompressionFactor 	== 	new->videoFormatCompressionFactor 	) &&
-			( origin->videoFormatCompressionRate 	== 	new->videoFormatCompressionRate 	) &&
-			( origin->videoFormatMaxHorzRes 		== 	new->videoFormatMaxHorzRes 			) &&
+	 return(( !strcmp( origin->videoFormatBase 		, 	new->videoFormatBase 				)) 	&&
+			( !strcmp(origin->videoFormatSampling 	, 	new->videoFormatSampling 			)) 	&&
+			( origin->videoFormatBitDepth 			== 	new->videoFormatBitDepth 			) 	&&
+			( origin->videoFormatFps 				== 	new->videoFormatFps 				) 	&&
+			( !strcmp(origin->videoFormatColorimetry,  	new->videoFormatColorimetry 		)) 	&&
+			( origin->videoFormatInterlaced 		== 	new->videoFormatInterlaced 			) 	&&
+			( origin->videoFormatCompressionFactor 	== 	new->videoFormatCompressionFactor 	) 	&&
+			( origin->videoFormatCompressionRate 	== 	new->videoFormatCompressionRate 	) 	&&
+			( origin->videoFormatMaxHorzRes 		== 	new->videoFormatMaxHorzRes 			) 	&&
 			( origin->videoFormatMaxVertRes 		== 	new->videoFormatMaxVertRes 			) 		
-		   )){
-		 g_printerr("VideoFormat already exists\n");
-		 return TRUE;		 
-	 }else
-		 return FALSE;
+	   		);
 }
 /* 
  * This function tries to save a maximum of information (in the form of capabilities) 
@@ -52,34 +48,28 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
 	if( gst_structure_has_field(source_str_caps, "encoding-name") && ( video_info->videoFormatBase == NULL) ){
 		video_info->videoFormatBase				= (char*) g_value_dup_string (gst_structure_get_value(source_str_caps, "encoding-name"));
 		video_info->videoFormatBase_len 		= strlen(video_info->videoFormatBase);
-		printf("got it videoFormatBase: %s, length: %ld \n",video_info->videoFormatBase, video_info->videoFormatBase_len );
 	}
 	/*VideoFormatSampling*/
 	if( gst_structure_has_field(source_str_caps, "sampling") && ( video_info->videoFormatSampling == NULL) ){
 		video_info->videoFormatSampling 		= (char*) g_value_dup_string (gst_structure_get_value(source_str_caps, "sampling"));
 		video_info->videoFormatSampling_len 	= strlen(video_info->videoFormatSampling);
-		printf("got it VideoFormatSampling: %s, length: %ld\n",video_info->videoFormatSampling,video_info->videoFormatSampling_len  );				
 	}
 	/*videoFormatBitDepth*/	
 	if( gst_structure_has_field(source_str_caps, "depth") && ( video_info->videoFormatBitDepth == 0)){
 		video_info->videoFormatBitDepth 		=  strtol ( (char* ) g_value_dup_string ( gst_structure_get_value(source_str_caps, "depth")), NULL , 10 ); /* the string is converted into long int, basis 10 */
-		printf("got it videoFormatBitDepth: %ld\n", video_info->videoFormatBitDepth);		
 	}
 	/*videoFormatFps*/	
 	if( gst_structure_has_field(source_str_caps, "framerate") && ( video_info->videoFormatFps == 0)){
 		video_info->videoFormatFps 				= (long) g_value_get_int( gst_structure_get_value(source_str_caps, "framerate"));
-		printf("got it videoFormatFps\n");				
 	}
 	/*videoFormatColorimetry*/	
 	if( gst_structure_has_field(source_str_caps, "colorimetry") && ( video_info->videoFormatColorimetry == NULL)){
 		video_info->videoFormatColorimetry 		= (char*)g_value_dup_string (gst_structure_get_value(source_str_caps, "colorimetry"));
 		video_info->videoFormatColorimetry_len 	= strlen(video_info->videoFormatColorimetry);
-		printf("got it videoFormatColorimetry: %s, legnth: %ld\n",video_info->videoFormatColorimetry,video_info->videoFormatColorimetry_len  );				
 	}
 	/*videoFormatInterlaced*/
 	if( gst_structure_has_field(source_str_caps, "interlaced") && ( video_info->videoFormatInterlaced == 0)){
 		video_info->videoFormatInterlaced 		= (long) g_value_get_int(gst_structure_get_value(source_str_caps, "interlaced "));
-		printf("got it videoFormatInterlaced: %ld\n", video_info->videoFormatInterlaced);				
 	}	
 	/*videoFormatMaxHorzRes*/
 	if( gst_structure_has_field(source_str_caps, "height") && ( video_info->videoFormatMaxHorzRes == 0)){
@@ -87,8 +77,6 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
 			video_info->videoFormatMaxHorzRes		= (long) g_value_get_int( gst_structure_get_value(source_str_caps, "height"));
 		else
 		 	video_info->videoFormatMaxHorzRes		= strtol ( (char* ) g_value_dup_string ( gst_structure_get_value(source_str_caps, "height")), NULL , 10 ); /* the string is converted into long int, basis 10 */
-
-		printf("got it videoFormatMaxHorzRes: %ld\n", video_info->videoFormatMaxHorzRes);
 	}	
 	/*videoFormatMaxVertRes*/
 	if( gst_structure_has_field(source_str_caps, "width") && ( video_info->videoFormatMaxVertRes == 0)){
@@ -96,8 +84,6 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
 			video_info->videoFormatMaxVertRes		= (long) g_value_get_int( gst_structure_get_value(source_str_caps, "width"));			
 		else
 			video_info->videoFormatMaxVertRes		= strtol ( (char* ) g_value_dup_string ( gst_structure_get_value(source_str_caps, "width")), NULL , 10 ); /* the string is converted into long int, basis 10 */
-
-		printf("got it videoFormatMaxVertRes: %ld\n", video_info->videoFormatMaxVertRes );				
 	}
 }
 

@@ -30,7 +30,6 @@
 #define MIN_DEFAULT_PORT 1024
 #define MAX_DEFAULT_PORT 65535
 
-
 /*
  * Handle the Bus: display message, get interruption, etc...
  * */
