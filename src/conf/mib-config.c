@@ -1,17 +1,18 @@
 /*
  * Licence: GPL
- * Created: Thu, 21 Jan 2016 10:48:44 +0100
+ * Created: Fri, 12 Feb 2016 12:48:48 +0100
  * Main authors:
- *     - hoel <hvasseur@openwide.fr>
+ *     - hoel <hoel.vasseur@openwide.fr>
  */
 
-#include "../include/config.h"
+#include "../../include/conf/mib-conf.h"
 #include <stdio.h>
 #include <glib-2.0/glib.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "../include/mibParameters.h"
+#include "../../include/mibParameters.h"
+
 
 /* Define the number of groups in the configuration file
  * It should correspond to the number of primary nodes in the VIVOE MIB

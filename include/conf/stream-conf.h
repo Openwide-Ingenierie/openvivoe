@@ -1,0 +1,29 @@
+/*
+ * Licence: GPL
+ * Created: Fri, 12 Feb 2016 12:47:57 +0100
+ * Main authors:
+ *     - hoel <hoel.vasseur@openwide.fr>
+ */
+#ifndef STREAM_CONF_H
+# define STREAM_CONF_H
+
+/*
+ * Name of the configuration file
+ */
+#define CONFIG_FILE_NAME "vivoe-stream.conf"
+
+/*
+ * This is a list of path where the configuration should be found
+ */
+#define WORKING_DIR 	"."
+#define DEBUG_DIR 		WORKING_DIR"/bin/Debug/"
+
+#define CONFIG_FILE_1 	WORKING_DIR"/conf"
+#define CONFIG_FILE_2 	DEBUG_DIR"/conf"
+#define CONFIG_FILE_3 	"/usr/share/vivoe/conf"
+#define CONFIG_FILE_4 	"$HOME/.vivoe/conf"
+
+GKeyFile* open_configuration_file();
+void close_configuration_file(	GKeyFile* gkf);
+
+#endif /* STREAM_CONF_H */

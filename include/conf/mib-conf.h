@@ -1,11 +1,11 @@
 /*
  * Licence: GPL
- * Created: Thu, 21 Jan 2016 10:48:55 +0100
+ * Created: Fri, 12 Feb 2016 12:47:49 +0100
  * Main authors:
- *     - hoel <hvasseur@openwide.fr>
+ *     - hoel <hoel.vasseur@openwide.fr>
  */
-#ifndef CONFIG_H
-# define CONFIG_H
+#ifndef MIB_CONF_H
+# define MIB_CONF_H
 
 /* This is the name of the configuration file to use for the subAgent
  * handling the VIVOE MIB
@@ -15,5 +15,5 @@
 /*functions' definitions*/
 int get_check_configuration(); /*check the groups, key and values of the MIB's parameters*/
 
-#endif /* CONFIG_H */
+#endif /* MIB_CONF_H */
 

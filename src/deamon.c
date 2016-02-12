@@ -47,7 +47,7 @@
 /*
  * Configuration - Initialization of the MIB header
  */
-#include "../include/config.h"
+#include "../include/conf/config.h"
 
 
 /*

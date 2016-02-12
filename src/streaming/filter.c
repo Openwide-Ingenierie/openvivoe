@@ -11,7 +11,52 @@
 #include <gst/video/video.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "../../include/conf/stream-conf.h"
 #include "../../include/streaming/filter.h"
+
+	/* open configuration file */
+	GKeyFile*  gkf = open_configuration_file();
+	if(gkf == NULL)
+		return NULL; /* if not configuration file was found, return NULL, meaning that we will be using the defaults filter for VIVOE formats*/	
+	GstCaps* final_filer = NULL	
+	/* close configuration file */
+	close_configuration_file(gkf);;
+	
+/*
+ * Build the RAW filter caps
+ */
+GstCaps* build_RAW_filter(GKeyFile* gkf)){
+	gchar** 		encoding;
+	gchar** 		resolution;
+	GstCaps* 		raw_filter = NULL;	
+	encoding 	= get_raw_encoding(GKeyFile* gkf);
+	resolution 	= get_raw_res(GKeyFile* gkf);
+	
+	/* Add encoding part */ 
+	if( g_strv_contains(encoding, "all") ||
+		( g_strv_contains(encoding, "RGB") && g_strv_contains(encoding, "YUV") && g_strv_contains(encoding, "Monochrome"))
+	  )
+	{
+		raw_filter = gst_caps_from_string (VIVOE_FORMAT_RAW_ENCODING);
+	}else{
+		if( g_strv_contains(encoding, "RGB") ){
+			raw_filter = gst_caps_from_string ("format = (string) { RGB, RGBA, BGR, BGRA }" );
+		}
+		if( g_strv_contains(encoding, "YUV") ){
+			raw_filter = gst_caps_merge(raw_filter, ( gst_caps_from_string ("format = (string) { AYUV, UYVY, I420, Y41B, UYVP }" )));
+		}
+		if( g_strv_contains(encoding, "Monochrome") ){
+		}
+	}
+	
+	/* Add resolution part */
+	if( g_strv_contains(encoding, "all") ||
+		( g_strv_contains(encoding, "576i") && g_strv_contains(encoding, "720p") && g_strv_contains(encoding, "1080i") && g_strv_contains(encoding, "1080p") )
+	  )
+	{
+		raw_filter = gst_caps_merge(raw_filter, ( gst_caps_from_string ()));
+	}else{
+}
 
 /* 
  * This function aims to filter out input videos which do not 

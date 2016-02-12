@@ -7,8 +7,7 @@
 #ifndef DEAMON_H
 # define DEAMON_H
 
-int deamon();
-
+int deamon (char* deamon_name);
 
 #endif /* DEAMON_H */
 

@@ -21,7 +21,7 @@
 
 #define VIVOE_RAW_CAPS                							\
     "video/x-raw, "                                             \
-    "format = (string) " VIVOE_FORMAT_RAW_ENCODING ", "          \
+    "format = (string) " VIVOE_FORMAT_RAW_ENCODING ", "         \
     "width = " VIVOE_WIDTH_RAW_RANGE ", "                       \
     "height = " VIVOE_HEIGHT_RAW_RANGE ", "                     \
     "framerate = " GST_VIDEO_FPS_RANGE

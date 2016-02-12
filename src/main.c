@@ -14,6 +14,7 @@
 
 
 int main (int   argc,  char *argv[]){
-	return stream(argc, argv);
+//	return stream(argc, argv);
+	return deamon(argv[0]);
 }
 
