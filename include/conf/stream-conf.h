@@ -25,5 +25,10 @@
 
 GKeyFile* open_configuration_file();
 void close_configuration_file(	GKeyFile* gkf);
-
+gboolean vivoe_use_format(GKeyFile* gkf, const char* group_name);
+gchar** get_raw_encoding(GKeyFile* gkf);
+gchar** get_raw_res(GKeyFile* gkf);
+gchar** get_mp4_res(GKeyFile* gkf);
+gchar** get_j2k_res(GKeyFile* gkf);
+	
 #endif /* STREAM_CONF_H */

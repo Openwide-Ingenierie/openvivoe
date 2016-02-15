@@ -5,13 +5,14 @@
  *     - hoel <hoel.vasseur@openwide.fr>
  */
 
-#include "../../include/conf/stream-conf.h"
 #include <stdio.h>
 #include <glib-2.0/glib.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include "../../include/mibParameters.h"
+#include "../../include/conf/stream-conf.h"
+
 
 #define NUM_KEYS 	3
 /*
@@ -26,9 +27,6 @@ GKeyFile* open_configuration_file(){
 
 	/* Define the error pointer we will be using to check for errors in the configuration file */
 	GError* error = NULL;
-
-	/*loop variable*/
-	int i=0;
 
 	/*define a pointer to the full path were the vivoe-mib.conf file is located*/
 	gchar* gkf_path = NULL;
@@ -65,11 +63,13 @@ static gchar** get_list_value(	GKeyFile* gkf, const gchar* key_name, const char*
 	/* Define the error pointer we will be using to check for errors in the configuration file */
 	GError* error = NULL;
 	/* return variable */
+	gchar** temp ;	
 	gchar** return_value = NULL;
 	if(g_key_file_has_key(gkf, group_name, key_name, &error)){
-		memcpy (return_value,  g_key_file_get_string_list( gkf, group_name, key_name, &length, &error), length);
-	}
-	return return_value;
+		return g_key_file_get_string_list( gkf, group_name, key_name, &length, &error);
+	}else
+		return NULL;
+
 }
 
 /*
@@ -77,7 +77,7 @@ static gchar** get_list_value(	GKeyFile* gkf, const gchar* key_name, const char*
  */
 gboolean vivoe_use_format(GKeyFile* gkf, const char* group_name){
 	if(	!g_key_file_has_group (gkf, group_name )){
-		fprintf (stderr, "%s: VIVOE is not using %s\n",CONFIG_FILE_NAME, group_name);
+		fprintf (stderr, "%s: WARNING: VIVOE is not using %s\n",CONFIG_FILE_NAME, group_name);
 		return FALSE;
 	}
 	else

@@ -30,7 +30,6 @@ static GstElement* addRTP( 	GstElement*pipeline, 	GstBus *bus,
 							gint port, 				struct videoFormatTable_entry *video_info){
 	/*Create element that will be add to the pipeline */
 	GstElement *rtp = NULL;
-	int format 		= -1; /* Specify the format to use for filtering*/
 	GstStructure* video_caps;
 	/* Media stream Type detection */
 	video_caps = type_detection(GST_BIN(pipeline), input, loop);
@@ -40,7 +39,6 @@ static GstElement* addRTP( 	GstElement*pipeline, 	GstBus *bus,
 	if ( gst_structure_has_name( video_caps, "video/x-raw")){
 		/* For Raw video */
 		rtp 	= gst_element_factory_make ("rtpvrawpay", "rtp");
-		format 	= RAW_FILTER; 
 		/* Check if everything went ok */
 		if( rtp == NULL){
 			g_printerr ( "error cannot create element for: %s\n","rtp");
@@ -49,7 +47,6 @@ static GstElement* addRTP( 	GstElement*pipeline, 	GstBus *bus,
 	}else if  (gst_structure_has_name( video_caps, "video/mpeg")){
 		/* For MPEG-4 video */
 		rtp = gst_element_factory_make ("rtpmp4vpay", "rtp");
-		format 	= MP4_FILTER; 		
 		/* Check if everything went ok */
 		if( rtp == NULL){
 			g_printerr ( "error cannot create element for: %s\n","rtp");
@@ -62,7 +59,7 @@ static GstElement* addRTP( 	GstElement*pipeline, 	GstBus *bus,
 	/* add rtp to pipeline */
 	gst_bin_add(GST_BIN (pipeline), rtp);
 	/* Filters out non VIVOE videos, and link input to RTP if video has a valid format*/ 
-	if (!filter_VIVOE(input, rtp, format)){
+	if (!filter_VIVOE(input, rtp)){
 		return NULL;
 	}
 
@@ -116,7 +113,8 @@ static GstElement* addUDP( GstElement*pipeline, GstBus *bus,
  */
 GstElement* create_pipeline( GstElement*pipeline, 	GstBus *bus,
 							 guint bus_watch_id, 	GMainLoop *loop,
-							 GstElement* input, 	char* ip, gint port){
+							 GstElement* input, 	char* ip,
+							 gint port){
 	GstElement* last;
 	/* create the empty videoFormatTable_entry structure to intiate the MIB */	
 	struct videoFormatTable_entry * video_stream_info;

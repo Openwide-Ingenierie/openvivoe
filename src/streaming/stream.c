@@ -142,7 +142,7 @@ static GstElement* source_creation(GstElement* pipeline, char* format){
 		return NULL;        
 	}
 
-	caps = gst_caps_from_string("video/x-raw, format=I420, width=1280, height=720");
+	caps = gst_caps_from_string("video/x-raw, format=I420, width=1920, height=1080");
 	g_return_if_fail (gst_caps_is_fixed (caps));	
 
 	/* Put the source in the pipeline */
