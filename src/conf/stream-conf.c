@@ -63,8 +63,6 @@ static gchar** get_list_value(	GKeyFile* gkf, const gchar* key_name, const char*
 	/* Define the error pointer we will be using to check for errors in the configuration file */
 	GError* error = NULL;
 	/* return variable */
-	gchar** temp ;	
-	gchar** return_value = NULL;
 	if(g_key_file_has_key(gkf, group_name, key_name, &error)){
 		return g_key_file_get_string_list( gkf, group_name, key_name, &length, &error);
 	}else
