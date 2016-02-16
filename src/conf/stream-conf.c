@@ -48,7 +48,7 @@ GKeyFile* open_configuration_file(){
 	}
 
 	/* Defined what separator will be used in the list when the parameter can have several values (for a table for example)*/
-	g_key_file_set_list_separator (gkf, (gchar) ';');
+	g_key_file_set_list_separator (gkf, (gchar) ',');
 	return gkf;
 }
 
