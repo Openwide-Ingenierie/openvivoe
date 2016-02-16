@@ -3,7 +3,7 @@
  * Created: Tue, 16 Feb 2016 14:07:57 +0100
  * Main authors:
  *     - hoel <hoel.vasseur@openwide.fr>
- *     - Gerome <gerome.burlarts@openwide.fr>
+ *     - Gerome <gerome.burlats@openwide.fr>
  */
 
 #include <stdlib.h>
@@ -25,7 +25,7 @@
 #define DEFAULT_MULTICAST_PORT		5004
 #define DEFAULT_MULTICAST_CHANNEL	"1"
 #define DEFAULT_MULTICAST_ADDR		"239.192.1.254"
-#define DEFAULT_MULTICAST_IFACE		"eth0"
+#define DEFAULT_MULTICAST_IFACE		"enp2s0"
 
 
 /** \brief Retrieve system IP address on a specific interface
@@ -70,7 +70,7 @@ static short get_device_id(char* addr){
  */
  void define_vivoe_multicast(long *multicast_addr, const char* multicast_iface, const short int multicast_channel)
 {
-	char* 	device_ip = NULL;
+	char* 	device_ip 	= NULL;
 	short 	device_id;
 	struct 	ifreq ifr;
 	/* constant values needed to build multicast address */ 
@@ -80,6 +80,7 @@ static short get_device_id(char* addr){
 		
 	if( get_ip(multicast_iface, &ifr)){
 		device_ip = inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr);
+		printf("%s\n", device_ip);
 		device_id = get_device_id(device_ip);
 		result = multicast_pref + channel + device_id;
 		*multicast_addr =  result;
@@ -87,9 +88,7 @@ static short get_device_id(char* addr){
 		g_printerr("ERROR: Failed to retrieve IP on %s\n", multicast_iface);
 	}
 	if(!multicast_addr){
-		*multicast_addr = htonl(inet_addr( DEFAULT_MULTICAST_ADDR));
-		printf("Failed to generate multicast IP for udpsink, using default address: %s\n", DEFAULT_MULTICAST_ADDR);
+		*multicast_addr = htonl(inet_addr( DEFAULT_MULTICAST_ADDR ));
+		printf("Failed to generate multicast IP for udpsink, using default address: %s\n", DEFAULT_MULTICAST_ADDR );
 	}
 }
-
-

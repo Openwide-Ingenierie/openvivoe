@@ -6,11 +6,13 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
-#include "../../include/deviceInfo/ethernetIfTable.h"
-#include "../../include/mibParameters.h"
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <ctype.h>
+#include <glib-2.0/glib.h>
+#include "../../include/mibParameters.h"
+#include "../../include/deviceInfo/ethernetIfTable.h"
+
 
     /* Typical data structure for a row entry */
 struct ethernetIfTableEntry {

@@ -7,6 +7,7 @@
 
 /* function declarations */
 void init_ethernetIfTable(void);
+gboolean init_ethernet(const char* iface);
 void MAC_to_byte_array(u_char dest[6], u_char* source);
 void init_ethernetIfTable_content(int entryNumber);
 void initialize_table_ethernetIfTable(void);
@@ -14,6 +15,7 @@ void initialize_ethernetIfTableEntry();
 Netsnmp_Node_Handler 		ethernetIfTable_handler;
 Netsnmp_First_Data_Point 	ethernetIfTable_get_first_data_point;
 Netsnmp_Next_Data_Point 	ethernetIfTable_get_next_data_point;
+
 
 /* column number definitions for table ethernetIfTable */
        #define COLUMN_ETHERNETIFINDEX                   1

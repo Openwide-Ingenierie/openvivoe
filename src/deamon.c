@@ -20,6 +20,8 @@
 #include <net-snmp/library/snmpusm.h> /*for init_usmUser()*/
 #include <signal.h>
 
+#include <glib-2.0/glib.h>
+
 /*
  * DeviceInfo header
  */
