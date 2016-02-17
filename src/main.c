@@ -37,12 +37,6 @@
 
 int main (int   argc,  char *argv[]){
 //	return stream(argc, argv);
-//long mu;
-//define_vivoe_multicast(&mu, "lo", 1);
-//return 0; "enp2s0"
-//select_interfaces();
-//return 0;
-//	return init_ethernet("enp2s0");
 	return deamon(argv[0]);
 }
 

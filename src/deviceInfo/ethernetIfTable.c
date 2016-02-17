@@ -14,7 +14,7 @@
 #include "../../include/deviceInfo/ethernetIfTable.h"
 
 
-    /* Typical data structure for a row entry */
+/* Typical data structure for a row entry */
 struct ethernetIfTableEntry {
     /* Index values */
     long ethernetIfIndex;
@@ -71,60 +71,7 @@ struct ethernetIfTableEntry * ethernetIfTableEntry_create(  long  ethernetIfInde
 
     return entry;
 }
-#if 0
-/* This function converts a char* representing a MacAddress to an array of bytes.
- * As the char* represent a MAC address it should have a pattern as:
- * 'XX:XX:XX:XX:XX:XX\0'
- * It will be used to convert the ethernetIfMacAddress
- * from the initial char* value to an array of 6 bytes
- * using the character to creates the right bytes
- */
-void MAC_to_byte_array(u_char dest[6], u_char* source){
-    /*we declare a byte that will be used to fill our destination array*/
-   u_char result;
-    int i=0;
-    int j = 0;
-    /* The format of a Mac address is XX:XX:XX:XX:XX:XX, so we access
-     * character number 0, then 3, then 6, then 9, then 11 and finally 15
-     */
-    for(i=0; i<strlen((char*) source); i=i+3){
-        result = toupper(source[i]);
-        if ( (result >= 'A') && (result<= 'F')){
-            result = result - 55 ; //get the corresponding hexadecimal value of the character
-        }
-        else{ /*if result is not a letter, it a number*/
-            result = result - 48;
-        }
-        result = (result<<4);
-        if (toupper(source[i+1]) <= 'F' && toupper(source[i+1]) >= 'A'){
-            result += (toupper(source[i+1]) -55);
-        }else{
-            result += source[i+1] - 48;
-        }
-        dest[j] = result;
-        j++;
-    }
-}
 
-
-/* This function initialize the content of the Entry of he ethernetIfTable
- * with the content of the array defined in mib_parameter.h, and initialize
- * with the configuration file
- */
-void ethernetIfTable_fill(int entryCount){
-    int i=0; /*loop variable*/
-    u_char Mac[6];
-    for(i=0; i < entryCount; i++){
-        MAC_to_byte_array( Mac,(u_char*) deviceInfo.parameters[num_ethernetIfMacAddress]._value.array_string_val[i]);
-        struct ethernetIfTableEntry* entry = ethernetIfTableEntry_create(i+1, deviceInfo.parameters[num_ethernetIfSpeed]._value.array_int_val[i],
-                                                                         Mac, 6,
-                                                                         inet_addr(deviceInfo.parameters[num_ethernetIfIpAddress]._value.array_string_val[i]),
-                                                                         inet_addr(deviceInfo.parameters[num_ethernetIfSubnetMask]._value.array_string_val[i]),
-                                                                         inet_addr(deviceInfo.parameters[num_ethernetIfIpAddressConflict]._value.array_string_val[i]));
-        entry->valid = 1;
-    }
-}
-#endif //if 0
 /** Initialize the ethernetIfTable table by defining its contents and how it's structured */
 static void initialize_table_ethernetIfTable(void)
 {
