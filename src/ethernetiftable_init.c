@@ -173,10 +173,10 @@ gboolean init_ethernet(const char* iface){
 					memcpy(ethernetIfMacAddress , (unsigned char*) ifr.ifr_hwaddr.sa_data, ethernetIfMacAddress_len);
 					break;
 				case SIOCGIFADDR:
-					ethernetIfIpAddress 	= inet_netof(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr);
+					ethernetIfIpAddress 	= ((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr.s_addr;
 					break;
 				case SIOCGIFNETMASK:
-					ethernetIfSubnetMask 	= inet_netof(((struct sockaddr_in *)&ifr.ifr_netmask)->sin_addr);
+					ethernetIfSubnetMask 	= ((struct sockaddr_in *)&ifr.ifr_netmask)->sin_addr.s_addr;
 					break;
 				default:
 					/* this is a really bad error, we should never get there */
@@ -190,7 +190,7 @@ gboolean init_ethernet(const char* iface){
 	}
 	/* now we can create an entry in the ethernetIfTable */
 	/* create an null Ip conflict */
-	ethernetIfIpAddressConflict = inet_netof(inet_makeaddr (ethernetIfSubnetMask&ethernetIfIpAddress , inet_addr("0.0.0.0")));
+	ethernetIfIpAddressConflict = inet_netof(inet_makeaddr (0 , inet_addr("0.0.0.0")));
 	struct ethernetIfTableEntry * new_entry =  ethernetIfTableEntry_create( ethernetIfIndex,
                                                           				  	ethernetIfSpeed,
 			                                                           		ethernetIfMacAddress,
