@@ -101,7 +101,6 @@ static gboolean list_interfaces(char*** if_names, int* if_num){
  *  @return TRUE if we succeed to list IPv4 interface FALSE otherwise
  */
 gboolean select_interfaces(char*** if_used){
-	char** used;
 	char** if_names = NULL; /* the buffer in which interface names will be stored*/
 	int if_num = 2;
 	int i= 0; /* loop variable */
@@ -110,8 +109,6 @@ gboolean select_interfaces(char*** if_used){
 	gboolean valid = FALSE;
 	list_interfaces(&if_names, &if_num);
 	
-	/* allocate the size for the ethernet interface to use if_used */
-	used = (char**) malloc(sizeof(char*));
 	/* Ask to the user which network interfaces he wants VIVOE to use */
 	g_print("Which network interface you want VIVOE to use?\n");
 	for(i = 0; i < if_num; i++){
@@ -149,13 +146,13 @@ gboolean init_ethernet(const char* iface){
 
 	/* the structure to use for retrieving information */
 	struct 		ifreq ifr;
-	long  		ethernetIfIndex;
-	long 		ethernetIfSpeed;
+	long  		ethernetIfIndex 							= 0;
+	long 		ethernetIfSpeed 							= 0;
 	u_char 		ethernetIfMacAddress[MAC_ADDRESS_SIZE];
-	size_t 		ethernetIfMacAddress_len = MAC_ADDRESS_SIZE;
-	in_addr_t 	ethernetIfIpAddress;
-	in_addr_t 	ethernetIfSubnetMask;
-	in_addr_t 	ethernetIfIpAddressConflict;
+	size_t 		ethernetIfMacAddress_len 					= MAC_ADDRESS_SIZE;
+	in_addr_t 	ethernetIfIpAddress 						= 0;
+	in_addr_t 	ethernetIfSubnetMask 						= 0;
+	in_addr_t 	ethernetIfIpAddressConflict 				= 0;
 	/* A array with the different call to ioctl to make */ 
 	int ioctl_call[calls_num] = {SIOCGIFINDEX,SIOCGIFMTU, SIOCGIFHWADDR, SIOCGIFADDR, SIOCGIFNETMASK };
 	int i; /* loop variable */
@@ -191,13 +188,13 @@ gboolean init_ethernet(const char* iface){
 	/* now we can create an entry in the ethernetIfTable */
 	/* create an null Ip conflict */
 	ethernetIfIpAddressConflict = inet_netof(inet_makeaddr (0 , inet_addr("0.0.0.0")));
-	struct ethernetIfTableEntry * new_entry =  ethernetIfTableEntry_create( ethernetIfIndex,
-                                                          				  	ethernetIfSpeed,
-			                                                           		ethernetIfMacAddress,
-            			                                              		ethernetIfMacAddress_len,
-			                                                          		ethernetIfIpAddress,
-			                                                          		ethernetIfSubnetMask,
-			                                                          		ethernetIfIpAddressConflict);
+	ethernetIfTableEntry_create( ethernetIfIndex,
+                                 ethernetIfSpeed,
+			                     ethernetIfMacAddress,
+            			         ethernetIfMacAddress_len,
+			                     ethernetIfIpAddress,
+			                     ethernetIfSubnetMask,
+			                     ethernetIfIpAddressConflict);
 	return TRUE;
 }
 # 
