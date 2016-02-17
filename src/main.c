@@ -36,11 +36,13 @@
 #include "../include/deviceInfo/ethernetIfTable.h"
 
 int main (int   argc,  char *argv[]){
+	char **if_names;
 //	return stream(argc, argv);
 //long mu;
 //define_vivoe_multicast(&mu, "lo", 1);
 //return 0; "enp2s0"
-	return init_ethernet("enp2s0");
+return list_interfaces(if_names);
+//	return init_ethernet("enp2s0");
 //	return deamon(argv[0]);
 }
 
