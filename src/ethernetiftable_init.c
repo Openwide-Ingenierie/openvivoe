@@ -29,75 +29,85 @@
 /** \brief Retrieve system IP address on a specific interface
  *  @param iface The network interface to use to retrieve the IP
  *  @param ifr a structure to store the interface information
+ *  @param param The int parameter that we want to retireve. It corespond to the number to pass to ioctl
+ *  @return TRUE if we succeed to get interface info on param, FALSE otherwise
  */
-static gboolean get_interface_info(const char* iface, struct ifreq* ifr){
+static gboolean get_interface_info(const char* iface, struct ifreq* ifr, int param){
 	int fd;
 	fd = socket(AF_INET, SOCK_DGRAM, 0);
     /* IPv4 */
     ifr->ifr_addr.sa_family = AF_INET;
-
+	
+	memset(ifr, 0, sizeof(*ifr));
     /* Specify network interface */
     strncpy(ifr->ifr_name, iface, IFNAMSIZ-1);
 
-	/* 
-	 * Now that we should have normally retrieve the information of the internet interface
-	 * we need to check that we do have everything that we need to initiate the MIB
-	 */
-
-	/* ioctl - MAC address*/
-	if(ioctl(fd, SIOCGIFHWADDR, ifr) < 0) {
+	/* ioctl - retrieve parameter from interface*/
+	if( ioctl(fd, param, ifr) < 0) {
 		g_printerr("ERROR: get_ip(): ioctl failed with error message \"%s\"\n", strerror(errno));
 		return FALSE;
 	}
-	/* ioctl - SubnetMask*/
-	if(ioctl(fd, SIOCGIFNETMASK, ifr) < 0) {
-		g_printerr("ERROR: get_ip(): ioctl failed with error message \"%s\"\n", strerror(errno));
-		return FALSE;
-	}
-	/* ioctl - IP address*/
-	if(ioctl(fd, SIOCGIFADDR, ifr) < 0) {
-		g_printerr("ERROR: get_ip(): ioctl failed with error message \"%s\"\n", strerror(errno));
-		return FALSE;
-	}
-	/* ioctl - Speed or MTU (Maximum Transert Unit*/
-	if(ioctl(fd, SIOCGIFMTU, ifr) < 0) {
-		g_printerr("ERROR: get_ip(): ioctl failed with error message \"%s\"\n", strerror(errno));
-		return FALSE;
-	}
-	/* close socket */
-    close(fd);
 	return TRUE;
 }
 
-
+/* define the number of ioctl calls to make */ 
+#define calls_num 5		
 /** \brief Retrieve parameters of ethernet interface and initiate the MIB with it
  * @paramiface the interface name from which retirev
  */
 gboolean init_ethernet(const char* iface){
 
+	/* the structure to use for retrieving information */
 	struct 		ifreq ifr;
 	long  		ethernetIfIndex;
 	long 		ethernetIfSpeed;
-	//	u_char 		ethernetIfMacAddress[6];
-	//	size_t 		ethernetIfMacAddress_len;
+	u_char 		ethernetIfMacAddress[MAC_ADDRESS_SIZE];
+	size_t 		ethernetIfMacAddress_len = MAC_ADDRESS_SIZE;
 	in_addr_t 	ethernetIfIpAddress;
 	in_addr_t 	ethernetIfSubnetMask;
-	//	in_addr_t 	ethernetIfIpAddressConflict;
-	//
-	//
-	if( get_interface_info(iface, &ifr)){
-		printf("ethernetIfIpAddress: %s\n",  inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr)	);	
-		printf("ethernetIfSubnetMask: %s\n",  inet_ntoa(((struct sockaddr_in *)&ifr.ifr_netmask)->sin_addr)	 );		
-		ethernetIfIndex 		= ((struct sockaddr_in *)&ifr.ifr_ifindex);
-		ethernetIfSpeed 		= ((struct sockaddr_in *)&ifr.ifr_mtu);
-		ethernetIfIpAddress 	= inet_netof(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr);
-		ethernetIfSubnetMask 	= inet_netof(((struct sockaddr_in *)&ifr.ifr_netmask)->sin_addr);
-		printf("ethernetIfIndex: %ld\n",  		ethernetIfIndex);
-		printf("ethernetIfSpeed: %ld\n",  		ethernetIfSpeed);
-		printf("ethernetIfSubnetMask: %8X\n", 	ethernetIfSubnetMask );
-		return TRUE;
-	}else{
-		g_printerr("ERROR: Failed to retrieve parameters of %s\n", iface);
-		return FALSE;
+	in_addr_t 	ethernetIfIpAddressConflict;
+	/* A array with the different call to ioctl to make */ 
+	int ioctl_call[calls_num] = {SIOCGIFINDEX,SIOCGIFMTU, SIOCGIFHWADDR, SIOCGIFADDR, SIOCGIFNETMASK };
+	
+	/* Get interface IP Address */
+   for(int i =0; i<	calls_num; i++){
+		if( get_interface_info(iface, &ifr, ioctl_call[i])){
+			switch(i){
+				case SIOCGIFINDEX:
+					ethernetIfIndex 		= (ifr.ifr_ifindex);					
+					break;
+				case SIOCGIFMTU:
+					ethernetIfSpeed 		= (ifr.ifr_mtu);		
+					break;
+				case SIOCGIFHWADDR:
+					memcpy(ethernetIfMacAddress , (unsigned char*) ifr.ifr_hwaddr.sa_data, ethernetIfMacAddress_len);
+					break;
+				case SIOCGIFADDR:
+					ethernetIfIpAddress 	= inet_netof(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr);
+					break;
+				case SIOCGIFNETMASK:
+					ethernetIfSubnetMask 	= inet_netof(((struct sockaddr_in *)&ifr.ifr_netmask)->sin_addr);
+					break;
+				default:
+					/* this is a really bad error, we should never get there */
+					g_printerr("ERROR: unkown ioctl call\n");
+					return FALSE;
+			}
+		}else
+			g_printerr("ERROR: Failed to retrieve parameters of %s\n", iface);
+			return FALSE;
 	}
+	
+	/* now we can create an entry in the ethernetIfTable */
+	/* create an null Ip conflict */
+	ethernetIfIpAddressConflict = inet_netof(inet_makeaddr (ethernetIfSubnetMask , inet_addr("0.0.0.0")));
+
+	struct ethernetIfTableEntry * new_entry =  ethernetIfTableEntry_create( ethernetIfIndex,
+                                                          				  	ethernetIfSpeed,
+			                                                           		ethernetIfMacAddress,
+            			                                              		ethernetIfMacAddress_len,
+			                                                          		ethernetIfIpAddress,
+			                                                          		ethernetIfSubnetMask,
+			                                                          		ethernetIfIpAddressConflict);
+	return TRUE;
 }

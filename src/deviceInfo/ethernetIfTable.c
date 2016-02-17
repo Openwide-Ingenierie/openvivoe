@@ -65,7 +65,10 @@ struct ethernetIfTableEntry * ethernetIfTableEntry_create(  long  ethernetIfInde
 
     entry->ethernetIfIpAddressConflict = ethernetIfIpAddressConflict;
 
+    entry->valid = 1;
+
     ethernetIfTable_head = entry;
+
     return entry;
 }
 
@@ -120,19 +123,8 @@ void ethernetIfTable_fill(int entryCount){
         entry->valid = 1;
     }
 }
-
-/** Initializes the ethernetIfTable module */
-void
-init_ethernetIfTable(void)
-{
-  /* here we initialize all the tables we're planning on supporting */
-    initialize_table_ethernetIfTable();
-}
-
-
 /** Initialize the ethernetIfTable table by defining its contents and how it's structured */
-void
-initialize_table_ethernetIfTable(void)
+static void initialize_table_ethernetIfTable(void)
 {
     const oid ethernetIfTable_oid[] = {1,3,6,1,4,1,35990,3,1,1,12};
     const size_t ethernetIfTable_oid_len   = OID_LENGTH(ethernetIfTable_oid);
@@ -167,6 +159,13 @@ initialize_table_ethernetIfTable(void)
 
 }
 
+/** Initializes the ethernetIfTable module */
+void
+init_ethernetIfTable(void)
+{
+  /* here we initialize all the tables we're planning on supporting */
+    initialize_table_ethernetIfTable();
+}
 
 /* Remove a row from the table
  * I leave the code here, however for our application, there is not possibility

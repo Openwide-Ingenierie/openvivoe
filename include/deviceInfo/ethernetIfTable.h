@@ -6,11 +6,18 @@
 #define ETHERNETIFTABLE_H
 
 /* function declarations */
+struct ethernetIfTableEntry * ethernetIfTableEntry_create(  long  ethernetIfIndex,
+                                                            long ethernetIfSpeed,
+                                                            u_char ethernetIfMacAddress[6],
+                                                            size_t ethernetIfMacAddress_len,
+                                                            in_addr_t ethernetIfIpAddress,
+                                                            in_addr_t ethernetIfSubnetMask,
+                                                            in_addr_t ethernetIfIpAddressConflict);
+
 void init_ethernetIfTable(void);
 gboolean init_ethernet(const char* iface);
 void MAC_to_byte_array(u_char dest[6], u_char* source);
 void init_ethernetIfTable_content(int entryNumber);
-void initialize_table_ethernetIfTable(void);
 void initialize_ethernetIfTableEntry();
 Netsnmp_Node_Handler 		ethernetIfTable_handler;
 Netsnmp_First_Data_Point 	ethernetIfTable_get_first_data_point;
@@ -24,4 +31,7 @@ Netsnmp_Next_Data_Point 	ethernetIfTable_get_next_data_point;
        #define COLUMN_ETHERNETIFIPADDRESS	           	4
        #define COLUMN_ETHERNETIFSUBNETMASK	        	5
        #define COLUMN_ETHERNETIFIPADDRESSCONFLICT		6
+
+/* define the size in bytes, that should be a MAC address */
+		#define MAC_ADDRESS_SIZE						6
 #endif /* ETHERNETIFTABLE_H */
