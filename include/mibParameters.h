@@ -46,9 +46,6 @@ typedef struct {
 }MIB_group;
 
 /* --------------------------------- Group DeviceInfo --------------------------------- */
-/* define the number of deviceInfo's parameters in a MACRO, so it is more evolutive! */
-#define DEVICEINFO_NUM_PARAM 				19
-
 /*set the declaration of the position of each parameter in the array parameters of deviceInfo MIB_group*/
 #define num_DeviceDesc                  	0
 #define num_DeviceManu                  	1
@@ -60,15 +57,14 @@ typedef struct {
 #define num_DeviceMibV                  	7
 #define num_DeviceType                  	8
 #define num_DeviceUD                    	9
-#define num_ethernetIFnumber            	10
-#define num_ethernetIfSpeed             	11
-#define num_ethernetIfMacAddress        	12
-#define num_ethernetIfIpAddress         	13
-#define num_ethernetIfSubnetMask        	14
-#define num_ethernetIfIpAddressConflict 	15
-#define num_DeviceNato                  	16
-#define num_DeviceMode                  	17
-#define num_DeviceReset                 	18
+#define num_DeviceNato                  	10
+#define num_DeviceMode                  	11
+#define num_DeviceReset                 	12
+#define num_ethernetInterface             	13
+#define num_ethernetIFnumber 				14
+
+/* define the number of deviceInfo's parameters in a MACRO, so it is more evolutive! */
+#define DEVICEINFO_NUM_PARAM 				(num_ethernetIFnumber + 1)
 
 MIB_group deviceInfo;
 /* --------------------------------- end Group DeviceInfo --------------------------------- */

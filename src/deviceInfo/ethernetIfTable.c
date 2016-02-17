@@ -71,7 +71,7 @@ struct ethernetIfTableEntry * ethernetIfTableEntry_create(  long  ethernetIfInde
 
     return entry;
 }
-
+#if 0
 /* This function converts a char* representing a MacAddress to an array of bytes.
  * As the char* represent a MAC address it should have a pattern as:
  * 'XX:XX:XX:XX:XX:XX\0'
@@ -106,6 +106,7 @@ void MAC_to_byte_array(u_char dest[6], u_char* source){
     }
 }
 
+
 /* This function initialize the content of the Entry of he ethernetIfTable
  * with the content of the array defined in mib_parameter.h, and initialize
  * with the configuration file
@@ -123,6 +124,7 @@ void ethernetIfTable_fill(int entryCount){
         entry->valid = 1;
     }
 }
+#endif //if 0
 /** Initialize the ethernetIfTable table by defining its contents and how it's structured */
 static void initialize_table_ethernetIfTable(void)
 {
@@ -155,8 +157,9 @@ static void initialize_table_ethernetIfTable(void)
     netsnmp_register_table_iterator( reg, iinfo );
 
     /* Initialise the contents of the table here */
-    ethernetIfTable_fill(deviceInfo.parameters[num_ethernetIFnumber]._value.int_val);
-
+   // ethernetIfTable_fill(deviceInfo.parameters[num_ethernetIFnumber]._value.int_val);
+   for(int i =0; i < deviceInfo.parameters[num_ethernetIFnumber]._value.int_val; i++)
+		init_ethernet(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i]);
 }
 
 /** Initializes the ethernetIfTable module */

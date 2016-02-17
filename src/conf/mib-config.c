@@ -14,11 +14,6 @@
 #include "../../include/mibParameters.h"
 
 
-/* Define the number of groups in the configuration file
- * It should correspond to the number of primary nodes in the VIVOE MIB
- */
-#define NUM_GROUP 5
-
 int check_MAC_format(u_char** mac, int ethernetIf_Number){
     int i=0;
     int j =0;
@@ -105,30 +100,12 @@ int get_check_configuration(){
     /*first we load the different Groups of the configuration file
      * second parameter "gchar* length" is optional*/
     groups = g_key_file_get_groups(gkf, NULL);
-    /* Check for all the groups that are defined in VIVOE MIB
-     * all of them should be here:
-     * _deviceInfo
-     * _VideoFormatInfo
-     * _ChannelControl
-     * _ViveoNotification
-     * _VivoeGroups
-     */
-
-    /* Defined an array containing the group names that should be present into the configuration file
-     * to check if there are all present
-     */
-    const gchar* groupsName_vector[NUM_GROUP] = {   (const gchar*)"deviceInfo",
-                                                    (const gchar*)"VideoFormatInfo",
-                                                    (const gchar*)"ChannelControl",
-                                                    (const gchar*)"VivoeNotification",
-                                                    (const gchar*)"VivoeGroups" };
-
-    for(i=0; i< NUM_GROUP; i++) {
-        if( !(g_strv_contains((const gchar* const*) groups,  groupsName_vector[i]))){
-            fprintf (stderr, "Group %s not found in configuration file\nIt should be written in the form [%s]\n",groupsName_vector[i] ,groupsName_vector[i] );
+	/* check that the group deviceInfo is present in configuration file */
+        if( !(g_strv_contains((const gchar* const*) groups, "deviceInfo" ))){
+            fprintf (stderr, "Group %s not found in configuration file\nIt should be written in the form [%s]\n","deviceInfo" , "deviceInfo");
             return EXIT_FAILURE;
         }
-    }
+
 
     /* Once we have check that all groups were present in the configuration file
      * we assign the values to the different
@@ -149,16 +126,11 @@ int get_check_configuration(){
     parameter deviceMibVersion              = {"deviceMibVersion",              STRING,     1};
     parameter deviceType                    = {"deviceType",                    INTEGER,    0};
     parameter deviceUserDesc                = {"deviceUserDesc",                STRING,     1};
-    parameter ethernetIfNumber              = {"ethernetIfNumber",              INTEGER,    0};
-    parameter ethernetIfSpeed               = {"ethernetIfSpeed",               T_INTEGER,  0};
-    parameter ethernetIfMacAddress          = {"ethernetIfMacAddress",          T_STRING,   0};
-    parameter ethernetIfIpAddress           = {"ethernetIfIpAddress",           T_STRING,   0};
-    parameter ethernetIfSubnetMask          = {"ethernetIfSubnetMask",          T_STRING,   0};
-    parameter ethernetIfIpAddressConflict   = {"ethernetIfIpAddressConflict",   T_STRING,   0};
     parameter deviceNatoStockNumber         = {"deviceNatoStockNumber",         STRING,     1};
     parameter deviceMode                    = {"deviceMode",                    INTEGER,    1};
     parameter deviceReset                   = {"deviceReset",                   STRING,     0};
-
+    parameter ethernetInterface             = {"ethernetInterface",             T_STRING,   1};
+    parameter ethernetIfNumber       	    = {"ethernetIfNumber",             	INTEGER,    1};
 
 
     parameter deviceInfo_parameters[DEVICEINFO_NUM_PARAM] = {  deviceDesc,            deviceManufacturer,
@@ -166,18 +138,17 @@ int get_check_configuration(){
                                                                deviceHardwareVersion, deviceSoftwareVersion,
                                                                deviceFirmwareVersion, deviceMibVersion,
                                                                deviceType,            deviceUserDesc,
-                                                               ethernetIfNumber,      ethernetIfSpeed,
-                                                               ethernetIfMacAddress,  ethernetIfIpAddress,
-                                                               ethernetIfSubnetMask,  ethernetIfIpAddressConflict,
                                                                deviceNatoStockNumber, deviceMode,
-                                                               deviceReset   };
+                                                               deviceReset, 		  ethernetInterface,
+															   ethernetIfNumber	
+															};
    
    
    /* Defined what separator will be used in the list when the parameter can have several values (for a table for example)*/
     g_key_file_set_list_separator (gkf, (gchar) ';');
 
     /* Get the value of all parameter that are present into the configuration file*/
-    for(i=0; i<DEVICEINFO_NUM_PARAM; i++) {
+    for(i=0; i<DEVICEINFO_NUM_PARAM - 1; i++) {
         if(g_key_file_has_key(gkf, groups[0], (const gchar*) deviceInfo_parameters[i]._name , &error)){
             switch(deviceInfo_parameters[i]._type){
                     case INTEGER:
@@ -197,56 +168,41 @@ int get_check_configuration(){
                             }
                             break;
                     case T_INTEGER:
-                             /*Only case of int* in deviceInfo is ethernetIfSpeed number*/
                             deviceInfo_parameters[i]._value.array_int_val = (int*) g_key_file_get_integer_list(gkf, groups[0], (const gchar*) deviceInfo_parameters[i]._name, &length,  &error);
                             if(error != NULL){
                                 fprintf(stderr, "Invalid format for %s: %s\n", (const gchar*) deviceInfo_parameters[i]._name, error->message);
                                 error = NULL; /* resetting the error pointer*/
                                 error_occured = TRUE; /*set the error boolean to*/
                             }
-                            if(length !=  deviceInfo_parameters[num_ethernetIFnumber]._value.int_val ){
-                                fprintf(stderr, "Invalid number of values for %s, there should be %ld value(s)\n", deviceInfo_parameters[i]._name,(long) deviceInfo_parameters[num_ethernetIFnumber]._value.int_val );
-                                error_occured = TRUE; /*set the error boolean to*/
-                            }
                             break;
-                    case T_STRING:
+                    case T_STRING: /* only case here is ethernetInterface, from that we should compute ethernetIfNumber */
                             deviceInfo_parameters[i]._value.array_string_val =  (char**) g_key_file_get_string_list(gkf, groups[0], (const gchar*) deviceInfo_parameters[i]._name, &length, &error);
                             if(error != NULL){
                                 fprintf(stderr, "Invalid format for %s: %s\n", (const gchar*) deviceInfo_parameters[i]._name, error->message);
                                 error = NULL; /* resetting the error pointer*/
                                 error_occured = TRUE; /*set the error boolean to*/
                             }
-                            if(length != deviceInfo_parameters[num_ethernetIFnumber]._value.int_val){
-                                fprintf(stderr, "Invalid number of values for %s, there should be %d value(s)\n", deviceInfo_parameters[i]._name, deviceInfo_parameters[num_ethernetIFnumber]._value.int_val);
-                                error_occured = TRUE; /*set the error boolean to*/
-                            }
-                            else if((   !strcmp("ethernetIfMacAddress",deviceInfo_parameters[i]._name)) &&
-                                        check_MAC_format((u_char**) deviceInfo_parameters[i]._value.array_string_val,  deviceInfo_parameters[num_ethernetIFnumber]._value.int_val)){
-                                fprintf(stderr, "Invalid format for %s, it should something like: XX:XX:XX:XX:XX:XX\n", "ethernetIfMacAddress");
-                                error_occured = TRUE; /*set the error boolean to*/
-                                    /* For every MAC address we check the format of the string passed into the config file: it should be a 18 bytes string
-                                    * including the '\0' character, and parsed every two characters with ':'
-                                    */
-                                }
+							/* check that the key is indeed ethernetInterface */
+							if( !strcmp(deviceInfo_parameters[i]._name, "ethernetInterface"))
+								deviceInfo_parameters[num_ethernetIFnumber]._value.int_val = (int) length;
                             break;
             }
         }else{
             /*if the parameter is mandatory, print an error message to the user, and exit the program*/
             if(!deviceInfo_parameters[i]._optional){
-                fprintf(stderr, "Parameter %s mandatory and not found: %s\n", (const gchar*) "deviceUserDesc", error->message);
+                fprintf(stderr, "Parameter %s mandatory and not found: %s\n", (const gchar*)deviceInfo_parameters[i]._name, error->message);
                 return EXIT_FAILURE;
             }
             /*if the parameter is optional, do not do anything special, just keep running!*/
         }
     }
 
-    deviceInfo.number       = DEVICEINFO_NUM_PARAM;
+    deviceInfo.number      = DEVICEINFO_NUM_PARAM;
     deviceInfo.parameters  = (parameter*) malloc(deviceInfo.number*sizeof(parameter));
     memcpy(deviceInfo.parameters ,deviceInfo_parameters, sizeof(deviceInfo_parameters));
 	
     /* free the GKeyFile before leaving the function*/
     g_key_file_free (gkf);
-
 
     if(error_occured==FALSE){
         return EXIT_FAILURE;

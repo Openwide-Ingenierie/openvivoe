@@ -53,43 +53,92 @@ static gboolean get_interface_info(const char* iface, struct ifreq* ifr, int par
 	return TRUE;
 }
 
-i/** \brief List all network interface using IPv4
+/** \brief List all network interface using IPv4
  *  @param if_names the array of string to store the result
+ *  @param if_num The number of compatibles interface found
  *  @return TRUE if we succeed to list IPv4 interface FALSE otherwise
  */
-static gboolean list_interfaces(char** if_names){
+static gboolean list_interfaces(char*** if_names, int* if_num){
 		/* Get all interfaces */
 	struct ifaddrs 	*ifap;
 	struct ifaddrs 	*iterator;
+	char 			**names;
 	int 			i = 0; /* array accessor variable */
+
+	/* set the number of interfaces found to 0 */
+	*if_num = 0;
     if( getifaddrs(&ifap) < 0){
 		printf("ERROR: Failed to get system's network interfaces\n");
 		return FALSE;
 	}
 	/* listing interfaces */
 	g_print("Listing network interfaces using IPv4...\n");
+	names 	= (char**) 	malloc(sizeof(char*));
 	/* iterate through interfaces */ 
 	for (iterator = ifap; iterator; iterator = iterator->ifa_next) {
 		/* get only IPv4 interface */
         if (iterator->ifa_addr->sa_family==AF_INET)
 		{
-			if_names 	= (char**) 	realloc(if_names, (i+1) * sizeof(char*));
-			if_names[i] = (char*) 	malloc( (strlen( iterator->ifa_name ) +1) * sizeof(char));
-			strcpy(if_names[i], iterator->ifa_name);
+			names 	= (char**) 	realloc(names, (i+1) * sizeof(char*));
+			names[i] = (char*) 	malloc( (strlen( iterator->ifa_name ) +1) * sizeof(char));
+			strcpy(names[i], iterator->ifa_name);
 			i++;
 		}
 	}
-	if(if_names)
+	*if_num = i;
+	if(if_num != 0){
+		*if_names = names;
 		return TRUE;
-	else
+	}
+	else{
+		g_printerr("No compatible network interfaces have been found.\n");
 		return FALSE;
+	}
 }
 
-
 /** \brief Ask the user which interface he wants VIVOE to use
- *  @param if_names the list of network interface comptable for VIVOE
+ *  @param if_used the names of the interfaces that the user chooses to use for VIVOE
  *  @return TRUE if we succeed to list IPv4 interface FALSE otherwise
  */
+gboolean select_interfaces(char*** if_used){
+	char** used;
+	char** if_names = NULL; /* the buffer in which interface names will be stored*/
+	int if_num = 2;
+	int i= 0; /* loop variable */
+	char choice[100];
+	int length;
+	gboolean valid = FALSE;
+	list_interfaces(&if_names, &if_num);
+	
+	/* allocate the size for the ethernet interface to use if_used */
+	used = (char**) malloc(sizeof(char*));
+	/* Ask to the user which network interfaces he wants VIVOE to use */
+	g_print("Which network interface you want VIVOE to use?\n");
+	for(i = 0; i < if_num; i++){
+		g_print("[%d]\t%s\n", i+1, if_names[i]);
+	}
+	g_print("Your choice [default: all]:\n");
+	length = scanf("%s", choice);
+	if(length == 0){
+		g_printerr("Not a valid choice\n");
+		return FALSE;
+	}
+	if(	! strcmp(choice, "all")){
+		g_print("You choose: %s\n", if_names[i]);
+	}else{
+		for(i =0; i<if_num; i++){
+			if( strtol(choice, NULL, 10) == (i+1) ){
+				g_print("You choose: %s\n", if_names[i]);
+				valid = TRUE;
+			}
+		}
+	}
+	if( !valid){
+		g_printerr("Invalid input \n");
+		return FALSE;
+	}else
+		return TRUE;
+}
 
 /* define the number of ioctl calls to make */ 
 #define calls_num 		5		
@@ -142,12 +191,13 @@ gboolean init_ethernet(const char* iface){
 	/* now we can create an entry in the ethernetIfTable */
 	/* create an null Ip conflict */
 	ethernetIfIpAddressConflict = inet_netof(inet_makeaddr (ethernetIfSubnetMask&ethernetIfIpAddress , inet_addr("0.0.0.0")));
-/*	struct ethernetIfTableEntry * new_entry =  ethernetIfTableEntry_create( ethernetIfIndex,
+	struct ethernetIfTableEntry * new_entry =  ethernetIfTableEntry_create( ethernetIfIndex,
                                                           				  	ethernetIfSpeed,
 			                                                           		ethernetIfMacAddress,
             			                                              		ethernetIfMacAddress_len,
 			                                                          		ethernetIfIpAddress,
 			                                                          		ethernetIfSubnetMask,
-			                                                          		ethernetIfIpAddressConflict);*/
+			                                                          		ethernetIfIpAddressConflict);
 	return TRUE;
 }
+# 

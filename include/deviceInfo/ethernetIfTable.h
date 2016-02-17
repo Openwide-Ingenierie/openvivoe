@@ -14,6 +14,7 @@ struct ethernetIfTableEntry * ethernetIfTableEntry_create(  long  ethernetIfInde
                                                             in_addr_t ethernetIfSubnetMask,
                                                             in_addr_t ethernetIfIpAddressConflict);
 
+gboolean select_interfaces();
 void init_ethernetIfTable(void);
 gboolean init_ethernet(const char* iface);
 void MAC_to_byte_array(u_char dest[6], u_char* source);
