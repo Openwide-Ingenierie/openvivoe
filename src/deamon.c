@@ -136,7 +136,7 @@ int deamon (char* deamon_name) {
   signal(SIGTERM, stop_server);
   signal(SIGINT,  stop_server);
 
-  snmp_log(LOG_INFO,"%s is up and running.\n", deamon_name);
+  snmp_log(LOG_INFO,"%s is up and running.\n", basename(deamon_name));
 
   /* your main loop here... */
   while(keep_running) {
@@ -146,7 +146,7 @@ int deamon (char* deamon_name) {
   }
 
   /* at shutdown time */
-  snmp_shutdown(deamon_name);
+  snmp_shutdown(basename(deamon_name));
 
   return EXIT_SUCCESS;
 }
