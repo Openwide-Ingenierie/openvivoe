@@ -9,17 +9,12 @@
  * SubAgent Module
  */
 #include <stdio.h>
-#include "../include/deamon.h"
-#include "../include/streaming/stream.h"
-#include "../include/multicast.h"
-
 #include <stdlib.h>
-#include <stdio.h>
+#include <gio/gio.h>
 #include <glib-2.0/glib.h>
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
-
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
@@ -33,10 +28,16 @@
 #include <arpa/inet.h>
 
 /* header file */
-#include "../include/deviceInfo/ethernetIfTable.h"
+#include "../include/deamon.h"
+#include "../include/streaming/stream.h"
+#include "../include/multicast.h"
+
+
+
 
 int main (int   argc,  char *argv[]){
-//	return stream(argc, argv);
-	return deamon(argv[0]);
+//return	deamon(argv[0]);
+	return stream(argc, argv);
+
 }
 

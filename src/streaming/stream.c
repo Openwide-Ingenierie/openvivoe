@@ -4,8 +4,9 @@
  * Main authors:
  *     - hoel <hoel.vasseur@openwide.fr>
  */
-
+#include <signal.h>
 #include <glib-2.0/glib.h>
+#include <glib-unix.h>
 #include <gstreamer-1.0/gst/gst.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,11 +16,14 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+
+
 #include "../../include/mibParameters.h"
 #include "../../include/streaming/pipeline.h"
 #include "../../include/streaming/detect.h"
 #include "../../include/streaming/stream_registration.h"
 #include "../../include/streaming/stream.h"
+#include "../../include/deamon.h"
 /*
  * Macro for testing purposes
  */
@@ -38,7 +42,6 @@ static gboolean bus_call (  GstBus     *bus,
 							gpointer    data)
 {
 	GMainLoop *loop = (GMainLoop *) data;
-
 	switch (GST_MESSAGE_TYPE (msg)) {
 
 		case GST_MESSAGE_EOS:
@@ -63,6 +66,13 @@ static gboolean bus_call (  GstBus     *bus,
 	}
 
 	return TRUE;
+}
+
+static gboolean stop_stream ( gpointer data ){
+	GMainLoop *loop = (GMainLoop *) data;
+	g_print ("End of stream\n");
+	g_main_loop_quit (loop);
+	return TRUE;	
 }
 
 /* 
@@ -125,8 +135,8 @@ static GstElement* source_creation(GstElement* pipeline, char* format){
 	/*
 	 * For now, the source is created manually, directly into the code
 	 * */
-	GstElement *source, *capsfilter, *enc, *last;	
-	GstCaps* caps;
+	GstElement 	*source, *capsfilter, *enc, *last;	
+	GstCaps 	*caps;
 	/*
 	 * For now, the source is created manually, directly into the code
 	 * */
@@ -173,27 +183,26 @@ static GstElement* source_creation(GstElement* pipeline, char* format){
 int stream (int   argc,  char *argv[])
 {
     /* Initialization of elements needed */
-    GstElement *pipeline,*last;
-    GstBus *bus;
-    guint bus_watch_id;    
-    GMainLoop *loop;
-	gchar* ip = g_strdup( (gchar*) DEFAULT_IP);
-	gint port 	= DEFAULT_PORT;
-	char* format = strdup(DEFAULT_FORMAT);
+    GstElement 	*pipeline,*last;
+    GstBus 		*bus;
+    guint 		bus_watch_id;
+	GMainLoop 	*loop;  	
+	gchar 		*ip 				= g_strdup( (gchar*) DEFAULT_IP);
+	gint 		port 				= DEFAULT_PORT;
+	char 		*format 			= strdup(DEFAULT_FORMAT);
 
 	/* Initialize GStreamer */
     gst_init (&argc, &argv);
 	/* Check input arguments */
 	check_param(argc, argv, &ip, &port, &format);
 
-    /* Initialize the main loop, (replace gst-launch) */
-    loop = g_main_loop_new (NULL, FALSE);
+	loop = g_main_loop_new (NULL, FALSE);
 
     /* Create the pipeline */
     pipeline  = gst_pipeline_new ("pipeline");
 	if(pipeline  == NULL){
 		g_printerr ( "error cannot create: %s\n","pipeline" );
-		return EXIT_FAILURE;        
+		return EXIT_FAILURE;
 	}
 	
 	/* we add a message handler */
@@ -220,11 +229,15 @@ int stream (int   argc,  char *argv[])
   	/* Set the pipeline to "playing" state*/
     g_print ("Now playing\n");
     gst_element_set_state (pipeline, GST_STATE_PLAYING);
-    /* Iterate */
-    g_print ("Running...\n");
-    g_main_loop_run (loop);
 
-	
+    /* Iterate */
+	g_print ("Running...\n");
+
+	/* watch for stop signal */
+	g_unix_signal_add (SIGINT,stop_stream, loop);
+	g_unix_signal_add (SIGTERM,stop_stream, loop);	
+	g_main_loop_run (loop);
+
 	/* Out of the main loop, clean up nicely */
     g_print ("Returned, stopping playback\n");
     gst_element_set_state (pipeline, GST_STATE_NULL);
@@ -235,3 +248,5 @@ int stream (int   argc,  char *argv[])
     g_main_loop_unref (loop);
     return 0;
 }
+
+

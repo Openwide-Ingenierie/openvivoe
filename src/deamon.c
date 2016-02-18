@@ -77,14 +77,13 @@ int deamon (char* deamon_name) {
     else
         snmp_enable_stderrlog();
 
-  /* we're an agentx subagent? */
-
+ 	 /* we're an agentx subagent? */
     if (agentx_subagent) {
         /* make us a agentx client. */
         netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE, 1);
     }
 
-    /* run in background, if requested */
+	/* run in background, if requested */
     if (background && netsnmp_daemonize(1, !syslog))
         exit(1);
 
@@ -116,7 +115,8 @@ int deamon (char* deamon_name) {
     init_deviceMode();
     init_deviceReset();
 	init_videoFormatNumber();
-	init_videoFormatTable();
+	init_videoFormatTable(); 
+ 
 
   /* initialize vacm/usm access control  */
   if (!agentx_subagent) {
@@ -142,7 +142,7 @@ int deamon (char* deamon_name) {
   while(keep_running) {
     /* if you use select(), see snmp_select_info() in snmp_api(3) */
     /*     --- OR ---  */
-    agent_check_and_process(1); /* 0 == don't block */
+    agent_check_and_process(0); /* 0 == don't block */
   }
 
   /* at shutdown time */
@@ -150,3 +150,5 @@ int deamon (char* deamon_name) {
 
   return EXIT_SUCCESS;
 }
+
+
