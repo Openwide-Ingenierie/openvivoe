@@ -173,29 +173,13 @@ static GstElement* source_creation(GstElement* pipeline, char* format){
 }
 
 
-typedef struct{
-	GMainLoop 	*loop;
-	char 		*deamon_name;
-}stop_stream_data;
-
-static gboolean stop_stream ( gpointer data ){
-	stop_stream_data *stop_data = data;
-	GMainLoop *loop = (GMainLoop *) stop_data->loop;
-
-	/* Stop net snmp subAgetnt deamon */
-	snmp_shutdown(stop_data->deamon_name);	
-	g_print ("End of stream\n");
-	g_main_loop_quit (loop);
-	return TRUE;	
-}
-
-int stream (int   argc,  char *argv[])
+int start_streaming (int   argc,  char *argv[], gpointer main_loop, gpointer stream_datas)
 {
     /* Initialization of elements needed */
     GstElement 	*pipeline,*last;
     GstBus 		*bus;
     guint 		bus_watch_id;
-	GMainLoop 	*loop;  	
+	GMainLoop 	*loop 				= main_loop;  	
 	gchar 		*ip 				= g_strdup( (gchar*) DEFAULT_IP);
 	gint 		port 				= DEFAULT_PORT;
 	char 		*format 			= strdup(DEFAULT_FORMAT);
@@ -204,8 +188,6 @@ int stream (int   argc,  char *argv[])
     gst_init (&argc, &argv);
 	/* Check input arguments */
 	check_param(argc, argv, &ip, &port, &format);
-
-	loop = g_main_loop_new (NULL, FALSE);
 
     /* Create the pipeline */
     pipeline  = gst_pipeline_new ("pipeline");
@@ -239,30 +221,28 @@ int stream (int   argc,  char *argv[])
     g_print ("Now playing\n");
     gst_element_set_state (pipeline, GST_STATE_PLAYING);
 
-    /* Iterate */
 	g_print ("Running...\n");
+	
+	/* Reference all data needed to stop the stream */
+	stream_data *data 	= stream_datas;
+	data->pipeline 		= pipeline;
+	data->bus 			= bus;
+	data->bus_watch_id 	= bus_watch_id;
 
-	/* watch for stop signal */
-	stop_stream_data 	stop_data;
-	stop_data.loop 		= loop;
-	stop_data.deamon_name 	= argv[0];
-	g_unix_signal_add (SIGINT,stop_stream, &stop_data);
-	g_unix_signal_add (SIGTERM,stop_stream, &stop_data);
-
-	/* Call the net snmp agent check and process function periodically */
-	deamon(argv[0]);
-	g_timeout_add (10, handle_snmp_request, NULL);
-	g_main_loop_run (loop);
-
-	/* Out of the main loop, clean up nicely */
-    g_print ("Returned, stopping playback\n");
-    gst_element_set_state (pipeline, GST_STATE_NULL);
-
-    g_print ("Deleting pipeline\n");
-    gst_object_unref (GST_OBJECT (pipeline));
-    g_source_remove (bus_watch_id);
-    g_main_loop_unref (loop);
     return 0;
+}
+
+int stop_streaming(gpointer stream_datas){
+
+	stream_data *data 	=  stream_datas;
+	/* Out of the main loop, clean up nicely */
+	g_print ("Returned, stopping playback\n");
+	gst_element_set_state (data->pipeline, GST_STATE_NULL);
+
+	g_print ("Deleting pipeline\n");
+	gst_object_unref (GST_OBJECT (data->pipeline));
+	g_source_remove (data->bus_watch_id);
+	return 0;
 }
 
 
