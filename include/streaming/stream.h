@@ -7,7 +7,17 @@
 #ifndef STREAM_H
 # define STREAM_H
 
-int stream (int   argc,  char *argv[]);
+
+typedef struct{
+	GstElement 	*pipeline;
+	GstBus 		*bus;
+    guint 		bus_watch_id;
+}stream_data;
+
+int init_streaming (int   argc,  char *argv[], gpointer main_loop, gpointer stream_datas);
+int start_streaming(gpointer stream_datas);
+int stop_streaming(gpointer stream_datas);
+int delete_steaming_data(gpointer stream_datas);
 
 #endif /* STREAM_H */
 

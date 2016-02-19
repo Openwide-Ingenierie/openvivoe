@@ -173,7 +173,7 @@ static GstElement* source_creation(GstElement* pipeline, char* format){
 }
 
 
-int start_streaming (int   argc,  char *argv[], gpointer main_loop, gpointer stream_datas)
+int init_streaming (int   argc,  char *argv[], gpointer main_loop, gpointer stream_datas)
 {
     /* Initialization of elements needed */
     GstElement 	*pipeline,*last;
@@ -232,17 +232,27 @@ int start_streaming (int   argc,  char *argv[], gpointer main_loop, gpointer str
     return 0;
 }
 
+int start_streaming (gpointer stream_datas){
+	stream_data *data 	=  stream_datas;	
+  	/* Set the pipeline to "playing" state*/
+    g_print ("Now playing\n");
+    gst_element_set_state (data->pipeline, GST_STATE_PLAYING);
+	return 0;
+}
+
 int stop_streaming(gpointer stream_datas){
 
 	stream_data *data 	=  stream_datas;
 	/* Out of the main loop, clean up nicely */
 	g_print ("Returned, stopping playback\n");
 	gst_element_set_state (data->pipeline, GST_STATE_NULL);
+	return 0;
+}
 
+int delete_steaming_data(gpointer stream_datas){
+	stream_data *data 	=  stream_datas;	
 	g_print ("Deleting pipeline\n");
 	gst_object_unref (GST_OBJECT (data->pipeline));
 	g_source_remove (data->bus_watch_id);
 	return 0;
 }
-
-

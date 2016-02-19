@@ -33,7 +33,7 @@
 typedef struct{
 	GMainLoop 			*loop;
 	char 				*deamon_name;
-	struct stream_data 	*stream_datas;
+	stream_data 	*stream_datas;
 }stop_program_data;
 
 
@@ -45,6 +45,7 @@ static gboolean stop_program ( gpointer data ){
 	snmp_shutdown(stop_data->deamon_name);
 
 	stop_streaming(stop_data->stream_datas);
+	delete_steaming_data(stop_data->stream_datas);
 
 	g_main_loop_quit (loop);
 	g_main_loop_unref (loop);	
@@ -77,9 +78,9 @@ int main (int   argc,  char *argv[]){
 	/* init SubAgent Deamon */
 	deamon(argv[0]);
 	
-
 	/* prepare the stream - initialize all the data relevant to the stream into stream-data */
-	start_streaming(argc, argv, loop, &stream_datas);
+	init_streaming(argc, argv, loop, &stream_datas);
+	start_streaming(&stream_datas);
 
 	/* start the program: SNMP SubAgent deamon, and streaming */
     /* Iterate */	
