@@ -6,7 +6,7 @@
  */
 #ifndef DEAMON_H
 # define DEAMON_H
-
+gboolean handle_snmp_request();
 int deamon (char* deamon_name);
 
 #endif /* DEAMON_H */

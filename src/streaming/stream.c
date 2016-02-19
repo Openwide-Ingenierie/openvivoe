@@ -68,13 +68,6 @@ static gboolean bus_call (  GstBus     *bus,
 	return TRUE;
 }
 
-static gboolean stop_stream ( gpointer data ){
-	GMainLoop *loop = (GMainLoop *) data;
-	g_print ("End of stream\n");
-	g_main_loop_quit (loop);
-	return TRUE;	
-}
-
 /* 
  * This function is used to check the parameters used for intialize the stream
  */
@@ -180,6 +173,22 @@ static GstElement* source_creation(GstElement* pipeline, char* format){
 }
 
 
+typedef struct{
+	GMainLoop 	*loop;
+	char 		*deamon_name;
+}stop_stream_data;
+
+static gboolean stop_stream ( gpointer data ){
+	stop_stream_data *stop_data = data;
+	GMainLoop *loop = (GMainLoop *) stop_data->loop;
+
+	/* Stop net snmp subAgetnt deamon */
+	snmp_shutdown(stop_data->deamon_name);	
+	g_print ("End of stream\n");
+	g_main_loop_quit (loop);
+	return TRUE;	
+}
+
 int stream (int   argc,  char *argv[])
 {
     /* Initialization of elements needed */
@@ -190,7 +199,7 @@ int stream (int   argc,  char *argv[])
 	gchar 		*ip 				= g_strdup( (gchar*) DEFAULT_IP);
 	gint 		port 				= DEFAULT_PORT;
 	char 		*format 			= strdup(DEFAULT_FORMAT);
-
+	
 	/* Initialize GStreamer */
     gst_init (&argc, &argv);
 	/* Check input arguments */
@@ -234,8 +243,15 @@ int stream (int   argc,  char *argv[])
 	g_print ("Running...\n");
 
 	/* watch for stop signal */
-	g_unix_signal_add (SIGINT,stop_stream, loop);
-	g_unix_signal_add (SIGTERM,stop_stream, loop);	
+	stop_stream_data 	stop_data;
+	stop_data.loop 		= loop;
+	stop_data.deamon_name 	= argv[0];
+	g_unix_signal_add (SIGINT,stop_stream, &stop_data);
+	g_unix_signal_add (SIGTERM,stop_stream, &stop_data);
+
+	/* Call the net snmp agent check and process function periodically */
+	deamon(argv[0]);
+	g_timeout_add (10, handle_snmp_request, NULL);
 	g_main_loop_run (loop);
 
 	/* Out of the main loop, clean up nicely */

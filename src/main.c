@@ -36,7 +36,6 @@
 
 
 int main (int   argc,  char *argv[]){
-//return	deamon(argv[0]);
 	return stream(argc, argv);
 
 }

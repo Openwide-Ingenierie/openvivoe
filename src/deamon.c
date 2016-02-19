@@ -57,18 +57,9 @@
  */
 #include "../include/deamon.h"
 
-/* main deamon for the MIB */
-
-static int keep_running;
-
-RETSIGTYPE
-stop_server(int a) {
-    keep_running = 0;
-}
+/* deamon for the MIB subAgent */
 
 int deamon (char* deamon_name) {
-    int agentx_subagent=1; /* change this if you want to be a SNMP master agent */
-    int background = 0; /* change this if you want to run in the background */
     int syslog = 0; /* change this if you want to use syslog */
 
     /* print log errors to syslog or stderr */
@@ -76,16 +67,8 @@ int deamon (char* deamon_name) {
         snmp_enable_calllog();
     else
         snmp_enable_stderrlog();
-
- 	 /* we're an agentx subagent? */
-    if (agentx_subagent) {
-        /* make us a agentx client. */
-        netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE, 1);
-    }
-
-	/* run in background, if requested */
-    if (background && netsnmp_daemonize(1, !syslog))
-        exit(1);
+	/* make us a agentx client. */
+    netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE, 1);
 
     /* Before starting the agent, we should initialize the MIB's parameters
      * from the configuration file vivoe-mib.conf
@@ -116,39 +99,15 @@ int deamon (char* deamon_name) {
     init_deviceReset();
 	init_videoFormatNumber();
 	init_videoFormatTable(); 
- 
-
-  /* initialize vacm/usm access control  */
-  if (!agentx_subagent) {
-      init_vacm_vars();
-      init_usmUser();
-  }
 
   /* example-demon will be used to read example-demon.conf files. */
   init_snmp(basename(deamon_name));
 
-  /* If we're going to be a snmp master agent, initial the ports */
-  if (!agentx_subagent)
-    init_master_agent();  /* open the port to listen on (defaults to udp:161) */
-
-  /* In case we receive a request to stop (kill -TERM or kill -INT) */
-  keep_running = 1;
-  signal(SIGTERM, stop_server);
-  signal(SIGINT,  stop_server);
-
   snmp_log(LOG_INFO,"%s is up and running.\n", basename(deamon_name));
-
-  /* your main loop here... */
-  while(keep_running) {
-    /* if you use select(), see snmp_select_info() in snmp_api(3) */
-    /*     --- OR ---  */
-    agent_check_and_process(0); /* 0 == don't block */
-  }
-
-  /* at shutdown time */
-  snmp_shutdown(basename(deamon_name));
-
   return EXIT_SUCCESS;
 }
 
-
+gboolean handle_snmp_request( ){
+    agent_check_and_process(0); /* 0 == don't block */
+	return TRUE;
+}
