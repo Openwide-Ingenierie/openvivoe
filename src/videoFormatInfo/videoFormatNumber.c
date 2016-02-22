@@ -10,7 +10,7 @@
 #include "../../include/mibParameters.h"
 #include "../../include/handler.h"
 
-parameter videoFormatNumber = {"videoFormatNumber",INTEGER,0, {0} };
+parameter videoFormatNumber = {"videoFormatNumber",INTEGER, 0, {0} };
 
 /** Initializes the videoFormatNumber module */
 void

@@ -122,7 +122,7 @@ init_ethernetIfTable(void)
  * to remove a row from the table.
  * the functionnality exits, but should not be implemented for now
  */
-#define ALLOW_REMOVING_ROW 0
+
 #if ALLOW_REMOVING_ROW
 void ethernetIfTable_removeEntry( struct ethernetIfTableEntry *entry ) {
     struct ethernetIfTableEntry *ptr, *prev;

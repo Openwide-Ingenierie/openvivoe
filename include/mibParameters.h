@@ -7,7 +7,11 @@
 # ifndef MIBPARAMETERS_H
 # define MIBPARAMETERS_H
 
-
+/* define general parameters for the MIB_management */
+#define DisplayString16 			16
+#define DisplayString32 			32
+#define DisplayString64 			64
+#define ALLOW_REMOVING_ROW 			0
 /*
  * Enum for the type of MIB's parameter
  */
@@ -69,11 +73,19 @@ typedef struct {
 MIB_group deviceInfo;
 /* --------------------------------- end Group DeviceInfo --------------------------------- */
 
+/* --------------------------------- Group videoFormatInfo -------------------------------- */
 /* Initiation of videoFormatNumber to 0, it will be automatically updated each 
  * time a new videoFormat is detected on the display
  */
-extern parameter videoFormatNumber;
+extern parameter videoFormatNumber; /*initialize in viodeFormatNumber.c*/
 /* --------------------------------- end Group videoFormatInfo ---------------------------- */
+
+/* --------------------------------- Group channelControl --------------------------------- */
+
+extern parameter channelReset;
+extern parameter channelNumber;
+
+/* --------------------------------- end Group channelControl ----------------------------- */
 
 
 #endif /* MIBPARAMETERS_H */

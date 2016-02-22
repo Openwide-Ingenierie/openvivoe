@@ -2,8 +2,8 @@
  * Licence: GPL
  * Created: Tue, 16 Feb 2016 14:07:57 +0100
  * Main authors:
- *     - hoel <hoel.vasseur@openwide.fr>
- *     - Gerome <gerome.burlats@openwide.fr>
+ *     - hoel <hoel.vasseur\openwide.fr>
+ *     - Gerome <gerome.burlats\openwide.fr>
  */
 
 #include <stdlib.h>
@@ -29,8 +29,8 @@
 
 
 /** \brief Retrieve system IP address on a specific interface
- *  @param iface The network interface to use to retrieve the IP
- *  @param ifr a structure to store the interface information
+ *  \param iface The network interface to use to retrieve the IP
+ *  \param ifr a structure to store the interface information
  */
 static gboolean get_ip(const char* iface, struct ifreq* ifr){
 	int fd;
@@ -53,8 +53,8 @@ static gboolean get_ip(const char* iface, struct ifreq* ifr){
 }
 
 /** \brief Retrieve the device IP associated to the address addr
- * @param addr The addresse to use
- * @return the deviceID associated (last byte of IP address)
+ * \param addr The addresse to use
+ * \return the deviceID associated (last byte of IP address)
  */
 static short get_device_id(char* addr){
 	long int_addr 	= htonl(inet_addr( (const char*) addr)); /* get the addresse in binary mode, in network style (as host style may changed according to host) */
@@ -64,9 +64,9 @@ static short get_device_id(char* addr){
 }
 
 /** \brief Build Multicast address for streaming in VIVOE protocol
- * @param multicast_addr the string to store the computed multicast address
- * @param multicast_iface the interface from which retirevinf the IP address
- * @param multicast_channel the multicast channel we wanna use
+ * \param multicast_addr the string to store the computed multicast address
+ * \param multicast_iface the interface from which retirevinf the IP address
+ * \param multicast_channel the multicast channel we wanna use
  */
  void define_vivoe_multicast(long *multicast_addr, const char* multicast_iface, const short int multicast_channel)
 {
@@ -80,7 +80,6 @@ static short get_device_id(char* addr){
 		
 	if( get_ip(multicast_iface, &ifr)){
 		device_ip = inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr);
-		printf("%s\n", device_ip);
 		device_id = get_device_id(device_ip);
 		result = multicast_pref + channel + device_id;
 		*multicast_addr =  result;

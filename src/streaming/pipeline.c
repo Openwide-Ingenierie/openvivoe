@@ -33,9 +33,10 @@ static GstElement* addRTP( 	GstElement*pipeline, 	GstBus *bus,
 	GstStructure* video_caps;
 	/* Media stream Type detection */
 	video_caps = type_detection(GST_BIN(pipeline), input, loop);
-
+	
 	/* Fill the MIB a first Time */
 	fill_entry(video_caps, video_info);
+
 	if ( gst_structure_has_name( video_caps, "video/x-raw")){
 		/* For Raw video */
 		rtp 	= gst_element_factory_make ("rtpvrawpay", "rtp");
@@ -46,7 +47,7 @@ static GstElement* addRTP( 	GstElement*pipeline, 	GstBus *bus,
 		}
 	}else if  (gst_structure_has_name( video_caps, "video/mpeg")){
 		/* For MPEG-4 video */
-		rtp = gst_element_factory_make ("rtpmp4vpay", "rtp");
+		rtp 	= gst_element_factory_make ("rtpmp4vpay", "rtp");
 		/* Check if everything went ok */
 		if( rtp == NULL){
 			g_printerr ( "error cannot create element for: %s\n","rtp");
@@ -62,7 +63,6 @@ static GstElement* addRTP( 	GstElement*pipeline, 	GstBus *bus,
 	if (!filter_VIVOE(input, rtp)){
 		return NULL;
 	}
-
 	/* Now that wa have added the RTP payloader to the pipeline, we can get the new caps of the video stream*/
 	/* Media stream Type detection */
 	video_caps = type_detection(GST_BIN(pipeline), rtp, loop);

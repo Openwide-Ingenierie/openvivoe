@@ -31,12 +31,16 @@
  * \brief the data needed to pass to functions used to exit the program nicely
  */
 typedef struct{
-	GMainLoop 			*loop;
-	char 				*deamon_name;
-	stream_data 	*stream_datas;
+	GMainLoop 			*loop; 			/* the main Loop to quit and unref */
+	char 				*deamon_name; 	/* the deamon's nam to stop */
+	stream_data 		*stream_datas; 	/* the data allocated from the streaming to free */
 }stop_program_data;
 
-
+/**
+ * \brief the data needed to pass to functions used to exit the program nicely
+ * \param data the data we need to know to exit the program nicely see stop_program_data
+ * \return TRUE
+ */
 static gboolean stop_program ( gpointer data ){
 	stop_program_data *stop_data = data;
 	GMainLoop *loop = (GMainLoop *) stop_data->loop;
@@ -52,19 +56,23 @@ static gboolean stop_program ( gpointer data ){
 	return TRUE;	
 }
 
-
-
+/**
+ * \brief the data needed to pass to functions used to exit the program nicely
+ * \param data the data we need to know to exit the program nicely see stop_program_dat
+ * \return 0 as it's our main function
+ */
 int main (int   argc,  char *argv[]){
 
 	/* create the GMainLoop*/
 	GMainLoop 	*loop;  	
 	loop = g_main_loop_new (NULL, FALSE);
 
-	/* add the idle function that handle SNMP request */
+	/* add the idle function that handle SNMP request everye 100ms */
 	g_timeout_add (10, handle_snmp_request, NULL);
 
 	/* watch for stop signal */
-	stream_data 	stream_datas;
+	stream_data 			stream_datas;
+
 
 	stop_program_data 		stop_data;
 	stop_data.loop 			= loop;
@@ -79,14 +87,15 @@ int main (int   argc,  char *argv[]){
 	deamon(argv[0]);
 	
 	/* prepare the stream - initialize all the data relevant to the stream into stream-data */
-	init_streaming(argc, argv, loop, &stream_datas);
+	if ( init_streaming(argc, argv, loop, &stream_datas)){
+		return 0;
+	}
 	start_streaming(&stream_datas);
 
 	/* start the program: SNMP SubAgent deamon, and streaming */
     /* Iterate */	
 	g_main_loop_run (loop);
 	
-
 	return 0;
 }
 

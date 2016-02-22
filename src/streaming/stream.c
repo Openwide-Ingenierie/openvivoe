@@ -34,9 +34,12 @@
 #define MIN_DEFAULT_PORT 1024
 #define MAX_DEFAULT_PORT 65535
 
-/*
- * Handle the Bus: display message, get interruption, etc...
- * */
+/**
+ * \brief Handle the Bus: display message, get interruption, etc...
+ * \param bus the Bus element
+ * \param msg the masseges receive on the bus 
+ * \return gboolean TRUE (always)
+ */
 static gboolean bus_call (  GstBus     *bus,
 							GstMessage *msg,
 							gpointer    data)
@@ -68,8 +71,12 @@ static gboolean bus_call (  GstBus     *bus,
 	return TRUE;
 }
 
-/* 
- * This function is used to check the parameters used for intialize the stream
+
+/**
+ * \brief check the parameters used for intialize the stream
+ * \param argc: as in main (should be 3)
+ * \param argv: as in main (should begin with ip=... port=... format=...)
+ * \return int EXIT_FAILURE if wrong parameters passed to the program, EXIT_SUCCESS otherwise
  */
 static int check_param(int argc, char* argv[], char** ip, gint* port, char** format){
 
@@ -119,10 +126,11 @@ static int check_param(int argc, char* argv[], char** ip, gint* port, char** for
 	return EXIT_SUCCESS;
 }
 
-
-
-/*
- * For test purposes
+/**
+ * \brief create a fake source for test purposes
+ * \param pipeline: the pipeline in which add the source 
+ * \param format: the video format for the source raw or mp4
+ * \return GstElement* the last element add and link into the pipeline 
  */
 static GstElement* source_creation(GstElement* pipeline, char* format){
 	/*
@@ -160,7 +168,6 @@ static GstElement* source_creation(GstElement* pipeline, char* format){
 		/*create the MPEG-4 encoder */
 		enc = gst_element_factory_make ("avenc_mpeg4", "enc");
 		/* save last pipeline element */
-		last = enc;
 		if(enc == NULL){
 			g_printerr ( "error cannot create element for: %s\n","enc");
 			return NULL;        
@@ -168,15 +175,22 @@ static GstElement* source_creation(GstElement* pipeline, char* format){
 		/* add encryptor to pipeline, link it to the source */
 		gst_bin_add (GST_BIN(pipeline), enc); 
 		gst_element_link (capsfilter, enc);
+		last = enc;		
 	}
 	return last;
 }
 
-
+/**
+ * \brief intialize the stream: create the pipeline and filters out non vivoe format
+ * \param argc to know which source to built
+ * \param argv to know which source to built
+ * \param stream_datas a structure in which we will save the pipeline and the bus elements 
+ * \return 0 
+ */
 int init_streaming (int   argc,  char *argv[], gpointer main_loop, gpointer stream_datas)
 {
     /* Initialization of elements needed */
-    GstElement 	*pipeline,*last;
+    GstElement 	*pipeline, *last;
     GstBus 		*bus;
     guint 		bus_watch_id;
 	GMainLoop 	*loop 				= main_loop;  	
@@ -207,7 +221,6 @@ int init_streaming (int   argc,  char *argv[], gpointer main_loop, gpointer stre
 		g_printerr ( "Failed to create videosource\n");	
 		return EXIT_FAILURE;	
 	}
-
 	/* Create pipeline */
 	last = create_pipeline( pipeline, 		bus, 
 							bus_watch_id, 	loop,
@@ -216,12 +229,6 @@ int init_streaming (int   argc,  char *argv[], gpointer main_loop, gpointer stre
 	/* Check if everything went ok */
 	if (last == NULL)
 		return EXIT_FAILURE;
-
-  	/* Set the pipeline to "playing" state*/
-    g_print ("Now playing\n");
-    gst_element_set_state (pipeline, GST_STATE_PLAYING);
-
-	g_print ("Running...\n");
 	
 	/* Reference all data needed to stop the stream */
 	stream_data *data 	= stream_datas;
@@ -232,6 +239,11 @@ int init_streaming (int   argc,  char *argv[], gpointer main_loop, gpointer stre
     return 0;
 }
 
+/**
+ * \brief start the streaming: set pipeling into PLAYING state
+ * \param data of the stream (pipeline, bus and bust_watch_id) - see stream_data structure
+ * \return 0 
+ */
 int start_streaming (gpointer stream_datas){
 	stream_data *data 	=  stream_datas;	
   	/* Set the pipeline to "playing" state*/
@@ -240,6 +252,11 @@ int start_streaming (gpointer stream_datas){
 	return 0;
 }
 
+/**
+ * \brief stop the streaming: set pipeling into NULL state
+ * \param data of the stream (pipeline, bus and bust_watch_id) - see stream_data structure
+ * \return 0 
+ */
 int stop_streaming(gpointer stream_datas){
 
 	stream_data *data 	=  stream_datas;
@@ -249,6 +266,11 @@ int stop_streaming(gpointer stream_datas){
 	return 0;
 }
 
+/**
+ * \brief delete the stream: free pipeline and bus element
+ * \param data of the stream (pipeline, bus and bust_watch_id) - see stream_data structure
+ * \return 0 
+ */
 int delete_steaming_data(gpointer stream_datas){
 	stream_data *data 	=  stream_datas;	
 	g_print ("Deleting pipeline\n");
