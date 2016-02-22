@@ -154,17 +154,17 @@ struct channelTable_entry *
 
     entry->channelIndex 					= channelIndex;
  	entry->channelUserDesc 					= strdup(channelUserDesc);
-	entry->channelUserDesc_len 				= MAX(strlen(channelUserDesc), DisplayString64);
+	entry->channelUserDesc_len 				= MIN(strlen(channelUserDesc), DisplayString64);
 	entry->channelStatus 					= channelStatus;
 	entry->channelVideoFormatIndex 			= channelVideoFormatIndex;
 	entry->channelVideoFormat 	 			= strdup(channelVideoFormat);
-	entry->channelVideoFormat_len			= MAX(strlen(channelVideoFormat), DisplayString16);
+	entry->channelVideoFormat_len			= MIN(strlen(channelVideoFormat), DisplayString16);
 	entry->channelVideoSampling 			= strdup(channelVideoSampling);
-	entry->channelVideoFormat_len			= MAX(strlen(channelVideoSampling), DisplayString16);	
+	entry->channelVideoFormat_len			= MIN(strlen(channelVideoSampling), DisplayString16);	
 	entry->channelVideoBitDepth 			= channelVideoBitDepth;
 	entry->channelFps 						= channelFps;
 	entry->channelColorimetry 				= strdup(channelColorimetry);
-	entry->channelColorimetry_len 			= MAX(strlen(channelColorimetry), DisplayString16);	
+	entry->channelColorimetry_len 			= MIN(strlen(channelColorimetry), DisplayString16);	
 	entry->channelInterlaced 				= channelInterlaced;
 	entry->channelCompressionFactor 		= channelCompressionFactor;
 	entry->channelCompressionRate 			= channelCompressionRate;

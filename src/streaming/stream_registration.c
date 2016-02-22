@@ -46,12 +46,10 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
 	/*videoFormatBase*/
 	if( gst_structure_has_field(source_str_caps, "encoding-name")){
 		video_info->videoFormatBase				= (char*) g_value_dup_string (gst_structure_get_value(source_str_caps, "encoding-name"));
-		video_info->videoFormatBase_len 		= strlen(video_info->videoFormatBase);
 	}
 	/*VideoFormatSampling*/
 	if( gst_structure_has_field(source_str_caps, "sampling")){
 		video_info->videoFormatSampling 		= (char*) g_value_dup_string (gst_structure_get_value(source_str_caps, "sampling"));
-		video_info->videoFormatSampling_len 	= strlen(video_info->videoFormatSampling);
 	}
 	/*videoFormatBitDepth*/	
 	if( gst_structure_has_field(source_str_caps, "depth")){
@@ -66,7 +64,6 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
 	/*videoFormatColorimetry*/	
 	if( gst_structure_has_field(source_str_caps, "colorimetry")){
 		video_info->videoFormatColorimetry 		= (char*)g_value_dup_string (gst_structure_get_value(source_str_caps, "colorimetry"));
-		video_info->videoFormatColorimetry_len 	= strlen(video_info->videoFormatColorimetry);
 	}
 	/*videoFormatInterlaced*/
 	if( gst_structure_has_field(source_str_caps, "interlace-mode")){
@@ -113,16 +110,14 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info){
 			/* Then we are sure that we can create a new entry */
 			videoFormatTable_createEntry( 	0, 			 								videoChannel,
 											enable, 									video_info->videoFormatBase,
-											video_info->videoFormatBase_len,			video_info->videoFormatSampling,
-											video_info->videoFormatSampling_len,		video_info->videoFormatBitDepth,
+											video_info->videoFormatSampling, 			video_info->videoFormatBitDepth,
 											video_info->videoFormatFps,				 	video_info->videoFormatColorimetry,
-											video_info->videoFormatColorimetry_len, 	video_info->videoFormatInterlaced,
-											video_info->videoFormatCompressionFactor, 	video_info->videoFormatCompressionRate, 	
-											video_info->videoFormatMaxHorzRes,			video_info->videoFormatMaxVertRes, 
-											0,											0, 
-											0,											0,	
-											0, 											0, 	
-											0);
+											video_info->videoFormatInterlaced, 			video_info->videoFormatCompressionFactor, 
+											video_info->videoFormatCompressionRate, 	video_info->videoFormatMaxHorzRes,			
+											video_info->videoFormatMaxVertRes, 			0,
+											0, 											0,		
+											0,											0, 				
+											0, 											0);
 
 			/* increase videoFormatNumber as we added an entry */
 			videoFormatNumber._value.int_val++;
@@ -152,10 +147,10 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info){
 			 */
 			videoFormatTable_createEntry( 	video_info->videoFormatIndex,				videoChannel,
 											enable, 									video_info->videoFormatBase,
-											video_info->videoFormatBase_len,			video_info->videoFormatSampling,
-											video_info->videoFormatSampling_len,		video_info->videoFormatBitDepth,
+														video_info->videoFormatSampling,
+													video_info->videoFormatBitDepth,
 											video_info->videoFormatFps,				 	video_info->videoFormatColorimetry,
-											video_info->videoFormatColorimetry_len, 	video_info->videoFormatInterlaced,
+											 	video_info->videoFormatInterlaced,
 											video_info->videoFormatCompressionFactor, 	video_info->videoFormatCompressionRate, 	
 											video_info->videoFormatMaxHorzRes,			video_info->videoFormatMaxVertRes, 
 											0,											0, 

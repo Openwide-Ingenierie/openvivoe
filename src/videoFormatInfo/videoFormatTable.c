@@ -6,6 +6,8 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include "../../include/macro.h"
+#include "../../include/mibParameters.h"
 #include "../../include/videoFormatInfo/videoFormatTable.h"
 
 /** Initializes the videoFormatTable module */
@@ -74,10 +76,10 @@ struct videoFormatTable_entry * videoFormatTable_initiateEntry( 	long  videoForm
  * */
 struct videoFormatTable_entry * videoFormatTable_createEntry( 	long  videoFormatIndex, 			long videoFormatType,
 																long videoFormatStatus,				char* videoFormatBase,
-																size_t videoFormatBase_len,			char* videoFormatSampling,
-																size_t videoFormatSampling_len,		long videoFormatBitDepth,
+																			char* videoFormatSampling,
+																		long videoFormatBitDepth,
 																long videoFormatFps,				char* videoFormatColorimetry,
-																size_t videoFormatColorimetry_len, 	long videoFormatInterlaced,
+																 	long videoFormatInterlaced,
 																long videoFormatCompressionFactor, 	long videoFormatCompressionRate, 	
 																long videoFormatMaxHorzRes,			long videoFormatMaxVertRes,
 																long videoFormatRoiHorzRes,			long videoFormatRoiVertRes, 
@@ -90,16 +92,18 @@ struct videoFormatTable_entry * videoFormatTable_createEntry( 	long  videoFormat
     if (!entry)
         return NULL;
 
+
     entry->videoFormatIndex 			= videoFormatIndex;
 	entry->videoFormatType 				= videoFormatType;
 	entry->videoFormatStatus 			= videoFormatStatus;
-	entry->videoFormatBase 				= videoFormatBase;
-	entry->videoFormatBase_len 			= videoFormatBase_len;
+	entry->videoFormatBase 				= strdup(videoFormatBase);
+	entry->videoFormatBase_len 			= MIN(strlen(videoFormatBase), DisplayString16);
 	entry->videoFormatSampling 			= videoFormatSampling;
-	entry->videoFormatSampling_len 		= videoFormatSampling_len;
+	entry->videoFormatSampling_len 		= MIN(strlen(videoFormatSampling), DisplayString16);
 	entry->videoFormatBitDepth 			= videoFormatBitDepth;
 	entry->videoFormatFps 				= videoFormatFps;
-	entry->videoFormatColorimetry 		= videoFormatColorimetry;
+	entry->videoFormatColorimetry 		= strdup(videoFormatColorimetry);
+	entry->videoFormatColorimetry_len 	= MIN(strlen(videoFormatColorimetry), DisplayString16);
 	entry->videoFormatInterlaced 		= videoFormatInterlaced;
 	entry->videoFormatCompressionFactor = videoFormatCompressionFactor;
 	entry->videoFormatCompressionRate 	= videoFormatCompressionRate;
