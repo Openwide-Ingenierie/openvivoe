@@ -15,7 +15,9 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "../../include/mibParameters.h"
+#include "../../include/channelControl/channelTable.h"
 #include "../../include/videoFormatInfo/videoFormatTable.h"
+#include "../../include/multicast.h"
 #include "../../include/streaming/stream_registration.h"
 #include "../../include/streaming/stream.h"
 
@@ -121,12 +123,28 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 											0, 											0,		
 											0,											0, 				
 											0, 											0);
-
 			/* increase videoFormatNumber as we added an entry */
 			videoFormatNumber._value.int_val++;
 
 			/* update stream_datas by adding the videoFormatIndex that we just add into the videoFormatTable*/
 			data->videoFormatIndex = index;
+
+			/* At the  same time we copy all of those parameters into video channel */
+			channelTable_createEntry( 	0, 																				videoChannel,
+										"channelUserDesc", 																disable,
+										index, 																			video_info->videoFormatBase,
+										video_info->videoFormatSampling, 												video_info->videoFormatBitDepth,
+										video_info->videoFormatFps,				 										video_info->videoFormatColorimetry,
+										video_info->videoFormatInterlaced, 												video_info->videoFormatCompressionFactor, 
+										video_info->videoFormatCompressionRate, 										video_info->videoFormatMaxHorzRes,			
+										video_info->videoFormatMaxVertRes, 												0,
+										0, 																				0,		
+										0,																				0, 				
+										define_vivoe_multicast("lo",video_info->videoFormatIndex),/*receive Address*/ 	0 /* packet delay*/,
+ 										0, /*SAP interval*/ 															index, /*defaultVideoFormatIndex*/
+										define_vivoe_multicast("lo",index)/*default receive IP*/);
+			/* increase channelNumber as we added an entry */			
+			channelNumber._value.int_val++;			
 		}
 	}else{
 		/* if the table of video format is not empty for this device, check if this format is already in the table
@@ -161,8 +179,27 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 											0, 											0,				
 											0,											0, 	
 											0, 											0);
+			/* increase videoFormatNumber as we added an entry */
+			videoFormatNumber._value.int_val++;
 			/* update stream_datas by adding the videoFormatIndex that we just add into the videoFormatTable*/
 			data->videoFormatIndex = video_info->videoFormatIndex;
+
+					/* At the  same time we copy all of those parameters into video channel */
+			channelTable_createEntry( 	video_info->videoFormatIndex, 				videoChannel,
+										"channelUserDesc", 							disable,
+										video_info->videoFormatIndex, 				video_info->videoFormatBase,
+										video_info->videoFormatSampling, 			video_info->videoFormatBitDepth,
+										video_info->videoFormatFps,				 	video_info->videoFormatColorimetry,
+										video_info->videoFormatInterlaced, 			video_info->videoFormatCompressionFactor, 
+										video_info->videoFormatCompressionRate, 	video_info->videoFormatMaxHorzRes,			
+										video_info->videoFormatMaxVertRes, 			0,
+										0, 											0,		 				
+										0, 											0,
+										define_vivoe_multicast("lo",video_info->videoFormatIndex),/*receive Address*/ 						0 /* packet delay*/,
+ 										0, /*SAP interval*/ 						index, /*defaultVideoFormatIndex - 0 is taken by default*/
+										define_vivoe_multicast("lo",index)/*default receive IP*/);
+			/* increase channelNumber as we added an entry */			
+			channelNumber._value.int_val++;
 		}
 	/* !!! IMPORTANT !!!
 	 * Do not free iterator, it was positioning on HEAD */

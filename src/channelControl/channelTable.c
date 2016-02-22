@@ -53,91 +53,34 @@ initialize_table_channelTable(void)
     netsnmp_register_table_iterator( reg, iinfo );
 }
 
-    /* Typical data structure for a row entry */
-struct channelTable_entry {
-    /* Index values */
-    long channelIndex;
-
-    /* Column values */
-    long channelType;
-    char* channelUserDesc;
-    size_t channelUserDesc_len;
-    char* old_channelUserDesc;
-    size_t old_channelUserDesc_len;
-    long channelStatus;
-    long old_channelStatus;
-    long channelVideoFormatIndex;
-    long old_channelVideoFormatIndex;
-    char* channelVideoFormat;
-    size_t channelVideoFormat_len;
-    char* channelVideoSampling;
-    size_t channelVideoSampling_len;
-    long channelVideoBitDepth;
-    long channelFps;
-    char* channelColorimetry;
-    size_t channelColorimetry_len;
-    long channelInterlaced;
-    long channelCompressionFactor;
-    long channelCompressionRate;
-    long old_channelCompressionRate;
-    long channelHorzRes;
-    long old_channelHorzRes;
-    long channelVertRes;
-    long old_channelVertRes;
-    long channelRoiOriginTop;
-    long old_channelRoiOriginTop;
-    long channelRoiOriginLeft;
-    long old_channelRoiOriginLeft;
-    long channelRoiExtentBottom;
-    long old_channelRoiExtentBottom;
-    long channelRoiExtentRight;
-    long old_channelRoiExtentRight;
-    long channelRtpPt;
-    in_addr_t channelReceiveIpAddress;
-    in_addr_t old_channelReceiveIpAddress;
-    long channelInterPacketDelay;
-    long old_channelInterPacketDelay;
-    long channelSapMessageInterval;
-    long old_channelSapMessageInterval;
-    long channelDefaultVideoFormatIndex;
-    long old_channelDefaultVideoFormatIndex;
-    in_addr_t channelDefaultReceiveIpAddress;
-    in_addr_t old_channelDefaultReceiveIpAddress;
-
-    /* Illustrate using a simple linked list */
-    int   valid;
-    struct channelTable_entry *next;
-};
-
-struct channelTable_entry  *channelTable_head;
-
 /* create a new row in the (unsorted) table */
 struct channelTable_entry *
 	channelTable_createEntry(
-    	        				long  channelIndex,
-						    	char* channelUserDesc,
-    							long channelStatus,
-							    long channelVideoFormatIndex,
-							    char* channelVideoFormat,
-							    char* channelVideoSampling,
-							    long channelVideoBitDepth,
-							    long channelFps,
-							    char* channelColorimetry,
-							    long channelInterlaced,
-							    long channelCompressionFactor,
-							    long channelCompressionRate,
-    							long channelHorzRes,
-    							long channelVertRes,
-							    long channelRoiOriginTop,
-							    long channelRoiOriginLeft,
-							    long channelRoiExtentBottom,
-							    long channelRoiExtentRight,
-							    long channelRtpPt,
-							    in_addr_t channelReceiveIpAddress,
-							    long channelInterPacketDelay,
-							    long channelSapMessageInterval,
-							    long channelDefaultVideoFormatIndex,
-							    in_addr_t channelDefaultReceiveIpAddress
+    	        				long 		channelIndex,
+								long  		channelType,
+						    	char* 		channelUserDesc,
+    							long 		channelStatus,
+							    long 		channelVideoFormatIndex,
+							    char*  		channelVideoFormat,
+							    char* 		channelVideoSampling,
+							    long 		channelVideoBitDepth,
+							    long 		channelFps,
+							    char* 		channelColorimetry,
+							    long 		channelInterlaced,
+							    long 		channelCompressionFactor,
+							    long 		channelCompressionRate,
+    							long 		channelHorzRes,
+    							long 		channelVertRes,
+							    long 		channelRoiOriginTop,
+							    long 		channelRoiOriginLeft,
+							    long 		channelRoiExtentBottom,
+							    long 		channelRoiExtentRight,
+							    long 		channelRtpPt,
+							    in_addr_t 	channelReceiveIpAddress,
+							    long 		channelInterPacketDelay,
+							    long 		channelSapMessageInterval,
+							    long 		channelDefaultVideoFormatIndex,
+							    in_addr_t 	channelDefaultReceiveIpAddress
                 			) {
     struct channelTable_entry *entry;
 
@@ -659,16 +602,12 @@ channelTable_handler(
     
             switch (table_info->colnum) {
             case COLUMN_CHANNELUSERDESC:
-                memcpy( table_entry->old_channelUserDesc,
-                        table_entry->channelUserDesc,
-                        sizeof(table_entry->channelUserDesc));
+                strcpy( table_entry->old_channelUserDesc,
+                        table_entry->channelUserDesc);
                 table_entry->old_channelUserDesc_len =
                         table_entry->channelUserDesc_len;
-                memset( table_entry->channelUserDesc, 0,
-                        sizeof(table_entry->channelUserDesc));
-                memcpy( table_entry->channelUserDesc,
-                        request->requestvb->val.string,
-                        request->requestvb->val_len);
+                strcmp ( table_entry->channelUserDesc,
+                        request->requestvb->val.string);
                 table_entry->channelUserDesc_len =
                         request->requestvb->val_len;
                 break;
@@ -740,11 +679,8 @@ channelTable_handler(
     
             switch (table_info->colnum) {
             case COLUMN_CHANNELUSERDESC:
-                memcpy( table_entry->channelUserDesc,
-                        table_entry->old_channelUserDesc,
-                        sizeof(table_entry->channelUserDesc));
-                memset( table_entry->old_channelUserDesc, 0,
-                        sizeof(table_entry->channelUserDesc));
+                strcpy( table_entry->channelUserDesc,
+                        table_entry->old_channelUserDesc); 
                 table_entry->channelUserDesc_len =
                         table_entry->old_channelUserDesc_len;
                 break;

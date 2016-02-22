@@ -13,6 +13,7 @@ Netsnmp_First_Data_Point  channelTable_get_first_data_point;
 Netsnmp_Next_Data_Point   channelTable_get_next_data_point;
 NetsnmpCacheLoad channelTable_load;
 NetsnmpCacheFree channelTable_free;
+
 #define CHANNELTABLE_TIMEOUT  60
 
 /* column number definitions for table channelTable */
@@ -41,4 +42,89 @@ NetsnmpCacheFree channelTable_free;
        #define COLUMN_CHANNELSAPMESSAGEINTERVAL				23
        #define COLUMN_CHANNELDEFAULTVIDEOFORMATINDEX		24
        #define COLUMN_CHANNELDEFAULTRECEIVEIPADDRESS		25
+    /* Typical data structure for a row entry */
+struct channelTable_entry {
+    /* Index values */
+    long channelIndex;
+
+    /* Column values */
+    long channelType;
+    char* channelUserDesc;
+    size_t channelUserDesc_len;
+    char* old_channelUserDesc;
+    size_t old_channelUserDesc_len;
+    long channelStatus;
+    long old_channelStatus;
+    long channelVideoFormatIndex;
+    long old_channelVideoFormatIndex;
+    char* channelVideoFormat;
+    size_t channelVideoFormat_len;
+    char* channelVideoSampling;
+    size_t channelVideoSampling_len;
+    long channelVideoBitDepth;
+    long channelFps;
+    char* channelColorimetry;
+    size_t channelColorimetry_len;
+    long channelInterlaced;
+    long channelCompressionFactor;
+    long channelCompressionRate;
+    long old_channelCompressionRate;
+    long channelHorzRes;
+    long old_channelHorzRes;
+    long channelVertRes;
+    long old_channelVertRes;
+    long channelRoiOriginTop;
+    long old_channelRoiOriginTop;
+    long channelRoiOriginLeft;
+    long old_channelRoiOriginLeft;
+    long channelRoiExtentBottom;
+    long old_channelRoiExtentBottom;
+    long channelRoiExtentRight;
+    long old_channelRoiExtentRight;
+    long channelRtpPt;
+    in_addr_t channelReceiveIpAddress;
+    in_addr_t old_channelReceiveIpAddress;
+    long channelInterPacketDelay;
+    long old_channelInterPacketDelay;
+    long channelSapMessageInterval;
+    long old_channelSapMessageInterval;
+    long channelDefaultVideoFormatIndex;
+    long old_channelDefaultVideoFormatIndex;
+    in_addr_t channelDefaultReceiveIpAddress;
+    in_addr_t old_channelDefaultReceiveIpAddress;
+
+    /* Illustrate using a simple linked list */
+    int   valid;
+    struct channelTable_entry *next;
+};
+
+struct channelTable_entry  *channelTable_head;
+
+/* create a new row in the (unsorted) table */
+struct channelTable_entry * channelTable_createEntry(
+    	        									long  channelIndex,
+													long channelType,
+ 												 	char* channelUserDesc,
+    												long channelStatus,
+												    long channelVideoFormatIndex,
+												    char* channelVideoFormat,
+												    char* channelVideoSampling,
+												    long channelVideoBitDepth,
+													long channelFps,	
+													char* channelColorimetry,
+												    long channelInterlaced,
+												    long channelCompressionFactor,
+												    long channelCompressionRate,
+    												long channelHorzRes,
+    												long channelVertRes,
+							  						long channelRoiOriginTop,
+							  					  	long channelRoiOriginLeft,
+							  					  	long channelRoiExtentBottom,
+												  	long channelRoiExtentRight,
+						  						  	long channelRtpPt,
+						 						  	in_addr_t channelReceiveIpAddress,
+						   						 	long channelInterPacketDelay,
+												 	long channelSapMessageInterval,
+					 							   	long channelDefaultVideoFormatIndex,
+						 						   	in_addr_t channelDefaultReceiveIpAddress);
 #endif /* CHANNELTABLE_H */

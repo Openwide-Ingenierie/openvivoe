@@ -67,8 +67,9 @@ static short get_device_id(char* addr){
  * \param multicast_addr the string to store the computed multicast address
  * \param multicast_iface the interface from which retirevinf the IP address
  * \param multicast_channel the multicast channel we wanna use
+ * \return the multicast_addr in a long form
  */
- void define_vivoe_multicast(long *multicast_addr, const char* multicast_iface, const short int multicast_channel)
+long define_vivoe_multicast(const char* multicast_iface, const short int multicast_channel)
 {
 	char* 	device_ip 	= NULL;
 	short 	device_id;
@@ -82,12 +83,12 @@ static short get_device_id(char* addr){
 		device_ip = inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr);
 		device_id = get_device_id(device_ip);
 		result = multicast_pref + channel + device_id;
-		*multicast_addr =  result;
 	} else{
 		g_printerr("ERROR: Failed to retrieve IP on %s\n", multicast_iface);
 	}
-	if(!multicast_addr){
-		*multicast_addr = htonl(inet_addr( DEFAULT_MULTICAST_ADDR ));
+	if(!result){
+		 htonl(inet_addr( DEFAULT_MULTICAST_ADDR ));
 		printf("Failed to generate multicast IP for udpsink, using default address: %s\n", DEFAULT_MULTICAST_ADDR );
 	}
+	return result;
 }

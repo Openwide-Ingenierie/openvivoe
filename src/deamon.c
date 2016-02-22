@@ -45,6 +45,13 @@
  */
 #include "../include/videoFormatInfo/videoFormatNumber.h"
 #include "../include/videoFormatInfo/videoFormatTable.h"
+/*
+ * channelControl header
+ */
+#include "../include/channelControl/channelNumber.h"
+#include "../include/channelControl/channelReset.h"
+#include "../include/channelControl/channelTable.h"
+
 
 /*
  * Configuration - Initialization of the MIB header
@@ -98,8 +105,11 @@ int deamon (char* deamon_name) {
     init_deviceMode();
     init_deviceReset();
 	init_videoFormatNumber();
-	init_videoFormatTable(); 
-
+	init_videoFormatTable();
+	init_channelNumber();
+	init_channelReset();
+	init_channelTable();	
+	
   /* example-demon will be used to read example-demon.conf files. */
   init_snmp(basename(deamon_name));
 
