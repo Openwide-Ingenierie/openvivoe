@@ -18,56 +18,8 @@ init_videoFormatTable(void)
     initialize_table_videoFormatTable();
 }
 
-/*
- * Only initiate the memeber of the structure but do not add this entry in the table
- * to add the entry into the table, use the function above
- */
-struct videoFormatTable_entry * videoFormatTable_initiateEntry( 	long  videoFormatIndex, 			long videoFormatType,
-																	long videoFormatStatus,				char* videoFormatBase,
-																	size_t videoFormatBase_len,			char* videoFormatSampling,
-																	size_t videoFormatSampling_len,		long videoFormatBitDepth,
-																	long videoFormatFps,				char* videoFormatColorimetry,
-																	size_t videoFormatColorimetry_len, 	long videoFormatInterlaced,
-																	long videoFormatCompressionFactor, 	long videoFormatCompressionRate, 	
-																	long videoFormatMaxHorzRes,			long videoFormatMaxVertRes,
-																	long videoFormatRoiHorzRes,			long videoFormatRoiVertRes, 
-																	long videoFormatRoiOriginTop,		long videoFormatRoiOriginLeft,	
-																	long videoFormatRoiExtentBottom, 	long videoFormatRoiExtentRight, 	
-																	long videoFormatRtpPt) {
 
-    struct videoFormatTable_entry *entry;
-
-    entry = SNMP_MALLOC_TYPEDEF(struct videoFormatTable_entry);
-    if (!entry)
-        return NULL;
-
-    entry->videoFormatIndex 			= videoFormatIndex;
-	entry->videoFormatType 				= videoFormatType;
-	entry->videoFormatStatus 			= videoFormatStatus;
-	entry->videoFormatBase 				= videoFormatBase;
-	entry->videoFormatBase_len 			= videoFormatBase_len;
-	entry->videoFormatSampling 			= videoFormatSampling;
-	entry->videoFormatSampling_len 		= videoFormatSampling_len;
-	entry->videoFormatBitDepth 			= videoFormatBitDepth;
-	entry->videoFormatFps 				= videoFormatFps;
-	entry->videoFormatColorimetry 		= videoFormatColorimetry;
-	entry->videoFormatInterlaced 		= videoFormatInterlaced;
-	entry->videoFormatCompressionFactor = videoFormatCompressionFactor;
-	entry->videoFormatCompressionRate 	= videoFormatCompressionRate;
-	entry->videoFormatMaxHorzRes 		= videoFormatMaxHorzRes;
- 	entry->videoFormatMaxVertRes 		= videoFormatMaxVertRes;
-	entry->videoFormatRoiHorzRes 		= videoFormatRoiHorzRes;
- 	entry->videoFormatRoiVertRes 		= videoFormatRoiVertRes;
-	entry->videoFormatRoiOriginTop 		= videoFormatRoiOriginTop;
- 	entry->videoFormatRoiOriginLeft 	= videoFormatRoiOriginLeft;
- 	entry->videoFormatRoiExtentBottom 	= videoFormatRoiExtentBottom;
-	entry->videoFormatRoiExtentRight 	= videoFormatRoiExtentRight;
-	entry->videoFormatRtpPt 			= videoFormatRtpPt;
-	entry->valid 						= 1;
-    return entry;
-}
-
-/*
+/**
  * Create a new row in the (unsorted) table.
  * This create an entry and add it into the table
  * Howeber we need a function which is juste used to intitiate the entry's members
@@ -76,16 +28,14 @@ struct videoFormatTable_entry * videoFormatTable_initiateEntry( 	long  videoForm
  * */
 struct videoFormatTable_entry * videoFormatTable_createEntry( 	long  videoFormatIndex, 			long videoFormatType,
 																long videoFormatStatus,				char* videoFormatBase,
-																			char* videoFormatSampling,
-																		long videoFormatBitDepth,
+																char* videoFormatSampling, 			long videoFormatBitDepth,
 																long videoFormatFps,				char* videoFormatColorimetry,
-																 	long videoFormatInterlaced,
-																long videoFormatCompressionFactor, 	long videoFormatCompressionRate, 	
-																long videoFormatMaxHorzRes,			long videoFormatMaxVertRes,
-																long videoFormatRoiHorzRes,			long videoFormatRoiVertRes, 
-																long videoFormatRoiOriginTop,		long videoFormatRoiOriginLeft,	
-																long videoFormatRoiExtentBottom, 	long videoFormatRoiExtentRight, 	
-																long videoFormatRtpPt) {
+															 	long videoFormatInterlaced,			long videoFormatCompressionFactor, 	
+																long videoFormatCompressionRate, 	long videoFormatMaxHorzRes,			
+																long videoFormatMaxVertRes, 		long videoFormatRoiHorzRes,			
+																long videoFormatRoiVertRes, 		long videoFormatRoiOriginTop,	
+																long videoFormatRoiOriginLeft,		long videoFormatRoiExtentBottom,
+																long videoFormatRoiExtentRight, 	long videoFormatRtpPt) {
 
     struct videoFormatTable_entry *entry;
     entry = SNMP_MALLOC_TYPEDEF(struct videoFormatTable_entry);
