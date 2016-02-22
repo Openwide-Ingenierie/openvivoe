@@ -51,13 +51,6 @@ initialize_table_channelTable(void)
     iinfo->table_reginfo        = table_info;
     
     netsnmp_register_table_iterator( reg, iinfo );
-    netsnmp_inject_handler_before( reg, 
-        netsnmp_get_cache_handler(CHANNELTABLE_TIMEOUT,
-                                  channelTable_load, channelTable_free,
-                                  channelTable_oid, channelTable_oid_len),
-            TABLE_ITERATOR_NAME);
-
-    /* Initialise the contents of the table here */
 }
 
     /* Typical data structure for a row entry */

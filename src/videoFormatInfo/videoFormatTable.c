@@ -74,12 +74,27 @@ struct videoFormatTable_entry * videoFormatTable_createEntry( 	long  videoFormat
     return entry;
 }
 
+/** 
+ * \brief retrieve the entry in the viodeFormatTable corresponding to the index given in parameter
+ * \param index the index of the entry we want
+ * \return videoFormatTable_entry*  a pointer on that entry
+ */
+struct videoFormatTable_entry * videoFormatTable_getEntry(int index){
+	struct videoFormatTable_entry *iterator = videoFormatTable_head;
+	while(iterator->videoFormatIndex != index){
+		if(iterator->next != NULL)
+			iterator = iterator->next;
+		else
+			return NULL;
+	}
+	return iterator;
+}
 
 /* Initialize the videoFormatTable table by defining its contents and how it's structured */
 void
 initialize_table_videoFormatTable(void)
 {
-    const oid videoFormatTable_oid[] = {1,3,6,1,4,1,35990,3,1,2,2};
+    const oid videoFormatTable_oid[] 		= {1,3,6,1,4,1,35990,3,1,2,2};
     const size_t videoFormatTable_oid_len   = OID_LENGTH(videoFormatTable_oid);
     netsnmp_handler_registration    *reg;
     netsnmp_iterator_info           *iinfo;
@@ -106,12 +121,9 @@ initialize_table_videoFormatTable(void)
     iinfo->table_reginfo        = table_info;
     
     netsnmp_register_table_iterator( reg, iinfo );
-
-
-    /* Initialise the contents of the table here */
 }
 
-#if 0 /* No right to remove a line from the table */
+#if ALLOW_REMOVING_ROW /* No right to remove a line from the table */
 /* remove a row from the table */
 void
 videoFormatTable_removeEntry( struct videoFormatTable_entry *entry ) {

@@ -17,6 +17,7 @@
 #include "../../include/mibParameters.h"
 #include "../../include/videoFormatInfo/videoFormatTable.h"
 #include "../../include/streaming/stream_registration.h"
+#include "../../include/streaming/stream.h"
 
 /* 
  * This function compares two entries in the videoFormatTable
@@ -92,7 +93,9 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
 }
 
 /* Fill the MIB from information the we success to extract from the pipeline */
-int initialize_videoFormat(struct videoFormatTable_entry *video_info){
+int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer stream_datas){
+	int index 			= 0;
+	stream_data *data 	= stream_datas;	
 	/* Check if entry already exits;
 	 *  _ if yes, do not add a new entry, but set it status to enable if it is not already enable
 	 *  _ if no, increase viodeFormatNumber, and  add a new entry in the table
@@ -108,8 +111,8 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info){
 			return EXIT_FAILURE;
 		}else{
 			/* Then we are sure that we can create a new entry */
-			videoFormatTable_createEntry( 	0, 			 								videoChannel,
-											enable, 									video_info->videoFormatBase,
+			videoFormatTable_createEntry( 	index, 			 								videoChannel,
+											disable, 									video_info->videoFormatBase,
 											video_info->videoFormatSampling, 			video_info->videoFormatBitDepth,
 											video_info->videoFormatFps,				 	video_info->videoFormatColorimetry,
 											video_info->videoFormatInterlaced, 			video_info->videoFormatCompressionFactor, 
@@ -121,6 +124,9 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info){
 
 			/* increase videoFormatNumber as we added an entry */
 			videoFormatNumber._value.int_val++;
+
+			/* update stream_datas by adding the videoFormatIndex that we just add into the videoFormatTable*/
+			data->videoFormatIndex = index;
 		}
 	}else{
 		/* if the table of video format is not empty for this device, check if this format is already in the table
@@ -146,20 +152,21 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info){
 			 * But check that the maximum number of video format has not been reached already
 			 */
 			videoFormatTable_createEntry( 	video_info->videoFormatIndex,				videoChannel,
-											enable, 									video_info->videoFormatBase,
-														video_info->videoFormatSampling,
-													video_info->videoFormatBitDepth,
+											disable, 									video_info->videoFormatBase,
+											video_info->videoFormatSampling, 			video_info->videoFormatBitDepth,
 											video_info->videoFormatFps,				 	video_info->videoFormatColorimetry,
-											 	video_info->videoFormatInterlaced,
-											video_info->videoFormatCompressionFactor, 	video_info->videoFormatCompressionRate, 	
-											video_info->videoFormatMaxHorzRes,			video_info->videoFormatMaxVertRes, 
-											0,											0, 
-											0,											0,	
-											0, 											0, 	
-											0);
+											video_info->videoFormatInterlaced,			video_info->videoFormatCompressionFactor, 
+											video_info->videoFormatCompressionRate, 	video_info->videoFormatMaxHorzRes,
+											video_info->videoFormatMaxVertRes, 			0,					
+											0, 											0,				
+											0,											0, 	
+											0, 											0);
+			/* update stream_datas by adding the videoFormatIndex that we just add into the videoFormatTable*/
+			data->videoFormatIndex = video_info->videoFormatIndex;
 		}
-	/* Do not free iterator, it was positioning on HEAD */
-	/* No malloc was done anyway */
+	/* !!! IMPORTANT !!!
+	 * Do not free iterator, it was positioning on HEAD */
+	/* No malloc was done anyway it should not been deleted  */
 	}
 	return EXIT_SUCCESS;
 }

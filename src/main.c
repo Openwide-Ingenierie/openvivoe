@@ -90,7 +90,7 @@ int main (int   argc,  char *argv[]){
 	if ( init_streaming(argc, argv, loop, &stream_datas)){
 		return 0;
 	}
-	start_streaming(&stream_datas);
+//	start_streaming(&stream_datas);
 
 	/* start the program: SNMP SubAgent deamon, and streaming */
     /* Iterate */	

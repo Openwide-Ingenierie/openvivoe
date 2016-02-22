@@ -19,6 +19,7 @@
 #include "../../include/streaming/stream_registration.h"
 #include "../../include/videoFormatInfo/videoFormatTable.h"
 #include "../../include/streaming/pipeline.h"
+#include "../../include/streaming/stream.h"
 
 
 /*
@@ -108,14 +109,24 @@ static GstElement* addUDP( GstElement*pipeline, GstBus *bus,
 	return udpsink;
 }
 
-/*
- * Create the pipeline, add information to MIB at the same time
+/**
+ * \brief Create the pipeline, add information to MIB at the same time
+ * \param pipeline the pipepline of the stream
+ * \param bus the bus associated to the pipeline
+ * \param bust_watch_id the watch associated to the bus
+ * \param loop the GMainLoop
+ * \param input the las element of the pipeline, (avenc_mp4 or capsfilter) as we built our own source 
+ * \param ip the ip to which send the stream on
+ * \port the port to use
+ * \return GstElement* the last element added to the pipeline (should be udpsink if everything went ok)
  */
-GstElement* create_pipeline( GstElement*pipeline, 	GstBus *bus,
-							 guint bus_watch_id, 	GMainLoop *loop,
-							 GstElement* input, 	char* ip,
+GstElement* create_pipeline( gpointer stream_datas,
+						 	 GMainLoop *loop,
+							 GstElement* input,
+							 char* ip,
 							 gint port){
 	GstElement* last;
+	stream_data *data 	=  stream_datas;	
 	/* create the empty videoFormatTable_entry structure to intiate the MIB */	
 	struct videoFormatTable_entry * video_stream_info;
 	video_stream_info = SNMP_MALLOC_TYPEDEF(struct videoFormatTable_entry);
@@ -123,6 +134,10 @@ GstElement* create_pipeline( GstElement*pipeline, 	GstBus *bus,
 		g_printerr("Failed to create temporary empty entry for the table\n");
 		return NULL;
 	}
+
+	GstElement 	*pipeline 		= data->pipeline;
+	GstBus 		*bus 			= data->bus;
+    guint 		bus_watch_id 	= data->bus_watch_id;
 	
    	/* Add RTP element */
  	last = addRTP( 	pipeline, 	  bus,
@@ -149,7 +164,7 @@ GstElement* create_pipeline( GstElement*pipeline, 	GstBus *bus,
 	 * Before returning the starting the stream
 	 * Add the entry to the Table, if necessary.
 	 */
-	if( initialize_videoFormat(video_stream_info)){
+	if( initialize_videoFormat(video_stream_info, stream_datas)){
 		g_printerr("Failed to add entry in the videoFormatTable\n");
 		return NULL;
 	}

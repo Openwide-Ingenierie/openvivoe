@@ -12,6 +12,7 @@ typedef struct{
 	GstElement 	*pipeline;
 	GstBus 		*bus;
     guint 		bus_watch_id;
+	int 		videoFormatIndex; /* the index of the videoFormat added in the table*/
 }stream_data;
 
 int init_streaming (int   argc,  char *argv[], gpointer main_loop, gpointer stream_datas);

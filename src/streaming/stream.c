@@ -19,6 +19,7 @@
 
 
 #include "../../include/mibParameters.h"
+#include "../../include/videoFormatInfo/videoFormatTable.h"
 #include "../../include/streaming/pipeline.h"
 #include "../../include/streaming/detect.h"
 #include "../../include/streaming/stream_registration.h"
@@ -214,6 +215,12 @@ int init_streaming (int   argc,  char *argv[], gpointer main_loop, gpointer stre
 	bus = gst_pipeline_get_bus ( GST_PIPELINE(pipeline));
     bus_watch_id = gst_bus_add_watch (bus, bus_call, loop);
     gst_object_unref (bus);
+
+	/* Reference all data relevant to the stream */
+	stream_data *data 	= stream_datas;
+	data->pipeline 		= pipeline;
+	data->bus 			= bus;
+	data->bus_watch_id 	= bus_watch_id;
 	
 	/* Source Creation */
 	last = source_creation(pipeline, format);
@@ -222,19 +229,12 @@ int init_streaming (int   argc,  char *argv[], gpointer main_loop, gpointer stre
 		return EXIT_FAILURE;	
 	}
 	/* Create pipeline */
-	last = create_pipeline( pipeline, 		bus, 
-							bus_watch_id, 	loop,
+	last = create_pipeline( stream_datas, 	loop,
 							last, 			ip,
 					 		port);
 	/* Check if everything went ok */
 	if (last == NULL)
 		return EXIT_FAILURE;
-	
-	/* Reference all data needed to stop the stream */
-	stream_data *data 	= stream_datas;
-	data->pipeline 		= pipeline;
-	data->bus 			= bus;
-	data->bus_watch_id 	= bus_watch_id;
 
     return 0;
 }
@@ -246,9 +246,11 @@ int init_streaming (int   argc,  char *argv[], gpointer main_loop, gpointer stre
  */
 int start_streaming (gpointer stream_datas){
 	stream_data *data 	=  stream_datas;	
-  	/* Set the pipeline to "playing" state*/
+	struct videoFormatTable_entry * stream_entry = videoFormatTable_getEntry(data->videoFormatIndex);
+  	/* Set the pipeline to "playing" state*/	
     g_print ("Now playing\n");
     gst_element_set_state (data->pipeline, GST_STATE_PLAYING);
+	stream_entry->videoFormatStatus = enable;
 	return 0;
 }
 
@@ -260,9 +262,11 @@ int start_streaming (gpointer stream_datas){
 int stop_streaming(gpointer stream_datas){
 
 	stream_data *data 	=  stream_datas;
-	/* Out of the main loop, clean up nicely */
+	struct videoFormatTable_entry * stream_entry = videoFormatTable_getEntry(data->videoFormatIndex);
+	/* Out of the main loop, clean up nicely */	
 	g_print ("Returned, stopping playback\n");
 	gst_element_set_state (data->pipeline, GST_STATE_NULL);
+	stream_entry->videoFormatStatus = disable;	
 	return 0;
 }
 
@@ -273,7 +277,10 @@ int stop_streaming(gpointer stream_datas){
  */
 int delete_steaming_data(gpointer stream_datas){
 	stream_data *data 	=  stream_datas;	
+	struct videoFormatTable_entry * stream_entry = videoFormatTable_getEntry(data->videoFormatIndex);
+	/* delete pipeline */	
 	g_print ("Deleting pipeline\n");
+	stream_entry->videoFormatStatus = disable;		
 	gst_object_unref (GST_OBJECT (data->pipeline));
 	g_source_remove (data->bus_watch_id);
 	return 0;

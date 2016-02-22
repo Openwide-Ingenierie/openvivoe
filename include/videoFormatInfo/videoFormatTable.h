@@ -50,7 +50,7 @@ NetsnmpCacheFree videoFormatTable_free;
 
 /*values for videoFormatStatus */
 #define enable 											1
-#define disable 										0
+#define disable 										2
 
 /*values for videoForamtInterleaced*/
 #define vivoe_interlaced 								1
@@ -112,5 +112,7 @@ struct videoFormatTable_entry * videoFormatTable_createEntry( 	long  videoFormat
 																long videoFormatRoiVertRes, 		long videoFormatRoiOriginTop,
 																long videoFormatRoiOriginLeft,		long videoFormatRoiExtentBottom,
 																long videoFormatRoiExtentRight, 	long videoFormatRtpPt);
+
+struct videoFormatTable_entry * videoFormatTable_getEntry(int index);
 
 #endif /* VIDEOFORMATTABLE_H */

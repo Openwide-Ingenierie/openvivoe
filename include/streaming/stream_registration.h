@@ -8,7 +8,7 @@
 # define STREAM_REGISTRATION_H
 struct videoFormatTable_entry; 
 void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *video_info);
-int initialize_videoFormat(struct videoFormatTable_entry *entry);
+int initialize_videoFormat(struct videoFormatTable_entry *entry, gpointer stream_datas);
 
 #endif /* STREAM_REGISTRATION_H */
 
