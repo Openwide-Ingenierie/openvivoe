@@ -49,10 +49,14 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
 	/*videoFormatBase*/
 	if( gst_structure_has_field(source_str_caps, "encoding-name")){
 		video_info->videoFormatBase				= (char*) g_value_dup_string (gst_structure_get_value(source_str_caps, "encoding-name"));
+	}else{
+		video_info->videoFormatBase 			= "";
 	}
 	/*VideoFormatSampling*/
 	if( gst_structure_has_field(source_str_caps, "sampling")){
 		video_info->videoFormatSampling 		= (char*) g_value_dup_string (gst_structure_get_value(source_str_caps, "sampling"));
+	}else{
+		video_info->videoFormatSampling			= "";
 	}
 	/*videoFormatBitDepth*/	
 	if( gst_structure_has_field(source_str_caps, "depth")){
@@ -67,6 +71,8 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
 	/*videoFormatColorimetry*/	
 	if( gst_structure_has_field(source_str_caps, "colorimetry")){
 		video_info->videoFormatColorimetry 		= (char*)g_value_dup_string (gst_structure_get_value(source_str_caps, "colorimetry"));
+	}else{
+		video_info->videoFormatColorimetry			= "";
 	}
 	/*videoFormatInterlaced*/
 	if( gst_structure_has_field(source_str_caps, "interlace-mode")){
@@ -94,7 +100,12 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
 	}
 }
 
-/* Fill the MIB from information the we success to extract from the pipeline */
+/**
+ * \brief Fill the MIB from information the we success to extract from the pipeline
+ * \param video_info an entry structure containing the parameters to create e new entry in the table
+ * \param stream_datas the data associated to the stream, to save the index of the video format added
+ * \return EXIT_SUCCESS (0) or EXIT_FAILURE (1)
+ */
 int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer stream_datas){
 	long index 			= 1;
 	stream_data *data 	= stream_datas;	
@@ -128,7 +139,7 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 
 			/* update stream_datas by adding the videoFormatIndex that we just add into the videoFormatTable*/
 			data->videoFormatIndex = index;	
-
+			
 			/* At the  same time we copy all of those parameters into video channel */
 			channelTable_createEntry( 	index, 																			videoChannel,
 										"channelUserDesc", 																stop,

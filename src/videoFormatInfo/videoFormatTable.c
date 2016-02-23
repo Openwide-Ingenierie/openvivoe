@@ -42,13 +42,12 @@ struct videoFormatTable_entry * videoFormatTable_createEntry( 	long  videoFormat
     if (!entry)
         return NULL;
 
-
     entry->videoFormatIndex 			= videoFormatIndex;
 	entry->videoFormatType 				= videoFormatType;
 	entry->videoFormatStatus 			= videoFormatStatus;
 	entry->videoFormatBase 				= strdup(videoFormatBase);
 	entry->videoFormatBase_len 			= MIN(strlen(videoFormatBase), DisplayString16);
-	entry->videoFormatSampling 			= videoFormatSampling;
+	entry->videoFormatSampling 			= strdup(videoFormatSampling);
 	entry->videoFormatSampling_len 		= MIN(strlen(videoFormatSampling), DisplayString16);
 	entry->videoFormatBitDepth 			= videoFormatBitDepth;
 	entry->videoFormatFps 				= videoFormatFps;
@@ -66,7 +65,6 @@ struct videoFormatTable_entry * videoFormatTable_createEntry( 	long  videoFormat
  	entry->videoFormatRoiExtentBottom 	= videoFormatRoiExtentBottom;
 	entry->videoFormatRoiExtentRight 	= videoFormatRoiExtentRight;
 	entry->videoFormatRtpPt 			= videoFormatRtpPt;
-
 	/* Link it into the list of entries */ 
     entry->next = videoFormatTable_head;
     videoFormatTable_head = entry;
