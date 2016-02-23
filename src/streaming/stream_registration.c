@@ -96,7 +96,7 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
 
 /* Fill the MIB from information the we success to extract from the pipeline */
 int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer stream_datas){
-	long index 			= 0;
+	long index 			= 1;
 	stream_data *data 	= stream_datas;	
 	/* Check if entry already exits;
 	 *  _ if yes, do not add a new entry, but set it status to enable if it is not already enable
@@ -130,8 +130,8 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 			data->videoFormatIndex = index;	
 
 			/* At the  same time we copy all of those parameters into video channel */
-			channelTable_createEntry( 	0, 																				videoChannel,
-										"channelUserDesc", 																disable,
+			channelTable_createEntry( 	index, 																				videoChannel,
+										"channelUserDesc", 																stop,
 										index, 																			video_info->videoFormatBase,
 										video_info->videoFormatSampling, 												video_info->videoFormatBitDepth,
 										video_info->videoFormatFps,				 										video_info->videoFormatColorimetry,
@@ -186,7 +186,7 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 
 					/* At the  same time we copy all of those parameters into video channel */
 			channelTable_createEntry( 	video_info->videoFormatIndex, 														videoChannel,
-										"channelUserDesc", 																	disable,
+										"channelUserDesc", 																	stop,
 										video_info->videoFormatIndex, 														video_info->videoFormatBase,
 										video_info->videoFormatSampling, 													video_info->videoFormatBitDepth,
 										video_info->videoFormatFps,				 											video_info->videoFormatColorimetry,

@@ -127,4 +127,9 @@ struct channelTable_entry * channelTable_createEntry(
 												 	long channelSapMessageInterval,
 					 							   	long channelDefaultVideoFormatIndex,
 						 						   	in_addr_t channelDefaultReceiveIpAddress);
+
+/* values for channelStatus */
+#define start 				1
+#define stop 				2
+#define singleFrame 		3
 #endif /* CHANNELTABLE_H */
