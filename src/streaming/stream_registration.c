@@ -130,7 +130,7 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 			data->videoFormatIndex = index;	
 
 			/* At the  same time we copy all of those parameters into video channel */
-			channelTable_createEntry( 	index, 																				videoChannel,
+			channelTable_createEntry( 	index, 																			videoChannel,
 										"channelUserDesc", 																stop,
 										index, 																			video_info->videoFormatBase,
 										video_info->videoFormatSampling, 												video_info->videoFormatBitDepth,
