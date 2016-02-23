@@ -89,6 +89,7 @@ struct channelTable_entry *
         return NULL;
 
     entry->channelIndex 					= channelIndex;
+	entry->channelType 						= channelType;
  	entry->channelUserDesc 					= strdup(channelUserDesc);
 	entry->channelUserDesc_len 				= MIN(strlen(channelUserDesc), DisplayString64);
 	entry->channelStatus 					= channelStatus;
@@ -96,7 +97,7 @@ struct channelTable_entry *
 	entry->channelVideoFormat 	 			= strdup(channelVideoFormat);
 	entry->channelVideoFormat_len			= MIN(strlen(channelVideoFormat), DisplayString16);
 	entry->channelVideoSampling 			= strdup(channelVideoSampling);
-	entry->channelVideoFormat_len			= MIN(strlen(channelVideoSampling), DisplayString16);	
+	entry->channelVideoSampling_len			= MIN(strlen(channelVideoSampling), DisplayString16);	
 	entry->channelVideoBitDepth 			= channelVideoBitDepth;
 	entry->channelFps 						= channelFps;
 	entry->channelColorimetry 				= strdup(channelColorimetry);
@@ -115,7 +116,7 @@ struct channelTable_entry *
 	entry->channelInterPacketDelay 			= channelInterPacketDelay;
 	entry->channelSapMessageInterval 		= channelSapMessageInterval;
 	entry->channelDefaultVideoFormatIndex 	= channelDefaultVideoFormatIndex;
-	entry->channelDefaultVideoFormatIndex 	= channelDefaultReceiveIpAddress;
+	entry->channelDefaultReceiveIpAddress 	= channelDefaultReceiveIpAddress;
 
     entry->next 		= channelTable_head;
 	entry->valid 		= 1;
@@ -402,8 +403,8 @@ channelTable_handler(
                                               SNMP_NOSUCHINSTANCE);
                     continue;
                 }
-                snmp_set_var_typed_integer( request->requestvb, ASN_IPADDRESS,
-                                            table_entry->channelReceiveIpAddress);
+				snmp_set_var_typed_value( request->requestvb, ASN_IPADDRESS,
+                                         (u_char*) &table_entry->channelReceiveIpAddress, IPV4_SIZE );
                 break;
             case COLUMN_CHANNELINTERPACKETDELAY:
                 if ( !table_entry ) {
@@ -438,8 +439,8 @@ channelTable_handler(
                                               SNMP_NOSUCHINSTANCE);
                     continue;
                 }
-                snmp_set_var_typed_integer( request->requestvb, ASN_IPADDRESS,
-                                            table_entry->channelDefaultReceiveIpAddress);
+				snmp_set_var_typed_value( request->requestvb, ASN_IPADDRESS,
+                                         (u_char*) &table_entry->channelDefaultReceiveIpAddress, IPV4_SIZE );
                 break;
             default:
                 netsnmp_set_request_error(reqinfo, request,
@@ -607,7 +608,7 @@ channelTable_handler(
                 table_entry->old_channelUserDesc_len =
                         table_entry->channelUserDesc_len;
                 strcmp ( table_entry->channelUserDesc,
-                        request->requestvb->val.string);
+                        (char*) request->requestvb->val.string);
                 table_entry->channelUserDesc_len =
                         request->requestvb->val_len;
                 break;

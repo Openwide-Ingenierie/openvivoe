@@ -11,6 +11,11 @@
 #define DisplayString16 			16
 #define DisplayString32 			32
 #define DisplayString64 			64
+
+/* size of IP addresses used in this MIB in bytes - 32bits/4bytes*/
+#define IPV4_SIZE  					4
+
+/* removing row from table in this MIB */
 #define ALLOW_REMOVING_ROW 			0
 /*
  * Enum for the type of MIB's parameter

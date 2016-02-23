@@ -96,7 +96,7 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
 
 /* Fill the MIB from information the we success to extract from the pipeline */
 int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer stream_datas){
-	int index 			= 0;
+	long index 			= 0;
 	stream_data *data 	= stream_datas;	
 	/* Check if entry already exits;
 	 *  _ if yes, do not add a new entry, but set it status to enable if it is not already enable
@@ -113,21 +113,21 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 			return EXIT_FAILURE;
 		}else{
 			/* Then we are sure that we can create a new entry */
-			videoFormatTable_createEntry( 	index, 			 								videoChannel,
-											disable, 									video_info->videoFormatBase,
-											video_info->videoFormatSampling, 			video_info->videoFormatBitDepth,
-											video_info->videoFormatFps,				 	video_info->videoFormatColorimetry,
-											video_info->videoFormatInterlaced, 			video_info->videoFormatCompressionFactor, 
-											video_info->videoFormatCompressionRate, 	video_info->videoFormatMaxHorzRes,			
-											video_info->videoFormatMaxVertRes, 			0,
-											0, 											0,		
-											0,											0, 				
-											0, 											0);
+			videoFormatTable_createEntry( 	index 										, 			 					videoChannel,
+											disable, 																	video_info->videoFormatBase,
+											video_info->videoFormatSampling, 											video_info->videoFormatBitDepth,
+											video_info->videoFormatFps,				 									video_info->videoFormatColorimetry,
+											video_info->videoFormatInterlaced, 											video_info->videoFormatCompressionFactor, 
+											video_info->videoFormatCompressionRate, 									video_info->videoFormatMaxHorzRes,			
+											video_info->videoFormatMaxVertRes, 											0,
+											0, 																			0,		
+											0,																			0, 				
+											0, 																			0);
 			/* increase videoFormatNumber as we added an entry */
 			videoFormatNumber._value.int_val++;
 
 			/* update stream_datas by adding the videoFormatIndex that we just add into the videoFormatTable*/
-			data->videoFormatIndex = index;
+			data->videoFormatIndex = index;	
 
 			/* At the  same time we copy all of those parameters into video channel */
 			channelTable_createEntry( 	0, 																				videoChannel,
@@ -140,7 +140,7 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 										video_info->videoFormatMaxVertRes, 												0,
 										0, 																				0,		
 										0,																				0, 				
-										define_vivoe_multicast("lo",video_info->videoFormatIndex),/*receive Address*/ 	0 /* packet delay*/,
+										define_vivoe_multicast("enp2s0",video_info->videoFormatIndex),/*receive Address*/ 	0 /* packet delay*/,
  										0, /*SAP interval*/ 															index, /*defaultVideoFormatIndex*/
 										define_vivoe_multicast("lo",index)/*default receive IP*/);
 			/* increase channelNumber as we added an entry */			
@@ -169,34 +169,34 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 			 * So add it!
 			 * But check that the maximum number of video format has not been reached already
 			 */
-			videoFormatTable_createEntry( 	video_info->videoFormatIndex,				videoChannel,
-											disable, 									video_info->videoFormatBase,
-											video_info->videoFormatSampling, 			video_info->videoFormatBitDepth,
-											video_info->videoFormatFps,				 	video_info->videoFormatColorimetry,
-											video_info->videoFormatInterlaced,			video_info->videoFormatCompressionFactor, 
-											video_info->videoFormatCompressionRate, 	video_info->videoFormatMaxHorzRes,
-											video_info->videoFormatMaxVertRes, 			0,					
-											0, 											0,				
-											0,											0, 	
-											0, 											0);
+			videoFormatTable_createEntry( 	video_info->videoFormatIndex,													videoChannel,
+											disable, 																		video_info->videoFormatBase,
+											video_info->videoFormatSampling, 												video_info->videoFormatBitDepth,
+											video_info->videoFormatFps,				 										video_info->videoFormatColorimetry,
+											video_info->videoFormatInterlaced,												video_info->videoFormatCompressionFactor, 
+											video_info->videoFormatCompressionRate, 										video_info->videoFormatMaxHorzRes,
+											video_info->videoFormatMaxVertRes, 												0,					
+											0, 																				0,				
+											0,																				0, 	
+											0, 																				0);
 			/* increase videoFormatNumber as we added an entry */
 			videoFormatNumber._value.int_val++;
 			/* update stream_datas by adding the videoFormatIndex that we just add into the videoFormatTable*/
 			data->videoFormatIndex = video_info->videoFormatIndex;
 
 					/* At the  same time we copy all of those parameters into video channel */
-			channelTable_createEntry( 	video_info->videoFormatIndex, 				videoChannel,
-										"channelUserDesc", 							disable,
-										video_info->videoFormatIndex, 				video_info->videoFormatBase,
-										video_info->videoFormatSampling, 			video_info->videoFormatBitDepth,
-										video_info->videoFormatFps,				 	video_info->videoFormatColorimetry,
-										video_info->videoFormatInterlaced, 			video_info->videoFormatCompressionFactor, 
-										video_info->videoFormatCompressionRate, 	video_info->videoFormatMaxHorzRes,			
-										video_info->videoFormatMaxVertRes, 			0,
-										0, 											0,		 				
-										0, 											0,
-										define_vivoe_multicast("lo",video_info->videoFormatIndex),/*receive Address*/ 						0 /* packet delay*/,
- 										0, /*SAP interval*/ 						index, /*defaultVideoFormatIndex - 0 is taken by default*/
+			channelTable_createEntry( 	video_info->videoFormatIndex, 														videoChannel,
+										"channelUserDesc", 																	disable,
+										video_info->videoFormatIndex, 														video_info->videoFormatBase,
+										video_info->videoFormatSampling, 													video_info->videoFormatBitDepth,
+										video_info->videoFormatFps,				 											video_info->videoFormatColorimetry,
+										video_info->videoFormatInterlaced, 													video_info->videoFormatCompressionFactor, 
+										video_info->videoFormatCompressionRate, 											video_info->videoFormatMaxHorzRes,			
+										video_info->videoFormatMaxVertRes, 													0,
+										0, 																					0,		 				
+										0, 																					0,
+										define_vivoe_multicast("lo",video_info->videoFormatIndex),/*receive Address*/ 		0 /* packet delay*/,
+ 										0, /*SAP interval*/ 																index, /*defaultVideoFormatIndex - 0 is taken by default*/
 										define_vivoe_multicast("lo",index)/*default receive IP*/);
 			/* increase channelNumber as we added an entry */			
 			channelNumber._value.int_val++;

@@ -90,7 +90,6 @@ GstStructure* type_detection(GstBin *pipeline, GstElement *input_video, GMainLoo
 	/* Create the VIVOE pipeline for MPEG-4 videos */
 	GstCaps 		*detected 		= gst_caps_from_string(data->type);
 	GstStructure 	*str_detected 	= gst_caps_get_structure(detected, 0);
-	printf("%s\n", gst_structure_to_string(str_detected));
 	free(data);	
 	return str_detected;
 }

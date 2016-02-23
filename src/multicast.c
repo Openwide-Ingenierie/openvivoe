@@ -57,7 +57,7 @@ static gboolean get_ip(const char* iface, struct ifreq* ifr){
  * \return the deviceID associated (last byte of IP address)
  */
 static short get_device_id(char* addr){
-	long int_addr 	= htonl(inet_addr( (const char*) addr)); /* get the addresse in binary mode, in network style (as host style may changed according to host) */
+	long int_addr 	= ntohl(inet_addr( (const char*) addr)); /* get the addresse in binary mode, in network style (as host style may changed according to host) */
 	long mask 		= 255 ; /* create the mask: 0x00.00.00.FF or 0x00.00.00.00.00.00.00.FF depending of architecture*/
 	/* return the device ID */
 	return (int_addr&mask);
@@ -75,9 +75,9 @@ long define_vivoe_multicast(const char* multicast_iface, const short int multica
 	short 	device_id;
 	struct 	ifreq ifr;
 	/* constant values needed to build multicast address */ 
-	long multicast_pref = htonl(inet_addr("239.192.0.0"));
+	long multicast_pref = ntohl(inet_addr("239.192.0.0"));
 	long channel 		= (long) (multicast_channel << 8);
-	long result; /* the multicast_addr in a binary form */ 
+	long result = -1; /* the multicast_addr in a binary form */ 
 		
 	if( get_ip(multicast_iface, &ifr)){
 		device_ip = inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr);
@@ -86,9 +86,9 @@ long define_vivoe_multicast(const char* multicast_iface, const short int multica
 	} else{
 		g_printerr("ERROR: Failed to retrieve IP on %s\n", multicast_iface);
 	}
-	if(!result){
-		 htonl(inet_addr( DEFAULT_MULTICAST_ADDR ));
+	if(result < 0){
 		printf("Failed to generate multicast IP for udpsink, using default address: %s\n", DEFAULT_MULTICAST_ADDR );
+		return ntohl(inet_addr( DEFAULT_MULTICAST_ADDR ));
 	}
-	return result;
+	return ntohl(result);
 }

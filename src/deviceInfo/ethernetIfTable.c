@@ -75,7 +75,7 @@ struct ethernetIfTableEntry * ethernetIfTableEntry_create(  long  ethernetIfInde
 /** Initialize the ethernetIfTable table by defining its contents and how it's structured */
 static void initialize_table_ethernetIfTable(void)
 {
-    const oid ethernetIfTable_oid[] = {1,3,6,1,4,1,35990,3,1,1,12};
+    const oid ethernetIfTable_oid[] = {1,3,6,1,IPV4_SIZE,1,35990,3,1,1,12};
     const size_t ethernetIfTable_oid_len   = OID_LENGTH(ethernetIfTable_oid);
     netsnmp_handler_registration    *reg;
     netsnmp_iterator_info           *iinfo;
@@ -234,7 +234,7 @@ ethernetIfTable_handler(
                     continue;
                 }
                 snmp_set_var_typed_value( request->requestvb, ASN_IPADDRESS,
-                                         (u_char*) &table_entry->ethernetIfIpAddress, 4 );
+                                         (u_char*) &table_entry->ethernetIfIpAddress, IPV4_SIZE );
                 break;
             case COLUMN_ETHERNETIFSUBNETMASK:
                 if ( !table_entry ) {
@@ -243,7 +243,7 @@ ethernetIfTable_handler(
                     continue;
                 }
                 snmp_set_var_typed_value( request->requestvb, ASN_IPADDRESS,
-                                         (u_char*) &table_entry->ethernetIfSubnetMask, 4 );
+                                         (u_char*) &table_entry->ethernetIfSubnetMask, IPV4_SIZE );
                 break;
             case COLUMN_ETHERNETIFIPADDRESSCONFLICT:
                 if ( !table_entry ) {
@@ -252,7 +252,7 @@ ethernetIfTable_handler(
                     continue;
                 }
                 snmp_set_var_typed_value( request->requestvb, ASN_IPADDRESS,
-                                         (u_char*) &table_entry->ethernetIfIpAddressConflict, 4 );
+                                         (u_char*) &table_entry->ethernetIfIpAddressConflict, IPV4_SIZE );
                 break;
             default:
                 netsnmp_set_request_error(reqinfo, request,
