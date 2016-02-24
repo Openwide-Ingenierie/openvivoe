@@ -34,7 +34,8 @@
 typedef struct{
 	GMainLoop 			*loop; 			/* the main Loop to quit and unref */
 	char 				*deamon_name; 	/* the deamon's nam to stop */
-	stream_data 		*stream_datas; 		/* the data allocated from the streaming to free */
+	int 				num_streams; 	/* the num of streams in the array stream_datas to stop */
+	stream_data 		**stream_datas; 	/* the data allocated from the streaming to free */
 }stop_program_data;
 
 /**
@@ -48,8 +49,10 @@ static gboolean stop_program ( gpointer data ){
 
 	/* Stop net snmp subAgetnt deamon */
 	snmp_shutdown(stop_data->deamon_name);
-	stop_streaming(stop_data->stream_datas);
-	delete_steaming_data(stop_data->stream_datas);
+	for (int i = 0; i<stop_data->num_streams; i++){
+		stop_streaming(stop_data->stream_datas[i]);
+		delete_steaming_data(stop_data->stream_datas[i]);
+	}
 	g_main_loop_quit (loop);
 	g_main_loop_unref (loop);
 	return TRUE;
@@ -76,21 +79,19 @@ int main (int   argc,  char *argv[]){
 	stream_data 			stream1;
 	stream_data 			stream2;
 
-	/* data associated to stream */
-	stop_program_data 			stop_data1;
-	stop_data1.loop 			= loop;
-	stop_data1.deamon_name 		= argv[0];
-	stop_data1.stream_datas 	= &stream1;
+	/* create an array of streams to passe to the stop_program function */
+	stream_data *streams[2] = {&stream1, &stream2};
 
 	/* data associated to stream */
-	stop_program_data 			stop_data2;
-	stop_data2.loop 			= loop;
-	stop_data2.deamon_name 		= argv[0];
-	stop_data2.stream_datas 	= &stream2;
+	stop_program_data 		stop_data;
+	stop_data.loop 			= loop;
+	stop_data.deamon_name 	= argv[0];
+	stop_data.num_streams  	= 2;
+	stop_data.stream_datas 	= streams;
 
 	/* Exit the program nicely when kill signals are received */
-	g_unix_signal_add (SIGINT, 	stop_program, &stop_data1);
-	g_unix_signal_add (SIGTERM, stop_program, &stop_data1);
+	g_unix_signal_add (SIGINT, 	stop_program, &stop_data);
+	g_unix_signal_add (SIGTERM, stop_program, &stop_data);
 
 	/* init SubAgent Deamon */
 	deamon(argv[0]);
