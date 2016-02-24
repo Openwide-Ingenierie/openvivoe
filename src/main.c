@@ -76,17 +76,17 @@ int main (int   argc,  char *argv[]){
     gst_init (&argc, &argv);
 
 	/* data associated to stream */	
-	stream_data 			stream1;
+//	stream_data 			stream1;
 	stream_data 			stream2;
 
 	/* create an array of streams to passe to the stop_program function */
-	stream_data *streams[2] = {&stream1, &stream2};
+	stream_data *streams[2] = {/*&stream1,*/ &stream2};
 
 	/* data associated to stream */
 	stop_program_data 		stop_data;
 	stop_data.loop 			= loop;
 	stop_data.deamon_name 	= argv[0];
-	stop_data.num_streams  	= 2;
+	stop_data.num_streams  	= 1;
 	stop_data.stream_datas 	= streams;
 
 	/* Exit the program nicely when kill signals are received */
@@ -95,13 +95,14 @@ int main (int   argc,  char *argv[]){
 
 	/* init SubAgent Deamon */
 	deamon(argv[0]);
-	
+#if 0	
 	/* prepare the stream - initialize all the data relevant to the stream into stream-data */
 	if ( init_streaming(loop, &stream1, /*test*/ "raw", 576, 576,"I420" /*end test param*/)){
 		return 0;
 	}
+#endif //if 0
 	/* prepare the stream - initialize all the data relevant to the stream into stream-data */
-	if ( init_streaming(loop, &stream2, /*test*/ "raw", 1280, 720,"I420" /*end test param*/)){
+	if ( init_streaming(loop, &stream2, /*test*/ "mp4", 1920, 1080,"I420" /*end test param*/)){
 		return  0;
 	}
 	/* start the program: SNMP SubAgent deamon, and streaming */

@@ -60,7 +60,7 @@ static GstElement* addRTP( 	GstElement*pipeline, 	GstBus *bus,
 	/* add rtp to pipeline */
 	gst_bin_add(GST_BIN (pipeline), rtp);
 	/* Filters out non VIVOE videos, and link input to RTP if video has a valid format*/ 
-	if (!filter_VIVOE(pipeline,input, rtp)){
+	if (!filter_VIVOE(type_detection(GST_BIN(pipeline), input, loop),input, rtp)){
 		return NULL;
 	}
 	/* Now that wa have added the RTP payloader to the pipeline, we can get the new caps of the video stream*/

@@ -119,6 +119,7 @@ static int check_param(int argc, char* argv[], char** ip, gint* port, char** for
 	return EXIT_SUCCESS;
 }
 #endif //if 0
+
 /**
  * \brief create a fake source for test purposes
  * \param pipeline: the pipeline in which add the source 
@@ -149,7 +150,6 @@ static GstElement* source_creation(GstElement* pipeline, char* format, int width
 		return NULL;        
 	}
 
-	//caps = gst_caps_from_string("video/x-raw, format=I420, width=576, height=576");
 	caps = gst_caps_new_full( 	gst_structure_new( 	"video/x-raw" 	, 
 													"format" 		, G_TYPE_STRING , encoding,
 													"width" 		, G_TYPE_INT 	, width,

@@ -5,8 +5,7 @@
  *     - hoel <hoel.vasseur@openwide.fr>
  */
 #ifndef FILTER_H
-# define FILTER_H
-
-gboolean filter_VIVOE(GstElement* pipeline, GstElement* input, GstElement* output);
+#define FILTER_H
+gboolean filter_VIVOE(GstStructure* input_caps_str, GstElement* input, GstElement* output);
 
 #endif /* FILTER_H */

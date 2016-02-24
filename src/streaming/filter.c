@@ -376,7 +376,6 @@ my_gst_element_link_pads_filtered (GstElement * src, const gchar * srcpadname,
       return TRUE;
     } else {
       if (!lr1) {
-		printf("pfezoibhgpiazerbhp\n");
         GST_INFO ("Could not link pads: %s:%s - capsfilter:sink",
             GST_ELEMENT_NAME (src), srcpadname);
       } else {
@@ -407,11 +406,11 @@ my_gst_element_link_pads_filtered (GstElement * src, const gchar * srcpadname,
  * \param output the element to which connect filtered the input video
  * \return TRUE if the video is filter out, false otherwise
  */
-gboolean filter_VIVOE(GstElement* pipeline, GstElement* input, GstElement* output){
-	GstStructure* raw_filter 	= NULL;
-	GstStructure* mpeg_filter 	= NULL;
+gboolean filter_VIVOE(GstStructure* input_caps_str, GstElement* input, GstElement* output){
+	GstStructure *raw_filter 	= NULL;
+	GstStructure *mpeg_filter 	= NULL;
 // 	GstStructure* j2k_filter 	= NULL; will be needed after 
-	GstCaps* vivoe_filter 	= NULL; /* the final filter to use to filters out non stream video */
+	GstCaps *vivoe_filter 	= NULL; /* the final filter to use to filters out non stream video */
 	
 	/* this function does the following: 
 	 * _ open configuration file
@@ -430,40 +429,24 @@ gboolean filter_VIVOE(GstElement* pipeline, GstElement* input, GstElement* outpu
 		raw_filter 	= build_RAW_filter(gkf);
 	if( vivoe_use_format(gkf, "MPEG-4") )
 		mpeg_filter = build_MPEG4_filter(gkf);
-//	if( vivoe_use_format(gkf, "JPEG2000") will be needed after
-//	j2k_filter 	= build_J2K_filter(gkf); will be neeeded after
-	
+	//	if( vivoe_use_format(gkf, "JPEG2000") will be needed after
+	//	j2k_filter 	= build_J2K_filter(gkf); will be neeeded after
+
 	/* close configuration file */
 	close_configuration_file(gkf);
-	/* create vivoe-filter */
 	vivoe_filter = gst_caps_new_full (  raw_filter,
-										mpeg_filter, 
-										NULL);
-
-	//filter = gst_element_factory_make ("capsfilter", "filter");
-  	//g_assert (filter != NULL); /* should always exist */
-	//g_object_set (G_OBJECT (filter), "caps", vivoe_filter, NULL);
-//	gst_bin_add(GST_BIN(pipeline), filter);
-	/* link element and filters out non-VIVOE format */
-	if ( !gst_element_link_filtered (input, output, vivoe_filter)){
+		mpeg_filter, 
+		NULL);
+	/* When building a new caps from a Structure, the structure is not copied, instead the caps own the structure 
+	 * it is not wan we want there, so we built a copy the structure before building the input_caps */ 
+	GstCaps *input_caps = gst_caps_new_full(gst_structure_copy(input_caps_str), NULL);
+	if(	gst_caps_can_intersect(input_caps, vivoe_filter)){
+		gst_element_link (input, output );
+		return TRUE;
+	}else{
 		g_print ("WARNING: Video source input has been filtered out: not a VIVOE format!\n");
 		return FALSE;
-	}else{
-		return TRUE;
-	}
-	  /* run */
-	/*gst_element_link_many (input, filter, output, NULL);
-  gst_element_set_state (pipeline, GST_STATE_PLAYING);
 
-  /* wait until it's up and running or failed */
- /* if (gst_element_get_state (pipeline, NULL, NULL, -1) == GST_STATE_CHANGE_FAILURE) {
-    g_error ("Failed to go into PLAYING state");
-  }
-/*	if ( !gst_element_link_many (input, filter, output, NULL)){
-		g_print ("Failed to link one or more elements for RAW streaming!\n");
-	    return FALSE;
-	}else{
-		return TRUE;
-	}*/
+	}
 }
 

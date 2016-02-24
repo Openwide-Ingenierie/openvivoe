@@ -38,6 +38,7 @@ static gboolean compare_entries(struct videoFormatTable_entry* origin, struct vi
 			( origin->videoFormatMaxVertRes 		== 	new->videoFormatMaxVertRes 			) 		
 	   		);
 }
+
 /* 
  * This function tries to save a maximum of information (in the form of capabilities) 
  * of a video stream. As each new element in pipeline may be used to gathered new relevant information 
