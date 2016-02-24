@@ -109,15 +109,15 @@ int deamon (char* deamon_name) {
 	init_channelNumber();
 	init_channelReset();
 	init_channelTable();	
-	
-  /* example-demon will be used to read example-demon.conf files. */
-  init_snmp(basename(deamon_name));
+
+	/* example-demon will be used to read example-demon.conf files. */
+	init_snmp(basename(deamon_name));
 
   snmp_log(LOG_INFO,"%s is up and running.\n", basename(deamon_name));
   return EXIT_SUCCESS;
 }
 
-gboolean handle_snmp_request( ){
+gboolean handle_snmp_request( void ){
     agent_check_and_process(0); /* 0 == don't block */
 	return TRUE;
 }

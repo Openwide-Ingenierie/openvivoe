@@ -140,7 +140,7 @@ gboolean select_interfaces(char*** if_used){
 /* define the number of ioctl calls to make */ 
 #define calls_num 		5		
 /** \brief Retrieve parameters of ethernet interface and initiate the MIB with it
- * @paramiface the interface name from which retirev
+ * \param iface the interface name from which retirev
  */
 gboolean init_ethernet(const char* iface){
 
@@ -196,5 +196,4 @@ gboolean init_ethernet(const char* iface){
 			                     ethernetIfSubnetMask,
 			                     ethernetIfIpAddressConflict);
 	return TRUE;
-}
-# 
+} 

@@ -153,7 +153,7 @@ static GstElement* source_creation(GstElement* pipeline, char* format){
 		return NULL;        
 	}
 
-	caps = gst_caps_from_string("video/x-raw, format=I420, width=1920, height=1080");
+	caps = gst_caps_from_string("video/x-raw, format=I420, width=576, height=576");
 	g_return_if_fail (gst_caps_is_fixed (caps));	
 
 	/* Put the source in the pipeline */
@@ -179,9 +179,6 @@ static GstElement* source_creation(GstElement* pipeline, char* format){
 	}
 	return last;
 }
-
-/* define default prefix for start channel signal */
-#define channel_start 		"channel_start_"
 
 /**
  * \brief intialize the stream: create the pipeline and filters out non vivoe format
@@ -233,8 +230,7 @@ int init_streaming (int   argc,  char *argv[], gpointer main_loop, gpointer stre
 	}
 	/* Create pipeline  - save videoFormatIndex into stream_data data*/
 	last = create_pipeline( stream_datas, 	loop,
-							last, 			ip,
-					 		port);
+							last, 		port);
 	/* Check if everything went ok*/ 
 	if (last == NULL)
 		return EXIT_FAILURE;

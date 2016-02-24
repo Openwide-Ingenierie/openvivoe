@@ -104,9 +104,10 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
  * \brief Fill the MIB from information the we success to extract from the pipeline
  * \param video_info an entry structure containing the parameters to create e new entry in the table
  * \param stream_datas the data associated to the stream, to save the index of the video format added
+ * \param ip a location to store the IP computed in order to gives it as a parameter for updsink
  * \return EXIT_SUCCESS (0) or EXIT_FAILURE (1)
  */
-int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer stream_datas){
+int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer stream_datas, long *ip){
 	long index 			= 1;
 	stream_data *data 	= stream_datas;	
 	/* Check if entry already exits;
@@ -118,7 +119,7 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 		 *	so check if videoFormatNumber equals to zero as a second security
 		 *	exit if not
 		 */
-		if(videoFormatNumber._value.int_val != 0){
+		if((videoFormatNumber._value.int_val != 0)){
 			g_printerr("Invalid videoFormatNumber in MIB\n");
 			g_printerr("No entry found in %s, so %s should be 0\n","videoFormatTable",videoFormatNumber._name );
 			return EXIT_FAILURE;
@@ -139,6 +140,10 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 
 			/* update stream_datas by adding the videoFormatIndex that we just add into the videoFormatTable*/
 			data->videoFormatIndex = index;	
+			*ip 			= define_vivoe_multicast("enp2s0",video_info->videoFormatIndex);
+			int default_ip 	= define_vivoe_multicast(DEFAULT_MULTICAST_IFACE,video_info->videoFormatIndex);
+
+			/* compute IP */
 			
 			/* At the  same time we copy all of those parameters into video channel */
 			channelTable_createEntry( 	index, 																			videoChannel,
@@ -151,9 +156,9 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 										video_info->videoFormatMaxVertRes, 												0,
 										0, 																				0,		
 										0,																				0, 				
-										define_vivoe_multicast("enp2s0",video_info->videoFormatIndex),/*receive Address*/ 	0 /* packet delay*/,
+										*ip/*IP*/, 																		0 /* packet delay*/,
  										0, /*SAP interval*/ 															index, /*defaultVideoFormatIndex*/
-										define_vivoe_multicast("lo",index)/*default receive IP*/, 						stream_datas);
+										default_ip/*default receive IP*/, 												stream_datas);
 			/* increase channelNumber as we added an entry */			
 			channelNumber._value.int_val++;			
 		}

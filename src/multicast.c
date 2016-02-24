@@ -22,11 +22,8 @@
 #include <net/if.h>
 #include <arpa/inet.h>
 
-#define DEFAULT_MULTICAST_PORT		5004
-#define DEFAULT_MULTICAST_CHANNEL	"1"
-#define DEFAULT_MULTICAST_ADDR		"239.192.1.254"
-#define DEFAULT_MULTICAST_IFACE		"enp2s0"
-
+/* header file */
+#include "../include/multicast.h"
 
 /** \brief Retrieve system IP address on a specific interface
  *  \param iface The network interface to use to retrieve the IP

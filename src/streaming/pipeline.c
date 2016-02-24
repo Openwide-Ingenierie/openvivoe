@@ -14,6 +14,7 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <arpa/inet.h>
 #include "../../include/streaming/filter.h"
 #include "../../include/streaming/detect.h"
 #include "../../include/streaming/stream_registration.h"
@@ -27,8 +28,7 @@
  */
 static GstElement* addRTP( 	GstElement*pipeline, 	GstBus *bus,
 							guint bus_watch_id, 	GMainLoop *loop,
-							GstElement* input, 		char* ip,
-							gint port, 				struct videoFormatTable_entry *video_info){
+							GstElement* input, 		struct videoFormatTable_entry *video_info){
 	/*Create element that will be add to the pipeline */
 	GstElement *rtp = NULL;
 	GstStructure* video_caps;
@@ -76,33 +76,37 @@ static GstElement* addRTP( 	GstElement*pipeline, 	GstBus *bus,
 /*
  * This function add the UDP element to the pipeline
  */
-static GstElement* addUDP( 	GstElement*pipeline, GstBus *bus,
+static GstElement* addUDP( 	GstElement*pipeline, 	GstBus *bus,
 							guint bus_watch_id, 	GMainLoop *loop,
-							GstElement* input, 		char* ip,
+							GstElement* input, 		long ip,
 							gint port){
 	/*Create element that will be add to the pipeline */
 	GstElement *udpsink;
-	
+		
 	/* Create the UDP sink */
     udpsink = gst_element_factory_make ("udpsink", "udpsink");
     if(udpsink == NULL){
        g_printerr ( "error cannot create element for: %s\n","udpsink");
 	   return NULL;
     }
-    /*Set UDP sink properties */
+
+	/* transform IP from long to char * */
+	struct in_addr ip_addr;
+	ip_addr.s_addr = ip;
+	/*Set UDP sink properties */
     g_object_set(   G_OBJECT(udpsink),
-                    "host", ip,
+                    "host", inet_ntoa(ip_addr),
                     "port", port,
                     NULL);
+
 	/* add rtp to pipeline */
 	if ( !gst_bin_add(GST_BIN (pipeline),  udpsink )){
 		g_printerr("Unable to add %s to pipeline", gst_element_get_name(udpsink));
 		return NULL;
 	}
-
 	/* we link the elements together */
 	if ( !gst_element_link_many (input, udpsink, NULL)){
-		g_print ("Failed to link one or more elements for RAW streaming!\n");
+		g_print ("Failed to build UDP sink!\n");
 	    return NULL;
 	}
 	return udpsink;
@@ -122,10 +126,10 @@ static GstElement* addUDP( 	GstElement*pipeline, GstBus *bus,
 GstElement* create_pipeline( gpointer stream_datas,
 						 	 GMainLoop *loop,
 							 GstElement* input,
-							 char* ip,
 							 gint port){
 	GstElement* last;
-	stream_data *data 	=  stream_datas;	
+	stream_data *data 	=  stream_datas;
+	long 				ip;
 	/* create the empty videoFormatTable_entry structure to intiate the MIB */	
 	struct videoFormatTable_entry * video_stream_info;
 	video_stream_info = SNMP_MALLOC_TYPEDEF(struct videoFormatTable_entry);
@@ -141,13 +145,21 @@ GstElement* create_pipeline( gpointer stream_datas,
    	/* Add RTP element */
  	last = addRTP( 	pipeline, 	  bus,
 					bus_watch_id, loop,
-					input, 		  ip,
-					port, 		  video_stream_info);
+					input, 		  video_stream_info);
 
 	if(last == NULL){
 		g_printerr("Failed to create pipeline\n");
 		return NULL;
 	}
+
+	/* 
+	 * Before returning the starting the stream
+	 * Add the entry to the Table, if necessary.
+	 */
+	if( initialize_videoFormat(video_stream_info, stream_datas, &ip)){
+		g_printerr("Failed to add entry in the videoFormatTable or in channelEntry\n");
+		return NULL;
+	}	
 
 	/* Add UDP element */
 	last = addUDP( 	pipeline, 	  bus,
@@ -157,16 +169,8 @@ GstElement* create_pipeline( gpointer stream_datas,
 	if (last == NULL){
 		g_printerr("Failed to create pipeline\n");
 		return NULL;
-	}
-	
-	/* 
-	 * Before returning the starting the stream
-	 * Add the entry to the Table, if necessary.
-	 */
-	if( initialize_videoFormat(video_stream_info, stream_datas)){
-		g_printerr("Failed to add entry in the videoFormatTable\n");
-		return NULL;
-	}
+	}	
+
 	/* Before returning, free the entry created at the begging*/
 	free(video_stream_info);	
 	return last;
