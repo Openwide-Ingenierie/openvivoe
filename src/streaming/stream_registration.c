@@ -48,35 +48,35 @@ static gboolean compare_entries(struct videoFormatTable_entry* origin, struct vi
 void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *video_info){
 	/*videoFormatBase*/
 	if( gst_structure_has_field(source_str_caps, "encoding-name")){
-		video_info->videoFormatBase				= (char*) g_value_dup_string (gst_structure_get_value(source_str_caps, "encoding-name"));
+		video_info->videoFormatBase					= (char*) g_value_dup_string (gst_structure_get_value(source_str_caps, "encoding-name"));
 	}else{
-		video_info->videoFormatBase 			= "";
+		video_info->videoFormatBase 				= "";
 	}
 	/*VideoFormatSampling*/
 	if( gst_structure_has_field(source_str_caps, "sampling")){
-		video_info->videoFormatSampling 		= (char*) g_value_dup_string (gst_structure_get_value(source_str_caps, "sampling"));
+		video_info->videoFormatSampling 			= (char*) g_value_dup_string (gst_structure_get_value(source_str_caps, "sampling"));
 	}else{
-		video_info->videoFormatSampling			= "";
+		video_info->videoFormatSampling				= "";
 	}
 	/*videoFormatBitDepth*/	
 	if( gst_structure_has_field(source_str_caps, "depth")){
-		video_info->videoFormatBitDepth 		=  strtol ( (char* ) g_value_dup_string ( gst_structure_get_value(source_str_caps, "depth")), NULL , 10 ); /* the string is converted into long int, basis 10 */
+		video_info->videoFormatBitDepth 			=  strtol ( (char* ) g_value_dup_string ( gst_structure_get_value(source_str_caps, "depth")), NULL , 10 ); /* the string is converted into long int, basis 10 */
 	}
 	/*videoFormatFps*/	
 	if( gst_structure_has_field(source_str_caps, "framerate")){
-		int numerator 							= gst_value_get_fraction_numerator(gst_structure_get_value(source_str_caps, "framerate"));
-		int denominator 						= gst_value_get_fraction_denominator(gst_structure_get_value(source_str_caps, "framerate"));
-		video_info->videoFormatFps 				= (long) (numerator/denominator);
+		int numerator 								= gst_value_get_fraction_numerator(gst_structure_get_value(source_str_caps, "framerate"));
+		int denominator 							= gst_value_get_fraction_denominator(gst_structure_get_value(source_str_caps, "framerate"));
+		video_info->videoFormatFps 					= (long) (numerator/denominator);
 	}
 	/*videoFormatColorimetry*/	
 	if( gst_structure_has_field(source_str_caps, "colorimetry")){
-		video_info->videoFormatColorimetry 		= (char*)g_value_dup_string (gst_structure_get_value(source_str_caps, "colorimetry"));
+		video_info->videoFormatColorimetry 			= (char*)g_value_dup_string (gst_structure_get_value(source_str_caps, "colorimetry"));
 	}else{
 		video_info->videoFormatColorimetry			= "";
 	}
 	/*videoFormatInterlaced*/
 	if( gst_structure_has_field(source_str_caps, "interlace-mode")){
-		 gchar* interlaced_mode					= g_value_dup_string(gst_structure_get_value(source_str_caps, "interlace-mode"));
+		 gchar* interlaced_mode						= g_value_dup_string(gst_structure_get_value(source_str_caps, "interlace-mode"));
 		 if 	( !strcmp( (char*)interlaced_mode, "progressive")) 
 		 	video_info->videoFormatInterlaced 		= vivoe_progressive;
 		else if ( !strcmp( (char*)interlaced_mode, "interlaced"))
@@ -109,11 +109,13 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
  */
 int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer stream_datas, long *ip){
 	long index 			= 1;
+	long default_ip;
 	stream_data *data 	= stream_datas;	
 	/* Check if entry already exits;
 	 *  _ if yes, do not add a new entry, but set it status to enable if it is not already enable
 	 *  _ if no, increase viodeFormatNumber, and  add a new entry in the table
 	 */
+
 	if(videoFormatTable_head == NULL){
 		/* 	it means that this will be the first video format to be set into the table
 		 *	so check if videoFormatNumber equals to zero as a second security
@@ -140,10 +142,10 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 
 			/* update stream_datas by adding the videoFormatIndex that we just add into the videoFormatTable*/
 			data->videoFormatIndex = index;	
-			*ip 			= define_vivoe_multicast("enp2s0",video_info->videoFormatIndex);
-			int default_ip 	= define_vivoe_multicast(DEFAULT_MULTICAST_IFACE,video_info->videoFormatIndex);
 
-			/* compute IP */
+			/* compute IP */			
+			*ip 			= define_vivoe_multicast("enp2s0",video_info->videoFormatIndex);
+			default_ip 		= define_vivoe_multicast(DEFAULT_MULTICAST_IFACE,video_info->videoFormatIndex);
 			
 			/* At the  same time we copy all of those parameters into video channel */
 			channelTable_createEntry( 	index, 																			videoChannel,
@@ -199,6 +201,10 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 			videoFormatNumber._value.int_val++;
 			/* update stream_datas by adding the videoFormatIndex that we just add into the videoFormatTable*/
 			data->videoFormatIndex = video_info->videoFormatIndex;
+			
+			/* compute IP */			
+			*ip 			= define_vivoe_multicast("enp2s0",video_info->videoFormatIndex);
+			default_ip 		= define_vivoe_multicast(DEFAULT_MULTICAST_IFACE,video_info->videoFormatIndex);
 
 					/* At the  same time we copy all of those parameters into video channel */
 			channelTable_createEntry( 	video_info->videoFormatIndex, 														videoChannel,
@@ -211,9 +217,9 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 										video_info->videoFormatMaxVertRes, 													0,
 										0, 																					0,		 				
 										0, 																					0,
-										define_vivoe_multicast("lo",video_info->videoFormatIndex),/*receive Address*/ 		0 /* packet delay*/,
+										*ip,/*receive Address*/ 																0 /* packet delay*/,
  										0, /*SAP interval*/ 																index, /*defaultVideoFormatIndex - 0 is taken by default*/
-										define_vivoe_multicast("lo",index)/*default receive IP*/, 							stream_datas);
+										default_ip/*default receive IP*/, 													stream_datas);
 			/* increase channelNumber as we added an entry */			
 			channelNumber._value.int_val++;
 		}

@@ -74,23 +74,34 @@ int main (int   argc,  char *argv[]){
 
 	/* data associated to stream */	
 	stream_data 			stream1;
+	stream_data 			stream2;
 
 	/* data associated to stream */
-	stop_program_data 			stop_data;
-	stop_data.loop 				= loop;
-	stop_data.deamon_name 		= argv[0];
-	stop_data.stream_datas 		= &stream1;
+	stop_program_data 			stop_data1;
+	stop_data1.loop 			= loop;
+	stop_data1.deamon_name 		= argv[0];
+	stop_data1.stream_datas 	= &stream1;
+
+	/* data associated to stream */
+	stop_program_data 			stop_data2;
+	stop_data2.loop 			= loop;
+	stop_data2.deamon_name 		= argv[0];
+	stop_data2.stream_datas 	= &stream2;
 
 	/* Exit the program nicely when kill signals are received */
-	g_unix_signal_add (SIGINT, 	stop_program, &stop_data);
-	g_unix_signal_add (SIGTERM, stop_program, &stop_data);
+	g_unix_signal_add (SIGINT, 	stop_program, &stop_data1);
+	g_unix_signal_add (SIGTERM, stop_program, &stop_data1);
 
 	/* init SubAgent Deamon */
 	deamon(argv[0]);
 	
 	/* prepare the stream - initialize all the data relevant to the stream into stream-data */
-	if ( init_streaming(loop, &stream1)){
+	if ( init_streaming(loop, &stream1, /*test*/ "raw", 576, 576,"I420" /*end test param*/)){
 		return 0;
+	}
+	/* prepare the stream - initialize all the data relevant to the stream into stream-data */
+	if ( init_streaming(loop, &stream2, /*test*/ "raw", 1280, 720,"I420" /*end test param*/)){
+		return  0;
 	}
 	/* start the program: SNMP SubAgent deamon, and streaming */
     /* Iterate */

@@ -139,7 +139,6 @@ GstElement* create_pipeline( gpointer stream_datas,
 	GstElement 	*pipeline 		= data->pipeline;
 	GstBus 		*bus 			= data->bus;
     guint 		bus_watch_id 	= data->bus_watch_id;
-	
    	/* Add RTP element */
  	last = addRTP( 	pipeline, 	  bus,
 					bus_watch_id, loop,

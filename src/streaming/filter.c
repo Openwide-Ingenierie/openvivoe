@@ -234,7 +234,7 @@ static GstStructure* build_RAW_filter(GKeyFile* gkf){
 		set_filter_field(raw_filter,"interlace-mode",NULL, interlace_mode, MIN(num_inter_mode,offset_im));
 	}
 //	set_filter_field(raw_filter, "framerate", GST_VIDEO_FPS_RANGE);
-	printf("%s\n", gst_structure_to_string (raw_filter) );	
+//	printf("%s\n", gst_structure_to_string (raw_filter) );	
 	return raw_filter;
 }
 
@@ -323,7 +323,7 @@ static GstStructure* build_MPEG4_filter(GKeyFile* gkf){
 		set_filter_field(mpeg_filter,"interlace-mode", 	NULL, 	interlace_mode, MIN(num_inter_mode,offset_im));
 	}
 	//	set_filter_field(raw_filter, "framerate", GST_VIDEO_FPS_RANGE);
-	printf("%s\n", gst_structure_to_string (mpeg_filter) );
+//	printf("%s\n", gst_structure_to_string (mpeg_filter) );
 	return mpeg_filter;
 
 }

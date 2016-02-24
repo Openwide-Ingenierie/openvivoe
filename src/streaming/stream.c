@@ -157,7 +157,6 @@ static GstElement* source_creation(GstElement* pipeline, char* format, int width
 													NULL), 
 								NULL);
 	g_return_if_fail (gst_caps_is_fixed (caps));	
-	printf("zeffez\n");
 
 	/* Put the source in the pipeline */
 	g_object_set (capsfilter, "caps", caps, NULL); 
@@ -190,7 +189,8 @@ static GstElement* source_creation(GstElement* pipeline, char* format, int width
  * \param stream_datas a structure in which we will save the pipeline and the bus elements 
  * \return 0 
  */
-int init_streaming (gpointer main_loop, gpointer stream_datas)
+int init_streaming (gpointer main_loop, gpointer stream_datas /* real prototype */
+					, char* format, int width, int height, char* encoding /* extra parameters for testing purposes*/)
 {
     /* Initialization of elements needed */
     GstElement 	*pipeline, *last;
@@ -216,7 +216,7 @@ int init_streaming (gpointer main_loop, gpointer stream_datas)
 	data->bus 			= bus;
 	data->bus_watch_id 	= bus_watch_id;
 	/* Source Creation */
-	last = source_creation(pipeline, "raw", 576, 576,"I420");
+	last = source_creation(pipeline, format,width ,height ,encoding);
 
 	if (last == NULL ){
 		g_printerr ( "Failed to create videosource\n");	
@@ -225,8 +225,10 @@ int init_streaming (gpointer main_loop, gpointer stream_datas)
 	/* Create pipeline  - save videoFormatIndex into stream_data data*/
 	last = create_pipeline( stream_datas, 	loop, last );
 	/* Check if everything went ok*/ 
-	if (last == NULL)
+	if (last == NULL){
+		g_printerr ( "Failed to create pipeline\n");	
 		return EXIT_FAILURE;
+	}
     return 0;
 }
 

@@ -22,7 +22,7 @@ typedef struct{
  */
 GHashTable* streams;
 
-int init_streaming (gpointer main_loop, gpointer stream_datas);
+int init_streaming (gpointer main_loop, gpointer stream_datas, char* format, int width, int height, char* encoding);
 int start_streaming (gpointer stream_datas );
 int stop_streaming( gpointer stream_datas );
 int delete_steaming_data(gpointer stream_datas );
