@@ -7,6 +7,6 @@
 #ifndef FILTER_H
 # define FILTER_H
 
-gboolean filter_VIVOE(GstElement* input, GstElement* output);
+gboolean filter_VIVOE(GstElement* pipeline, GstElement* input, GstElement* output);
 
 #endif /* FILTER_H */

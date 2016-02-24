@@ -7,10 +7,13 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <string.h>
-#include "../../include/macro.h"
+#include <glib-2.0/glib.h>
+#include <glib-unix.h>
+#include <gstreamer-1.0/gst/gst.h>
 #include "../../include/channelControl/channelTable.h"
 #include "../../include/handler.h"
 #include "../../include/mibParameters.h"
+#include "../../include/streaming/stream.h"
 /** Initializes the channelTable module */
 void
 init_channelTable(void)
@@ -80,7 +83,8 @@ struct channelTable_entry *
 							    long 		channelInterPacketDelay,
 							    long 		channelSapMessageInterval,
 							    long 		channelDefaultVideoFormatIndex,
-							    in_addr_t 	channelDefaultReceiveIpAddress
+							    in_addr_t 	channelDefaultReceiveIpAddress,
+								gpointer 	stream_datas
                 			) {
     struct channelTable_entry *entry;
 
@@ -117,6 +121,8 @@ struct channelTable_entry *
 	entry->channelSapMessageInterval 		= channelSapMessageInterval;
 	entry->channelDefaultVideoFormatIndex 	= channelDefaultVideoFormatIndex;
 	entry->channelDefaultReceiveIpAddress 	= channelDefaultReceiveIpAddress;
+
+	entry->stream_datas 					= stream_datas;
 
     entry->next 		= channelTable_head;
 	entry->valid 		= 1;
@@ -710,7 +716,6 @@ channelTable_handler(
     
             switch (table_info->colnum) {
             case COLUMN_CHANNELUSERDESC:
-				printf("oksqhfpohdf\n");				
                 strcpy( table_entry->old_channelUserDesc,
                         table_entry->channelUserDesc);
                 table_entry->old_channelUserDesc_len =
@@ -723,6 +728,12 @@ channelTable_handler(
             case COLUMN_CHANNELSTATUS:
                 table_entry->old_channelStatus 					= table_entry->channelStatus;
                 table_entry->channelStatus     					= *request->requestvb->val.integer;
+				if ( table_entry->channelStatus == start){
+					start_streaming( table_entry->stream_datas);
+				}
+				else if ( table_entry->channelStatus == stop){
+					stop_streaming( table_entry->stream_datas);
+				}
                 break;
             case COLUMN_CHANNELVIDEOFORMATINDEX:
                 table_entry->old_channelVideoFormatIndex 		= table_entry->channelVideoFormatIndex;

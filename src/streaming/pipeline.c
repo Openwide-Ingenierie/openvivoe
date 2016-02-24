@@ -34,7 +34,6 @@ static GstElement* addRTP( 	GstElement*pipeline, 	GstBus *bus,
 	GstStructure* video_caps;
 	/* Media stream Type detection */
 	video_caps = type_detection(GST_BIN(pipeline), input, loop);
-	
 	/* Fill the MIB a first Time */
 	fill_entry(video_caps, video_info);
 
@@ -61,7 +60,7 @@ static GstElement* addRTP( 	GstElement*pipeline, 	GstBus *bus,
 	/* add rtp to pipeline */
 	gst_bin_add(GST_BIN (pipeline), rtp);
 	/* Filters out non VIVOE videos, and link input to RTP if video has a valid format*/ 
-	if (!filter_VIVOE(input, rtp)){
+	if (!filter_VIVOE(pipeline,input, rtp)){
 		return NULL;
 	}
 	/* Now that wa have added the RTP payloader to the pipeline, we can get the new caps of the video stream*/
@@ -77,9 +76,10 @@ static GstElement* addRTP( 	GstElement*pipeline, 	GstBus *bus,
 /*
  * This function add the UDP element to the pipeline
  */
-static GstElement* addUDP( GstElement*pipeline, GstBus *bus,
-						guint bus_watch_id, 	GMainLoop *loop,
-						GstElement* input, 		char* ip, gint port){
+static GstElement* addUDP( 	GstElement*pipeline, GstBus *bus,
+							guint bus_watch_id, 	GMainLoop *loop,
+							GstElement* input, 		char* ip,
+							gint port){
 	/*Create element that will be add to the pipeline */
 	GstElement *udpsink;
 	
@@ -94,7 +94,6 @@ static GstElement* addUDP( GstElement*pipeline, GstBus *bus,
                     "host", ip,
                     "port", port,
                     NULL);
-
 	/* add rtp to pipeline */
 	if ( !gst_bin_add(GST_BIN (pipeline),  udpsink )){
 		g_printerr("Unable to add %s to pipeline", gst_element_get_name(udpsink));
@@ -105,7 +104,7 @@ static GstElement* addUDP( GstElement*pipeline, GstBus *bus,
 	if ( !gst_element_link_many (input, udpsink, NULL)){
 		g_print ("Failed to link one or more elements for RAW streaming!\n");
 	    return NULL;
-	}	
+	}
 	return udpsink;
 }
 
@@ -169,7 +168,7 @@ GstElement* create_pipeline( gpointer stream_datas,
 		return NULL;
 	}
 	/* Before returning, free the entry created at the begging*/
-	free(video_stream_info);
+	free(video_stream_info);	
 	return last;
 
 }

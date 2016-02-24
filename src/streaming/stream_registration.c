@@ -153,7 +153,7 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 										0,																				0, 				
 										define_vivoe_multicast("enp2s0",video_info->videoFormatIndex),/*receive Address*/ 	0 /* packet delay*/,
  										0, /*SAP interval*/ 															index, /*defaultVideoFormatIndex*/
-										define_vivoe_multicast("lo",index)/*default receive IP*/);
+										define_vivoe_multicast("lo",index)/*default receive IP*/, 						stream_datas);
 			/* increase channelNumber as we added an entry */			
 			channelNumber._value.int_val++;			
 		}
@@ -208,7 +208,7 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 										0, 																					0,
 										define_vivoe_multicast("lo",video_info->videoFormatIndex),/*receive Address*/ 		0 /* packet delay*/,
  										0, /*SAP interval*/ 																index, /*defaultVideoFormatIndex - 0 is taken by default*/
-										define_vivoe_multicast("lo",index)/*default receive IP*/);
+										define_vivoe_multicast("lo",index)/*default receive IP*/, 							stream_datas);
 			/* increase channelNumber as we added an entry */			
 			channelNumber._value.int_val++;
 		}

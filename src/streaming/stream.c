@@ -24,7 +24,6 @@
 #include "../../include/streaming/detect.h"
 #include "../../include/streaming/stream_registration.h"
 #include "../../include/streaming/stream.h"
-#include "../../include/deamon.h"
 /*
  * Macro for testing purposes
  */
@@ -174,12 +173,15 @@ static GstElement* source_creation(GstElement* pipeline, char* format){
 			return NULL;        
 		}
 		/* add encryptor to pipeline, link it to the source */
-		gst_bin_add (GST_BIN(pipeline), enc); 
-		gst_element_link (capsfilter, enc);
+		gst_bin_add_many (GST_BIN(pipeline), enc, NULL); 
+		gst_element_link_many (capsfilter, enc,NULL);
 		last = enc;		
 	}
 	return last;
 }
+
+/* define default prefix for start channel signal */
+#define channel_start 		"channel_start_"
 
 /**
  * \brief intialize the stream: create the pipeline and filters out non vivoe format
@@ -224,18 +226,18 @@ int init_streaming (int   argc,  char *argv[], gpointer main_loop, gpointer stre
 	
 	/* Source Creation */
 	last = source_creation(pipeline, format);
+
 	if (last == NULL ){
 		g_printerr ( "Failed to create videosource\n");	
 		return EXIT_FAILURE;	
 	}
-	/* Create pipeline */
+	/* Create pipeline  - save videoFormatIndex into stream_data data*/
 	last = create_pipeline( stream_datas, 	loop,
 							last, 			ip,
 					 		port);
-	/* Check if everything went ok */
+	/* Check if everything went ok*/ 
 	if (last == NULL)
 		return EXIT_FAILURE;
-
     return 0;
 }
 
@@ -244,8 +246,8 @@ int init_streaming (int   argc,  char *argv[], gpointer main_loop, gpointer stre
  * \param data of the stream (pipeline, bus and bust_watch_id) - see stream_data structure
  * \return 0 
  */
-int start_streaming (gpointer stream_datas){
-	stream_data *data 	=  stream_datas;	
+int start_streaming (gpointer stream_datas ){
+	stream_data *data 	=  stream_datas;
 	struct videoFormatTable_entry * stream_entry = videoFormatTable_getEntry(data->videoFormatIndex);
   	/* Set the pipeline to "playing" state*/	
     g_print ("Now playing\n");
@@ -259,8 +261,7 @@ int start_streaming (gpointer stream_datas){
  * \param data of the stream (pipeline, bus and bust_watch_id) - see stream_data structure
  * \return 0 
  */
-int stop_streaming(gpointer stream_datas){
-
+int stop_streaming( gpointer stream_datas ){
 	stream_data *data 	=  stream_datas;
 	struct videoFormatTable_entry * stream_entry = videoFormatTable_getEntry(data->videoFormatIndex);
 	/* Out of the main loop, clean up nicely */	
@@ -275,7 +276,7 @@ int stop_streaming(gpointer stream_datas){
  * \param data of the stream (pipeline, bus and bust_watch_id) - see stream_data structure
  * \return 0 
  */
-int delete_steaming_data(gpointer stream_datas){
+int delete_steaming_data(gpointer stream_datas ){
 	stream_data *data 	=  stream_datas;	
 	struct videoFormatTable_entry * stream_entry = videoFormatTable_getEntry(data->videoFormatIndex);
 	/* delete pipeline */	
@@ -285,3 +286,5 @@ int delete_steaming_data(gpointer stream_datas){
 	g_source_remove (data->bus_watch_id);
 	return 0;
 }
+
+

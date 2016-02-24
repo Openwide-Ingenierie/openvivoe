@@ -93,6 +93,9 @@ struct channelTable_entry {
     in_addr_t channelDefaultReceiveIpAddress;
     in_addr_t old_channelDefaultReceiveIpAddress;
 
+	/* a stream assoicated to the channel */
+	gpointer stream_datas;
+
     /* Illustrate using a simple linked list */
     int   valid;
     struct channelTable_entry *next;
@@ -102,31 +105,32 @@ struct channelTable_entry  *channelTable_head;
 
 /* create a new row in the (unsorted) table */
 struct channelTable_entry * channelTable_createEntry(
-    	        									long  channelIndex,
-													long channelType,
- 												 	char* channelUserDesc,
-    												long channelStatus,
-												    long channelVideoFormatIndex,
-												    char* channelVideoFormat,
-												    char* channelVideoSampling,
-												    long channelVideoBitDepth,
-													long channelFps,	
-													char* channelColorimetry,
-												    long channelInterlaced,
-												    long channelCompressionFactor,
-												    long channelCompressionRate,
-    												long channelHorzRes,
-    												long channelVertRes,
-							  						long channelRoiOriginTop,
-							  					  	long channelRoiOriginLeft,
-							  					  	long channelRoiExtentBottom,
-												  	long channelRoiExtentRight,
-						  						  	long channelRtpPt,
-						 						  	in_addr_t channelReceiveIpAddress,
-						   						 	long channelInterPacketDelay,
-												 	long channelSapMessageInterval,
-					 							   	long channelDefaultVideoFormatIndex,
-						 						   	in_addr_t channelDefaultReceiveIpAddress);
+    	        									long 		channelIndex,
+													long 		channelType,
+ 												 	char* 		channelUserDesc,
+    												long 		channelStatus,
+												    long 		channelVideoFormatIndex,
+												    char* 		channelVideoFormat,
+												    char* 		channelVideoSampling,
+												    long 		channelVideoBitDepth,
+													long 		channelFps,	
+													char* 		channelColorimetry,
+												    long 		channelInterlaced,
+												    long 		channelCompressionFactor,
+												    long 		channelCompressionRate,
+    												long 		channelHorzRes,
+    												long 		channelVertRes,
+							  						long 		channelRoiOriginTop,
+							  					  	long 		channelRoiOriginLeft,
+							  					  	long 		channelRoiExtentBottom,
+												  	long 		channelRoiExtentRight,
+						  						  	long 		channelRtpPt,
+						 						  	in_addr_t 	channelReceiveIpAddress,
+						   						 	long 		channelInterPacketDelay,
+												 	long 		channelSapMessageInterval,
+					 							   	long 		channelDefaultVideoFormatIndex,
+						 						   	in_addr_t 	channelDefaultReceiveIpAddress,
+													gpointer 	stream_datas);
 
 /* values for channelStatus */
 #define start 				1

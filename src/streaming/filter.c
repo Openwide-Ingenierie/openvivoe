@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../../include/conf/stream-conf.h"
+#include "../../include/streaming/detect.h"
 #include "../../include/streaming/filter.h"
 
 /*
@@ -406,11 +407,11 @@ my_gst_element_link_pads_filtered (GstElement * src, const gchar * srcpadname,
  * \param output the element to which connect filtered the input video
  * \return TRUE if the video is filter out, false otherwise
  */
-gboolean filter_VIVOE(GstElement* input, GstElement* output){
+gboolean filter_VIVOE(GstElement* pipeline, GstElement* input, GstElement* output){
 	GstStructure* raw_filter 	= NULL;
 	GstStructure* mpeg_filter 	= NULL;
 // 	GstStructure* j2k_filter 	= NULL; will be needed after 
-	GstCaps* vivoe_filter 	= NULL; /* the final filter to use to filters out non stream video */ 
+	GstCaps* vivoe_filter 	= NULL; /* the final filter to use to filters out non stream video */
 	
 	/* this function does the following: 
 	 * _ open configuration file
@@ -435,16 +436,36 @@ gboolean filter_VIVOE(GstElement* input, GstElement* output){
 	/* close configuration file */
 	close_configuration_file(gkf);
 	/* create vivoe-filter */
-	vivoe_filter = gst_caps_new_full ( 	raw_filter,
+	vivoe_filter = gst_caps_new_full (  raw_filter,
 										mpeg_filter, 
 										NULL);
 
+
+
+	//filter = gst_element_factory_make ("capsfilter", "filter");
+  	//g_assert (filter != NULL); /* should always exist */
+	//g_object_set (G_OBJECT (filter), "caps", vivoe_filter, NULL);
+//	gst_bin_add(GST_BIN(pipeline), filter);
 	/* link element and filters out non-VIVOE format */
-	if ( !gst_element_link_pads_filtered (input, NULL, output, NULL, vivoe_filter)){
+	if ( !gst_element_link_filtered (input, output, vivoe_filter)){
 		g_print ("WARNING: Video source input has been filtered out: not a VIVOE format!\n");
 		return FALSE;
 	}else{
 		return TRUE;
 	}
+	  /* run */
+	/*gst_element_link_many (input, filter, output, NULL);
+  gst_element_set_state (pipeline, GST_STATE_PLAYING);
+
+  /* wait until it's up and running or failed */
+ /* if (gst_element_get_state (pipeline, NULL, NULL, -1) == GST_STATE_CHANGE_FAILURE) {
+    g_error ("Failed to go into PLAYING state");
+  }
+/*	if ( !gst_element_link_many (input, filter, output, NULL)){
+		g_print ("Failed to link one or more elements for RAW streaming!\n");
+	    return FALSE;
+	}else{
+		return TRUE;
+	}*/
 }
 
