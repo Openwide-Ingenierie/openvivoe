@@ -69,12 +69,11 @@ int main (int   argc,  char *argv[]){
 	/* add the idle function that handle SNMP request everye 100ms */
 	g_timeout_add (10, handle_snmp_request, NULL);
 	
+	/* Initialize GStreamer */
+    gst_init (&argc, &argv);
 
-	/* CREATE THE STREAMS */
-	/*create an array of stream */
+	/* data associated to stream */	
 	stream_data 			stream1;
-	/* data associated to stream */
-
 
 	/* data associated to stream */
 	stop_program_data 			stop_data;
@@ -90,7 +89,7 @@ int main (int   argc,  char *argv[]){
 	deamon(argv[0]);
 	
 	/* prepare the stream - initialize all the data relevant to the stream into stream-data */
-	if ( init_streaming(argc, argv, loop, &stream1)){
+	if ( init_streaming(loop, &stream1)){
 		return 0;
 	}
 	/* start the program: SNMP SubAgent deamon, and streaming */

@@ -440,8 +440,6 @@ gboolean filter_VIVOE(GstElement* pipeline, GstElement* input, GstElement* outpu
 										mpeg_filter, 
 										NULL);
 
-
-
 	//filter = gst_element_factory_make ("capsfilter", "filter");
   	//g_assert (filter != NULL); /* should always exist */
 	//g_object_set (G_OBJECT (filter), "caps", vivoe_filter, NULL);

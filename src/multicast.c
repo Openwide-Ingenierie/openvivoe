@@ -24,6 +24,8 @@
 
 /* header file */
 #include "../include/multicast.h"
+#include "../include/mibParameters.h"
+
 
 /** \brief Retrieve system IP address on a specific interface
  *  \param iface The network interface to use to retrieve the IP

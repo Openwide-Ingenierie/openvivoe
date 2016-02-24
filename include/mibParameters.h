@@ -15,6 +15,12 @@
 /* size of IP addresses used in this MIB in bytes - 32bits/4bytes*/
 #define IPV4_SIZE  					4
 
+/* defines default parameters for multicasting*/
+#define DEFAULT_MULTICAST_PORT		5004
+#define DEFAULT_MULTICAST_CHANNEL	"1"
+#define DEFAULT_MULTICAST_ADDR		"239.192.1.254"
+#define DEFAULT_MULTICAST_IFACE		"enp2s0"
+
 /* removing row from table in this MIB */
 #define ALLOW_REMOVING_ROW 			0
 /*

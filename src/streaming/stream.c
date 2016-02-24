@@ -16,8 +16,6 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
-
-
 #include "../../include/mibParameters.h"
 #include "../../include/videoFormatInfo/videoFormatTable.h"
 #include "../../include/streaming/pipeline.h"
@@ -27,12 +25,7 @@
 /*
  * Macro for testing purposes
  */
-#define DEFAULT_IP "127.0.0.1" /*this is the address of the server to sink the UPD datagrams*/
-#define DEFAULT_PORT 5004 /*this is the port number associated to the udp socket created for the sink*/
 #define DEFAULT_FORMAT "raw" /*this is the default video format used for the stream */
-
-#define MIN_DEFAULT_PORT 1024
-#define MAX_DEFAULT_PORT 65535
 
 /**
  * \brief Handle the Bus: display message, get interruption, etc...
@@ -71,7 +64,7 @@ static gboolean bus_call (  GstBus     *bus,
 	return TRUE;
 }
 
-
+#if 0 
 /**
  * \brief check the parameters used for intialize the stream
  * \param argc: as in main (should be 3)
@@ -125,14 +118,17 @@ static int check_param(int argc, char* argv[], char** ip, gint* port, char** for
 	strcpy(*format, temp_format);	
 	return EXIT_SUCCESS;
 }
-
+#endif //if 0
 /**
  * \brief create a fake source for test purposes
  * \param pipeline: the pipeline in which add the source 
  * \param format: the video format for the source raw or mp4
+ * \param width the width to give to the video source 
+ * \param height the height to give to the video source
+ * \param encoding the encoding to use for the video source
  * \return GstElement* the last element add and link into the pipeline 
  */
-static GstElement* source_creation(GstElement* pipeline, char* format){
+static GstElement* source_creation(GstElement* pipeline, char* format, int width, int height, char* encoding){
 	/*
 	 * For now, the source is created manually, directly into the code
 	 * */
@@ -153,8 +149,15 @@ static GstElement* source_creation(GstElement* pipeline, char* format){
 		return NULL;        
 	}
 
-	caps = gst_caps_from_string("video/x-raw, format=I420, width=576, height=576");
+	//caps = gst_caps_from_string("video/x-raw, format=I420, width=576, height=576");
+	caps = gst_caps_new_full( 	gst_structure_new( 	"video/x-raw" 	, 
+													"format" 		, G_TYPE_STRING , encoding,
+													"width" 		, G_TYPE_INT 	, width,
+													"height" 		, G_TYPE_INT 	, height,
+													NULL), 
+								NULL);
 	g_return_if_fail (gst_caps_is_fixed (caps));	
+	printf("zeffez\n");
 
 	/* Put the source in the pipeline */
 	g_object_set (capsfilter, "caps", caps, NULL); 
@@ -187,22 +190,14 @@ static GstElement* source_creation(GstElement* pipeline, char* format){
  * \param stream_datas a structure in which we will save the pipeline and the bus elements 
  * \return 0 
  */
-int init_streaming (int   argc,  char *argv[], gpointer main_loop, gpointer stream_datas)
+int init_streaming (gpointer main_loop, gpointer stream_datas)
 {
     /* Initialization of elements needed */
     GstElement 	*pipeline, *last;
     GstBus 		*bus;
     guint 		bus_watch_id;
-	GMainLoop 	*loop 				= main_loop;  	
-	gchar 		*ip 				= g_strdup( (gchar*) DEFAULT_IP);
-	gint 		port 				= DEFAULT_PORT;
-	char 		*format 			= strdup(DEFAULT_FORMAT);
+	GMainLoop 	*loop 				= main_loop;
 	
-	/* Initialize GStreamer */
-    gst_init (&argc, &argv);
-	/* Check input arguments */
-	check_param(argc, argv, &ip, &port, &format);
-
     /* Create the pipeline */
     pipeline  = gst_pipeline_new ("pipeline");
 	if(pipeline  == NULL){
@@ -220,17 +215,15 @@ int init_streaming (int   argc,  char *argv[], gpointer main_loop, gpointer stre
 	data->pipeline 		= pipeline;
 	data->bus 			= bus;
 	data->bus_watch_id 	= bus_watch_id;
-	
 	/* Source Creation */
-	last = source_creation(pipeline, format);
+	last = source_creation(pipeline, "raw", 576, 576,"I420");
 
 	if (last == NULL ){
 		g_printerr ( "Failed to create videosource\n");	
 		return EXIT_FAILURE;	
 	}
 	/* Create pipeline  - save videoFormatIndex into stream_data data*/
-	last = create_pipeline( stream_datas, 	loop,
-							last, 		port);
+	last = create_pipeline( stream_datas, 	loop, last );
 	/* Check if everything went ok*/ 
 	if (last == NULL)
 		return EXIT_FAILURE;

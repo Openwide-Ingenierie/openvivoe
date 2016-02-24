@@ -9,7 +9,6 @@
 
 GstElement* create_pipeline( 	gpointer stream_datas,
 								GMainLoop *loop,
-							 	GstElement* input,
-								gint port);
+							 	GstElement* input);
 #endif /* PIPELINE_H */
 

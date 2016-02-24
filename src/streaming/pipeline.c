@@ -15,13 +15,13 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <arpa/inet.h>
+#include "../../include/mibParameters.h"
 #include "../../include/streaming/filter.h"
 #include "../../include/streaming/detect.h"
 #include "../../include/streaming/stream_registration.h"
 #include "../../include/videoFormatInfo/videoFormatTable.h"
 #include "../../include/streaming/pipeline.h"
 #include "../../include/streaming/stream.h"
-
 
 /*
  * This function add the RTP element to the pipeline
@@ -78,8 +78,7 @@ static GstElement* addRTP( 	GstElement*pipeline, 	GstBus *bus,
  */
 static GstElement* addUDP( 	GstElement*pipeline, 	GstBus *bus,
 							guint bus_watch_id, 	GMainLoop *loop,
-							GstElement* input, 		long ip,
-							gint port){
+							GstElement* input, 		long ip){
 	/*Create element that will be add to the pipeline */
 	GstElement *udpsink;
 		
@@ -96,7 +95,7 @@ static GstElement* addUDP( 	GstElement*pipeline, 	GstBus *bus,
 	/*Set UDP sink properties */
     g_object_set(   G_OBJECT(udpsink),
                     "host", inet_ntoa(ip_addr),
-                    "port", port,
+                    "port", DEFAULT_MULTICAST_PORT,
                     NULL);
 
 	/* add rtp to pipeline */
@@ -125,8 +124,7 @@ static GstElement* addUDP( 	GstElement*pipeline, 	GstBus *bus,
  */
 GstElement* create_pipeline( gpointer stream_datas,
 						 	 GMainLoop *loop,
-							 GstElement* input,
-							 gint port){
+							 GstElement* input){
 	GstElement* last;
 	stream_data *data 	=  stream_datas;
 	long 				ip;
@@ -164,7 +162,7 @@ GstElement* create_pipeline( gpointer stream_datas,
 	/* Add UDP element */
 	last = addUDP( 	pipeline, 	  bus,
 					bus_watch_id, loop,
-					last, ip,     port);
+					last, ip);
 
 	if (last == NULL){
 		g_printerr("Failed to create pipeline\n");
