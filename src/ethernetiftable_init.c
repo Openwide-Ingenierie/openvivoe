@@ -196,4 +196,4 @@ gboolean init_ethernet(const char* iface){
 			                     ethernetIfSubnetMask,
 			                     ethernetIfIpAddressConflict);
 	return TRUE;
-} 
+}

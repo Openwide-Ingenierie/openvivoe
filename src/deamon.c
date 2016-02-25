@@ -108,7 +108,7 @@ int deamon (char* deamon_name) {
 	init_videoFormatTable();
 	init_channelNumber();
 	init_channelReset();
-	init_channelTable();	
+	init_channelTable();
 
 	/* example-demon will be used to read example-demon.conf files. */
 	init_snmp(basename(deamon_name));

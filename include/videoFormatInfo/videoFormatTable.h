@@ -39,24 +39,6 @@ NetsnmpCacheFree videoFormatTable_free;
        #define COLUMN_VIDEOFORMATROIEXTENTRIGHT			19
        #define COLUMN_VIDEOFORMATRTPPT					20
 
-/* Definition of value to create entries in table */
-
-/* values for videoFormatType */
-#define videoChannel 									1
-#define roi 											2
-#define serviceUser 									3
-#define rawData 										4
-#define otherwise 										5
-
-/*values for videoFormatStatus */
-#define enable 											1
-#define disable 										2
-
-/*values for videoForamtInterleaced*/
-#define vivoe_interlaced 								1
-#define vivoe_progressive 								2
-#define vivoe_none 										3
-
 /* Typical data structure for a row entry */
 struct videoFormatTable_entry {
 	/* Index values */
@@ -95,6 +77,9 @@ struct videoFormatTable_entry {
 	long videoFormatRtpPt;
 	long old_videoFormatRtpPt;
 
+	/* a stream assoicated to the channel */
+	gpointer stream_datas;
+
 	/* Illustrate using a simple linked list */
 	int   valid;
 	struct videoFormatTable_entry *next;
@@ -111,7 +96,8 @@ struct videoFormatTable_entry * videoFormatTable_createEntry( 	long  videoFormat
 																long videoFormatMaxVertRes,			long videoFormatRoiHorzRes,
 																long videoFormatRoiVertRes, 		long videoFormatRoiOriginTop,
 																long videoFormatRoiOriginLeft,		long videoFormatRoiExtentBottom,
-																long videoFormatRoiExtentRight, 	long videoFormatRtpPt);
+																long videoFormatRoiExtentRight, 	long videoFormatRtpPt,
+																gpointer stream_datas);
 
 struct videoFormatTable_entry * videoFormatTable_getEntry(int index);
 
