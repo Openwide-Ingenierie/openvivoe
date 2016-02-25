@@ -214,7 +214,7 @@ channelTable_handler(
     netsnmp_request_info       		*request;
     netsnmp_table_request_info 		*table_info;
     struct channelTable_entry   	*table_entry;
-	int 							ret 		= 0;
+	int 							ret 			= 0;
     DEBUGMSGTL(("channelTable:handler", "Processing request (%d)\n", reqinfo->mode));
 
     switch (reqinfo->mode) {
@@ -467,9 +467,9 @@ channelTable_handler(
     
             switch (table_info->colnum) {
             case COLUMN_CHANNELUSERDESC:
-	        /* or possibly 'netsnmp_check_vb_type_and_size' */
+				/* check this is at most a 64 byte string */
                 ret = netsnmp_check_vb_type_and_max_size(
-                          request->requestvb, ASN_OCTET_STR, sizeof(table_entry->channelUserDesc));
+                          request->requestvb, ASN_OCTET_STR, DisplayString64);
                 if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;
@@ -603,14 +603,14 @@ channelTable_handler(
 			table_info  =     netsnmp_extract_table_info(      request);
 
 			switch (table_info->colnum) {
-				/* case COLUMN_CHANNELUSERDESC:
-				   ret = netsnmp_check_vb_type_and_max_size(
+				 case COLUMN_CHANNELUSERDESC:
+				/*   ret = netsnmp_check_vb_type_and_max_size(
 				   request->requestvb, ASN_OCTET_STR, sizeof(table_entry->channelUserDesc));
 				   if ( ret != SNMP_ERR_NOERROR ) {
 				   netsnmp_set_request_error( reqinfo, request, ret );
 				   return SNMP_ERR_NOERROR;
-				   }
-				   break;*/
+				   }*/
+				   break;
 				case COLUMN_CHANNELSTATUS:
 					ret = *(request->requestvb->val.integer);
 					if ( (ret < 1) || (ret > 3) ) { 
@@ -713,11 +713,9 @@ channelTable_handler(
             table_entry = (struct channelTable_entry *)
                               netsnmp_extract_iterator_context(request);
             table_info  =     netsnmp_extract_table_info(      request);
-    
             switch (table_info->colnum) {
             case COLUMN_CHANNELUSERDESC:
-                strcpy( table_entry->old_channelUserDesc,
-                        table_entry->channelUserDesc);
+				table_entry->old_channelUserDesc = strdup(table_entry->channelUserDesc);
                 table_entry->old_channelUserDesc_len =
                         table_entry->channelUserDesc_len;
                 strcpy ( table_entry->channelUserDesc,
