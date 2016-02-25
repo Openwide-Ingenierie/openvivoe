@@ -20,6 +20,7 @@ typedef struct{
 /**
  * \brief an array of stream, that contains all stream initiated, an not deleted yet
  */
+GHashTable* streams;
 
 int init_streaming (gpointer main_loop, gpointer stream_datas, char* format, int width, int height, char* encoding);
 int start_streaming (gpointer stream_datas );

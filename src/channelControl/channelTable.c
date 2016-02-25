@@ -10,13 +10,51 @@
 #include <glib-2.0/glib.h>
 #include <glib-unix.h>
 #include <gstreamer-1.0/gst/gst.h>
-#include "../../include/videoFormatInfo/videoFormatTable.h"
 #include "../../include/channelControl/channelTable.h"
 #include "../../include/handler.h"
 #include "../../include/mibParameters.h"
-#include "../../include/multicast.h"
 #include "../../include/streaming/stream.h"
+/** Initializes the channelTable module */
+void
+init_channelTable(void)
+{
+  /* here we initialize all the tables we're planning on supporting */
+    initialize_table_channelTable();
+}
 
+
+/** Initialize the channelTable table by defining its contents and how it's structured */
+void
+initialize_table_channelTable(void)
+{
+    const oid channelTable_oid[] = {1,3,6,1,4,1,35990,3,1,3,3};
+    const size_t channelTable_oid_len   = OID_LENGTH(channelTable_oid);
+    netsnmp_handler_registration    *reg;
+    netsnmp_iterator_info           *iinfo;
+    netsnmp_table_registration_info *table_info;
+
+    DEBUGMSGTL(("channelTable:init", "initializing table channelTable\n"));
+
+    reg = netsnmp_create_handler_registration(
+              "channelTable",     channelTable_handler,
+              channelTable_oid, channelTable_oid_len,
+              HANDLER_CAN_RWRITE
+              );
+
+    table_info = SNMP_MALLOC_TYPEDEF( netsnmp_table_registration_info );
+    netsnmp_table_helper_add_indexes(table_info,
+                           ASN_INTEGER,  /* index: channelIndex */
+                           0 /* to terminate the list of parameters*/);
+    table_info->min_column = COLUMN_CHANNELTYPE;
+    table_info->max_column = COLUMN_CHANNELDEFAULTRECEIVEIPADDRESS;
+    
+    iinfo = SNMP_MALLOC_TYPEDEF( netsnmp_iterator_info );
+    iinfo->get_first_data_point = channelTable_get_first_data_point;
+    iinfo->get_next_data_point  = channelTable_get_next_data_point;
+    iinfo->table_reginfo        = table_info;
+    
+    netsnmp_register_table_iterator( reg, iinfo );
+}
 
 /* create a new row in the (unsorted) table */
 struct channelTable_entry *
@@ -84,127 +122,14 @@ struct channelTable_entry *
 	entry->channelDefaultVideoFormatIndex 	= channelDefaultVideoFormatIndex;
 	entry->channelDefaultReceiveIpAddress 	= channelDefaultReceiveIpAddress;
 
-	/* register stream_data relative to a channel */
 	entry->stream_datas 					= stream_datas;
 
-	/* fot the management of the entries as a chained list*/
-    entry->next 							= channelTable_head;
-	entry->valid 							= 1;
-    channelTable_head 						= entry;
+    entry->next 		= channelTable_head;
+	entry->valid 		= 1;
+    channelTable_head 	= entry;
     return entry;
 }
 
-/**
- * \brief update an entry in the ChannelTable when changing its videoFormat
- * \param entry the entry in channelTable to update
- * \param videoFormatIndex the new videoFormatIndex to use for this channel
- * \return TRUE if we succeed to update the parameters
- */
-gboolean channelTable_updateEntry(struct channelTable_entry * entry, int videoFormatNumberIndex){
-	/* get the correspondante entry in the table of VideoFormat */
-	struct videoFormatTable_entry *videoFormatentry 	= videoFormatTable_getEntry( videoFormatNumberIndex );
-	if ( videoFormatentry == NULL)
-		return FALSE;	
-	/* upate ChannelTable_entry parameter with the ones retrieve from videoFormatTable */
-	entry->channelVideoFormatIndex 						= videoFormatNumberIndex;
-	entry->channelVideoFormat 	 						= strdup(videoFormatentry->videoFormatBase);
-	entry->channelVideoFormat_len						= MIN(strlen(videoFormatentry->videoFormatBase), 		DisplayString16);
-	entry->channelVideoSampling 						= strdup(videoFormatentry->videoFormatSampling);
-	entry->channelVideoSampling_len						= MIN(strlen(videoFormatentry->videoFormatSampling), 	DisplayString16);	
-	entry->channelVideoBitDepth 						= videoFormatentry->videoFormatBitDepth;
-	entry->channelFps 									= videoFormatentry->videoFormatFps;
-	entry->channelColorimetry 							= strdup(videoFormatentry->videoFormatColorimetry);
-	entry->channelColorimetry_len 						= MIN(strlen(videoFormatentry->videoFormatColorimetry), DisplayString16);	
-	entry->channelInterlaced 							= videoFormatentry->videoFormatInterlaced;
-	entry->channelCompressionFactor 					= videoFormatentry->videoFormatCompressionFactor;
-	entry->channelCompressionRate 						= videoFormatentry->videoFormatCompressionRate;
-	entry->channelHorzRes 								= videoFormatentry->videoFormatMaxHorzRes;
-	entry->channelVertRes 								= videoFormatentry->videoFormatMaxVertRes;
-
-	/* update the stream data */
-	entry->stream_datas 								= videoFormatentry->stream_datas;
-	return TRUE;
-}
-
-/** 
- * \brief get the first channel in the table that is not assigned to a videoFormat yet
- * \param void
- * \return channelTable_entry * an pointer to this entry or NULL
- */
-struct channelTable_entry * channelTable_get_empty_entry( void ){
-	struct channelTable_entry * iterator = channelTable_head;
-	while( iterator != NULL ){
-		if(iterator->channelVideoFormatIndex == 0)
-			return iterator;
-		iterator = iterator->next;
-	}
-	return NULL; /*if all channel have been assigned to a videoFormat return NULL*/
-}
-
-/** Initializes the channelTable module */
-void
-init_channelTable(void)
-{
-  /* here we initialize all the tables we're planning on supporting */
-    initialize_table_channelTable();
-}
-
-/** Initialize the channelTable table by defining its contents and how it's structured */
-void
-initialize_table_channelTable(void)
-{
-    const oid channelTable_oid[] = {1,3,6,1,4,1,35990,3,1,3,3};
-    const size_t channelTable_oid_len   = OID_LENGTH(channelTable_oid);
-    netsnmp_handler_registration    *reg;
-    netsnmp_iterator_info           *iinfo;
-    netsnmp_table_registration_info *table_info;
-
-    DEBUGMSGTL(("channelTable:init", "initializing table channelTable\n"));
-
-    reg = netsnmp_create_handler_registration(
-              "channelTable",     channelTable_handler,
-              channelTable_oid, channelTable_oid_len,
-              HANDLER_CAN_RWRITE
-              );
-
-    table_info = SNMP_MALLOC_TYPEDEF( netsnmp_table_registration_info );
-    netsnmp_table_helper_add_indexes(table_info,
-                           ASN_INTEGER,  /* index: channelIndex */
-                           0 /* to terminate the list of parameters*/);
-    table_info->min_column = COLUMN_CHANNELTYPE;
-    table_info->max_column = COLUMN_CHANNELDEFAULTRECEIVEIPADDRESS;
-    
-    iinfo = SNMP_MALLOC_TYPEDEF( netsnmp_iterator_info );
-    iinfo->get_first_data_point = channelTable_get_first_data_point;
-    iinfo->get_next_data_point  = channelTable_get_next_data_point;
-    iinfo->table_reginfo        = table_info;
-    
-    netsnmp_register_table_iterator( reg, iinfo );
-	long ip 					= 0;
-	long default_ip;
-	char channelUserDesc[64] 	= "channel_";
-	for(int i = 0; i < deviceInfo.parameters[num_ethernetIFnumber]._value.int_val; i++){
-		if ( i == 0 )
-			default_ip 			= define_vivoe_multicast(DEFAULT_MULTICAST_IFACE,i+1);
-
-		ip = define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i], i+1);
-		strcat(channelUserDesc,deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i]);
-		channelTable_createEntry( 	i+1, 																							videoChannel,
-									channelUserDesc,																				stop,
-									0, 																								"",
-									"", 																							0,
-									0,				 																				"",
-									0, 																								0,
-									0, 																								0,
-									0, 																								0,
-									0, 																								0,
-									0,																								0,
-									ip,/*IP*/ 																						0,/* packet delay*/
- 									0,/*SAP interval*/ 																				0,/*defaultVideoFormatIndex*/
-									default_ip,/*default receive IP*/ 																NULL);
-		channelNumber._value.int_val++;					
-	 }
-}
 
 #if  ALLOW_REMOVING_ROW
 /* remove a row from the table */
@@ -692,7 +617,7 @@ channelTable_handler(
                 table_entry->old_channelStatus 					= table_entry->channelStatus;
                 table_entry->channelStatus     					= *request->requestvb->val.integer;
 				if ( table_entry->channelStatus == start){
-					start_streaming( table_entry->stream_datas );
+					start_streaming( table_entry->stream_datas);
 				}
 				else if ( table_entry->channelStatus == stop){
 					stop_streaming( table_entry->stream_datas);
@@ -701,7 +626,6 @@ channelTable_handler(
             case COLUMN_CHANNELVIDEOFORMATINDEX:
                 table_entry->old_channelVideoFormatIndex 		= table_entry->channelVideoFormatIndex;
                 table_entry->channelVideoFormatIndex     		= *request->requestvb->val.integer;
-				channelTable_updateEntry(table_entry, table_entry->channelVideoFormatIndex);
                 break;
             case COLUMN_CHANNELCOMPRESSIONRATE:
                 table_entry->old_channelCompressionRate 		= table_entry->channelCompressionRate;

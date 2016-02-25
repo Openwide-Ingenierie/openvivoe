@@ -4,7 +4,7 @@
  * Main authors:
  *     - hoel <hoel.vasseur@openwide.fr>
  */
-#include <glib-2.0/glib.h>
+
 #include "../include/handler.h"
 #include "../include/macro.h"
 

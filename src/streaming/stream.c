@@ -22,7 +22,6 @@
 #include "../../include/streaming/detect.h"
 #include "../../include/streaming/stream_registration.h"
 #include "../../include/streaming/stream.h"
-
 /*
  * Macro for testing purposes
  */
@@ -64,6 +63,63 @@ static gboolean bus_call (  GstBus     *bus,
 
 	return TRUE;
 }
+
+#if 0 
+/**
+ * \brief check the parameters used for intialize the stream
+ * \param argc: as in main (should be 3)
+ * \param argv: as in main (should begin with ip=... port=... format=...)
+ * \return int EXIT_FAILURE if wrong parameters passed to the program, EXIT_SUCCESS otherwise
+ */
+static int check_param(int argc, char* argv[], char** ip, gint* port, char** format){
+
+	/* this will be used to check wether the DEFAULT_IP address has a goot format or not */
+	struct in_addr* check_addr = malloc(sizeof(struct in_addr));
+	if (argc != 4) {
+		g_printerr ("Usage: %s ip=ddd.ddd.ddd.ddd port=[1024,65535] format=[raw;mp4]\n", argv[0]);
+		g_print ("Default settings taken: ip=%s port=%d format=%s\n",(char*) *ip, *port, *format);
+		return EXIT_FAILURE;
+	/*Check that parameters are indeed: ip= and port= */	
+	}else if( strncmp("ip=", argv[1], strlen("ip=")) || strncmp("port=", argv[2], strlen("port=")) || strncmp("format=", argv[3], strlen("format=")) ) {
+		g_printerr ("Usage: %s ip=ddd.ddd.ddd.ddd port=[1024,65535] format=[raw;mp4]\n", argv[0]);
+		g_print ("Default settings taken: ip=%s port=%d format=%s\n",(char*) *ip, *port, *format);
+		return EXIT_FAILURE;
+	}
+	/*Here, the fromat of the command line entered is good, we just need te check the format of the DEFAULT_IP Address given, and the port number */
+
+	/* First check DEFAULT_IP address format */
+	char* temp_ip = strdup(argv[1] + strlen("ip="));
+	if (! inet_pton(AF_INET, temp_ip, check_addr)){
+		g_printerr ("Ip should be Ipv4 dotted-decimal format\n");
+		g_print ("Default settings taken: ip=%s port=%d format=%s\n",(char*) *ip, *port, *format);		
+		return EXIT_FAILURE;
+	}
+
+	/* Then, chek port number ( should be greater than 1024 and less than 65535 as it is coded on a short int (16-bits) */
+	char* temp_port = strdup(argv[2] + strlen("port="));
+	int temp_numport = atoi(temp_port);
+	if(temp_numport< MIN_DEFAULT_PORT || temp_numport>MAX_DEFAULT_PORT){
+		g_printerr ("Port number should in the range: %d -> %d\n", MIN_DEFAULT_PORT, MAX_DEFAULT_PORT);
+		g_print ("Default settings taken: ip=%s port=%d format=%s\n",(char*) *ip, *port, *format);
+		return EXIT_FAILURE;
+	}
+
+	/*Then, check the value of the format given should be raw  or mp4 */
+	char* temp_format = strdup(argv[3] + strlen("format="));
+	if( strcmp("raw", temp_format) &&  strcmp("mp4", temp_format) ){
+		g_printerr ("Format should be: %s or %s\n", "raw", "mp4");
+		g_print ("Default settings taken: ip=%s port=%d format=%s\n",(char*) *ip, *port, *format);
+		return EXIT_FAILURE;
+	}
+
+	/* replace ip's value by the value entered by the user */
+	strcpy(*ip, temp_ip);
+	*port = (gint) temp_numport;
+	strcpy(*format, temp_format);	
+	return EXIT_SUCCESS;
+}
+#endif //if 0
+
 /**
  * \brief create a fake source for test purposes
  * \param pipeline: the pipeline in which add the source 
@@ -91,7 +147,7 @@ static GstElement* source_creation(GstElement* pipeline, char* format, int width
 	capsfilter = gst_element_factory_make ("capsfilter","capsfilter");
 	if(capsfilter == NULL){
 		g_printerr ( "error cannot create element: %s\n", "capsfilter" );
-		return NULL;
+		return NULL;        
 	}
 
 	caps = gst_caps_new_full( 	gst_structure_new( 	"video/x-raw" 	, 
@@ -181,7 +237,7 @@ int init_streaming (gpointer main_loop, gpointer stream_datas /* real prototype 
  * \param data of the stream (pipeline, bus and bust_watch_id) - see stream_data structure
  * \return 0 
  */
-int start_streaming ( gpointer stream_datas ){
+int start_streaming (gpointer stream_datas ){
 	stream_data *data 	=  stream_datas;
 	struct videoFormatTable_entry * stream_entry = videoFormatTable_getEntry(data->videoFormatIndex);
   	/* Set the pipeline to "playing" state*/	
@@ -211,7 +267,7 @@ int stop_streaming( gpointer stream_datas ){
  * \param data of the stream (pipeline, bus and bust_watch_id) - see stream_data structure
  * \return 0 
  */
-int delete_steaming_data( gpointer stream_datas ){
+int delete_steaming_data(gpointer stream_datas ){
 	stream_data *data 	=  stream_datas;	
 	struct videoFormatTable_entry * stream_entry = videoFormatTable_getEntry(data->videoFormatIndex);
 	/* delete pipeline */	

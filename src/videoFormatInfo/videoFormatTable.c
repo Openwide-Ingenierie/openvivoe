@@ -6,9 +6,6 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
-#include <glib-2.0/glib.h>
-#include <glib-unix.h>
-#include <gstreamer-1.0/gst/gst.h>
 #include "../../include/macro.h"
 #include "../../include/mibParameters.h"
 #include "../../include/videoFormatInfo/videoFormatTable.h"
@@ -38,8 +35,7 @@ struct videoFormatTable_entry * videoFormatTable_createEntry( 	long  videoFormat
 																long videoFormatMaxVertRes, 		long videoFormatRoiHorzRes,			
 																long videoFormatRoiVertRes, 		long videoFormatRoiOriginTop,	
 																long videoFormatRoiOriginLeft,		long videoFormatRoiExtentBottom,
-																long videoFormatRoiExtentRight, 	long videoFormatRtpPt,
-																gpointer stream_datas) {
+																long videoFormatRoiExtentRight, 	long videoFormatRtpPt) {
 
     struct videoFormatTable_entry *entry;
     entry = SNMP_MALLOC_TYPEDEF(struct videoFormatTable_entry);
@@ -69,9 +65,6 @@ struct videoFormatTable_entry * videoFormatTable_createEntry( 	long  videoFormat
  	entry->videoFormatRoiExtentBottom 	= videoFormatRoiExtentBottom;
 	entry->videoFormatRoiExtentRight 	= videoFormatRoiExtentRight;
 	entry->videoFormatRtpPt 			= videoFormatRtpPt;
-
-	entry->stream_datas 					= stream_datas;	
-
 	/* Link it into the list of entries */ 
     entry->next = videoFormatTable_head;
     videoFormatTable_head = entry;

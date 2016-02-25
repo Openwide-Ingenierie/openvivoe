@@ -21,34 +21,12 @@
 #define DEFAULT_MULTICAST_ADDR		"239.192.1.254"
 #define DEFAULT_MULTICAST_IFACE		"enp2s0"
 
-/* values for videoFormatType */
-#define videoChannel 				1
-#define roi 						2
-#define serviceUser 				3
-#define rawData 					4
-#define otherwise 					5
-
-/*values for videoFormatStatus */
-#define enable 						1
-#define disable 					2
-
-/*values for videoForamtInterleaced*/
-#define vivoe_interlaced 			1
-#define vivoe_progressive 			2
-#define vivoe_none 					3
-
-/* values for channelStatus */
-#define start 						1
-#define stop 						2
-#define singleFrame 				3
-
 /* removing row from table in this MIB */
 #define ALLOW_REMOVING_ROW 			0
-
-
-/**
- * \brief Enum for the type of MIB's parameter
+/*
+ * Enum for the type of MIB's parameter
  */
+
 typedef enum {INTEGER, STRING, T_INTEGER, T_STRING} type;
 
 /*

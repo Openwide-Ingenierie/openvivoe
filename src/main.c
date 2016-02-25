@@ -76,7 +76,7 @@ int main (int   argc,  char *argv[]){
     gst_init (&argc, &argv);
 
 	/* data associated to stream */	
-	stream_data 			stream1;
+//	stream_data 			stream1;
 	stream_data 			stream2;
 
 	/* create an array of streams to passe to the stop_program function */
@@ -95,10 +95,12 @@ int main (int   argc,  char *argv[]){
 
 	/* init SubAgent Deamon */
 	deamon(argv[0]);
+#if 0	
 	/* prepare the stream - initialize all the data relevant to the stream into stream-data */
 	if ( init_streaming(loop, &stream1, /*test*/ "raw", 576, 576,"I420" /*end test param*/)){
 		return 0;
 	}
+#endif //if 0
 	/* prepare the stream - initialize all the data relevant to the stream into stream-data */
 	if ( init_streaming(loop, &stream2, /*test*/ "mp4", 1920, 1080,"I420" /*end test param*/)){
 		return  0;

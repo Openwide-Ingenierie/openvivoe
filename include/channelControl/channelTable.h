@@ -132,7 +132,8 @@ struct channelTable_entry * channelTable_createEntry(
 						 						   	in_addr_t 	channelDefaultReceiveIpAddress,
 													gpointer 	stream_datas);
 
-gboolean channelTable_updateEntry(struct channelTable_entry * entry, int videoFormatNumberIndex);
-struct channelTable_entry * channelTable_get_empty_entry( void );
-
+/* values for channelStatus */
+#define start 				1
+#define stop 				2
+#define singleFrame 		3
 #endif /* CHANNELTABLE_H */
