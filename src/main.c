@@ -58,7 +58,6 @@ static gboolean stop_program ( gpointer data ){
 	return TRUE;
 }
 
-
 /**
  * \brief the data needed to pass to functions used to exit the program nicely
  * \param data the data we need to know to exit the program nicely see stop_program_dat

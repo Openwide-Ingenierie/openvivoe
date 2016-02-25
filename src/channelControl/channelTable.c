@@ -181,12 +181,9 @@ initialize_table_channelTable(void)
     
     netsnmp_register_table_iterator( reg, iinfo );
 	long ip 					= 0;
-	long default_ip;
+	long default_ip 			= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0],1);
 	char channelUserDesc[64] 	= "channel_";
 	for(int i = 0; i < deviceInfo.parameters[num_ethernetIFnumber]._value.int_val; i++){
-		if ( i == 0 )
-			default_ip 			= define_vivoe_multicast(DEFAULT_MULTICAST_IFACE,i+1);
-
 		ip = define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i], i+1);
 		strcat(channelUserDesc,deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i]);
 		channelTable_createEntry( 	i+1, 																							videoChannel,
