@@ -477,7 +477,7 @@ channelTable_handler(
                 break;
             case COLUMN_CHANNELSTATUS:
                 /* or possibly 'netsnmp_check_vb_int_range' */
-                ret = netsnmp_check_vb_int( request->requestvb );
+                ret = netsnmp_check_vb_int_range( request->requestvb, start, singleFrame );
                 if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;
@@ -485,7 +485,7 @@ channelTable_handler(
                 break;
             case COLUMN_CHANNELVIDEOFORMATINDEX:
                 /* or possibly 'netsnmp_check_vb_int_range' */
-                ret = netsnmp_check_vb_int( request->requestvb );
+                ret = netsnmp_check_vb_int_range( request->requestvb, 1, videoFormatNumber._value.int_val );
                 if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;
@@ -500,16 +500,14 @@ channelTable_handler(
                 }
                 break;
             case COLUMN_CHANNELHORZRES:
-                /* or possibly 'netsnmp_check_vb_int_range' */
-                ret = netsnmp_check_vb_int( request->requestvb );
+                ret = netsnmp_check_vb_int_range( request->requestvb, 576, 1080 );
                 if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;
                 }
                 break;
             case COLUMN_CHANNELVERTRES:
-                /* or possibly 'netsnmp_check_vb_int_range' */
-                ret = netsnmp_check_vb_int( request->requestvb );
+                ret = netsnmp_check_vb_int_range( request->requestvb, 576, 1920 );				
                 if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;
@@ -517,15 +515,14 @@ channelTable_handler(
                 break;
             case COLUMN_CHANNELROIORIGINTOP:
                 /* or possibly 'netsnmp_check_vb_int_range' */
-                ret = netsnmp_check_vb_int( request->requestvb );
-                if ( ret != SNMP_ERR_NOERROR ) {
+                ret = netsnmp_check_vb_int_range( request->requestvb, 0, 1080 );
+				if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;
                 }
                 break;
             case COLUMN_CHANNELROIORIGINLEFT:
-                /* or possibly 'netsnmp_check_vb_int_range' */
-                ret = netsnmp_check_vb_int( request->requestvb );
+                ret = netsnmp_check_vb_int_range( request->requestvb, 0, 1920 );				
                 if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;
@@ -573,7 +570,7 @@ channelTable_handler(
                 break;
             case COLUMN_CHANNELDEFAULTVIDEOFORMATINDEX:
                 /* or possibly 'netsnmp_check_vb_int_range' */
-                ret = netsnmp_check_vb_int( request->requestvb );
+                ret = netsnmp_check_vb_int_range( request->requestvb, 1, videoFormatNumber._value.int_val );				
                 if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;
@@ -596,114 +593,7 @@ channelTable_handler(
         break;
 	/* protect yoursefl against inconsistent (meaningless values) */
     case MODE_SET_RESERVE2:
-
-		for (request=requests; request; request=request->next) {
-			table_entry = (struct channelTable_entry *)
-				netsnmp_extract_iterator_context(request);
-			table_info  =     netsnmp_extract_table_info(      request);
-
-			switch (table_info->colnum) {
-				 case COLUMN_CHANNELUSERDESC:
-				/*   ret = netsnmp_check_vb_type_and_max_size(
-				   request->requestvb, ASN_OCTET_STR, sizeof(table_entry->channelUserDesc));
-				   if ( ret != SNMP_ERR_NOERROR ) {
-				   netsnmp_set_request_error( reqinfo, request, ret );
-				   return SNMP_ERR_NOERROR;
-				   }*/
-				   break;
-				case COLUMN_CHANNELSTATUS:
-					ret = *(request->requestvb->val.integer);
-					if ( (ret < 1) || (ret > 3) ) { 
-						netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_INCONSISTENTVALUE);
-						return SNMP_ERR_NOERROR;
-					}
-					break;
-				case COLUMN_CHANNELVIDEOFORMATINDEX:
-					ret = *(request->requestvb->val.integer);
-					/* check that the videoFormatIndex exists: comprise between 0 and the number of VideoFormat */
-					if ( (ret < 1) || (ret > videoFormatNumber._value.int_val) ) {
-						netsnmp_set_request_error( reqinfo, request, SNMP_ERR_INCONSISTENTVALUE );
-						return SNMP_ERR_NOERROR;
-					}
-					break;
-				case COLUMN_CHANNELCOMPRESSIONRATE:
-					ret = *(request->requestvb->val.integer);
-					if ( (ret < 0) ) { 
-						netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_INCONSISTENTVALUE);
-						return SNMP_ERR_NOERROR;
-					}
-					break;
-            	case COLUMN_CHANNELHORZRES:
-					ret = *(request->requestvb->val.integer);
-					if ( (ret < 0) ) { 
-						netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_INCONSISTENTVALUE);
-						return SNMP_ERR_NOERROR;
-					}
-					break;
-            	case COLUMN_CHANNELVERTRES:
-					ret = *(request->requestvb->val.integer);
-					if ( (ret < 0) ) { 
-						netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_INCONSISTENTVALUE);
-						return SNMP_ERR_NOERROR;
-					}
-					break;
-            	case COLUMN_CHANNELROIORIGINTOP:
-					ret = *(request->requestvb->val.integer);
-					if ( (ret < 0) ) { 
-						netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_INCONSISTENTVALUE);
-						return SNMP_ERR_NOERROR;
-					}
-					break;
-            	case COLUMN_CHANNELROIORIGINLEFT:
-					ret = *(request->requestvb->val.integer);
-					if ( (ret < 0) ) { 
-						netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_INCONSISTENTVALUE);
-						return SNMP_ERR_NOERROR;
-					}
-					break;
-            	case COLUMN_CHANNELROIEXTENTBOTTOM:
-					ret = *(request->requestvb->val.integer);
-					if ( (ret < 0) ) { 
-						netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_INCONSISTENTVALUE);
-						return SNMP_ERR_NOERROR;
-					}
-					break;
-            	case COLUMN_CHANNELRECEIVEIPADDRESS:
-					ret = *(request->requestvb->val.integer);
-					if ( (ret < 0) ) { 
-						netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_INCONSISTENTVALUE);
-						return SNMP_ERR_NOERROR;
-					}
-					break;
-            	case COLUMN_CHANNELINTERPACKETDELAY:
-					ret = *(request->requestvb->val.integer);
-					if ( (ret < 0) ) { 
-						netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_INCONSISTENTVALUE);
-						return SNMP_ERR_NOERROR;
-					}
-					break;
-            	case COLUMN_CHANNELSAPMESSAGEINTERVAL:
-					ret = *(request->requestvb->val.integer);
-					if ( (ret < 0) ) { 
-						netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_INCONSISTENTVALUE);
-						return SNMP_ERR_NOERROR;
-					}
-					break;
-				case COLUMN_CHANNELDEFAULTVIDEOFORMATINDEX:
-					ret = *(request->requestvb->val.integer);
-					if ( (ret < 1) || (ret > videoFormatNumber._value.int_val) ) {
-						netsnmp_set_request_error( reqinfo, request, SNMP_ERR_INCONSISTENTVALUE );
-						return SNMP_ERR_NOERROR;
-					}
-					break;
-
-				default:
-					netsnmp_set_request_error( reqinfo, request,
-							SNMP_ERR_NOTWRITABLE );
-					return SNMP_ERR_NOERROR;
-			}
-		}
-		break;
+			break;
 
 	case MODE_SET_FREE:
 		break;
