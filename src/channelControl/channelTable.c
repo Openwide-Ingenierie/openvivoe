@@ -10,6 +10,7 @@
 #include <glib-2.0/glib.h>
 #include <glib-unix.h>
 #include <gstreamer-1.0/gst/gst.h>
+#include "../../include/videoFormatInfo/videoFormatTable.h"
 #include "../../include/channelControl/channelTable.h"
 #include "../../include/handler.h"
 #include "../../include/mibParameters.h"
@@ -128,6 +129,36 @@ struct channelTable_entry *
 	entry->valid 		= 1;
     channelTable_head 	= entry;
     return entry;
+}
+/**
+ * \brief update an entry in the ChannelTable when changing its videoFormat
+ * \param entry the entry in channelTable to update
+ * \param videoFormatIndex the new videoFormatIndex to use for this channel
+ * \return TRUE if we succeed to update the parameters
+ */
+gboolean channelTable_updateEntry(struct channelTable_entry * entry, int videoFormatNumberIndex){
+       /* get the correspondante entry in the table of VideoFormat */
+       struct videoFormatTable_entry *videoFormatentry         = videoFormatTable_getEntry( videoFormatNumberIndex );
+       if ( videoFormatentry == NULL)
+               return FALSE;
+       /* upate ChannelTable_entry parameter with the ones retrieve from videoFormatTable */
+       entry->channelVideoFormatIndex 						= videoFormatNumberIndex;
+       entry->channelVideoFormat 							= strdup(videoFormatentry->videoFormatBase);
+       entry->channelVideoFormat_len 						= MIN(strlen(videoFormatentry->videoFormatBase), 		DisplayString16);
+       entry->channelVideoSampling 							= strdup(videoFormatentry->videoFormatSampling);
+       entry->channelVideoSampling_len 						= MIN(strlen(videoFormatentry->videoFormatSampling), 	DisplayString16);
+       entry->channelVideoBitDepth 							= videoFormatentry->videoFormatBitDepth;
+       entry->channelFps 									= videoFormatentry->videoFormatFps;
+       entry->channelColorimetry 							= strdup(videoFormatentry->videoFormatColorimetry);
+       entry->channelColorimetry_len 						= MIN(strlen(videoFormatentry->videoFormatColorimetry), DisplayString16);
+       entry->channelInterlaced 							= videoFormatentry->videoFormatInterlaced;
+       entry->channelCompressionFactor 						= videoFormatentry->videoFormatCompressionFactor;
+       entry->channelCompressionRate 						= videoFormatentry->videoFormatCompressionRate;
+       entry->channelHorzRes 								= videoFormatentry->videoFormatMaxHorzRes;
+       entry->channelVertRes 								= videoFormatentry->videoFormatMaxVertRes;
+       /* update the stream data */
+       entry->stream_datas 									= videoFormatentry->stream_datas;
+       return TRUE;
 }
 
 
@@ -626,6 +657,7 @@ channelTable_handler(
             case COLUMN_CHANNELVIDEOFORMATINDEX:
                 table_entry->old_channelVideoFormatIndex 		= table_entry->channelVideoFormatIndex;
                 table_entry->channelVideoFormatIndex     		= *request->requestvb->val.integer;
+				channelTable_updateEntry(table_entry, table_entry->channelVideoFormatIndex);
                 break;
             case COLUMN_CHANNELCOMPRESSIONRATE:
                 table_entry->old_channelCompressionRate 		= table_entry->channelCompressionRate;

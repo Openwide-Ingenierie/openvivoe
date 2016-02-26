@@ -76,7 +76,9 @@ struct videoFormatTable_entry {
 	long old_videoFormatRoiExtentRight;
 	long videoFormatRtpPt;
 	long old_videoFormatRtpPt;
-
+	
+	/* a stream assoicated to the channel */
+	gpointer stream_datas;
 	/* Illustrate using a simple linked list */
 	int   valid;
 	struct videoFormatTable_entry *next;
@@ -93,7 +95,8 @@ struct videoFormatTable_entry * videoFormatTable_createEntry( 	long  videoFormat
 																long videoFormatMaxVertRes,			long videoFormatRoiHorzRes,
 																long videoFormatRoiVertRes, 		long videoFormatRoiOriginTop,
 																long videoFormatRoiOriginLeft,		long videoFormatRoiExtentBottom,
-																long videoFormatRoiExtentRight, 	long videoFormatRtpPt);
+																long videoFormatRoiExtentRight, 	long videoFormatRtpPt, 
+																gpointer stream_datas);
 
 struct videoFormatTable_entry * videoFormatTable_getEntry(int index);
 
