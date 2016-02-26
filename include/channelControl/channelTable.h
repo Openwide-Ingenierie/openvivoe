@@ -132,8 +132,5 @@ struct channelTable_entry * channelTable_createEntry(
 						 						   	in_addr_t 	channelDefaultReceiveIpAddress,
 													gpointer 	stream_datas);
 
-/* values for channelStatus */
-#define start 				1
-#define stop 				2
-#define singleFrame 		3
+
 #endif /* CHANNELTABLE_H */

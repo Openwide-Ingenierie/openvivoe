@@ -39,24 +39,6 @@ NetsnmpCacheFree videoFormatTable_free;
        #define COLUMN_VIDEOFORMATROIEXTENTRIGHT			19
        #define COLUMN_VIDEOFORMATRTPPT					20
 
-/* Definition of value to create entries in table */
-
-/* values for videoFormatType */
-#define videoChannel 									1
-#define roi 											2
-#define serviceUser 									3
-#define rawData 										4
-#define otherwise 										5
-
-/*values for videoFormatStatus */
-#define enable 											1
-#define disable 										2
-
-/*values for videoForamtInterleaced*/
-#define vivoe_interlaced 								1
-#define vivoe_progressive 								2
-#define vivoe_none 										3
-
 /* Typical data structure for a row entry */
 struct videoFormatTable_entry {
 	/* Index values */
