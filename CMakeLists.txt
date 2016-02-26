@@ -5,7 +5,6 @@
 #     - hoel <hvasseur@openwide.fr>
 #
 
-
 #set Cmake minimum required version
 cmake_minimum_required(VERSION 2.8)
 
@@ -33,6 +32,7 @@ add_executable(openvivoe ${openvivoe_SRC} ${openvivoe_HEADER} )
 #
 #Link specific libraries to target
 #
+
 #link that need to be set up to use net-snmp API
 execute_process(COMMAND "net-snmp-config" "--libs"
 				WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
@@ -56,13 +56,27 @@ execute_process(COMMAND "pkg-config" "--libs" "gstreamer-1.0"
 	WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 	OUTPUT_VARIABLE GST_LIBS				
 	OUTPUT_STRIP_TRAILING_WHITESPACE)
-target_link_libraries(openvivoe ${SNMP_LIBS} ${SNMPAGENT_LIBS} ${GLIB} ${GST_LIBS})
+
+#link for Gstreamer-sdp-1.0
+execute_process(COMMAND "pkg-config" "--libs" "gstreamer-video-1.0"
+	WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+	OUTPUT_VARIABLE GST_VIDEO_LIBS
+	OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+#link for Gstreamer-sdp-1.0
+execute_process(COMMAND "pkg-config" "--libs" "gstreamer-sdp-1.0"
+	WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+	OUTPUT_VARIABLE GST_SDP_LIBS
+	OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+#link librairies
+target_link_libraries(openvivoe ${SNMP_LIBS} ${SNMPAGENT_LIBS} ${GLIB} ${GST_LIBS} ${GST_VIDEO_LIBS} ${GST_SDP_LIBS})
 
 #set debug as default configuration, to buld release run "cmake -DCMAKE_BUILD_TYPE=Release" or simply the alias cmakerelease
 if( NOT CMAKE_BUILD_TYPE )
 	set( CMAKE_BUILD_TYPE DEBUG CACHE STRING
-		"Build type set to default as not specified."
-		FORCE )
+		 "Build type set to default as not specified."
+		 FORCE )
 endif()
 
 #Compilation flags
@@ -84,8 +98,19 @@ execute_process(COMMAND "pkg-config" "--cflags" "gstreamer-1.0"
 				OUTPUT_VARIABLE GST_FLAGS
 				OUTPUT_STRIP_TRAILING_WHITESPACE)
 
+#Cflags for Gstreamer-sdp-1.0
+execute_process(COMMAND "pkg-config" "--cflags" "gstreamer-video-1.0"
+				WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+				OUTPUT_VARIABLE GST_VIDEO_FLAGS
+				OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-set( CFLAGS "${CFLAGS} ${SNMP_FLAGS} ${GLIBC_FLAGS} ${GST_FLAGS}")
+#Cflags for Gstreamer-sdp-1.0
+execute_process(COMMAND "pkg-config" "--cflags" "gstreamer-sdp-1.0"
+				WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+				OUTPUT_VARIABLE GST_SDP_FLAGS
+				OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+set(CFLAGS "${CFLAGS} ${SNMP_FLAGS} ${GLIBC_FLAGS} ${GST_FLAGS} ${GST_VIDEO_FLAGS} ${GST_SDP_FLAGS}")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -I. ${CFLAGS}") #always
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -00 -v -da -Q") #for debugging
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -I.")#for release
@@ -99,16 +124,12 @@ else()
 	SET( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)#default version
 endif()
 
-
 #display info to user
-message(STATUS "CMAKE_GENERATOR      : ${CMAKE_GENERATOR}")
-message(STATUS "PRJ 		        : ${PROJECT_NAME}")
-message(STATUS "BINARY_DIR           : ${EXECUTABLE_OUTPUT_PATH}")
+message(STATUS "CMAKE_GENERATOR 	: ${CMAKE_GENERATOR}")
+message(STATUS "PRJ 			: ${PROJECT_NAME}")
+message(STATUS "BINARY_DIR 		: ${EXECUTABLE_OUTPUT_PATH}")
 message(STATUS "SRC_DIR 		: ${PROJECT_SOURCE_DIR}/src")
 message(STATUS "SYSTEM_NAME 		: ${CMAKE_SYSTEM_NAME}")
-message(STATUS "BUILD_TYPE  		: ${CMAKE_BUILD_TYPE}")
-message(STATUS "LIBS  			:${SNMP_LIBS} ${SNMPAGENT_LIBS} ${GLIB} ${GST_LIBS}")
-message(STATUS "CFLAGS    			: ${CFLAGS}")
-
-
-
+message(STATUS "BUILD_TYPE 		: ${CMAKE_BUILD_TYPE}")
+message(STATUS "LIBS 		:${SNMP_LIBS} ${SNMPAGENT_LIBS} ${GLIB} ${GST_LIBS}")
+message(STATUS "CFLAGS 		: ${CFLAGS}")
