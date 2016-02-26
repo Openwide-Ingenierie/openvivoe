@@ -221,7 +221,7 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 										video_info->videoFormatMaxVertRes, 													0,
 										0, 																					0,		 				
 										0, 																					0,
-										*ip,/*receive Address*/ 																0 /* packet delay*/,
+										*ip,/*receive Address*/ 															0 /* packet delay*/,
  										0, /*SAP interval*/ 																index, /*defaultVideoFormatIndex - 0 is taken by default*/
 										default_ip/*default receive IP*/, 													stream_datas);
 			/* increase channelNumber as we added an entry */			
