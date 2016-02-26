@@ -5,9 +5,9 @@
  *     - hoel <hoel.vasseur@openwide.fr>
  */
 #ifndef SDP_H
-# define SDP_H
+#define SDP_H
 
-
+gboolean create_SDP( struct channelTable_entry * channel_entry );
 
 #endif /* SDP_H */
 

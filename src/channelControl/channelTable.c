@@ -15,6 +15,8 @@
 #include "../../include/handler.h"
 #include "../../include/mibParameters.h"
 #include "../../include/streaming/stream.h"
+#include "../../include/streaming/sdp.h"
+
 /** Initializes the channelTable module */
 void
 init_channelTable(void)
@@ -648,6 +650,7 @@ channelTable_handler(
                 table_entry->old_channelStatus 					= table_entry->channelStatus;
                 table_entry->channelStatus     					= *request->requestvb->val.integer;
 				if ( table_entry->channelStatus == start){
+					create_SDP( table_entry );
 					start_streaming( table_entry->stream_datas);
 				}
 				else if ( table_entry->channelStatus == stop){

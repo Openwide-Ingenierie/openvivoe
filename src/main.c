@@ -21,13 +21,11 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
-
-
 /* header file */
 #include "../include/deamon.h"
 #include "../include/streaming/stream.h"
 
-
+#include "../include/streaming/sdp.h"
 /**
  * \brief the data needed to pass to functions used to exit the program nicely
  */
@@ -57,7 +55,6 @@ static gboolean stop_program ( gpointer data ){
 	g_main_loop_unref (loop);
 	return TRUE;
 }
-
 
 /**
  * \brief the data needed to pass to functions used to exit the program nicely
@@ -103,10 +100,10 @@ int main (int   argc,  char *argv[]){
 	if ( init_streaming(loop, &stream2, /*test*/ "mp4", 1920, 1080,"I420" /*end test param*/)){
 		return  0;
 	}
+
 	/* start the program: SNMP SubAgent deamon, and streaming */
     /* Iterate */
 	g_main_loop_run (loop);
 	
 	return 0;
 }
-
