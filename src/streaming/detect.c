@@ -52,14 +52,8 @@ static void cb_typefound ( 	GstElement 				*typefind,
 	g_idle_add (idle_exit_loop, loop);
 }
 
-/**
- * \brief Media Stream Capabilities detection - detect caps of stream
- * \param pipeline the pipeline used by the stream
- * \param input_video the video stream we want to know the caps from
- * \param loop the GMainLoop the run
- */
-GstStructure* type_detection(GstBin *pipeline, GstElement *input_video, GMainLoop *loop){
-	GstElement  *typefind,  *fakesink;
+static GstStructure* type_detection_with_sink( GstBin *pipeline, GstElement *input_video, GMainLoop *loop, GstElement *sink ){
+	GstElement *typefind;
 	data_type_detection* data = malloc(sizeof(data_type_detection));
 	data->loop 	= loop;
 	/* Create typefind element */
@@ -69,29 +63,47 @@ GstStructure* type_detection(GstBin *pipeline, GstElement *input_video, GMainLoo
 		return NULL;		
 	}
 	/* Connect typefind element to handler */
-	g_signal_connect (typefind, "have-type", G_CALLBACK (cb_typefound), data);	
-  	fakesink = gst_element_factory_make ("fakesink", "sink");
-	if(fakesink == NULL){
-		g_printerr ("Fail to detect Media Stream type\n");
-		return NULL;	
-	}
-  	gst_bin_add_many (GST_BIN (pipeline), typefind, fakesink, NULL);
-  	gst_element_link_many (input_video, typefind, fakesink, NULL);
-    gst_element_set_state (GST_ELEMENT (pipeline), GST_STATE_PLAYING);
-
+	g_signal_connect (typefind, "have-type", G_CALLBACK (cb_typefound), data);
+	gst_bin_add_many (GST_BIN (pipeline), typefind, sink, NULL);
+	gst_element_link_many (input_video, typefind, sink, NULL);
+	gst_element_set_state (GST_ELEMENT (pipeline), GST_STATE_PLAYING);
 	/* run the main loop until type is found so we execute callback function */
 	g_main_loop_run (loop);
 	/* Video type found */	
   	gst_element_set_state (GST_ELEMENT (pipeline), GST_STATE_NULL);
 
 	/*Remove typefind and fakesink from pipeline */
+	gst_element_unlink_many( input_video, typefind, sink, NULL);
 	gst_bin_remove(GST_BIN(pipeline), typefind);
-	gst_bin_remove(GST_BIN(pipeline), fakesink);
-	/* Create the VIVOE pipeline for MPEG-4 videos */
+
+	/* Get video Caps */
 	GstCaps 		*detected 		= gst_caps_from_string(data->type);
-//	printf("%s\n", gst_caps_to_string(gst_caps_intersect (detected,vivoe_filter)));
+	printf("%s\n", gst_caps_to_string(detected));
 	GstStructure 	*str_detected 	= gst_caps_get_structure(detected, 0);
 
 	free(data);
+	return str_detected;
+}
+
+/**
+ * \brief Media Stream Capabilities detection - detect caps of stream
+ * \param pipeline the pipeline used by the stream
+ * \param input_video the video stream we want to know the caps from
+ * \param loop the GMainLoop the run
+ */
+GstStructure* type_detection(GstBin *pipeline, GstElement *input_video, GMainLoop *loop, GstElement *sink){
+	GstStructure *str_detected;
+	if (sink == NULL){
+		GstElement  *fakesink;
+		fakesink = gst_element_factory_make ("fakesink", "sink");
+		if(fakesink == NULL){
+			g_printerr ("Fail to detect Media Stream type\n");
+			return NULL;
+		}
+		str_detected = type_detection_with_sink( pipeline, input_video, loop, fakesink);
+		gst_bin_remove(GST_BIN(pipeline), fakesink);
+	}else{
+		str_detected = type_detection_with_sink( pipeline, input_video, loop, sink);
+	}
 	return str_detected;
 }

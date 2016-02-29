@@ -7,7 +7,7 @@
 #ifndef DETECT_H
 # define DETECT_H
 
-GstStructure* type_detection(GstBin *pipeline, GstElement *input_video, GMainLoop *loop);
+GstStructure* type_detection(GstBin *pipeline, GstElement *input_video, GMainLoop *loop, GstElement *sink);
 
 #endif /* DETECT_H */
 
