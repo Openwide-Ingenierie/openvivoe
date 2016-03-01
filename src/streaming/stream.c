@@ -278,6 +278,7 @@ int delete_steaming_data(gpointer stream_datas){
 	stream_data *data 	=  stream_datas;	
 	/* delete pipeline */	
 	g_print ("Deleting pipeline\n");
+	gst_element_set_state (data->pipeline, GST_STATE_NULL);	
 	gst_object_unref (GST_OBJECT (data->pipeline));
 	g_source_remove (data->bus_watch_id);
 	return 0;
