@@ -111,15 +111,11 @@ static GstElement* addUDP( 	GstElement *pipeline, 	GstBus *bus,
                     "port", DEFAULT_MULTICAST_PORT,
                     NULL);
 
-	GstStructure* video_caps;
-	/* Media stream Type detection */
-	video_caps = type_detection(GST_BIN(pipeline), input, loop, udpsink );
-
 	/* add rtp to pipeline */
-/*	if ( !gst_bin_add(GST_BIN (pipeline), udpsink )){
+	if ( !gst_bin_add(GST_BIN (pipeline), udpsink )){
 		g_printerr("Unable to add %s to pipeline", gst_element_get_name(udpsink));
 		return NULL;
-	}*/
+	}
 
 	/* we link the elements together */
 	if ( !gst_element_link_many (input, udpsink, NULL)){

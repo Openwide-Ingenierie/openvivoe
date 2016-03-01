@@ -14,6 +14,7 @@
 #include "../../include/channelControl/channelTable.h"
 #include "../../include/handler.h"
 #include "../../include/mibParameters.h"
+#include "../../include/streaming/stream_registration.h"
 #include "../../include/streaming/stream.h"
 #include "../../include/streaming/sdp.h"
 
@@ -651,10 +652,10 @@ channelTable_handler(
                 table_entry->channelStatus     					= *request->requestvb->val.integer;
 				if ( table_entry->channelStatus == start){
 					create_SDP( table_entry );
-					start_streaming( table_entry->stream_datas);
+					start_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex);
 				}
 				else if ( table_entry->channelStatus == stop){
-					stop_streaming( table_entry->stream_datas);
+					stop_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex );
 				}
                 break;
             case COLUMN_CHANNELVIDEOFORMATINDEX:

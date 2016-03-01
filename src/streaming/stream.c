@@ -204,8 +204,9 @@ int init_streaming (gpointer main_loop, gpointer stream_datas /* real prototype 
 	stream_data *data 	= stream_datas;
 
 	/* allocate memory for the structure rtp_data of stream_data */
-	rtp_data 			rtp_datas;
-	data->rtp_datas = 	&rtp_datas;
+	/* this will be free in the delete_stream function */
+	rtp_data 			*rtp_datas = malloc(sizeof(rtp_data));
+	data->rtp_datas = 	rtp_datas;
 	
     /* Create the pipeline */
     pipeline  = gst_pipeline_new ("pipeline");
@@ -281,5 +282,9 @@ int delete_steaming_data(gpointer stream_datas){
 	gst_element_set_state (data->pipeline, GST_STATE_NULL);	
 	gst_object_unref (GST_OBJECT (data->pipeline));
 	g_source_remove (data->bus_watch_id);
+	/* free rtp_data */
+	free(data->rtp_datas);
+	/* free stream_data associated to stream */
+	free(data);
 	return 0;
 }

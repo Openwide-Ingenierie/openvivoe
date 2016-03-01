@@ -16,9 +16,36 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 /* Header file */
+#include "../../include/mibParameters.h"
 #include "../../include/channelControl/channelTable.h"
 #include "../../include/streaming/sdp.h"
+#include "../../include/streaming/stream_registration.h"
 #include "../../include/streaming/stream.h"
+
+/* define constant value for the VIVOE norm */
+#define network_type 		"IN"
+#define address_type 		"IPV4"
+#define address_ttl 		15
+#define media_type 			"video"
+#define transport_proto 	"RTP/AVP"
+
+/**
+ * \brief 	provides a mapping between the int representation of the interlaced-mode of a stream 
+ * 			according to the MIB: (1) interlaced, (2) progressive, (3) none
+ * \param 	interlaced_mode the int representation of our video stream
+ * \return 	the string representation of our interlaced_mode
+ */
+static char* interlace_mode_to_string(int interlaced_mode){
+	switch(interlaced_mode){
+		case 1: return "interlaced";
+				break;
+		case 2: return "progressive";
+				break;
+		case 3: return "none";
+				break;
+		default: return "";
+	}
+}
 
 /** 
  * \brief Create the SDP message corresponding to the stream
@@ -27,6 +54,9 @@
 gboolean create_SDP(struct channelTable_entry * channel_entry ){
 
 	GstSDPMessage 	*msg;
+	stream_data 	*data = channel_entry->stream_datas;
+
+
 	/* create a new SDP message */
 	if (gst_sdp_message_new(&msg)){
 		g_printerr("Failed to create SDP message\n");
@@ -57,8 +87,7 @@ gboolean create_SDP(struct channelTable_entry * channel_entry ){
 	/* get multicast IP from MIB */
 	struct in_addr ip_addr;
     ip_addr.s_addr			= channel_entry->channelReceiveIpAddress;
-	
-	
+		
 	if ( !gst_sdp_address_is_multicast ("IN", "IPV4",inet_ntoa(ip_addr)) ){
 		g_printerr("ERROR: try to stream on a non multicast IPv4 address\n");
 	}
@@ -66,52 +95,64 @@ gboolean create_SDP(struct channelTable_entry * channel_entry ){
 									"-" /* username*/,
 									session_id_str /* sessionid*/,
 									session_version_str/* sessionversion*/,
-									"IN", /* network type :internet (always for VIVOE)*/
-									"IPV4", /* address type :IPV4 (always for VIVOE)*/
+									network_type, /* network type :internet (always for VIVOE)*/
+									address_type, /* address type :IPV4 (always for VIVOE)*/
 									inet_ntoa(ip_addr) /* multicast IP*/
 								); 
 	
-
-	printf("%s\n", gst_sdp_message_as_text(msg)); 
-#if 0
-		/* to see our work */
-	//
-gst_sdp_address_is_multicast ()
-
-
-/
 	/* session name
-	 * s=<session name>
+	* s=<session name>
+	*/
+	/* Build session name from deviceUserDesc Value and DeviceChannel value */
+	/* Create a buffer that will contain the concatenation of deviceUserDesc and ChannelUserDesc 
+	 * Both of those Strings are 64 bytes strings, so at most, session name will be a 129 bytes string
+	 * because we will add a space " " character between those two strings
 	 */
-gst_sdp_message_set_session_name
+	char session_name[DisplayString64*2+1];
+	/* Get deviceUserDesc Value */
+	memcpy(session_name, deviceInfo.parameters[num_DeviceUD]._value.string_val, strlen(deviceInfo.parameters[num_DeviceUD]._value.string_val));
+	strcat(session_name, " ");	
+	strcat(session_name, channel_entry->channelUserDesc);
+	gst_sdp_message_set_session_name(msg, session_name);
 
-/* connection:
- * c=<network type> <address type> <address>
- */
-gst_sdp_message_set_connection ()
+	/* connection:
+	 * c=<network type> <address type> <address>
+	 */
+	gst_sdp_message_set_connection (msg, network_type, address_type,  inet_ntoa(ip_addr) , address_ttl, 0);
 
-/* time : shall be set yo 0 0 in VIVOE to describe an unbound session
- *
- * t=<start time> <stop time>
- */
-gst_sdp_message_add_time(
+	
+	/* time : shall be set yo 0 0 in VIVOE to describe an unbound session
+	 *
+	 * t=<start time> <stop time>
+	 */
+	gst_sdp_message_add_time(msg, "0", "0", NULL);
 
 	/* media: 
 	 * m=<media> <port> <transport> <fmt list>
 	 */
-gst_sdp_media_new ()
-gst_sdp_media_set_port_info ()
-gst_sdp_media_set_proto ()
-gst_sdp_media_add_format ()
-gst_sdp_media_set_information ()
-gst_sdp_media_add_connection ()
+	GstSDPMedia *media;
+	gst_sdp_media_new (&media);
+	gst_sdp_media_set_media (media, media_type );
+	gst_sdp_media_set_port_info (media, DEFAULT_MULTICAST_PORT, 1 );
+	gst_sdp_media_set_proto ( media,transport_proto );
+	gst_sdp_media_add_format(media, g_strdup_printf ("%ld", data->rtp_datas->rtp_type));
+	/* convert rtp_type into string, max value is 107 so a 4 bytes string */
+	gchar *rtmpmap =  g_strdup_printf ("%ld %s/%d", data->rtp_datas->rtp_type,channel_entry->channelVideoFormat ,data->rtp_datas->clock_rate );
+	gst_sdp_media_add_attribute (media, "rtmpmap",rtmpmap );
+	gchar *fmtp =  g_strdup_printf ("sampling=%s; width=%ld; height=%ld; depth=%ld; colorimetry=%s; %s",
+										channel_entry->channelVideoSampling,
+										channel_entry->channelHorzRes,
+										channel_entry->channelVertRes, 
+										channel_entry->channelVideoBitDepth,
+										channel_entry->channelColorimetry,
+										interlace_mode_to_string (channel_entry->channelInterlaced)
+										);	
+	gst_sdp_media_add_attribute (media, "fmtp", fmtp);
+	gchar *framerate =  g_strdup_printf("%ld", channel_entry->channelFps);
+	gst_sdp_media_add_attribute (media, "framerate", framerate);
+	
 	/* Add the media to SDP message */
-	gst_sdp_message_add_media ()
-
-/* a=rtpmap:<payload type> <encoding name>/<clock rate>	 */
-
-#endif //if 0
+	gst_sdp_message_add_media (msg, media);
+	printf("%s\n", gst_sdp_message_as_text(msg));
 	 return TRUE;	
 }
-
-
