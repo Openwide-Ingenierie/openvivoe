@@ -55,10 +55,12 @@ static char* interlace_mode_to_string(int interlaced_mode){
  */
 static gboolean create_raw_media(struct channelTable_entry * channel_entry, GstSDPMedia *media)
 {
-	gchar *fmtp =  g_strdup_printf ("sampling=%s; width=%ld; height=%ld; depth=%ld; colorimetry=%s; %s",
+	stream_data *data = channel_entry->stream_datas;
+	gchar *fmtp =  g_strdup_printf ("%ld sampling=%s; width=%ld; height=%ld; depth=%ld; colorimetry=%s; %s",
+										data->rtp_datas->rtp_type,
 										channel_entry->channelVideoSampling,
-										channel_entry->channelHorzRes,
-										channel_entry->channelVertRes, 
+										channel_entry->channelVertRes,
+										channel_entry->channelHorzRes, 
 										channel_entry->channelVideoBitDepth,
 										channel_entry->channelColorimetry,
 										interlace_mode_to_string (channel_entry->channelInterlaced)
@@ -78,8 +80,9 @@ static gboolean create_raw_media(struct channelTable_entry * channel_entry, GstS
 static gboolean create_mpeg4_media(struct channelTable_entry * channel_entry, GstSDPMedia *media)
 {
 	stream_data *data = channel_entry->stream_datas;
-	gchar  		*fmtp =  g_strdup_printf( 	"profile-level-id=%s, config=%s", 
-											data->rtp_datas->profile_level_id, 
+	gchar  		*fmtp =  g_strdup_printf("%ld  profile-level-id=%s, config=%s",
+											data->rtp_datas->rtp_type,
+											data->rtp_datas->profile_level_id,
 											data->rtp_datas->config
 										);	
 	if( gst_sdp_media_add_attribute (media, "fmtp", fmtp)!= GST_SDP_OK ){
@@ -119,8 +122,6 @@ static gboolean create_fmtp_media(struct channelTable_entry * channel_entry, Gst
 	}
 	return TRUE;
 }
-
-
 
 /** 
  * \brief Create the SDP message corresponding to the stream
@@ -174,7 +175,7 @@ gboolean create_SDP(struct channelTable_entry * channel_entry ){
 									address_type, /* address type :IPV4 (always for VIVOE)*/
 									inet_ntoa(ip_addr) /* multicast IP*/
 								); 
-	
+
 	/* session name
 	* s=<session name>
 	*/
@@ -220,13 +221,11 @@ gboolean create_SDP(struct channelTable_entry * channel_entry ){
 
 	/* convert rtp_type into string, max value is 107 so a 4 bytes string */
 	gchar *rtmpmap =  g_strdup_printf ("%ld %s/%d", data->rtp_datas->rtp_type,channel_entry->channelVideoFormat ,data->rtp_datas->clock_rate );
-	if( gst_sdp_media_add_attribute (media, "rtmpmap",rtmpmap ) != GST_SDP_OK)
+	if( gst_sdp_media_add_attribute (media, "rtpmap",rtmpmap ) != GST_SDP_OK)
 		return error_function();
 
 	create_fmtp_media(channel_entry, media);
 
-
-//***/*//*/*/*/*/*/*/*/**/*/*/
 	/* Add framerate to media information */
 	gchar *framerate =  g_strdup_printf("%ld", channel_entry->channelFps);
 	if( gst_sdp_media_add_attribute (media, "framerate", framerate)!= GST_SDP_OK )	/* Add the media to SDP message */
