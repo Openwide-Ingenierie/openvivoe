@@ -79,11 +79,11 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
 	/*videoFormatInterlaced*/
 	if( gst_structure_has_field(source_str_caps, "interlace-mode")){
 		 gchar* interlaced_mode						= g_value_dup_string(gst_structure_get_value(source_str_caps, "interlace-mode"));
-		 if 	( !strcmp( (char*)interlaced_mode, "progressive")) 
+		 if 	( !strcmp( (char*)interlaced_mode, "progressive"))
 		 	video_info->videoFormatInterlaced 		= vivoe_progressive;
 		else if ( !strcmp( (char*)interlaced_mode, "interlaced"))
 			video_info->videoFormatInterlaced 		= vivoe_interlaced;
-	}else{
+		else
 			video_info->videoFormatInterlaced 		= vivoe_none;
 	}
 	/*videoFormatMaxHorzRes*/
@@ -222,7 +222,6 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 											data);
 			/* increase videoFormatNumber as we added an entry */
 			videoFormatNumber._value.int_val++;
-			
 			/* compute IP */			
 			*ip 			= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0],video_info->videoFormatIndex);
 			default_ip 		= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0], video_info->videoFormatIndex);
