@@ -125,13 +125,20 @@ static gboolean create_fmtp_media(struct channelTable_entry * channel_entry, Gst
 
 /** 
  * \brief Create the SDP message corresponding to the stream
- * \pramam strea_datas the stream_datas (pipeline, bus, bus_watch_id) associated to the video stream
+ * \pramam entry an entry to the correspondante channel 
  */
-gboolean create_SDP(struct channelTable_entry * channel_entry ){
+gboolean create_SDP(gpointer entry ){
 
 	GstSDPMessage 	*msg;
+	struct channelTable_entry * channel_entry = entry; 
 	stream_data 	*data = channel_entry->stream_datas;
 
+	/* check channel status, this is check as a stop condition
+	 * if the status in stop, we return false, which means that 
+	 * we will stop to call repeteadly create_SDP
+	 */
+	if( channel_entry->channelStatus == stop )
+		return FALSE;
 
 	/* create a new SDP message */
 	if (gst_sdp_message_new(&msg)){

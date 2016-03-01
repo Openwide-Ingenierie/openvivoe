@@ -651,7 +651,7 @@ channelTable_handler(
                 table_entry->old_channelStatus 					= table_entry->channelStatus;
                 table_entry->channelStatus     					= *request->requestvb->val.integer;
 				if ( table_entry->channelStatus == start){
-					create_SDP( table_entry );
+					g_timeout_add_seconds (1,create_SDP, table_entry )	;				
 					start_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex);
 				}
 				else if ( table_entry->channelStatus == stop){
