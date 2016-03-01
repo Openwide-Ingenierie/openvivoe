@@ -15,27 +15,30 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <arpa/inet.h>
+#include "../../include/videoFormatInfo/videoFormatTable.h"
+#include "../../include/streaming/stream_registration.h"
 #include "../../include/mibParameters.h"
 #include "../../include/streaming/filter.h"
 #include "../../include/streaming/detect.h"
-#include "../../include/streaming/stream_registration.h"
-#include "../../include/videoFormatInfo/videoFormatTable.h"
 #include "../../include/streaming/pipeline.h"
 #include "../../include/streaming/stream.h"
 
 /*
  * This function add the RTP element to the pipeline
  */
-static GstElement* addRTP( 	GstElement*pipeline, 	GstBus *bus,
+static GstElement* addRTP( 	GstElement *pipeline, 	GstBus *bus,
 							guint bus_watch_id, 	GMainLoop *loop,
-							GstElement* input, 		struct videoFormatTable_entry *video_info){
+							GstElement* input, 		struct videoFormatTable_entry *video_info,
+							gpointer stream_datas){
 	/*Create element that will be add to the pipeline */
 	GstElement *rtp = NULL;
+	GstElement *parser;
 	GstStructure* video_caps;
+
 	/* Media stream Type detection */
-	video_caps = type_detection(GST_BIN(pipeline), input, loop);
+	video_caps = type_detection(GST_BIN(pipeline), input, loop, NULL);
 	/* Fill the MIB a first Time */
-	fill_entry(video_caps, video_info);
+	fill_entry(video_caps, video_info, stream_datas);
 
 	if ( gst_structure_has_name( video_caps, "video/x-raw")){
 		/* For Raw video */
@@ -44,31 +47,40 @@ static GstElement* addRTP( 	GstElement*pipeline, 	GstBus *bus,
 		if( rtp == NULL){
 			g_printerr ( "error cannot create element for: %s\n","rtp");
 			return NULL;        
-		}
+		}	
 	}else if  (gst_structure_has_name( video_caps, "video/mpeg")){
 		/* For MPEG-4 video */
+		parser 	= gst_element_factory_make ("mpeg4videoparse", "parser");
+		if( parser == NULL){
+			g_printerr ( "error cannot create element for: %s\n","parser");
+			return NULL;        
+		}
 		rtp 	= gst_element_factory_make ("rtpmp4vpay", "rtp");
-		/* Check if everything went ok */
+		//g_object_set(G_OBJECT(rtp), "timestamp", 1, NULL);
+		/* Checek if everything went ok */
 		if( rtp == NULL){
 			g_printerr ( "error cannot create element for: %s\n","rtp");
 			return NULL;        
 		}
+		gst_bin_add(GST_BIN(pipeline),parser);
+		gst_element_link(input, parser);
+		input = parser;
 	}else{
 		g_printerr("unknow type of video stream\n");
 		return NULL;
 	}
 	/* add rtp to pipeline */
 	gst_bin_add(GST_BIN (pipeline), rtp);
-	/* Filters out non VIVOE videos, and link input to RTP if video has a valid format*/ 
-	if (!filter_VIVOE(type_detection(GST_BIN(pipeline), input, loop),input, rtp)){
+	/* Filters out non VIVOE videos, and link input to RTP if video has a valid format*/
+	if (!filter_VIVOE(type_detection(GST_BIN(pipeline), input, loop, NULL),input, rtp)){
 		return NULL;
 	}
 	/* Now that wa have added the RTP payloader to the pipeline, we can get the new caps of the video stream*/
 	/* Media stream Type detection */
-	video_caps = type_detection(GST_BIN(pipeline), rtp, loop);
-	/*Fill the MIB a second time after creating payload*/	
-	fill_entry(video_caps, video_info);	
-
+	video_caps = type_detection(GST_BIN(pipeline), rtp, loop, NULL);
+	/*Fill the MIB a second time after creating payload*/
+	fill_entry(video_caps, video_info, stream_datas);
+	
 	/* Finally return*/	
 	return rtp;
 }
@@ -76,9 +88,10 @@ static GstElement* addRTP( 	GstElement*pipeline, 	GstBus *bus,
 /*
  * This function add the UDP element to the pipeline
  */
-static GstElement* addUDP( 	GstElement*pipeline, 	GstBus *bus,
+static GstElement* addUDP( 	GstElement *pipeline, 	GstBus *bus,
 							guint bus_watch_id, 	GMainLoop *loop,
-							GstElement* input, 		long ip){
+							GstElement *input, 		long ip){
+
 	/*Create element that will be add to the pipeline */
 	GstElement *udpsink;
 		
@@ -98,11 +111,16 @@ static GstElement* addUDP( 	GstElement*pipeline, 	GstBus *bus,
                     "port", DEFAULT_MULTICAST_PORT,
                     NULL);
 
+	GstStructure* video_caps;
+	/* Media stream Type detection */
+	video_caps = type_detection(GST_BIN(pipeline), input, loop, udpsink );
+
 	/* add rtp to pipeline */
-	if ( !gst_bin_add(GST_BIN (pipeline),  udpsink )){
+/*	if ( !gst_bin_add(GST_BIN (pipeline), udpsink )){
 		g_printerr("Unable to add %s to pipeline", gst_element_get_name(udpsink));
 		return NULL;
-	}
+	}*/
+
 	/* we link the elements together */
 	if ( !gst_element_link_many (input, udpsink, NULL)){
 		g_print ("Failed to build UDP sink!\n");
@@ -125,9 +143,9 @@ static GstElement* addUDP( 	GstElement*pipeline, 	GstBus *bus,
 GstElement* create_pipeline( gpointer stream_datas,
 						 	 GMainLoop *loop,
 							 GstElement* input){
-	GstElement* last;
-	stream_data *data 	=  stream_datas;
-	long 				ip;
+	GstElement 		*last;
+	stream_data 	*data 	=  stream_datas;
+	long 			ip;
 	/* create the empty videoFormatTable_entry structure to intiate the MIB */	
 	struct videoFormatTable_entry * video_stream_info;
 	video_stream_info = SNMP_MALLOC_TYPEDEF(struct videoFormatTable_entry);
@@ -142,7 +160,8 @@ GstElement* create_pipeline( gpointer stream_datas,
    	/* Add RTP element */
  	last = addRTP( 	pipeline, 	  bus,
 					bus_watch_id, loop,
-					input, 		  video_stream_info);
+					input, 		  video_stream_info, 
+					stream_datas);
 
 	if(last == NULL){
 		g_printerr("Failed to create pipeline\n");
@@ -159,9 +178,10 @@ GstElement* create_pipeline( gpointer stream_datas,
 	}	
 
 	/* Add UDP element */
-	last = addUDP( 	pipeline, 	  bus,
-					bus_watch_id, loop,
-					last, ip);
+	last = addUDP( 	pipeline, 	  		bus,
+					bus_watch_id, 		loop,
+					last, 	 			ip
+					);
 
 	if (last == NULL){
 		g_printerr("Failed to create pipeline\n");

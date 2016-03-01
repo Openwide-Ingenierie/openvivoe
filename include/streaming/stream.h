@@ -11,16 +11,12 @@
  * \brief structure that register data relative to a stream
  */
 typedef struct{
-	GstElement 	*pipeline;
-	GstBus 		*bus;
-    guint 		bus_watch_id;
-	int 		videoFormatIndex; /* the index of the videoFormat added in the table*/
+	GstElement 		*pipeline;
+	GstBus 			*bus;
+    guint 			bus_watch_id;
+	rtp_data *rtp_datas;
+	int 			videoFormatIndex; /* the index of the videoFormat added in the table*/
 }stream_data;
-
-/**
- * \brief an array of stream, that contains all stream initiated, an not deleted yet
- */
-GHashTable* streams;
 
 int init_streaming (gpointer main_loop, gpointer stream_datas, char* format, int width, int height, char* encoding);
 int start_streaming (gpointer stream_datas );

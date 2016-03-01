@@ -435,11 +435,12 @@ gboolean filter_VIVOE(GstStructure* input_caps_str, GstElement* input, GstElemen
 	/* close configuration file */
 	close_configuration_file(gkf);
 	vivoe_filter = gst_caps_new_full (  raw_filter,
-		mpeg_filter, 
-		NULL);
+										mpeg_filter, 
+										NULL);
 	/* When building a new caps from a Structure, the structure is not copied, instead the caps own the structure 
 	 * it is not wan we want there, so we built a copy the structure before building the input_caps */ 
 	GstCaps *input_caps = gst_caps_new_full(gst_structure_copy(input_caps_str), NULL);
+
 	if(	gst_caps_can_intersect(input_caps, vivoe_filter)){
 		gst_element_link (input, output );
 		return TRUE;

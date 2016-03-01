@@ -23,9 +23,12 @@
 
 /* header file */
 #include "../include/deamon.h"
+#include "../include/mibParameters.h"
+#include "../include/channelControl/channelTable.h"
+#include "../include/videoFormatInfo/videoFormatTable.h"
+#include "../include/multicast.h"
+#include "../include/streaming/stream_registration.h"
 #include "../include/streaming/stream.h"
-
-#include "../include/streaming/sdp.h"
 /**
  * \brief the data needed to pass to functions used to exit the program nicely
  */
@@ -96,6 +99,7 @@ int main (int   argc,  char *argv[]){
 	if ( init_streaming(loop, &stream1, /*test*/ "raw", 1920, 1080,"I420" /*end test param*/)){
 		return 0;
 	}
+	printf("stream2\n");
 	/* prepare the stream - initialize all the data relevant to the stream into stream-data */
 	if ( init_streaming(loop, &stream2, /*test*/ "mp4", 1920, 1080,"I420" /*end test param*/)){
 		return  0;

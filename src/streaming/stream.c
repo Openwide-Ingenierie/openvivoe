@@ -143,7 +143,7 @@ static GstElement* source_creation(GstElement* pipeline, char* format, int width
 		g_printerr ("error cannot create element: %s\n", "videotestsrc" );
 		return NULL;        
 	}
-
+	g_object_set(source, "is-live", TRUE, NULL);
 	capsfilter = gst_element_factory_make ("capsfilter","capsfilter");
 	if(capsfilter == NULL){
 		g_printerr ( "error cannot create element: %s\n", "capsfilter" );
@@ -154,6 +154,7 @@ static GstElement* source_creation(GstElement* pipeline, char* format, int width
 													"format" 		, G_TYPE_STRING , encoding,
 													"width" 		, G_TYPE_INT 	, width,
 													"height" 		, G_TYPE_INT 	, height,
+													"interlace-mode", G_TYPE_STRING , "progressive",
 													NULL), 
 								NULL);
 	g_return_if_fail (gst_caps_is_fixed (caps));	
@@ -197,6 +198,14 @@ int init_streaming (gpointer main_loop, gpointer stream_datas /* real prototype 
     GstBus 		*bus;
     guint 		bus_watch_id;
 	GMainLoop 	*loop 				= main_loop;
+
+
+	/* Reference all data relevant to the stream */
+	stream_data *data 	= stream_datas;
+
+	/* allocate memory for the structure rtp_data of stream_data */
+	rtp_data 		rtp_datas;
+	data->rtp_datas = &rtp_datas;
 	
     /* Create the pipeline */
     pipeline  = gst_pipeline_new ("pipeline");
@@ -210,8 +219,6 @@ int init_streaming (gpointer main_loop, gpointer stream_datas /* real prototype 
     bus_watch_id = gst_bus_add_watch (bus, bus_call, loop);
     gst_object_unref (bus);
 
-	/* Reference all data relevant to the stream */
-	stream_data *data 	= stream_datas;
 	data->pipeline 		= pipeline;
 	data->bus 			= bus;
 	data->bus_watch_id 	= bus_watch_id;

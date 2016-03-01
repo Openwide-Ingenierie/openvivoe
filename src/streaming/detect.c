@@ -43,7 +43,8 @@ idle_exit_loop (gpointer data)
 static void cb_typefound ( 	GstElement  			*typefind,
 						    guint       			probability,
 							GstCaps    				*caps,
-					    	gpointer				data)
+					    	gpointer				data 
+							)
 {
 	data_type_detection *data_type 	= data;
 	GMainLoop *loop 				= data_type->loop;
@@ -64,6 +65,7 @@ static GstStructure* type_detection_with_sink( GstBin *pipeline, GstElement *inp
 		g_printerr ("Fail to detect Media Stream type\n");
 		return NULL;		
 	}
+	
 	/* Connect typefind element to handler */
 	g_signal_connect (typefind, "have-type", G_CALLBACK (cb_typefound), &data);
 	gst_bin_add_many (GST_BIN (pipeline), typefind, sink, NULL);

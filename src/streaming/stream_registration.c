@@ -46,7 +46,8 @@ static gboolean compare_entries(struct videoFormatTable_entry* origin, struct vi
  * each time we add a element to the Gstreamer pipeline. Therefor a videoFormatTable_entry should be passed in parameters.
  * This entry should be the same for a given stream, for each time we pass through this function. 
  */
-void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *video_info){
+void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *video_info, gpointer stream_datas){
+	stream_data *data 			= stream_datas;
 	/*videoFormatBase*/
 	if( gst_structure_has_field(source_str_caps, "encoding-name")){
 		video_info->videoFormatBase					= (char*) g_value_dup_string (gst_structure_get_value(source_str_caps, "encoding-name"));
@@ -99,6 +100,27 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
 		else
 			video_info->videoFormatMaxVertRes		= strtol ( (char* ) g_value_dup_string ( gst_structure_get_value(source_str_caps, "width")), NULL , 10 ); /* the string is converted into long int, basis 10 */
 	}
+	/*channelRTppt (saved in rtp_datas - payload type of the channel should be something like 96 or 127*/
+	if( gst_structure_has_field(source_str_caps, "payload")){
+		if (G_VALUE_HOLDS_INT(gst_structure_get_value(source_str_caps, "payload")))
+			data->rtp_datas->rtp_type 				= (long) g_value_get_int( gst_structure_get_value(source_str_caps, "payload"));
+	}
+	/* clock-rate */
+	if( gst_structure_has_field(source_str_caps, "clock-rate")){
+		if (G_VALUE_HOLDS_INT(gst_structure_get_value(source_str_caps, "clock-rate")))
+			data->rtp_datas->clock_rate				= g_value_get_int( gst_structure_get_value(source_str_caps, "clock-rate"));
+	}
+		
+	/* ONLY FOR MPEG-4 videos - relevant information to build SDP messages */
+	/* profile-level-id */
+	if( gst_structure_has_field(source_str_caps, "profile-level-id")){	
+			data->rtp_datas->profile_level_id		= (char*) g_value_dup_string (gst_structure_get_value(source_str_caps, "profile-level-id"));
+	}
+
+	/* config */
+	if( gst_structure_has_field(source_str_caps, "config")){	
+			data->rtp_datas->config 				= (char*) g_value_dup_string (gst_structure_get_value(source_str_caps, "config"));
+	}
 }
 
 /**
@@ -109,9 +131,9 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
  * \return EXIT_SUCCESS (0) or EXIT_FAILURE (1)
  */
 int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer stream_datas, long *ip){
-	long index 			= 1;
-	long default_ip;
-	stream_data *data 	= stream_datas;	
+	long 		index 			= 1;
+	long 		default_ip;
+	stream_data *data 			= stream_datas;	
 	/* Check if entry already exits;
 	 *  _ if yes, do not add a new entry, but set it status to enable if it is not already enable
 	 *  _ if no, increase viodeFormatNumber, and  add a new entry in the table
@@ -138,7 +160,7 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 											0, 																			0,		
 											0,																			0, 				
 											0, 																			0,
-											stream_datas);
+											data);
 			/* increase videoFormatNumber as we added an entry */
 			videoFormatNumber._value.int_val++;
 
@@ -160,10 +182,10 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 										video_info->videoFormatCompressionRate, 										video_info->videoFormatMaxHorzRes,			
 										video_info->videoFormatMaxVertRes, 												0,
 										0, 																				0,		
-										0,																				0, 				
+										0,																				data->rtp_datas->rtp_type, 				
 										*ip/*IP*/, 																		0 /* packet delay*/,
  										0, /*SAP interval*/ 															index, /*defaultVideoFormatIndex*/
-										default_ip/*default receive IP*/, 												stream_datas);
+										default_ip/*default receive IP*/, 												data);
 			/* increase channelNumber as we added an entry */			
 			channelNumber._value.int_val++;			
 		}
@@ -200,7 +222,7 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 											0, 																				0,				
 											0,																				0, 	
 											0, 																				0,
-											stream_datas);
+											data);
 			/* increase videoFormatNumber as we added an entry */
 			videoFormatNumber._value.int_val++;
 			/* update stream_datas by adding the videoFormatIndex that we just add into the videoFormatTable*/
@@ -220,10 +242,10 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 										video_info->videoFormatCompressionRate, 											video_info->videoFormatMaxHorzRes,			
 										video_info->videoFormatMaxVertRes, 													0,
 										0, 																					0,		 				
-										0, 																					0,
+										0,																					data->rtp_datas->rtp_type, 				
 										*ip,/*receive Address*/ 															0 /* packet delay*/,
  										0, /*SAP interval*/ 																index, /*defaultVideoFormatIndex - 0 is taken by default*/
-										default_ip/*default receive IP*/, 													stream_datas);
+										default_ip/*default receive IP*/, 													data);
 			/* increase channelNumber as we added an entry */			
 			channelNumber._value.int_val++;
 		}
