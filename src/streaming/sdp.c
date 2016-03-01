@@ -159,7 +159,7 @@ gboolean create_SDP(gpointer entry ){
 	/* build session id and session version using random numbers*/
 	srand(time(NULL));
 	int session_id 			= rand();
-	int session_version 	= rand();
+	int session_version 	= session_id;
 
 	char session_id_str[32];
 	sprintf(session_id_str, "%d", session_id);
