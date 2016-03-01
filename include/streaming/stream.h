@@ -14,13 +14,12 @@ typedef struct{
 	GstElement 		*pipeline;
 	GstBus 			*bus;
     guint 			bus_watch_id;
-	rtp_data *rtp_datas;
-	int 			videoFormatIndex; /* the index of the videoFormat added in the table*/
+	rtp_data 		*rtp_datas;
 }stream_data;
 
 int init_streaming (gpointer main_loop, gpointer stream_datas, char* format, int width, int height, char* encoding);
-int start_streaming (gpointer stream_datas );
-int stop_streaming( gpointer stream_datas );
+int start_streaming (gpointer stream_datas, long channelVideoFormatIndex );
+int stop_streaming( gpointer stream_datas, long channelVideoFormatIndex  );
 int delete_steaming_data(gpointer stream_datas );
 
 

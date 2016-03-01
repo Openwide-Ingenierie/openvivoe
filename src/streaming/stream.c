@@ -204,8 +204,8 @@ int init_streaming (gpointer main_loop, gpointer stream_datas /* real prototype 
 	stream_data *data 	= stream_datas;
 
 	/* allocate memory for the structure rtp_data of stream_data */
-	rtp_data 		rtp_datas;
-	data->rtp_datas = &rtp_datas;
+	rtp_data 			rtp_datas;
+	data->rtp_datas = 	&rtp_datas;
 	
     /* Create the pipeline */
     pipeline  = gst_pipeline_new ("pipeline");
@@ -244,9 +244,9 @@ int init_streaming (gpointer main_loop, gpointer stream_datas /* real prototype 
  * \param data of the stream (pipeline, bus and bust_watch_id) - see stream_data structure
  * \return 0 
  */
-int start_streaming (gpointer stream_datas ){
+int start_streaming (gpointer stream_datas, long channelVideoFormatIndex  ){
 	stream_data *data 	=  stream_datas;
-	struct videoFormatTable_entry * stream_entry = videoFormatTable_getEntry(data->videoFormatIndex);
+	struct videoFormatTable_entry * stream_entry = videoFormatTable_getEntry(channelVideoFormatIndex);
   	/* Set the pipeline to "playing" state*/	
     g_print ("Now playing\n");
     gst_element_set_state (data->pipeline, GST_STATE_PLAYING);
@@ -259,9 +259,9 @@ int start_streaming (gpointer stream_datas ){
  * \param data of the stream (pipeline, bus and bust_watch_id) - see stream_data structure
  * \return 0 
  */
-int stop_streaming( gpointer stream_datas ){
+int stop_streaming( gpointer stream_datas, long channelVideoFormatIndex ){
 	stream_data *data 	=  stream_datas;
-	struct videoFormatTable_entry * stream_entry = videoFormatTable_getEntry(data->videoFormatIndex);
+	struct videoFormatTable_entry * stream_entry = videoFormatTable_getEntry(channelVideoFormatIndex);
 	/* Out of the main loop, clean up nicely */	
 	g_print ("Returned, stopping playback\n");
 	gst_element_set_state (data->pipeline, GST_STATE_NULL);
@@ -274,15 +274,11 @@ int stop_streaming( gpointer stream_datas ){
  * \param data of the stream (pipeline, bus and bust_watch_id) - see stream_data structure
  * \return 0 
  */
-int delete_steaming_data(gpointer stream_datas ){
+int delete_steaming_data(gpointer stream_datas){
 	stream_data *data 	=  stream_datas;	
-	struct videoFormatTable_entry * stream_entry = videoFormatTable_getEntry(data->videoFormatIndex);
 	/* delete pipeline */	
 	g_print ("Deleting pipeline\n");
-	stream_entry->videoFormatStatus = disable;		
 	gst_object_unref (GST_OBJECT (data->pipeline));
 	g_source_remove (data->bus_watch_id);
 	return 0;
 }
-
-

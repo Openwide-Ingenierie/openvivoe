@@ -51,7 +51,6 @@ static gboolean stop_program ( gpointer data ){
 	/* Stop net snmp subAgetnt deamon */
 	snmp_shutdown(stop_data->deamon_name);
 	for (int i = 0; i<stop_data->num_streams; i++){
-		stop_streaming(stop_data->stream_datas[i]);
 		delete_steaming_data(stop_data->stream_datas[i]);
 	}
 	g_main_loop_quit (loop);
@@ -86,7 +85,7 @@ int main (int   argc,  char *argv[]){
 	stop_program_data 		stop_data;
 	stop_data.loop 			= loop;
 	stop_data.deamon_name 	= argv[0];
-	stop_data.num_streams  	= 1;
+	stop_data.num_streams  	= 2;
 	stop_data.stream_datas 	= streams;
 
 	/* Exit the program nicely when kill signals are received */
@@ -99,7 +98,6 @@ int main (int   argc,  char *argv[]){
 	if ( init_streaming(loop, &stream1, /*test*/ "raw", 1920, 1080,"I420" /*end test param*/)){
 		return 0;
 	}
-	printf("stream2\n");
 	/* prepare the stream - initialize all the data relevant to the stream into stream-data */
 	if ( init_streaming(loop, &stream2, /*test*/ "mp4", 1920, 1080,"I420" /*end test param*/)){
 		return  0;

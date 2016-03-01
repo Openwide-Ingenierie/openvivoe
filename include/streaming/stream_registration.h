@@ -13,7 +13,6 @@ typedef struct{
 	int 	clock_rate; /* for all video Formats */
 	char 	*profile_level_id; /* Only for MPEG-4 */
 	char 	*config; /* Only for MPEG-4 */
-	GstCaps *video_caps;
 }rtp_data ;
 
 void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *video_info,gpointer stream_datas);

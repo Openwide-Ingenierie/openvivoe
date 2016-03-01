@@ -110,8 +110,9 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
 		if (G_VALUE_HOLDS_INT(gst_structure_get_value(source_str_caps, "clock-rate")))
 			data->rtp_datas->clock_rate				= g_value_get_int( gst_structure_get_value(source_str_caps, "clock-rate"));
 	}
-		
+	/* ------------------------------------------------------------------- */
 	/* ONLY FOR MPEG-4 videos - relevant information to build SDP messages */
+
 	/* profile-level-id */
 	if( gst_structure_has_field(source_str_caps, "profile-level-id")){	
 			data->rtp_datas->profile_level_id		= (char*) g_value_dup_string (gst_structure_get_value(source_str_caps, "profile-level-id"));
@@ -164,10 +165,6 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 			/* increase videoFormatNumber as we added an entry */
 			videoFormatNumber._value.int_val++;
 
-			/* update stream_datas by adding the videoFormatIndex that we just add into the videoFormatTable*/
-			data->videoFormatIndex = index;	
-
-			/* compute IP */
 			/* compute IP */			
 			*ip 			= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0], index);
 			default_ip 		= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0], index);
@@ -225,14 +222,12 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 											data);
 			/* increase videoFormatNumber as we added an entry */
 			videoFormatNumber._value.int_val++;
-			/* update stream_datas by adding the videoFormatIndex that we just add into the videoFormatTable*/
-			data->videoFormatIndex = video_info->videoFormatIndex;
 			
 			/* compute IP */			
 			*ip 			= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0],video_info->videoFormatIndex);
 			default_ip 		= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0], video_info->videoFormatIndex);
 
-					/* At the  same time we copy all of those parameters into video channel */
+			/* At the  same time we copy all of those parameters into video channel */
 			channelTable_createEntry( 	video_info->videoFormatIndex, 														videoChannel,
 										"channelUserDesc", 																	stop,
 										video_info->videoFormatIndex, 														video_info->videoFormatBase,
