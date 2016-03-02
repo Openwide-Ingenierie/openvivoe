@@ -7,7 +7,7 @@
 #ifndef SDP_H
 #define SDP_H
 
-gboolean create_SDP(gpointer entry );
+gboolean create_SDP(GstSDPMessage 	*msg, struct channelTable_entry * channel_entry);
 
 #endif /* SDP_H */
 

@@ -29,6 +29,11 @@
 #include "../include/multicast.h"
 #include "../include/streaming/stream_registration.h"
 #include "../include/streaming/stream.h"
+
+
+
+#include "../include/announcement/sap.h"
+
 /**
  * \brief the data needed to pass to functions used to exit the program nicely
  */
@@ -64,7 +69,6 @@ static gboolean stop_program ( gpointer data ){
  * \return 0 as it's our main function
  */
 int main (int   argc,  char *argv[]){
-
 	/* create the GMainLoop*/
 	GMainLoop 	*loop = g_main_loop_new (NULL, FALSE);
 
@@ -94,6 +98,7 @@ int main (int   argc,  char *argv[]){
 
 	/* init SubAgent Deamon */
 	deamon(argv[0]);
+
 	/* prepare the stream - initialize all the data relevant to the stream into stream-data */
 	if ( init_streaming(loop, stream1, /*test*/ "raw", 1920, 1080,"I420" /*end test param*/)){
 		return 0;

@@ -9,6 +9,7 @@
 #include <string.h>
 #include <glib-2.0/glib.h>
 #include <glib-unix.h>
+#include <gstreamer-1.0/gst/sdp/gstsdpmessage.h>
 #include <gstreamer-1.0/gst/gst.h>
 #include "../../include/videoFormatInfo/videoFormatTable.h"
 #include "../../include/channelControl/channelTable.h"
@@ -27,7 +28,10 @@ init_channelTable(void)
 }
 
 
-/** Initialize the channelTable table by defining its contents and how it's structured */
+/** 
+ * \brief Initialize the channelTable table by defining its contents and how it's structured 
+ */
+
 void
 initialize_table_channelTable(void)
 {
@@ -651,7 +655,8 @@ channelTable_handler(
                 table_entry->old_channelStatus 					= table_entry->channelStatus;
                 table_entry->channelStatus     					= *request->requestvb->val.integer;
 				if ( table_entry->channelStatus == start){
-					g_timeout_add_seconds (1,create_SDP, table_entry )	;				
+			//		g_timeout_add_seconds (1,create_SDP, table_entry )	;
+					build_SAP_msg(table_entry);
 					start_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex);
 				}
 				else if ( table_entry->channelStatus == stop){

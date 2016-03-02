@@ -120,10 +120,8 @@ static gboolean create_fmtp_media(struct channelTable_entry * channel_entry, Gst
  * \brief Create the SDP message corresponding to the stream
  * \pramam entry an entry to the correspondante channel 
  */
-gboolean create_SDP(gpointer entry ){
+gboolean create_SDP(GstSDPMessage 	*msg, struct channelTable_entry * channel_entry){
 
-	GstSDPMessage 	*msg;
-	struct channelTable_entry * channel_entry = entry; 
 	stream_data 	*data = channel_entry->stream_datas;
 
 	/* check channel status, this is check as a stop condition
@@ -132,12 +130,6 @@ gboolean create_SDP(gpointer entry ){
 	 */
 	if( channel_entry->channelStatus == stop )
 		return FALSE;
-
-	/* create a new SDP message */
-	if (gst_sdp_message_new(&msg)){
-		g_printerr("Failed to create SDP message\n");
-		return FALSE;
-	}
 
 	/* version : shall be set to 0 for VIVOE 
 	 * v=0
@@ -231,8 +223,6 @@ gboolean create_SDP(gpointer entry ){
 	if( gst_sdp_media_add_attribute (media, "framerate", framerate)!= GST_SDP_OK )	/* Add the media to SDP message */
 		return error_function();		
 	if ( gst_sdp_message_add_media (msg, media))
-		return error_function();		
-
-	printf("%s\n", gst_sdp_message_as_text(msg));
+		return error_function();
 	 return TRUE;	
 }

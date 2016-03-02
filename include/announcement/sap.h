@@ -7,7 +7,7 @@
 #ifndef SAP_H
 # define SAP_H
 
-
+char* build_SAP_msg(gpointer entry);
 
 #endif /* SAP_H */
 
