@@ -13,30 +13,6 @@
 #include "../../include/mibParameters.h"
 #include "../../include/deviceInfo/ethernetIfTable.h"
 
-
-/* Typical data structure for a row entry */
-struct ethernetIfTableEntry {
-    /* Index values */
-    long ethernetIfIndex;
-
-    /* Column values */
-    long ethernetIfSpeed;
-    char ethernetIfMacAddress[6];
-    size_t ethernetIfMacAddress_len;
-    in_addr_t ethernetIfIpAddress;
-    in_addr_t old_ethernetIfIpAddress;
-    in_addr_t ethernetIfSubnetMask;
-    in_addr_t old_ethernetIfSubnetMask;
-    in_addr_t ethernetIfIpAddressConflict;
-    in_addr_t old_ethernetIfIpAddressConflict;
-
-    /* Illustrate using a simple linked list */
-    int   valid;
-    struct ethernetIfTableEntry *next;
-};
-
-struct ethernetIfTableEntry  *ethernetIfTable_head;
-
 /** 
  * \brief get the last element of the Table
  * \return ethernetIfTableEntry*  a pointer the last entry in the table
@@ -48,8 +24,9 @@ static struct ethernetIfTableEntry * ethernetIfTable_getLast(){
 	return iterator;
 }
 
-
-/* create a new row in the (unsorted) table */
+/**
+ *  \brief create a new row in the (unsorted) table
+ */
 struct ethernetIfTableEntry * ethernetIfTableEntry_create(  long  ethernetIfIndex,
                                                             long ethernetIfSpeed,
                                                             u_char ethernetIfMacAddress[6],
@@ -84,7 +61,7 @@ struct ethernetIfTableEntry * ethernetIfTableEntry_create(  long  ethernetIfInde
 		struct ethernetIfTableEntry *last = ethernetIfTable_getLast();
    // ethernetIfTable_head = entry;
 		last->next = entry;
-		entry->next = NULL;ethernetIfSpeed;
+		entry->next = NULL;
 	}
     return entry;
 }
