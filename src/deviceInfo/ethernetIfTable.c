@@ -37,6 +37,18 @@ struct ethernetIfTableEntry {
 
 struct ethernetIfTableEntry  *ethernetIfTable_head;
 
+/** 
+ * \brief get the last element of the Table
+ * \return ethernetIfTableEntry*  a pointer the last entry in the table
+ */
+static struct ethernetIfTableEntry * ethernetIfTable_getLast(){
+	struct ethernetIfTableEntry *iterator = ethernetIfTable_head;
+	while(iterator->next != NULL)
+			iterator = iterator->next;
+	return iterator;
+}
+
+
 /* create a new row in the (unsorted) table */
 struct ethernetIfTableEntry * ethernetIfTableEntry_create(  long  ethernetIfIndex,
                                                             long ethernetIfSpeed,
@@ -53,7 +65,7 @@ struct ethernetIfTableEntry * ethernetIfTableEntry_create(  long  ethernetIfInde
         return NULL;
 
     entry->ethernetIfIndex = ethernetIfIndex;
-    entry->next = ethernetIfTable_head;
+  //  entry->next = ethernetIfTable_head;
     entry->ethernetIfSpeed = ethernetIfSpeed;
 
     memcpy(entry->ethernetIfMacAddress, ethernetIfMacAddress,ethernetIfMacAddress_len );
@@ -66,9 +78,14 @@ struct ethernetIfTableEntry * ethernetIfTableEntry_create(  long  ethernetIfInde
     entry->ethernetIfIpAddressConflict = ethernetIfIpAddressConflict;
 
     entry->valid = 1;
-
-    ethernetIfTable_head = entry;
-
+	if( ethernetIfTable_head == NULL )
+		ethernetIfTable_head = entry;
+	else{
+		struct ethernetIfTableEntry *last = ethernetIfTable_getLast();
+   // ethernetIfTable_head = entry;
+		last->next = entry;
+		entry->next = NULL;ethernetIfSpeed;
+	}
     return entry;
 }
 
@@ -185,15 +202,15 @@ ethernetIfTable_get_first_data_point(void **my_loop_context,
 /** handles requests for the ethernetIfTable table */
 int
 ethernetIfTable_handler(
-    netsnmp_mib_handler               *handler,
-    netsnmp_handler_registration      *reginfo,
-    netsnmp_agent_request_info        *reqinfo,
-    netsnmp_request_info              *requests) {
+    netsnmp_mib_handler 			*handler,
+    netsnmp_handler_registration 	*reginfo,
+    netsnmp_agent_request_info 		*reqinfo,
+    netsnmp_request_info 			*requests) {
 
-    netsnmp_request_info       *request;
-    netsnmp_table_request_info *table_info;
-    struct ethernetIfTableEntry          *table_entry;
-    int ret;
+    netsnmp_request_info 			*request;
+    netsnmp_table_request_info 		*table_info;
+    struct ethernetIfTableEntry 	*table_entry;
+    int 							ret;
     DEBUGMSGTL(("ethernetIfTable:handler", "Processing request (%d)\n", reqinfo->mode));
 
     switch (reqinfo->mode) {
