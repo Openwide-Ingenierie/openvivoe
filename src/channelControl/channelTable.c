@@ -16,7 +16,7 @@
 #include "../../include/mibParameters.h"
 #include "../../include/streaming/stream_registration.h"
 #include "../../include/streaming/stream.h"
-#include "../../include/streaming/sdp.h"
+#include "../../include/announcement/sdp.h"
 
 /** Initializes the channelTable module */
 void

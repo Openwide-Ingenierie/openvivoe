@@ -19,7 +19,7 @@
 /* Header file */
 #include "../../include/mibParameters.h"
 #include "../../include/channelControl/channelTable.h"
-#include "../../include/streaming/sdp.h"
+#include "../../include/announcement/sdp.h"
 #include "../../include/streaming/stream_registration.h"
 #include "../../include/streaming/stream.h"
 
