@@ -35,4 +35,28 @@ Netsnmp_Next_Data_Point 	ethernetIfTable_get_next_data_point;
 
 /* define the size in bytes, that should be a MAC address */
 		#define MAC_ADDRESS_SIZE						6
+
+/* Typical data structure for a row entry */
+struct ethernetIfTableEntry {
+    /* Index values */
+    long ethernetIfIndex;
+
+    /* Column values */
+    long ethernetIfSpeed;
+    char ethernetIfMacAddress[6];
+    size_t ethernetIfMacAddress_len;
+    in_addr_t ethernetIfIpAddress;
+    in_addr_t old_ethernetIfIpAddress;
+    in_addr_t ethernetIfSubnetMask;
+    in_addr_t old_ethernetIfSubnetMask;
+    in_addr_t ethernetIfIpAddressConflict;
+    in_addr_t old_ethernetIfIpAddressConflict;
+
+    /* Illustrate using a simple linked list */
+    int   valid;
+    struct ethernetIfTableEntry *next;
+};
+
+struct ethernetIfTableEntry  *ethernetIfTable_head;
+
 #endif /* ETHERNETIFTABLE_H */
