@@ -23,13 +23,6 @@
 #include "../../include/streaming/stream_registration.h"
 #include "../../include/streaming/stream.h"
 
-/* define constant value for the VIVOE norm */
-#define network_type 		"IN"
-#define address_type 		"IPV4"
-#define address_ttl 		15
-#define media_type 			"video"
-#define transport_proto 	"RTP/AVP"
-
 /**
  * \brief 	provides a mapping between the int representation of the interlaced-mode of a stream 
  * 			according to the MIB: (1) interlaced, (2) progressive, (3) none

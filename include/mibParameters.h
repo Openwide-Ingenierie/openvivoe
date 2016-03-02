@@ -44,6 +44,14 @@
 #define stop 						2
 #define singleFrame 				3
 
+
+/* value for the SAP/SDP Announcement */
+#define network_type 			"IN"
+#define address_type 			"IPV4"
+#define address_ttl 			15
+#define media_type 				"video"
+#define transport_proto 		"RTP/AVP"
+
 /* removing row from table in this MIB */
 #define ALLOW_REMOVING_ROW 			0
 /*
