@@ -134,12 +134,9 @@ struct channelTable_entry *
 	entry->channelDefaultReceiveIpAddress 	= channelDefaultReceiveIpAddress;
 
 	entry->stream_datas 					= stream_datas;
-
-	prepare_socket(entry); //save the SAP datas
-
-    entry->next 						= channelTable_head;
-	entry->valid 						= 1;
-    channelTable_head 					= entry;
+    entry->next 							= channelTable_head;
+	entry->valid 							= 1;
+    channelTable_head 						= entry;
     return entry;
 }
 /**
@@ -660,7 +657,8 @@ channelTable_handler(
                 table_entry->old_channelStatus 					= table_entry->channelStatus;
                 table_entry->channelStatus     					= *request->requestvb->val.integer;
 				if ( table_entry->channelStatus == start){
-					g_timeout_add_seconds (1,send_announcement, table_entry )	;
+					prepare_socket(table_entry); //save the SAP datas					
+					g_timeout_add_seconds (1,send_announcement, table_entry );
 					start_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex);
 				}
 				else if ( table_entry->channelStatus == stop){
