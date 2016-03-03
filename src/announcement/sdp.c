@@ -124,13 +124,6 @@ gboolean create_SDP(GstSDPMessage 	*msg, struct channelTable_entry * channel_ent
 
 	stream_data 	*data = channel_entry->stream_datas;
 
-	/* check channel status, this is check as a stop condition
-	 * if the status in stop, we return false, which means that 
-	 * we will stop to call repeteadly create_SDP
-	 */
-	if( channel_entry->channelStatus == stop )
-		return FALSE;
-
 	/* version : shall be set to 0 for VIVOE 
 	 * v=0
 	 */

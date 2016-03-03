@@ -20,6 +20,7 @@
 #include "../../include/multicast.h"
 #include "../../include/streaming/stream_registration.h"
 #include "../../include/streaming/stream.h"
+#include "../../include/announcement/sap.h"
 
 /* 
  * This function compares two entries in the videoFormatTable
@@ -170,21 +171,22 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 			default_ip 		= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0], index);
 			
 			/* At the  same time we copy all of those parameters into video channel */
-			channelTable_createEntry( 	index, 																			videoChannel,
-										"channelUserDesc", 																stop,
-										index, 																			video_info->videoFormatBase,
-										video_info->videoFormatSampling, 												video_info->videoFormatBitDepth,
-										video_info->videoFormatFps,				 										video_info->videoFormatColorimetry,
-										video_info->videoFormatInterlaced, 												video_info->videoFormatCompressionFactor, 
-										video_info->videoFormatCompressionRate, 										video_info->videoFormatMaxHorzRes,			
-										video_info->videoFormatMaxVertRes, 												0,
-										0, 																				0,		
-										0,																				data->rtp_datas->rtp_type, 				
-										*ip/*IP*/, 																		0 /* packet delay*/,
- 										0, /*SAP interval*/ 															index, /*defaultVideoFormatIndex*/
-										default_ip/*default receive IP*/, 												data);
+			struct channelTable_entry * entry = channelTable_createEntry( 	index, 																			videoChannel,
+																			"channelUserDesc", 																stop,
+																			index, 																			video_info->videoFormatBase,
+																			video_info->videoFormatSampling, 												video_info->videoFormatBitDepth,
+																			video_info->videoFormatFps,				 										video_info->videoFormatColorimetry,
+																			video_info->videoFormatInterlaced, 												video_info->videoFormatCompressionFactor,
+																			video_info->videoFormatCompressionRate, 										video_info->videoFormatMaxHorzRes,		
+																			video_info->videoFormatMaxVertRes, 												0,
+																			0, 																				0,		
+																			0,																				data->rtp_datas->rtp_type, 				
+																			*ip/*IP*/, 																		0 /* packet delay*/,
+ 																			0, /*SAP interval*/ 															index, /*defaultVideoFormatIndex*/
+																			default_ip/*default receive IP*/, 												data);
 			/* increase channelNumber as we added an entry */			
-			channelNumber._value.int_val++;			
+			channelNumber._value.int_val++;
+			prepare_socket(entry);
 		}
 	}else{
 		/* if the table of video format is not empty for this device, check if this format is already in the table
@@ -225,23 +227,23 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 			/* compute IP */			
 			*ip 			= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0],video_info->videoFormatIndex);
 			default_ip 		= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0], video_info->videoFormatIndex);
-
 			/* At the  same time we copy all of those parameters into video channel */
-			channelTable_createEntry( 	video_info->videoFormatIndex, 														videoChannel,
-										"channelUserDesc", 																	stop,
-										video_info->videoFormatIndex, 														video_info->videoFormatBase,
-										video_info->videoFormatSampling, 													video_info->videoFormatBitDepth,
-										video_info->videoFormatFps,				 											video_info->videoFormatColorimetry,
-										video_info->videoFormatInterlaced, 													video_info->videoFormatCompressionFactor, 
-										video_info->videoFormatCompressionRate, 											video_info->videoFormatMaxHorzRes,			
-										video_info->videoFormatMaxVertRes, 													0,
-										0, 																					0,		 				
-										0,																					data->rtp_datas->rtp_type, 				
-										*ip,/*receive Address*/ 															0 /* packet delay*/,
- 										0, /*SAP interval*/ 																index, /*defaultVideoFormatIndex - 0 is taken by default*/
-										default_ip/*default receive IP*/, 													data);
+			struct channelTable_entry * entry = channelTable_createEntry( 	video_info->videoFormatIndex, 														videoChannel,
+																			"channelUserDesc", 																	stop,
+																			video_info->videoFormatIndex, 														video_info->videoFormatBase,
+																			video_info->videoFormatSampling, 													video_info->videoFormatBitDepth,
+																			video_info->videoFormatFps,				 											video_info->videoFormatColorimetry,
+																			video_info->videoFormatInterlaced, 													video_info->videoFormatCompressionFactor, 
+																			video_info->videoFormatCompressionRate, 											video_info->videoFormatMaxHorzRes,			
+																			video_info->videoFormatMaxVertRes, 													0,
+																			0, 																					0,		 				
+																			0,																					data->rtp_datas->rtp_type, 			
+																			*ip,/*receive Address*/ 															0 /* packet delay*/,
+ 																			0, /*SAP interval*/ 																index, /*defaultVideoFormatIndex - 0 is taken by default*/
+																			default_ip/*default receive IP*/, 													data);
 			/* increase channelNumber as we added an entry */			
 			channelNumber._value.int_val++;
+			prepare_socket(entry);	
 		}
 	/* !!! IMPORTANT !!!
 	 * Do not free iterator, it was positioning on HEAD */
