@@ -26,8 +26,8 @@
 #include "../../include/mibParameters.h"
 #include "../../include/deviceInfo/ethernetIfTable.h"
 #include "../../include/channelControl/channelTable.h"
-#include "../../include/announcement/sdp.h"
 #include "../../include/announcement/sap.h"
+#include "../../include/announcement/sdp.h"
 #include "../../include/streaming/stream_registration.h"
 #include "../../include/streaming/stream.h"
 
@@ -133,7 +133,7 @@ static gboolean build_SAP_header(char *header, int session_version){
 	return TRUE;	
 }
 
-static char*  build_SAP_msg(gpointer entry, int *sap_msg_length){
+static char*  build_SAP_msg(struct channelTable_entry * entry, int *sap_msg_length){
 
 	GstSDPMessage *msg;
 	/* create a new SDP message */
@@ -163,29 +163,16 @@ static char*  build_SAP_msg(gpointer entry, int *sap_msg_length){
 	return sap_msg;
 }
 
-
-/**
- * \biref a structure to registeer the information to send the UDP datagram
- */
-typedef struct {
-	struct 	addrinfo 	*sap_multicast_addr; 
-	int 				udp_socket_fd;
-	char 				*udp_payload;
-	int 				udp_payload_length;
-}udp_data;
-
-udp_data udp_datas;
-
 /**
  * \brief This function will send the SAP message, encapsulate into the payload of an UDP datagram, on the UDP socket with IP: 224.2.127.254 port 9875.
  * \gpointer data, the data to pass to the function (an entry in the channelTable)
  * \gboolean TRUE on succed, FALSE on failure, failure happened if the channel is in stop mode 
  */
-gboolean prepare_socket(gpointer entry){
+gboolean prepare_socket(struct channelTable_entry * entry ){
 	/* define multicast and port number for SAP */
-	const char* hostname="224.2.127.254";
-	const char* portname="9875";
-
+	const char 	*hostname = "224.2.127.254";
+	const char 	*portname = "9875";
+	sap_data 	*sap_datas = malloc(sizeof(sap_data));
 	/* define parameter for the address to use in a variable named sap_addr_info */
 	struct 	addrinfo sap_addr_info; 	
 	memset(&sap_addr_info,0,sizeof(sap_addr_info));
@@ -194,31 +181,28 @@ gboolean prepare_socket(gpointer entry){
 	sap_addr_info.ai_protocol=0;
 	sap_addr_info.ai_flags=AI_ADDRCONFIG;
 	
-	/* initialize sap_multicast_addr member of udp_datas structure */
-   //	udp_datas->sap_multicast_addr;
-	int err=getaddrinfo(hostname,portname,&sap_addr_info,&(udp_datas.sap_multicast_addr));
+	/* initialize sap_multicast_addr member of sap_datas structure */
+	int err=getaddrinfo(hostname,portname,&sap_addr_info,&(sap_datas->sap_multicast_addr));
 	if (err!=0) {
 		g_printerr("failed to open remote socket (err=%d)\n",err);
 		return FALSE;		
 	}
 	
-//	printf("%d\n",((struct sockaddr_in*) sap_multicast_addr->ai_addr)->sin_port);
-	
 	/* open UDP socket */
 	int udp_socket_fd = socket(AF_INET, SOCK_DGRAM, 0);	
 	if (udp_socket_fd==-1) {
 		g_printerr(" Failed to create UDP socket to send SAP/SDP announcement: %s\n",strerror(errno));
-		return FALSE;		
+		return FALSE;
 	}
 	/* save value of socket into global structure */	
-	udp_datas.udp_socket_fd = udp_socket_fd;
+	sap_datas->udp_socket_fd = udp_socket_fd;
 
-	/* create UDP payload and save the payload into udp_datas structure */
-	udp_datas.udp_payload_length = 0;
-	udp_datas.udp_payload =  build_SAP_msg(entry, &(udp_datas.udp_payload_length));	
-
-/*	for(int i = 0; i< sizeof(udp_datas.udp_payload); i++)
-		printf("%02X\t%d\n", udp_datas.udp_payload[i], i);*/
+	/* create UDP payload and save the payload into sap_datas structure */
+	sap_datas->udp_payload_length = 0;
+	sap_datas->udp_payload =  build_SAP_msg(entry, &(sap_datas->udp_payload_length));	
+	entry->sap_datas = sap_datas;
+/*	for(int i = 0; i< sizeof(sap_datas.udp_payload); i++)
+		printf("%02X\t%d\n", sap_datas.udp_payload[i], i);*/
 
 	return TRUE;
 }
@@ -230,8 +214,8 @@ gboolean send_announcement(gpointer entry){
 	 * we will stop to call repeteadly create_SDP
 	 */
 
-/*	for(int i = 0; i<udp_datas.udp_payload_length ; i++)
-		printf("%02X\t%d\n", udp_datas.udp_payload[i], i);*/
+/*	for(int i = 0; i<sap_datas.udp_payload_length ; i++)
+		printf("%02X\t%d\n", sap_datas.udp_payload[i], i);*/
 
 
 	struct channelTable_entry * channel_entry = entry;
@@ -240,12 +224,12 @@ gboolean send_announcement(gpointer entry){
 		return FALSE;
 	}
 	/* Build the UDP payload */
-	int n_bytes = sendto( 	udp_datas.udp_socket_fd,
-							udp_datas.udp_payload,
-							udp_datas.udp_payload_length,
+	int n_bytes = sendto( 	channel_entry->sap_datas->udp_socket_fd,
+							channel_entry->sap_datas->udp_payload,
+							channel_entry->sap_datas->udp_payload_length,
 							0,
-							udp_datas.sap_multicast_addr->ai_addr,
-							udp_datas.sap_multicast_addr->ai_addrlen);
+							channel_entry->sap_datas->sap_multicast_addr->ai_addr,
+							channel_entry->sap_datas->sap_multicast_addr->ai_addrlen);
 	/* check if the number of bytes send is -1, if so an error as occured */
 	if ( n_bytes	== -1 )
 	{

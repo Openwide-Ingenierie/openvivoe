@@ -93,8 +93,10 @@ struct channelTable_entry {
     in_addr_t channelDefaultReceiveIpAddress;
     in_addr_t old_channelDefaultReceiveIpAddress;
 
-	/* a stream assoicated to the channel */
-	gpointer stream_datas;
+	
+	gpointer stream_datas; /* a stream assoicated to the channel */
+	sap_data *sap_datas; /* the SAP/SDP announcement associated to the stream and the channel */
+
 
     /* Illustrate using a simple linked list */
     int   valid;

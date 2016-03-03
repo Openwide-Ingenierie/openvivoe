@@ -23,6 +23,12 @@
 #include <glib-2.0/glib.h>
 
 /*
+ * mib parameters
+ */
+#include "../include/mibParameters.h"
+
+
+/*
  * DeviceInfo header
  */
 #include "../include/deviceInfo/deviceDesc.h"
@@ -51,7 +57,6 @@
 #include "../include/channelControl/channelNumber.h"
 #include "../include/channelControl/channelReset.h"
 #include "../include/channelControl/channelTable.h"
-
 
 /*
  * Configuration - Initialization of the MIB header

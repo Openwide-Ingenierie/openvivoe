@@ -124,6 +124,18 @@ extern parameter videoFormatNumber; /*initialize in viodeFormatNumber.c*/
 
 /* --------------------------------- Group channelControl --------------------------------- */
 
+
+
+/**
+ * \brief a structure to registeer the information to send the UDP datagram
+ */
+typedef struct {
+	struct 	addrinfo 	*sap_multicast_addr; 
+	int 				udp_socket_fd;
+	char 				*udp_payload;
+	int 				udp_payload_length;
+}sap_data;
+
 extern parameter channelReset;
 extern parameter channelNumber;
 

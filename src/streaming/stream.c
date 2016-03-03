@@ -17,6 +17,7 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "../../include/mibParameters.h"
+#include "../../include/channelControl/channelTable.h"
 #include "../../include/videoFormatInfo/videoFormatTable.h"
 #include "../../include/streaming/pipeline.h"
 #include "../../include/streaming/detect.h"
@@ -275,13 +276,16 @@ int stop_streaming( gpointer stream_datas, long channelVideoFormatIndex ){
  * \param data of the stream (pipeline, bus and bust_watch_id) - see stream_data structure
  * \return 0 
  */
-int delete_steaming_data(gpointer stream_datas){
-	stream_data *data 	=  stream_datas;	
+int delete_steaming_data(gpointer channel_entry){
+	struct channelTable_entry 	*entry 	= channel_entry;	
+	stream_data 				*data 	=  entry->stream_datas ;
 	/* delete pipeline */	
 	g_print ("Deleting pipeline\n");
 	gst_element_set_state (data->pipeline, GST_STATE_NULL);	
 	gst_object_unref (GST_OBJECT (data->pipeline));
 	g_source_remove (data->bus_watch_id);
+	/* free the sap_data */
+	free(entry->sap_datas);
 	/* free rtp_data */
 	free(data->rtp_datas);
 	/* free stream_data associated to stream */

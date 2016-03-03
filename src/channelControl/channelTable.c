@@ -11,14 +11,15 @@
 #include <glib-unix.h>
 #include <gstreamer-1.0/gst/sdp/gstsdpmessage.h>
 #include <gstreamer-1.0/gst/gst.h>
-#include "../../include/videoFormatInfo/videoFormatTable.h"
-#include "../../include/channelControl/channelTable.h"
-#include "../../include/handler.h"
 #include "../../include/mibParameters.h"
+#include "../../include/videoFormatInfo/videoFormatTable.h"
+#include "../../include/handler.h"
+#include "../../include/channelControl/channelTable.h"
+#include "../../include/announcement/sap.h"
+#include "../../include/announcement/sdp.h"
 #include "../../include/streaming/stream_registration.h"
 #include "../../include/streaming/stream.h"
-#include "../../include/announcement/sdp.h"
-#include "../../include/announcement/sap.h"
+
 
 
 /** Initializes the channelTable module */
@@ -134,9 +135,11 @@ struct channelTable_entry *
 
 	entry->stream_datas 					= stream_datas;
 
-    entry->next 		= channelTable_head;
-	entry->valid 		= 1;
-    channelTable_head 	= entry;
+	prepare_socket(entry); //save the SAP datas
+
+    entry->next 						= channelTable_head;
+	entry->valid 						= 1;
+    channelTable_head 					= entry;
     return entry;
 }
 /**
