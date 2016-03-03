@@ -45,16 +45,19 @@
 		SDP payload encryption shall not be used. This bit shall therefore be set to 0 for an unencrypted payload.
 	Compsap_multicast_addrsed (C): 1 bit
 		SDP payload compsap_multicast_addrsion shall not be used. This bit shall therefore be set to 0 for an uncompsap_multicast_addrsed payload
-	SO te binary version is: 00100000 thus 0x20
-*/
-#define SAP_header_byte0 	0x20
+	So te binary version is:
+	_ 00100000 thus 0x20 for announcement
+	_ 00100000 thus 0x24 for announcement
 
+*/
+#define SAP_header_announcement 	0x20
+#define SAP_header_deletion 		0x24
 /* 
  * BYTE 1:
  * Authentication Length: 8 bits
  *  This shall be set to 0 in VIVOE as no authentication data is psap_multicast_addrent
  */
-#define SAP_header_AL 		0x00
+#define SAP_header_AL 				0x00
 
 /*
  * BYTE 9 and more:
@@ -62,7 +65,7 @@
  * This is a ASCII text string followed by null character.
  * this shall be set to "application/sdp"
  */
-#define SAP_header_OPT 		"application/sdp"
+#define SAP_header_OPT 				"application/sdp"
 
 /* 
  * After the really hard and scholar computation I have deduced that the total
@@ -75,7 +78,7 @@
  * 									_____________
  * Total: 								24 bytes
  */
-#define SAP_header_size 	24
+#define SAP_header_size 			24
 
 /**
  * \brief 	Build the first byte corsap_multicast_addrponding to the Message Identifier Hash (MAI) according to the norm
@@ -111,13 +114,16 @@ static const in_addr_t build_OS(void){
  * \param  	session_version the number of session_version to use to create the Message Identifier Hash
  * \return 	char* an array of byte corsap_multicast_addrponding to the built header
  */
-static gboolean build_SAP_header(char *header, int session_version){
+static gboolean build_SAP_header(char *header, int session_version, gboolean deletion){
 	
 
 	char returnv[SAP_header_size];
 	int offset 						= 0; /* an offset use to concatenate the arrays */
-
-	returnv[0] = SAP_header_byte0;
+	
+	if(deletion)
+		returnv[0] = SAP_header_deletion;
+	else
+		returnv[0] = SAP_header_announcement;
 	offset++;
 	returnv[1] = SAP_header_AL;
 	offset++;
@@ -133,7 +139,7 @@ static gboolean build_SAP_header(char *header, int session_version){
 	return TRUE;	
 }
 
-static char*  build_SAP_msg(struct channelTable_entry * entry, int *sap_msg_length){
+static char*  build_SAP_msg(struct channelTable_entry * entry, int *sap_msg_length, gboolean deletion){
 
 	GstSDPMessage *msg;
 	/* create a new SDP message */
@@ -149,7 +155,7 @@ static char*  build_SAP_msg(struct channelTable_entry * entry, int *sap_msg_leng
 
 	/* Build the  header */
 	char header[SAP_header_size];
-   	build_SAP_header(header, session_version);
+   	build_SAP_header(header, session_version, deletion);
 
 	/* Build the *payload */
 	char *payload = g_strdup (gst_sdp_message_as_text(msg));
@@ -199,7 +205,7 @@ gboolean prepare_socket(struct channelTable_entry * entry ){
 
 	/* create UDP payload and save the payload into sap_datas structure */
 	sap_datas->udp_payload_length = 0;
-	sap_datas->udp_payload =  build_SAP_msg(entry, &(sap_datas->udp_payload_length));	
+	sap_datas->udp_payload =  build_SAP_msg(entry, &(sap_datas->udp_payload_length), FALSE); /* build SAP announcement message (not deletion message) */
 	entry->sap_datas = sap_datas;
 /*	for(int i = 0; i< sizeof(sap_datas.udp_payload); i++)
 		printf("%02X\t%d\n", sap_datas.udp_payload[i], i);*/
@@ -216,26 +222,33 @@ gboolean send_announcement(gpointer entry){
 
 /*	for(int i = 0; i<sap_datas.udp_payload_length ; i++)
 		printf("%02X\t%d\n", sap_datas.udp_payload[i], i);*/
-
+	int nb_bytes = -1;
 
 	struct channelTable_entry * channel_entry = entry;
 	if( channel_entry->channelStatus == stop ){
-		/* Build and send deletion packet */
-		return FALSE;
-	}
-	/* Build the UDP payload */
-	int n_bytes = sendto( 	channel_entry->sap_datas->udp_socket_fd,
+		/* Build deletion packet */
+		channel_entry->sap_datas->udp_payload = build_SAP_msg(channel_entry, &(channel_entry->sap_datas->udp_payload_length), TRUE);
+		nb_bytes = sendto( 	channel_entry->sap_datas->udp_socket_fd,
 							channel_entry->sap_datas->udp_payload,
 							channel_entry->sap_datas->udp_payload_length,
 							0,
 							channel_entry->sap_datas->sap_multicast_addr->ai_addr,
 							channel_entry->sap_datas->sap_multicast_addr->ai_addrlen);
+		return FALSE;
+	}else{
+		/* Send Annoucement message */
+		nb_bytes = sendto( 	channel_entry->sap_datas->udp_socket_fd,
+							channel_entry->sap_datas->udp_payload,
+							channel_entry->sap_datas->udp_payload_length,
+							0,
+							channel_entry->sap_datas->sap_multicast_addr->ai_addr,
+							channel_entry->sap_datas->sap_multicast_addr->ai_addrlen);
+	}
 	/* check if the number of bytes send is -1, if so an error as occured */
-	if ( n_bytes	== -1 )
+	if ( nb_bytes	== -1 )
 	{
     	g_printerr("Failed to send SAP/SDP announcement: %s",strerror(errno));
 		return FALSE;
 	}
 	return TRUE;
 }
-
