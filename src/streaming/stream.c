@@ -277,18 +277,18 @@ int stop_streaming( gpointer stream_datas, long channelVideoFormatIndex ){
  * \return 0 
  */
 int delete_steaming_data(gpointer channel_entry){
-	struct channelTable_entry 	*entry 	= channel_entry;	
-	stream_data 				*data 	=  entry->stream_datas ;
+	struct channelTable_entry 	*entry 	= channel_entry;
+	stream_data 				*data 	=  entry->stream_datas;
 	/* delete pipeline */	
 	g_print ("Deleting pipeline\n");
 	gst_element_set_state (data->pipeline, GST_STATE_NULL);	
 	gst_object_unref (GST_OBJECT (data->pipeline));
 	g_source_remove (data->bus_watch_id);
+	/* free rtp_data */
+	free(data->rtp_datas);	
 	/* free the sap_data */
 	free(entry->sap_datas);
-	/* free rtp_data */
-	free(data->rtp_datas);
-	/* free stream_data associated to stream */
-	free(data);
+//	free(data); stream_data are no longer allocated dynamically
+	free(entry);
 	return 0;
 }

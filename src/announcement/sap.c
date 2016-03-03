@@ -178,7 +178,7 @@ gboolean prepare_socket(struct channelTable_entry * entry ){
 	/* define multicast and port number for SAP */
 	const char 	*hostname = "224.2.127.254";
 	const char 	*portname = "9875";
-	sap_data 	*sap_datas = malloc(sizeof(sap_data));
+	sap_data 	*sap_datas = (sap_data*) malloc(sizeof(sap_data));
 	/* define parameter for the address to use in a variable named sap_addr_info */
 	struct 	addrinfo sap_addr_info; 	
 	memset(&sap_addr_info,0,sizeof(sap_addr_info));
