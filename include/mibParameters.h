@@ -47,7 +47,7 @@
 
 /* value for the SAP/SDP Announcement */
 #define network_type 			"IN"
-#define address_type 			"IPV4"
+#define address_type 			"IP4"
 #define address_ttl 			15
 #define media_type 				"video"
 #define transport_proto 		"RTP/AVP"

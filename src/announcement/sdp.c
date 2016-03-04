@@ -74,7 +74,7 @@ static gboolean create_raw_media(struct channelTable_entry * channel_entry, GstS
 static gboolean create_mpeg4_media(struct channelTable_entry * channel_entry, GstSDPMedia *media)
 {
 	stream_data *data = channel_entry->stream_datas;
-	gchar  		*fmtp =  g_strdup_printf("%ld  profile-level-id=%s, config=%s",
+	gchar  		*fmtp =  g_strdup_printf("%ld  profile-level-id=%s; config=%s",
 											data->rtp_datas->rtp_type,
 											data->rtp_datas->profile_level_id,
 											data->rtp_datas->config
