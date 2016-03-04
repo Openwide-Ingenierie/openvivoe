@@ -66,6 +66,22 @@ static gboolean stop_program ( gpointer data ){
 	return TRUE;
 }
 
+static gboolean service_Provider_init(gpointer loop){
+	/* data associated to stream */	
+	stream_data 	stream1;
+	stream_data 	stream2;
+
+	/* prepare the stream - initialize all the data relevant to the stream into stream-data */
+	if ( init_streaming(loop, &stream1, /*test*/ "raw", 1920, 1080,"I420" /*end test param*/)){
+		return FALSE;
+	}
+	/* prepare the stream - initialize all the data relevant to the stream into stream-data */
+	if ( init_streaming(loop, &stream2, /*test*/ "mp4", 1920, 1080,"I420" /*end test param*/)){
+		return  FALSE;
+	}
+	return TRUE;
+}
+
 /**
  * \brief the data needed to pass to functions used to exit the program nicely
  * \param data the data we need to know to exit the program nicely see stop_program_dat
@@ -77,12 +93,13 @@ int main (int   argc,  char *argv[]){
 
 	/* add the idle function that handle SNMP request everye 100ms */
 	g_timeout_add (10, handle_snmp_request, NULL);
-	
+
+	/* init SubAgent Deamon */
+	deamon(argv[0]);
+
+	/* In case of an service Provider */
 	/* Initialize GStreamer */
-    gst_init (&argc, &argv);
-/* data associated to stream */	
-	stream_data 	stream1;
-	stream_data 	stream2;
+	gst_init (&argc, &argv);
 
 	/* data associated to stream */
 	stop_program_data 		stop_data;
@@ -93,19 +110,15 @@ int main (int   argc,  char *argv[]){
 	g_unix_signal_add (SIGINT, 	stop_program, &stop_data);
 	g_unix_signal_add (SIGTERM, stop_program, &stop_data);
 
-	/* init SubAgent Deamon */
-	deamon(argv[0]);
-
-	/* prepare the stream - initialize all the data relevant to the stream into stream-data */
-	if ( init_streaming(loop, &stream1, /*test*/ "raw", 1920, 1080,"I420" /*end test param*/)){
-		return 0;
-	}
-	/* prepare the stream - initialize all the data relevant to the stream into stream-data */
-	if ( init_streaming(loop, &stream2, /*test*/ "mp4", 1920, 1080,"I420" /*end test param*/)){
-		return  0;
-	}
 
 	/* start the program: SNMP SubAgent deamon, and streaming */
+	if ( deviceInfo.parameters[num_DeviceType]._value.int_val == serviceProvider ){
+		if ( !service_Provider_init( loop )) {
+			g_printerr("Failed to load streams\n");
+			return 1;
+		}
+	}
+
     /* Iterate */
 	g_main_loop_run (loop);
 	
