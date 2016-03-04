@@ -49,7 +49,7 @@
 #define start 						1
 #define stop 						2
 #define singleFrame 				3
-
+#define default_SAP_interval 		1000
 
 /* value for the SAP/SDP Announcement */
 #define network_type 			"IN"

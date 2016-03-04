@@ -182,10 +182,11 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 										0, 																				0,		
 										0,																				data->rtp_datas->rtp_type, 				
 										*ip/*IP*/, 																		0 /* packet delay*/,
- 										0, /*SAP interval*/ 															index, /*defaultVideoFormatIndex*/
+ 										default_SAP_interval,															index, /*defaultVideoFormatIndex*/
 										default_ip/*default receive IP*/, 												data);
 			/* increase channelNumber as we added an entry */			
 			channelNumber._value.int_val++;
+			
 		}
 	}else{
 		/* if the table of video format is not empty for this device, check if this format is already in the table
@@ -238,7 +239,7 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 										0, 																					0,		 				
 										0,																					data->rtp_datas->rtp_type, 			
 										*ip,/*receive Address*/ 															0 /* packet delay*/,
- 										0, /*SAP interval*/ 																index, /*defaultVideoFormatIndex - 0 is taken by default*/
+ 										default_SAP_interval,  																index, /*defaultVideoFormatIndex - 0 is taken by default*/
 										default_ip/*default receive IP*/, 													data);
 			/* increase channelNumber as we added an entry */			
 			channelNumber._value.int_val++;
