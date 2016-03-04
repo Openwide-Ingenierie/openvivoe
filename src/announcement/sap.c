@@ -207,8 +207,6 @@ gboolean prepare_socket(struct channelTable_entry * entry ){
 	sap_datas->udp_payload_length = 0;
 	sap_datas->udp_payload =  build_SAP_msg(entry, &(sap_datas->udp_payload_length), FALSE); /* build SAP announcement message (not deletion message) */
 	entry->sap_datas = sap_datas;
-/*	for(int i = 0; i< sizeof(sap_datas.udp_payload); i++)
-		printf("%02X\t%d\n", sap_datas.udp_payload[i], i);*/
 
 	return TRUE;
 }
@@ -220,8 +218,6 @@ gboolean send_announcement(gpointer entry){
 	 * we will stop to call repeteadly create_SDP
 	 */
 
-/*	for(int i = 0; i<sap_datas.udp_payload_length ; i++)
-		printf("%02X\t%d\n", sap_datas.udp_payload[i], i);*/
 	int nb_bytes = -1;
 
 	struct channelTable_entry * channel_entry = entry;

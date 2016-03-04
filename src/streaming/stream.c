@@ -238,7 +238,7 @@ int init_streaming (gpointer main_loop, gpointer stream_datas /* real prototype 
 		g_printerr ( "Failed to create pipeline\n");	
 		return EXIT_FAILURE;
 	}
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 /**
