@@ -149,10 +149,7 @@ gboolean create_SDP(GstSDPMessage 	*msg, struct channelTable_entry * channel_ent
 	/* get multicast IP from MIB */
 	struct in_addr ip_addr;
     ip_addr.s_addr			= ethernetIfTable_head->ethernetIfIpAddress;
-		
-	if ( !gst_sdp_address_is_multicast ("IN", "IPV4",inet_ntoa(ip_addr)) ){
-		g_printerr("ERROR: try to stream on a non multicast IPv4 address\n");
-	}
+
 	gst_sdp_message_set_origin ( 	msg,
 									"-" /* username*/,
 									session_id_str /* sessionid*/,
