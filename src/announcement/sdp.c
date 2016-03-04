@@ -18,6 +18,7 @@
 
 /* Header file */
 #include "../../include/mibParameters.h"
+#include "../../include/deviceInfo/ethernetIfTable.h"
 #include "../../include/channelControl/channelTable.h"
 #include "../../include/announcement/sdp.h"
 #include "../../include/streaming/stream_registration.h"
@@ -147,7 +148,7 @@ gboolean create_SDP(GstSDPMessage 	*msg, struct channelTable_entry * channel_ent
 
 	/* get multicast IP from MIB */
 	struct in_addr ip_addr;
-    ip_addr.s_addr			= channel_entry->channelReceiveIpAddress;
+    ip_addr.s_addr			= ethernetIfTable_head->ethernetIfIpAddress;
 		
 	if ( !gst_sdp_address_is_multicast ("IN", "IPV4",inet_ntoa(ip_addr)) ){
 		g_printerr("ERROR: try to stream on a non multicast IPv4 address\n");
