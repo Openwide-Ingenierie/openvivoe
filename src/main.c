@@ -22,7 +22,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 /* header file */
-#include "../include/deamon.h"
+#include "../include/daemon.h"
 #include "../include/mibParameters.h"
 #include "../include/channelControl/channelTable.h"
 #include "../include/videoFormatInfo/videoFormatTable.h"
@@ -95,7 +95,7 @@ int main (int   argc,  char *argv[]){
 	g_timeout_add (10, handle_snmp_request, NULL);
 
 	/* init SubAgent Deamon */
-	deamon(argv[0]);
+	open_vivoe_daemon (argv[0]);
 
 	/* In case of an service Provider */
 	/* Initialize GStreamer */
