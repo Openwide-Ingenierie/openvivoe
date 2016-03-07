@@ -292,9 +292,9 @@ channelTable_get_next_data_point(void **my_loop_context,
  */
 static void channelSatus_requests_handler( struct channelTable_entry * table_entry ){
 	/* the behaviour will be different wether the device is a ServiceProvider or a ServiceUser */
-	switch( deviceInfo.parameters[num_DeviceType]._value.int_val ){
+	switch( table_entry->channelStatus ){
 
-		case device_SP : /* case ServiceProvider */
+		case videoChannel : /* case ServiceProvider */
 			if ( table_entry->channelStatus == start){
 				prepare_socket(table_entry); //save the SAP datas
 				g_timeout_add(table_entry->channelSapMessageInterval,send_announcement, table_entry );
@@ -304,7 +304,7 @@ static void channelSatus_requests_handler( struct channelTable_entry * table_ent
 				stop_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex );
 			}
 			break;
-		case device_SU:
+		case serviceUser:	
 			if ( table_entry->channelStatus == start){
 				prepare_socket(table_entry); //save the SAP datas
 				g_timeout_add(table_entry->channelSapMessageInterval,receive_announcement, table_entry );
@@ -313,9 +313,6 @@ static void channelSatus_requests_handler( struct channelTable_entry * table_ent
 			else if ( table_entry->channelStatus == stop){
 			//	stop_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex );
 			}
-			break;
-		/* for later */
-		case device_both:
 			break;
 		default:
 			/* this is a really really bad error, we should never get there */
