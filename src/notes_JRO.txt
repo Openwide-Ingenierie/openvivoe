@@ -14,9 +14,6 @@ sap.c
   definie dans la norme. aucune chance que cela change... le socket SAP peut être 
   global, plutôt que par channel, par exemple
 
-deamon.c
-* ça s'écrit dAEmon :)
-
 handler.c
 * ligne 246 : je comprend pas la logique, tu fais un memdup, qui alloue de la memoire
   et tu perd cette mémoire ligne 250 (et aussi dans la 2eme erreur)
