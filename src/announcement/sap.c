@@ -80,6 +80,22 @@
  */
 #define SAP_header_size 			24
 
+
+/**
+ * \brief a global struct that represent the socket address on which to sent SAP/SDP announcement messages
+ */
+struct sockaddr_in 	multicast_addr;
+
+/**
+ * \brief inits the mulcast_addr parameter
+ */
+void init_sap_multicast(){
+	multicast_addr.sin_family 	= AF_INET;
+	multicast_addr.sin_port 	= htons(9875);
+	inet_aton("224.2.127.254", &multicast_addr.sin_addr);
+}
+
+
 /**
  * \brief 	Build the first byte corsap_multicast_addrponding to the Message Identifier Hash (MAI) according to the norm
  * \return 	the 16 bits corsap_multicast_addrponding to the Message Identifier Hash field of SAP header
@@ -173,24 +189,7 @@ static char*  build_SAP_msg(struct channelTable_entry * entry, int *sap_msg_leng
  * \gboolean TRUE on succed, FALSE on failure, failure happened if the channel is in stop mode
  */
 gboolean prepare_socket(struct channelTable_entry * entry ){
-	/* define multicast and port number for SAP */
-	const char 	*hostname = sap_multi_addr;
-	const char 	*portname = sap_port_num;
 	sap_data 	*sap_datas = (sap_data*) malloc(sizeof(sap_data));
-	/* define parameter for the address to use in a variable named sap_addr_info */
-	struct 	addrinfo sap_addr_info;
-	memset(&sap_addr_info,0,sizeof(sap_addr_info));
-	sap_addr_info.ai_family=AF_INET;
-	sap_addr_info.ai_socktype=SOCK_DGRAM;
-	sap_addr_info.ai_protocol=0;
-	sap_addr_info.ai_flags=AI_ADDRCONFIG;
-	
-	/* initialize sap_multicast_addr member of sap_datas structure */
-	int err = getaddrinfo(hostname,portname,&sap_addr_info,&(sap_datas->sap_multicast_addr));
-	if (err!=0) {
-		g_printerr("failed to open remote socket: %s\n",strerror(err));
-		return FALSE;
-	}
 
 	/* open UDP socket */
 	int udp_socket_fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
@@ -228,8 +227,8 @@ gboolean send_announcement(gpointer entry){
 							channel_entry->sap_datas->udp_payload,
 							channel_entry->sap_datas->udp_payload_length,
 							0,
-							channel_entry->sap_datas->sap_multicast_addr->ai_addr,
-							channel_entry->sap_datas->sap_multicast_addr->ai_addrlen);
+							(struct sockaddr *) &multicast_addr,
+							sizeof(multicast_addr));
 		return FALSE;
 	}else{
 		/* Send Annoucement message */
@@ -237,8 +236,8 @@ gboolean send_announcement(gpointer entry){
 							channel_entry->sap_datas->udp_payload,
 							channel_entry->sap_datas->udp_payload_length,
 							0,
-							channel_entry->sap_datas->sap_multicast_addr->ai_addr,
-							channel_entry->sap_datas->sap_multicast_addr->ai_addrlen);
+							(struct sockaddr *) &multicast_addr,
+							sizeof(multicast_addr));
 	}
 	/* check if the number of bytes send is -1, if so an error as occured */
 	if ( nb_bytes	== -1 )
