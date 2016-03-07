@@ -1,12 +1,6 @@
 remarques général
 * ça ne compile pas chez moi car je n'ai pas netsnmp d'installé... il faudrait que ce soit vérifié par cmake
 
-sdp.c
-* la façon habituelle de faire une conversion enum => string est d'exporter un tableau de const char* indexé par les valeurs de l'enum et terminé par un null
-  const char * enum_names []= [ "a","b","c",NULL ]
-  
-  en terminant par un NULL cela permet d'itérer sur le tableau
-
 sap.c 
 * g_strdup alloue de la mémoire. il faut la libérer. 
 * ton code a tout une infra pour pouvoir envoyer les messages de chaque channel sur 
