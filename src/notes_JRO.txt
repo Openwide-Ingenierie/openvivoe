@@ -1,0 +1,31 @@
+remarques général
+* ça ne compile pas chez moi car je n'ai pas netsnmp d'installé... il faudrait que ce soit vérifié par cmake
+
+sdp.c
+* la façon habituelle de faire une conversion enum => string est d'exporter un tableau de const char* indexé par les valeurs de l'enum et terminé par un null
+  const char * enum_names []= [ "a","b","c",NULL ]
+  
+  en terminant par un NULL cela permet d'itérer sur le tableau
+
+sap.c 
+* g_strdup alloue de la mémoire. il faut la libérer. 
+* ton code a tout une infra pour pouvoir envoyer les messages de chaque channel sur 
+  différentes adresses multicast, c'est inutilie ici. SAP utilise une adresse unique
+  definie dans la norme. aucune chance que cela change... le socket SAP peut être 
+  global, plutôt que par channel, par exemple
+
+deamon.c
+* ça s'écrit dAEmon :)
+
+handler.c
+* ligne 246 : je comprend pas la logique, tu fais un memdup, qui alloue de la memoire
+  et tu perd cette mémoire ligne 250 (et aussi dans la 2eme erreur)
+  de plus old_string est perdu à la sortie de la fonction, ton MODE_SET_FREE ne peut pas marcher...
+  il faut que tu sauvegarde old_string quelque part dans la request...
+* ligne 261, l'ancienne valeur de value est invalide après un realloc. passer par un temp_string ne
+  sert à rien 
+* ligne 99 tu as le même pb de gestion de memoire
+
+multicast.c
+* ligne 60 : un mask s'écrit en hexa, c'est plus lisible (255 -> 0xFF)
+* ligne 60 : ce serait plus logique que cette fonction renvoie un uint_8
