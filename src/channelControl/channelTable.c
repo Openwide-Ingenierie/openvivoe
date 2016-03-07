@@ -284,7 +284,48 @@ channelTable_get_next_data_point(void **my_loop_context,
 }
 
 
-/** handles requests for the channelTable table */
+/** 
+ * \brief handles the call of function according to the new channeltStatus value received from SNMP request
+ * \param table_entry the table entry on which the request applies
+ */
+static void channelSatus_requests_handler( struct channelTable_entry * table_entry ){
+	/* the behaviour will be different wether the device is a ServiceProvider or a ServiceUser */
+	switch( deviceInfo.parameters[num_DeviceType]._value.int_val ){
+
+		case device_SP : /* case ServiceProvider */
+			if ( table_entry->channelStatus == start){
+				prepare_socket(table_entry); //save the SAP datas
+				g_timeout_add(table_entry->channelSapMessageInterval,send_announcement, table_entry );
+				start_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex);
+			}
+			else if ( table_entry->channelStatus == stop){
+				stop_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex );
+			}
+			break;
+		case device_SU:
+			if ( table_entry->channelStatus == start){
+				prepare_socket(table_entry); //save the SAP datas
+				g_timeout_add(table_entry->channelSapMessageInterval,receive_announcement, table_entry );
+			//	start_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex);
+			}
+			else if ( table_entry->channelStatus == stop){
+			//	stop_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex );
+			}
+			break;
+		/* for later */
+		case device_both:
+			break;
+		default:
+			/* this is a really really bad error, we should never get there */
+			g_printerr("Unknown device Type: ut should be serviceProvider (%d), serviceUser (%d), or both (%d)\n" , device_SP, device_SU, device_both);
+			break;
+	}
+}
+
+
+/**
+ * \brief handles requests for the channelTable table
+ */
 int
 channelTable_handler(
     netsnmp_mib_handler             *handler,
@@ -697,15 +738,8 @@ channelTable_handler(
             case COLUMN_CHANNELSTATUS:
                 table_entry->old_channelStatus 					= table_entry->channelStatus;
                 table_entry->channelStatus     					= *request->requestvb->val.integer;
-				if ( table_entry->channelStatus == start){
-					prepare_socket(table_entry); //save the SAP datas					
-					g_timeout_add(table_entry->channelSapMessageInterval,send_announcement, table_entry );
-					start_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex);
-				}
-				else if ( table_entry->channelStatus == stop){
-					stop_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex );
-				}
-                break;
+				channelSatus_requests_handler( table_entry );
+				break;
             case COLUMN_CHANNELVIDEOFORMATINDEX:
                 table_entry->old_channelVideoFormatIndex 		= table_entry->channelVideoFormatIndex;
                 table_entry->channelVideoFormatIndex     		= *request->requestvb->val.integer;
