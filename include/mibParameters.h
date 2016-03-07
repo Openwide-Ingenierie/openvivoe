@@ -24,17 +24,17 @@
 /* Definition of value to create entries in table */
 
 /* values for deviceInfo */
-#define serviceProvider 			1
-#define serviceUser 				2
-#define both						3
+#define device_SP 			1
+#define device_SU 			2
+#define device_both			3
 
 
 /* values for videoFormatType */
-#define VF_videoChannel 			1
-#define VF_roi 						2
-#define VF_serviceUser 				3
-#define VF_rawData 					4
-#define VF_otherwise 				5
+#define videoChannel 				1
+#define roi 						2
+#define serviceUser 				3
+#define rawData 					4
+#define otherwise 					5
 
 /*values for videoFormatStatus */
 #define enable 						1

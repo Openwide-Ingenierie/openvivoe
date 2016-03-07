@@ -134,5 +134,7 @@ struct channelTable_entry * channelTable_createEntry(
 						 						   	in_addr_t 	channelDefaultReceiveIpAddress,
 													gpointer 	stream_datas);
 
+struct channelTable_entry *	channelTable_createEmptyEntry();
+
 
 #endif /* CHANNELTABLE_H */

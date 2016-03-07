@@ -65,6 +65,12 @@ initialize_table_channelTable(void)
     iinfo->table_reginfo        = table_info;
     
     netsnmp_register_table_iterator( reg, iinfo );
+	/* check if the device is a serviceProvider or a ServiceUser
+	 * If it is a serviceUser, then create an empty entry 
+	 */
+	if( deviceInfo.parameters[num_DeviceType]._value.int_val == device_SU )
+		channelTable_createEmptyEntry();
+	
 }
 
 /* create a new row in the (unsorted) table */
@@ -139,6 +145,41 @@ struct channelTable_entry *
     channelTable_head 						= entry;
     return entry;
 }
+
+/**
+ * \brief Create an empty entry, ServiceUser must have an available entry in order to receive the Start message from the manager
+ */
+struct channelTable_entry *	channelTable_createEmptyEntry(){
+	return	channelTable_createEntry(
+    	        				channelNumber._value.int_val+1, /* Appen one channel to the list, its index is just the number of channel incremented by one */
+								serviceUser,
+						    	"",
+    							stop,
+							    0,
+							    "",
+							    "",
+							    0,
+							    0,
+							    "",
+							    0,
+							    0,
+							    0,
+    							0,
+    							0,
+							    0,
+							    0,
+								0,
+							   	0,
+							   	0,
+							   	0,
+							   	0,
+							   	0,
+							   	0,
+							   	0,
+							 	NULL
+                			);
+}
+
 /**
  * \brief update an entry in the ChannelTable when changing its videoFormat
  * \param entry the entry in channelTable to update
