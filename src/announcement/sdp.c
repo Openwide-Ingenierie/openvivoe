@@ -25,7 +25,7 @@
 #include "../../include/streaming/stream.h"
 
 /**
- * \brief 	provides a mapping between the int representation of the interlaced-mode of a stream 
+ * \brief 	provides a mapping between the int representation of the interlaced-mode of a stream
  * 			according to the MIB: (1) interlaced, (2) progressive, (3) none
  * \param 	interlaced_mode the int representation of our video stream
  * \return 	the string representation of our interlaced_mode
@@ -54,11 +54,11 @@ static gboolean create_raw_media(struct channelTable_entry * channel_entry, GstS
 										data->rtp_datas->rtp_type,
 										channel_entry->channelVideoSampling,
 										channel_entry->channelVertRes,
-										channel_entry->channelHorzRes, 
+										channel_entry->channelHorzRes,
 										channel_entry->channelVideoBitDepth,
 										channel_entry->channelColorimetry,
 										interlace_mode_to_string (channel_entry->channelInterlaced)
-										);	
+										);
 	if( gst_sdp_media_add_attribute (media, "fmtp", fmtp)!= GST_SDP_OK ){
 		g_printerr("ERROR: problem in media creation for SDP file\n");
 		return FALSE;
@@ -78,12 +78,12 @@ static gboolean create_mpeg4_media(struct channelTable_entry * channel_entry, Gs
 											data->rtp_datas->rtp_type,
 											data->rtp_datas->profile_level_id,
 											data->rtp_datas->config
-										);	
+										);
 	if( gst_sdp_media_add_attribute (media, "fmtp", fmtp)!= GST_SDP_OK ){
 		g_printerr("ERROR: problem in media creation for SDP file\n");
 		return FALSE;
 	}
-	return TRUE;	
+	return TRUE;
 }
 
 /**
@@ -117,15 +117,15 @@ static gboolean create_fmtp_media(struct channelTable_entry * channel_entry, Gst
 	return TRUE;
 }
 
-/** 
+/**
  * \brief Create the SDP message corresponding to the stream
- * \pramam entry an entry to the correspondante channel 
+ * \pramam entry an entry to the correspondante channel
  */
 gboolean create_SDP(GstSDPMessage 	*msg, struct channelTable_entry * channel_entry){
 
 	stream_data 	*data = channel_entry->stream_datas;
 
-	/* version : shall be set to 0 for VIVOE 
+	/* version : shall be set to 0 for VIVOE
 	 * v=0
 	 */
 	if (gst_sdp_message_set_version(msg, "0")){
@@ -133,7 +133,7 @@ gboolean create_SDP(GstSDPMessage 	*msg, struct channelTable_entry * channel_ent
 		return FALSE;
 	}
 	/* origine:
-	 * o=<username> <session id> <session version> <network type> <address type> <address> 
+	 * o=<username> <session id> <session version> <network type> <address type> <address>
 	 */
 	/* build session id and session version using random numbers*/
 	srand(time(NULL));
@@ -157,20 +157,20 @@ gboolean create_SDP(GstSDPMessage 	*msg, struct channelTable_entry * channel_ent
 									network_type, /* network type :internet (always for VIVOE)*/
 									address_type, /* address type :IPV4 (always for VIVOE)*/
 									inet_ntoa(ip_addr) /* multicast IP*/
-								); 
+								);
 
 	/* session name
 	* s=<session name>
 	*/
 	/* Build session name from deviceUserDesc Value and DeviceChannel value */
-	/* Create a buffer that will contain the concatenation of deviceUserDesc and ChannelUserDesc 
+	/* Create a buffer that will contain the concatenation of deviceUserDesc and ChannelUserDesc
 	 * Both of those Strings are 64 bytes strings, so at most, session name will be a 129 bytes string
 	 * because we will add a space " " character between those two strings
 	 */
 	char session_name[DisplayString64*2+1];
 	/* Get deviceUserDesc Value */
 	memcpy(session_name, deviceInfo.parameters[num_DeviceUD]._value.string_val, strlen(deviceInfo.parameters[num_DeviceUD]._value.string_val));
-	strcat(session_name, " ");	
+	strcat(session_name, " ");
 	strcat(session_name, channel_entry->channelUserDesc);
 	gst_sdp_message_set_session_name(msg, session_name);
 
@@ -186,7 +186,7 @@ gboolean create_SDP(GstSDPMessage 	*msg, struct channelTable_entry * channel_ent
 	 */
 	gst_sdp_message_add_time(msg, "0", "0", NULL);
 
-	/* media: 
+	/* media:
 	 * m=<media> <port> <transport> <fmt list>
 	 */
 	GstSDPMedia *media;
@@ -212,8 +212,8 @@ gboolean create_SDP(GstSDPMessage 	*msg, struct channelTable_entry * channel_ent
 	/* Add framerate to media information */
 	gchar *framerate =  g_strdup_printf("%ld", channel_entry->channelFps);
 	if( gst_sdp_media_add_attribute (media, "framerate", framerate)!= GST_SDP_OK )	/* Add the media to SDP message */
-		return error_function();		
+		return error_function();
 	if ( gst_sdp_message_add_media (msg, media))
 		return error_function();
-	 return TRUE;	
+	 return TRUE;
 }

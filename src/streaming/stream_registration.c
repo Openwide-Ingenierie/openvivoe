@@ -156,17 +156,17 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 											disable, 																	video_info->videoFormatBase,
 											video_info->videoFormatSampling, 											video_info->videoFormatBitDepth,
 											video_info->videoFormatFps,				 									video_info->videoFormatColorimetry,
-											video_info->videoFormatInterlaced, 											video_info->videoFormatCompressionFactor, 
-											video_info->videoFormatCompressionRate, 									video_info->videoFormatMaxHorzRes,			
+											video_info->videoFormatInterlaced, 											video_info->videoFormatCompressionFactor,
+											video_info->videoFormatCompressionRate, 									video_info->videoFormatMaxHorzRes,
 											video_info->videoFormatMaxVertRes, 											0,
-											0, 																			0,		
-											0,																			0, 				
+											0, 																			0,
+											0,																			0,
 											0, 																			0,
 											data);
 			/* increase videoFormatNumber as we added an entry */
 			videoFormatNumber._value.int_val++;
 
-			/* compute IP */			
+			/* compute IP */
 			*ip 			= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0], index);
 			default_ip 		= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0], index);
 			
@@ -177,21 +177,21 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 										video_info->videoFormatSampling, 												video_info->videoFormatBitDepth,
 										video_info->videoFormatFps,				 										video_info->videoFormatColorimetry,
 										video_info->videoFormatInterlaced, 												video_info->videoFormatCompressionFactor,
-										video_info->videoFormatCompressionRate, 										video_info->videoFormatMaxHorzRes,		
+										video_info->videoFormatCompressionRate, 										video_info->videoFormatMaxHorzRes,
 										video_info->videoFormatMaxVertRes, 												0,
-										0, 																				0,		
-										0,																				data->rtp_datas->rtp_type, 				
+										0, 																				0,
+										0,																				data->rtp_datas->rtp_type,
 										*ip/*IP*/, 																		0 /* packet delay*/,
  										default_SAP_interval,															index, /*defaultVideoFormatIndex*/
 										default_ip/*default receive IP*/, 												data);
-			/* increase channelNumber as we added an entry */			
+			/* increase channelNumber as we added an entry */
 			channelNumber._value.int_val++;
 			
 		}
 	}else{
 		/* if the table of video format is not empty for this device, check if this format is already in the table
 		 * for that, iterate the table
-		 */	
+		 */
 		struct videoFormatTable_entry *iterator = videoFormatTable_head ;
 		video_info->videoFormatIndex = videoFormatNumber._value.int_val +1 ;
 		gboolean exists = FALSE; /* a boolean to indicate weather the entry already exists in the table or not*/
@@ -207,7 +207,7 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 		}
 		/* check if the entry does not already exist in the table*/
 		if ( !exists && (videoFormatNumber._value.int_val <=255) ){
-			/* 
+			/*
 			 * So add it!
 			 * But check that the maximum number of video format has not been reached already
 			 */
@@ -215,17 +215,17 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 											disable, 																		video_info->videoFormatBase,
 											video_info->videoFormatSampling, 												video_info->videoFormatBitDepth,
 											video_info->videoFormatFps,				 										video_info->videoFormatColorimetry,
-											video_info->videoFormatInterlaced,												video_info->videoFormatCompressionFactor, 
+											video_info->videoFormatInterlaced,												video_info->videoFormatCompressionFactor,
 											video_info->videoFormatCompressionRate, 										video_info->videoFormatMaxHorzRes,
-											video_info->videoFormatMaxVertRes, 												0,					
-											0, 																				0,				
-											0,																				0, 	
+											video_info->videoFormatMaxVertRes, 												0,
+											0, 																				0,
+											0,																				0,
 											0, 																				0,
 											data);
 			/* increase videoFormatNumber as we added an entry */
 			videoFormatNumber._value.int_val++;
-			/* compute IP */			
-			*ip 			= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0],video_info->videoFormatIndex);
+			/* compute IP */
+			*ip 			= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0], video_info->videoFormatIndex);
 			default_ip 		= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0], video_info->videoFormatIndex);
 			/* At the  same time we copy all of those parameters into video channel */
 			channelTable_createEntry( 	channelNumber._value.int_val+1, 													videoChannel,
@@ -233,15 +233,15 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 										video_info->videoFormatIndex, 														video_info->videoFormatBase,
 										video_info->videoFormatSampling, 													video_info->videoFormatBitDepth,
 										video_info->videoFormatFps,				 											video_info->videoFormatColorimetry,
-										video_info->videoFormatInterlaced, 													video_info->videoFormatCompressionFactor, 
-										video_info->videoFormatCompressionRate, 											video_info->videoFormatMaxHorzRes,			
+										video_info->videoFormatInterlaced, 													video_info->videoFormatCompressionFactor,
+										video_info->videoFormatCompressionRate, 											video_info->videoFormatMaxHorzRes,
 										video_info->videoFormatMaxVertRes, 													0,
-										0, 																					0,		 				
-										0,																					data->rtp_datas->rtp_type, 			
+										0, 																					0,
+										0,																					data->rtp_datas->rtp_type,
 										*ip,/*receive Address*/ 															0 /* packet delay*/,
  										default_SAP_interval,  																index, /*defaultVideoFormatIndex - 0 is taken by default*/
 										default_ip/*default receive IP*/, 													data);
-			/* increase channelNumber as we added an entry */			
+			/* increase channelNumber as we added an entry */
 			channelNumber._value.int_val++;
 		}
 	/* !!! IMPORTANT !!!

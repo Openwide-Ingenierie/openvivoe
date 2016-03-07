@@ -56,7 +56,7 @@ struct ethernetIfTableEntry * ethernetIfTableEntry_create(  long  ethernetIfInde
 
     entry->valid = 1;
 	if( ethernetIfTable_head == NULL )
-		ethernetIfTable_head = entry;	
+		ethernetIfTable_head = entry;
 	else{
 		struct ethernetIfTableEntry *last = ethernetIfTable_getLast();
    // ethernetIfTable_head = entry;

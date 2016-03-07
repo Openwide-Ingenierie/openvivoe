@@ -31,7 +31,7 @@
 /**
  * \brief Handle the Bus: display message, get interruption, etc...
  * \param bus the Bus element
- * \param msg the masseges receive on the bus 
+ * \param msg the masseges receive on the bus
  * \return gboolean TRUE (always)
  */
 static gboolean bus_call (  GstBus     *bus,
@@ -46,7 +46,7 @@ static gboolean bus_call (  GstBus     *bus,
 			g_main_loop_quit (loop);
 			break;
 
-		case GST_MESSAGE_ERROR:{ 
+		case GST_MESSAGE_ERROR:{
 								   gchar  *debug;
 								   GError *error;
 								   gst_message_parse_error (msg, &error, &debug);
@@ -65,7 +65,7 @@ static gboolean bus_call (  GstBus     *bus,
 	return TRUE;
 }
 
-#if 0 
+#if 0
 /**
  * \brief check the parameters used for intialize the stream
  * \param argc: as in main (should be 3)
@@ -80,7 +80,7 @@ static int check_param(int argc, char* argv[], char** ip, gint* port, char** for
 		g_printerr ("Usage: %s ip=ddd.ddd.ddd.ddd port=[1024,65535] format=[raw;mp4]\n", argv[0]);
 		g_print ("Default settings taken: ip=%s port=%d format=%s\n",(char*) *ip, *port, *format);
 		return EXIT_FAILURE;
-	/*Check that parameters are indeed: ip= and port= */	
+	/*Check that parameters are indeed: ip= and port= */
 	}else if( strncmp("ip=", argv[1], strlen("ip=")) || strncmp("port=", argv[2], strlen("port=")) || strncmp("format=", argv[3], strlen("format=")) ) {
 		g_printerr ("Usage: %s ip=ddd.ddd.ddd.ddd port=[1024,65535] format=[raw;mp4]\n", argv[0]);
 		g_print ("Default settings taken: ip=%s port=%d format=%s\n",(char*) *ip, *port, *format);
@@ -92,7 +92,7 @@ static int check_param(int argc, char* argv[], char** ip, gint* port, char** for
 	char* temp_ip = strdup(argv[1] + strlen("ip="));
 	if (! inet_pton(AF_INET, temp_ip, check_addr)){
 		g_printerr ("Ip should be Ipv4 dotted-decimal format\n");
-		g_print ("Default settings taken: ip=%s port=%d format=%s\n",(char*) *ip, *port, *format);		
+		g_print ("Default settings taken: ip=%s port=%d format=%s\n",(char*) *ip, *port, *format);
 		return EXIT_FAILURE;
 	}
 
@@ -116,25 +116,25 @@ static int check_param(int argc, char* argv[], char** ip, gint* port, char** for
 	/* replace ip's value by the value entered by the user */
 	strcpy(*ip, temp_ip);
 	*port = (gint) temp_numport;
-	strcpy(*format, temp_format);	
+	strcpy(*format, temp_format);
 	return EXIT_SUCCESS;
 }
 #endif //if 0
 
 /**
  * \brief create a fake source for test purposes
- * \param pipeline: the pipeline in which add the source 
+ * \param pipeline: the pipeline in which add the source
  * \param format: the video format for the source raw or mp4
- * \param width the width to give to the video source 
+ * \param width the width to give to the video source
  * \param height the height to give to the video source
  * \param encoding the encoding to use for the video source
- * \return GstElement* the last element add and link into the pipeline 
+ * \return GstElement* the last element add and link into the pipeline
  */
 static GstElement* source_creation(GstElement* pipeline, char* format, int width, int height, char* encoding){
 	/*
 	 * For now, the source is created manually, directly into the code
 	 * */
-	GstElement 	*source, *capsfilter, *enc, *last;	
+	GstElement 	*source, *capsfilter, *enc, *last;
 	GstCaps 	*caps;
 	/*
 	 * For now, the source is created manually, directly into the code
@@ -142,28 +142,28 @@ static GstElement* source_creation(GstElement* pipeline, char* format, int width
 	source = gst_element_factory_make ("videotestsrc", "source");
 	if(source == NULL){
 		g_printerr ("error cannot create element: %s\n", "videotestsrc" );
-		return NULL;        
+		return NULL;
 	}
 	g_object_set(source, "is-live", TRUE, NULL);
 	capsfilter = gst_element_factory_make ("capsfilter","capsfilter");
 	if(capsfilter == NULL){
 		g_printerr ( "error cannot create element: %s\n", "capsfilter" );
-		return NULL;        
+		return NULL;
 	}
 
-	caps = gst_caps_new_full( 	gst_structure_new( 	"video/x-raw" 	, 
+	caps = gst_caps_new_full( 	gst_structure_new( 	"video/x-raw" 	,
 													"format" 		, G_TYPE_STRING , encoding,
 													"width" 		, G_TYPE_INT 	, width,
 													"height" 		, G_TYPE_INT 	, height,
 													"interlace-mode", G_TYPE_STRING , "progressive",
-													NULL), 
+													NULL),
 								NULL);
-	g_return_if_fail (gst_caps_is_fixed (caps));	
+	g_return_if_fail (gst_caps_is_fixed (caps));
 
 	/* Put the source in the pipeline */
-	g_object_set (capsfilter, "caps", caps, NULL); 
-	gst_bin_add_many (GST_BIN(pipeline), source, capsfilter, NULL); 
-	gst_element_link (source, capsfilter); 
+	g_object_set (capsfilter, "caps", caps, NULL);
+	gst_bin_add_many (GST_BIN(pipeline), source, capsfilter, NULL);
+	gst_element_link (source, capsfilter);
 	/* save last pipeline element*/
 	last = capsfilter;
 	/* For test purposes, if user specify mp4 as format, encrypt the vidoe */
@@ -174,12 +174,12 @@ static GstElement* source_creation(GstElement* pipeline, char* format, int width
 		/* save last pipeline element */
 		if(enc == NULL){
 			g_printerr ( "error cannot create element for: %s\n","enc");
-			return NULL;        
+			return NULL;
 		}
 		/* add encryptor to pipeline, link it to the source */
-		gst_bin_add_many (GST_BIN(pipeline), enc, NULL); 
+		gst_bin_add_many (GST_BIN(pipeline), enc, NULL);
 		gst_element_link_many (capsfilter, enc,NULL);
-		last = enc;		
+		last = enc;
 	}
 	return last;
 }
@@ -188,8 +188,8 @@ static GstElement* source_creation(GstElement* pipeline, char* format, int width
  * \brief intialize the stream: create the pipeline and filters out non vivoe format
  * \param argc to know which source to built
  * \param argv to know which source to built
- * \param stream_datas a structure in which we will save the pipeline and the bus elements 
- * \return 0 
+ * \param stream_datas a structure in which we will save the pipeline and the bus elements
+ * \return 0
  */
 int init_streaming (gpointer main_loop, gpointer stream_datas /* real prototype */
 					, char* format, int width, int height, char* encoding /* extra parameters for testing purposes*/)
@@ -228,14 +228,14 @@ int init_streaming (gpointer main_loop, gpointer stream_datas /* real prototype 
 	last = source_creation(pipeline, format,width ,height ,encoding);
 
 	if (last == NULL ){
-		g_printerr ( "Failed to create videosource\n");	
-		return EXIT_FAILURE;	
+		g_printerr ( "Failed to create videosource\n");
+		return EXIT_FAILURE;
 	}
 	/* Create pipeline  - save videoFormatIndex into stream_data data*/
 	last = create_pipeline( stream_datas, 	loop, last );
-	/* Check if everything went ok*/ 
+	/* Check if everything went ok*/
 	if (last == NULL){
-		g_printerr ( "Failed to create pipeline\n");	
+		g_printerr ( "Failed to create pipeline\n");
 		return EXIT_FAILURE;
 	}
     return EXIT_SUCCESS;
@@ -244,12 +244,12 @@ int init_streaming (gpointer main_loop, gpointer stream_datas /* real prototype 
 /**
  * \brief start the streaming: set pipeling into PLAYING state
  * \param data of the stream (pipeline, bus and bust_watch_id) - see stream_data structure
- * \return 0 
+ * \return 0
  */
 int start_streaming (gpointer stream_datas, long channelVideoFormatIndex  ){
 	stream_data *data 	=  stream_datas;
 	struct videoFormatTable_entry * stream_entry = videoFormatTable_getEntry(channelVideoFormatIndex);
-  	/* Set the pipeline to "playing" state*/	
+  	/* Set the pipeline to "playing" state*/
     g_print ("Now playing\n");
     gst_element_set_state (data->pipeline, GST_STATE_PLAYING);
 	stream_entry->videoFormatStatus = enable;
@@ -259,33 +259,33 @@ int start_streaming (gpointer stream_datas, long channelVideoFormatIndex  ){
 /**
  * \brief stop the streaming: set pipeling into NULL state
  * \param data of the stream (pipeline, bus and bust_watch_id) - see stream_data structure
- * \return 0 
+ * \return 0
  */
 int stop_streaming( gpointer stream_datas, long channelVideoFormatIndex ){
 	stream_data *data 	=  stream_datas;
 	struct videoFormatTable_entry * stream_entry = videoFormatTable_getEntry(channelVideoFormatIndex);
-	/* Out of the main loop, clean up nicely */	
+	/* Out of the main loop, clean up nicely */
 	g_print ("Returned, stopping playback\n");
 	gst_element_set_state (data->pipeline, GST_STATE_NULL);
-	stream_entry->videoFormatStatus = disable;	
+	stream_entry->videoFormatStatus = disable;
 	return 0;
 }
 
 /**
  * \brief delete the stream: free pipeline and bus element
  * \param data of the stream (pipeline, bus and bust_watch_id) - see stream_data structure
- * \return 0 
+ * \return 0
  */
 int delete_steaming_data(gpointer channel_entry){
 	struct channelTable_entry 	*entry 	= channel_entry;
 	stream_data 				*data 	=  entry->stream_datas;
-	/* delete pipeline */	
+	/* delete pipeline */
 	g_print ("Deleting pipeline\n");
-	gst_element_set_state (data->pipeline, GST_STATE_NULL);	
+	gst_element_set_state (data->pipeline, GST_STATE_NULL);
 	gst_object_unref (GST_OBJECT (data->pipeline));
 	g_source_remove (data->bus_watch_id);
 	/* free rtp_data */
-	free(data->rtp_datas);	
+	free(data->rtp_datas);
 	/* free the sap_data */
 	free(entry->sap_datas);
 //	free(data); stream_data are no longer allocated dynamically

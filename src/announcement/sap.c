@@ -52,7 +52,7 @@
 */
 #define SAP_header_announcement 	0x20
 #define SAP_header_deletion 		0x24
-/* 
+/*
  * BYTE 1:
  * Authentication Length: 8 bits
  *  This shall be set to 0 in VIVOE as no authentication data is psap_multicast_addrent
@@ -67,7 +67,7 @@
  */
 #define SAP_header_OPT 				"application/sdp"
 
-/* 
+/*
  * After the really hard and scholar computation I have deduced that the total
  * size of the header of the SAP is 24 bytes:
  * byte 0 as described bedfore 	--> 	1 byte
@@ -115,20 +115,18 @@ static const in_addr_t build_OS(void){
  * \return 	char* an array of byte corsap_multicast_addrponding to the built header
  */
 static gboolean build_SAP_header(char *header, int session_version, gboolean deletion){
-	
-
 	char returnv[SAP_header_size];
 	int offset 						= 0; /* an offset use to concatenate the arrays */
 	
 	if(deletion)
-		returnv[0] = SAP_header_deletion;
+		returnv[0] 	= SAP_header_deletion;
 	else
-		returnv[0] = SAP_header_announcement;
+		returnv[0] 	= SAP_header_announcement;
 	offset++;
-	returnv[1] = SAP_header_AL;
+	returnv[1] 		= SAP_header_AL;
 	offset++;
-	uint16_t mai = build_MAI(session_version);
-	memcpy(returnv+offset, &mai, sizeof(uint16_t));
+	uint16_t mhi 	= build_MAI(session_version);
+	memcpy(returnv+offset, &mhi, sizeof(uint16_t));
 	offset += sizeof(uint16_t);
 	in_addr_t  operatig_source  = build_OS();
 	memcpy(returnv+offset, &operatig_source, sizeof(uint32_t));
@@ -136,7 +134,7 @@ static gboolean build_SAP_header(char *header, int session_version, gboolean del
 	memcpy(returnv+offset, SAP_header_OPT , sizeof(SAP_header_OPT)/sizeof(char) );
 	offset += sizeof(SAP_header_OPT)/sizeof(char);
 	memcpy( header,returnv,SAP_header_size );
-	return TRUE;	
+	return TRUE;
 }
 
 static char*  build_SAP_msg(struct channelTable_entry * entry, int *sap_msg_length, gboolean deletion){
@@ -172,15 +170,15 @@ static char*  build_SAP_msg(struct channelTable_entry * entry, int *sap_msg_leng
 /**
  * \brief This function will send the SAP message, encapsulate into the payload of an UDP datagram, on the UDP socket with IP: 224.2.127.254 port 9875.
  * \gpointer data, the data to pass to the function (an entry in the channelTable)
- * \gboolean TRUE on succed, FALSE on failure, failure happened if the channel is in stop mode 
+ * \gboolean TRUE on succed, FALSE on failure, failure happened if the channel is in stop mode
  */
 gboolean prepare_socket(struct channelTable_entry * entry ){
 	/* define multicast and port number for SAP */
-	const char 	*hostname = "224.2.127.254";
-	const char 	*portname = "9875";
+	const char 	*hostname = sap_multi_addr;
+	const char 	*portname = sap_port_num;
 	sap_data 	*sap_datas = (sap_data*) malloc(sizeof(sap_data));
 	/* define parameter for the address to use in a variable named sap_addr_info */
-	struct 	addrinfo sap_addr_info; 	
+	struct 	addrinfo sap_addr_info;
 	memset(&sap_addr_info,0,sizeof(sap_addr_info));
 	sap_addr_info.ai_family=AF_INET;
 	sap_addr_info.ai_socktype=SOCK_DGRAM;
@@ -188,36 +186,38 @@ gboolean prepare_socket(struct channelTable_entry * entry ){
 	sap_addr_info.ai_flags=AI_ADDRCONFIG;
 	
 	/* initialize sap_multicast_addr member of sap_datas structure */
-	int err=getaddrinfo(hostname,portname,&sap_addr_info,&(sap_datas->sap_multicast_addr));
+	int err = getaddrinfo(hostname,portname,&sap_addr_info,&(sap_datas->sap_multicast_addr));
 	if (err!=0) {
-		g_printerr("failed to open remote socket (err=%d)\n",err);
-		return FALSE;		
+		g_printerr("failed to open remote socket: %s\n",strerror(err));
+		return FALSE;
 	}
-	
+
 	/* open UDP socket */
-	int udp_socket_fd = socket(AF_INET, SOCK_DGRAM, 0);	
-	if (udp_socket_fd==-1) {
+	int udp_socket_fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
+	if ( udp_socket_fd == -1 ) {
 		g_printerr(" Failed to create UDP socket to send SAP/SDP announcement: %s\n",strerror(errno));
 		return FALSE;
 	}
-	/* save value of socket into global structure */	
+	/* save value of socket into global structure */
 	sap_datas->udp_socket_fd = udp_socket_fd;
 
 	/* create UDP payload and save the payload into sap_datas structure */
 	sap_datas->udp_payload_length = 0;
-	sap_datas->udp_payload =  build_SAP_msg(entry, &(sap_datas->udp_payload_length), FALSE); /* build SAP announcement message (not deletion message) */
+	if( entry->channelType == videoChannel ){
+		sap_datas->udp_payload =  build_SAP_msg(entry, &(sap_datas->udp_payload_length), FALSE); /* build SAP announcement message (not deletion message) */
+		for(int i = 0; i<sap_datas->udp_payload_length ; i++)
+			printf("%02X\t%d\n", sap_datas->udp_payload[i], i);
+	}
 	entry->sap_datas = sap_datas;
-
 	return TRUE;
 }
 
 gboolean send_announcement(gpointer entry){
 
 	/* check channel status, this is check as a stop condition
-	 * if the status in stop, we return false, which means that 
+	 * if the status in stop, we return false, which means that
 	 * we will stop to call repeteadly create_SDP
 	 */
-
 	int nb_bytes = -1;
 
 	struct channelTable_entry * channel_entry = entry;
@@ -248,3 +248,75 @@ gboolean send_announcement(gpointer entry){
 	}
 	return TRUE;
 }
+
+#if 0
+gboolean receive_announcement(gpointer entry){
+	struct channelTable_entry * channel_entry = entry;
+
+	int 				status;
+	unsigned int 		socklen;
+	struct sockaddr_in 	saddr;
+	struct ip_mreq 		imreq;
+
+	/* set content of struct saddr and imreq to zero */
+	memset(&saddr, 0, sizeof(struct sockaddr_in));
+	memset(&imreq, 0, sizeof(struct ip_mreq));
+	
+	channel_entry->sap_datas->udp_payload_length 	= 2048; /* set the Max size of received datagram */
+	channel_entry->sap_datas->udp_payload 			= (char*) malloc(channel_entry->sap_datas->udp_payload_length * sizeof(char));
+
+	saddr.sin_family 		= AF_INET;
+	saddr.sin_port 			= htons(9875); /* listen on port 9875 */
+	saddr.sin_addr.s_addr 	= inet_addr("10.5.18.119");
+	saddr.sin_addr.s_addr 	= ethernetIfTable_head->ethernetIfIpAddress; /* bind socket to any interface (any local ip addresse) */
+	status = bind( 	channel_entry->sap_datas->udp_socket_fd,
+		   			(struct sockaddr *)&saddr,
+					sizeof(struct sockaddr_in) );
+
+	if ( status < 0 )
+		g_printerr("Failed to bind socket: %s\n", strerror(errno));
+
+	imreq.imr_multiaddr.s_addr = inet_addr(sap_multi_addr); /* multicast group to join*/
+	imreq.imr_interface.s_addr = INADDR_ANY; /* use DEFAULT interface */
+	/* JOIN multicast group on default interface */
+	status = setsockopt(channel_entry->sap_datas->udp_socket_fd,
+						IPPROTO_IP,
+						IP_ADD_MEMBERSHIP,
+						(const void *)&imreq,
+						sizeof(struct ip_mreq) );
+
+	struct timeval timeout;
+    timeout.tv_sec = 10;
+    timeout.tv_usec = 0;
+	status = setsockopt (channel_entry->sap_datas->udp_socket_fd,
+						 SOL_SOCKET,
+						 SO_RCVTIMEO,
+						 (char *)&timeout,
+		 				 sizeof(timeout) );
+    if ( status < 0)
+		g_printerr("Failed to set socket timeout: %s\n", strerror(errno));
+
+	printf("1\n");
+	socklen = sizeof(struct sockaddr_in);
+
+	/* receive packet from socket */
+	status = recvfrom( 	channel_entry->sap_datas->udp_socket_fd,
+		   				channel_entry->sap_datas->udp_payload,
+						channel_entry->sap_datas->udp_payload_length,
+		   				0, /* flags */
+						NULL,
+						NULL);
+
+	if (status==-1) {
+		g_printerr("Failed to receive data from: %s\n",strerror(errno));
+		return TRUE;
+	} else if (status==sizeof(channel_entry->sap_datas->udp_payload)) {
+	    g_printerr("WARNING: datagram too large for buffer: truncated");
+		return FALSE;
+	} else {
+		for(int i = 0; i<status ; i++)
+			printf("%02X\t%d\n", channel_entry->sap_datas->udp_payload[i], i);
+	}
+	return TRUE;
+}
+#endif

@@ -46,21 +46,21 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus *bus,
 		/* Check if everything went ok */
 		if( rtp == NULL){
 			g_printerr ( "error cannot create element for: %s\n","rtp");
-			return NULL;        
-		}	
+			return NULL;
+		}
 	}else if  (gst_structure_has_name( video_caps, "video/mpeg")){
 		/* For MPEG-4 video */
 		parser 	= gst_element_factory_make ("mpeg4videoparse", "parser");
 		if( parser == NULL){
 			g_printerr ( "error cannot create element for: %s\n","parser");
-			return NULL;        
+			return NULL;
 		}
 		rtp 	= gst_element_factory_make ("rtpmp4vpay", "rtp");
 		//g_object_set(G_OBJECT(rtp), "timestamp", 1, NULL);
 		/* Checek if everything went ok */
 		if( rtp == NULL){
 			g_printerr ( "error cannot create element for: %s\n","rtp");
-			return NULL;        
+			return NULL;
 		}
 		gst_bin_add(GST_BIN(pipeline),parser);
 		gst_element_link(input, parser);
@@ -81,7 +81,7 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus *bus,
 	/*Fill the MIB a second time after creating payload*/
 	fill_entry(video_caps, video_info, stream_datas);
 	
-	/* Finally return*/	
+	/* Finally return*/
 	return rtp;
 }
 
@@ -131,7 +131,7 @@ static GstElement* addUDP( 	GstElement *pipeline, 	GstBus *bus,
  * \param bus the bus associated to the pipeline
  * \param bust_watch_id the watch associated to the bus
  * \param loop the GMainLoop
- * \param input the las element of the pipeline, (avenc_mp4 or capsfilter) as we built our own source 
+ * \param input the las element of the pipeline, (avenc_mp4 or capsfilter) as we built our own source
  * \param ip the ip to which send the stream on
  * \port the port to use
  * \return GstElement* the last element added to the pipeline (should be udpsink if everything went ok)
@@ -142,7 +142,7 @@ GstElement* create_pipeline( gpointer stream_datas,
 	GstElement 		*last;
 	stream_data 	*data 	=  stream_datas;
 	long 			ip;
-	/* create the empty videoFormatTable_entry structure to intiate the MIB */	
+	/* create the empty videoFormatTable_entry structure to intiate the MIB */
 	struct videoFormatTable_entry * video_stream_info;
 	video_stream_info = SNMP_MALLOC_TYPEDEF(struct videoFormatTable_entry);
 	if( !video_stream_info){
@@ -156,7 +156,7 @@ GstElement* create_pipeline( gpointer stream_datas,
    	/* Add RTP element */
  	last = addRTP( 	pipeline, 	  bus,
 					bus_watch_id, loop,
-					input, 		  video_stream_info, 
+					input, 		  video_stream_info,
 					stream_datas);
 
 	if(last == NULL){
@@ -164,14 +164,14 @@ GstElement* create_pipeline( gpointer stream_datas,
 		return NULL;
 	}
 
-	/* 
+	/*
 	 * Before returning the starting the stream
 	 * Add the entry to the Table, if necessary.
 	 */
 	if( initialize_videoFormat(video_stream_info, stream_datas, &ip)){
 		g_printerr("Failed to add entry in the videoFormatTable or in channelEntry\n");
 		return NULL;
-	}	
+	}
 
 	/* Add UDP element */
 	last = addUDP( 	pipeline, 	  		bus,
@@ -182,10 +182,10 @@ GstElement* create_pipeline( gpointer stream_datas,
 	if (last == NULL){
 		g_printerr("Failed to create pipeline\n");
 		return NULL;
-	}	
+	}
 
 	/* Before returning, free the entry created at the begging*/
-	free(video_stream_info);	
+	free(video_stream_info);
 	return last;
 
 }

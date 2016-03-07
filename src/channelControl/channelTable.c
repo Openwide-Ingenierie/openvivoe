@@ -286,7 +286,7 @@ channelTable_get_next_data_point(void **my_loop_context,
 }
 
 
-/** 
+/**
  * \brief handles the call of function according to the new channeltStatus value received from SNMP request
  * \param table_entry the table entry on which the request applies
  */
@@ -303,11 +303,11 @@ static void channelSatus_requests_handler( struct channelTable_entry * table_ent
 				stop_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex );
 			}
 			break;
-		case serviceUser:	
+		case serviceUser:
 			if ( table_entry->channelStatus == start){
 				prepare_socket(table_entry); //save the SAP datas
 				receive_announcement(table_entry);
-			//	g_timeout_add(table_entry->channelSapMessageInterval, receive_announcement, table_entry );
+			//	g_timeout_add(1000, receive_announcement, table_entry );
 			//	start_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex);
 			}
 			else if ( table_entry->channelStatus == stop){
@@ -316,7 +316,7 @@ static void channelSatus_requests_handler( struct channelTable_entry * table_ent
 			break;
 		default:
 			/* this is a really really bad error, we should never get there */
-			g_printerr("Unknown device Type: ut should be serviceProvider (%d), serviceUser (%d), or both (%d)\n" , device_SP, device_SU, device_both);
+			g_printerr("Unknown channel Type\n");
 			break;
 	}
 }
