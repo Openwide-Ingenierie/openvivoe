@@ -152,7 +152,7 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 			return EXIT_FAILURE;
 		}else{
 			/* Then we are sure that we can create a new entry */
-			videoFormatTable_createEntry( 	index 										, 			 					VF_videoChannel,
+			videoFormatTable_createEntry( 	index 										, 			 					videoChannel,
 											disable, 																	video_info->videoFormatBase,
 											video_info->videoFormatSampling, 											video_info->videoFormatBitDepth,
 											video_info->videoFormatFps,				 									video_info->videoFormatColorimetry,
@@ -171,7 +171,7 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 			default_ip 		= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0], index);
 			
 			/* At the  same time we copy all of those parameters into video channel */
-			channelTable_createEntry( 	index, 																			VF_videoChannel,
+			channelTable_createEntry( 	channelNumber._value.int_val+1, 												videoChannel,
 										"channelUserDesc", 																stop,
 										index, 																			video_info->videoFormatBase,
 										video_info->videoFormatSampling, 												video_info->videoFormatBitDepth,
@@ -211,7 +211,7 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 			 * So add it!
 			 * But check that the maximum number of video format has not been reached already
 			 */
-			videoFormatTable_createEntry( 	video_info->videoFormatIndex,													VF_videoChannel,
+			videoFormatTable_createEntry( 	video_info->videoFormatIndex,													videoChannel,
 											disable, 																		video_info->videoFormatBase,
 											video_info->videoFormatSampling, 												video_info->videoFormatBitDepth,
 											video_info->videoFormatFps,				 										video_info->videoFormatColorimetry,
@@ -228,7 +228,7 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 			*ip 			= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0],video_info->videoFormatIndex);
 			default_ip 		= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0], video_info->videoFormatIndex);
 			/* At the  same time we copy all of those parameters into video channel */
-			channelTable_createEntry( 	video_info->videoFormatIndex, 														VF_videoChannel,
+			channelTable_createEntry( 	channelNumber._value.int_val+1, 													videoChannel,
 										"channelUserDesc", 																	stop,
 										video_info->videoFormatIndex, 														video_info->videoFormatBase,
 										video_info->videoFormatSampling, 													video_info->videoFormatBitDepth,
