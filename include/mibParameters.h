@@ -24,9 +24,9 @@
 /* Definition of value to create entries in table */
 
 /* values for deviceInfo */
-#define device_SP 			1
-#define device_SU 			2
-#define device_both			3
+#define device_SP 					1
+#define device_SU 					2
+#define device_both					3
 
 
 /* values for videoFormatType */
@@ -41,9 +41,10 @@
 #define disable 					2
 
 /*values for videoForamtInterleaced*/
-#define vivoe_interlaced 			1
+/*#define vivoe_interlaced 			1
 #define vivoe_progressive 			2
-#define vivoe_none 					3
+#define vivoe_none 					3*/
+typedef enum {vivoe_interlaced = 1, vivoe_progressive,  vivoe_none }interlaced_mode;
 
 /* values for channelStatus */
 #define start 						1
@@ -57,6 +58,8 @@
 #define address_ttl 			15
 #define media_type 				"video"
 #define transport_proto 		"RTP/AVP"
+#define sap_multi_addr 			"224.2.127.254"
+#define sap_port_num 			"9875"
 
 /* removing row from table in this MIB */
 #define ALLOW_REMOVING_ROW 			0

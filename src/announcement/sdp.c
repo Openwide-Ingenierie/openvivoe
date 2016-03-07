@@ -30,8 +30,9 @@
  * \param 	interlaced_mode the int representation of our video stream
  * \return 	the string representation of our interlaced_mode
  */
-static char* interlace_mode_to_string(int interlaced_mode){
-	switch(interlaced_mode){
+static const char* interlace_mode_to_string(int interlaced_mode_val){
+	const char * enum_names []=  { NULL, "interlaced" , "progressive" , "none" , NULL };	
+/*	switch(interlaced_mode){
 		case 1: return "interlaced";
 				break;
 		case 2: return "progressive";
@@ -39,7 +40,8 @@ static char* interlace_mode_to_string(int interlaced_mode){
 		case 3: return "none";
 				break;
 		default: return "";
-	}
+	}*/
+	return enum_names[interlaced_mode_val];
 }
 
 /**

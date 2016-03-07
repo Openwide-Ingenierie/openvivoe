@@ -249,7 +249,6 @@ gboolean send_announcement(gpointer entry){
 	return TRUE;
 }
 
-#if 0
 gboolean receive_announcement(gpointer entry){
 	struct channelTable_entry * channel_entry = entry;
 
@@ -319,4 +318,3 @@ gboolean receive_announcement(gpointer entry){
 	}
 	return TRUE;
 }
-#endif
