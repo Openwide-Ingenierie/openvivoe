@@ -110,7 +110,7 @@ static const in_addr_t build_OS(void){
 }
 
 /**
- * \brief 	build the SAP header of datagram, as defined by the VIVOE nor
+ * \brief 	build the SAP header of datagram, as defined by the VIVOE norme
  * \param  	session_version the number of session_version to use to create the Message Identifier Hash
  * \return 	char* an array of byte corsap_multicast_addrponding to the built header
  */
