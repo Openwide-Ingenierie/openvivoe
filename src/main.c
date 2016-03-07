@@ -110,14 +110,15 @@ int main (int   argc,  char *argv[]){
 	g_unix_signal_add (SIGINT, 	stop_program, &stop_data);
 	g_unix_signal_add (SIGTERM, stop_program, &stop_data);
 
-
 	/* start the program: SNMP SubAgent deamon, and streaming */
-	if ( deviceInfo.parameters[num_DeviceType]._value.int_val == serviceProvider ){
+	if ( 	deviceInfo.parameters[num_DeviceType]._value.int_val == device_SP
+	  	 || deviceInfo.parameters[num_DeviceType]._value.int_val == device_both){
 		if ( !service_Provider_init( loop )) {
 			g_printerr("Failed to load streams\n");
 			return 1;
 		}
 	}
+
 
     /* Iterate */
 	g_main_loop_run (loop);

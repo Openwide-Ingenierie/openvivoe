@@ -66,11 +66,13 @@ initialize_table_channelTable(void)
     
     netsnmp_register_table_iterator( reg, iinfo );
 	/* check if the device is a serviceProvider or a ServiceUser
-	 * If it is a serviceUser, then create an empty entry 
+	 * If it is a serviceUser or both, then create an empty entry 
 	 */
-	if( deviceInfo.parameters[num_DeviceType]._value.int_val == device_SU )
+	if( deviceInfo.parameters[num_DeviceType]._value.int_val != device_SP ){
 		channelTable_createEmptyEntry();
-	
+		/* increase channelNumber as we added an entry */			
+		channelNumber._value.int_val++;
+	}
 }
 
 /* create a new row in the (unsorted) table */
