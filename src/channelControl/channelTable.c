@@ -306,8 +306,8 @@ static void channelSatus_requests_handler( struct channelTable_entry * table_ent
 		case serviceUser:
 			if ( table_entry->channelStatus == start){
 				prepare_socket(table_entry); //save the SAP datas
-				receive_announcement(table_entry);
-			//	g_timeout_add(1000, receive_announcement, table_entry );
+			//	receive_announcement(table_entry);
+				g_timeout_add(1000, receive_announcement, table_entry );
 			//	start_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex);
 			}
 			else if ( table_entry->channelStatus == stop){

@@ -93,8 +93,10 @@ struct {
  * \brief inits the mulcast_addr parameter
  */
 void init_sap_multicast(){
+	int status = -1;
+	memset(&sap_socket.multicast_addr, 0, sizeof(struct sockaddr_in));
 	sap_socket.multicast_addr.sin_family 	= AF_INET;
-	sap_socket.multicast_addr.sin_port 	= htons(9875);
+	sap_socket.multicast_addr.sin_port 		= htons(9875);
 	inet_aton("224.2.127.254", &sap_socket.multicast_addr.sin_addr);
 	
 	/* open UDP socket */
@@ -108,6 +110,15 @@ void init_sap_multicast(){
 	/* define a TTL of one, this will restrict the Multicast datagram to be restricted to the same subnet, which we want for VIVOE */
 	uint8_t ttl = 1;
 	setsockopt(sap_socket.udp_socket_fd, IPPROTO_IP, IP_MULTICAST_TTL, &ttl, sizeof(ttl));
+
+	status = bind( 	sap_socket.udp_socket_fd,
+		   			(struct sockaddr *)&(sap_socket.multicast_addr),
+					//sizeof(sap_socket.multicast_addr) );
+					sizeof( struct sockaddr_in));
+	
+	/* check for binding errors */
+	if ( status < 0 )
+		g_printerr("Failed to bind socket: %s\n", strerror(errno));
 }
 
 
@@ -260,37 +271,24 @@ gboolean receive_announcement(gpointer entry){
 
 	int 				status;
 	unsigned int 		socklen;
-	struct sockaddr_in 	saddr;
 	struct ip_mreq 		imreq;
 
 	/* set content of struct saddr and imreq to zero */
-	memset(&saddr, 0, sizeof(struct sockaddr_in));
 	memset(&imreq, 0, sizeof(struct ip_mreq));
 	
 	channel_entry->sap_datas->udp_payload_length 	= 2048; /* set the Max size of received datagram */
 	channel_entry->sap_datas->udp_payload 			= (char*) malloc(channel_entry->sap_datas->udp_payload_length * sizeof(char));
 
-	saddr.sin_family 		= AF_INET;
-	saddr.sin_port 			= htons(9875); /* listen on port 9875 */
-	saddr.sin_addr.s_addr 	= inet_addr("10.5.18.119");
-	saddr.sin_addr.s_addr 	= ethernetIfTable_head->ethernetIfIpAddress; /* bind socket to any interface (any local ip addresse) */
-	status = bind( 	sap_socket.udp_socket_fd,
-		   			(struct sockaddr *)&saddr,
-					sizeof(struct sockaddr_in) );
-
-	if ( status < 0 )
-		g_printerr("Failed to bind socket: %s\n", strerror(errno));
-
 	imreq.imr_multiaddr.s_addr = inet_addr(sap_multi_addr); /* multicast group to join*/
 	imreq.imr_interface.s_addr = INADDR_ANY; /* use DEFAULT interface */
-	/* JOIN multicast group on default interface */
+	/* JOIN multicast group on default interface - pass the ip_multicast_request to kernel */
 	status = setsockopt(sap_socket.udp_socket_fd,
 						IPPROTO_IP,
 						IP_ADD_MEMBERSHIP,
 						(const void *)&imreq,
 						sizeof(struct ip_mreq) );
 
-	struct timeval timeout;
+	/*struct timeval timeout;
     timeout.tv_sec = 10;
     timeout.tv_usec = 0;
 	status = setsockopt (sap_socket.udp_socket_fd,
@@ -300,17 +298,19 @@ gboolean receive_announcement(gpointer entry){
 		 				 sizeof(timeout) );
     if ( status < 0)
 		g_printerr("Failed to set socket timeout: %s\n", strerror(errno));
+	*/
 
-	printf("1\n");
 	/* receive packet from socket */
+	socklen = sizeof(sap_socket.multicast_addr);
+
 	status = recvfrom( 	sap_socket.udp_socket_fd,
 		   				channel_entry->sap_datas->udp_payload,
 						channel_entry->sap_datas->udp_payload_length,
-		   				0, /* flags */
-						NULL,
-						NULL);
+			   			MSG_DONTWAIT, /* flags */
+						&(sap_socket.multicast_addr),
+						&socklen );
 
-	if (status==-1) {
+	if (status == -1) {
 		g_printerr("Failed to receive data from: %s\n",strerror(errno));
 		return TRUE;
 	} else if (status==sizeof(channel_entry->sap_datas->udp_payload)) {
