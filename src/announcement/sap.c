@@ -98,12 +98,16 @@ void init_sap_multicast(){
 	inet_aton("224.2.127.254", &sap_socket.multicast_addr.sin_addr);
 	
 	/* open UDP socket */
-	int udp_socket_fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
+	int udp_socket_fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if ( udp_socket_fd == -1 ) {
 		g_printerr(" Failed to create UDP socket to send SAP/SDP announcement: %s\n",strerror(errno));
 	}
 	/* save value of socket into global structure */
 	sap_socket.udp_socket_fd = udp_socket_fd;
+	
+	/* define a TTL of one, this will restrict the Multicast datagram to be restricted to the same subnet, which we want for VIVOE */
+	uint8_t ttl = 1;
+	setsockopt(sap_socket.udp_socket_fd, IPPROTO_IP, IP_MULTICAST_TTL, &ttl, sizeof(ttl));
 }
 
 
@@ -298,8 +302,6 @@ gboolean receive_announcement(gpointer entry){
 		g_printerr("Failed to set socket timeout: %s\n", strerror(errno));
 
 	printf("1\n");
-	socklen = sizeof(struct sockaddr_in);
-
 	/* receive packet from socket */
 	status = recvfrom( 	sap_socket.udp_socket_fd,
 		   				channel_entry->sap_datas->udp_payload,
