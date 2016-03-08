@@ -211,24 +211,26 @@ static char*  build_SAP_msg(struct channelTable_entry * entry, int *sap_msg_leng
 
 /**
  * \brief This function will send the SAP message, encapsulate into the payload of an UDP datagram, on the UDP socket with IP: 224.2.127.254 port 9875.
- * \gpointer data, the data to pass to the function (an entry in the channelTable)
- * \gboolean TRUE on succed, FALSE on failure, failure happened if the channel is in stop mode
+ * \param hannelTable_entry * entry the entry in the channelTable associated to the socket
+ * \return gboolean TRUE
  */
 gboolean prepare_socket(struct channelTable_entry * entry ){
-	sap_data 	*sap_datas = (sap_data*) malloc(sizeof(sap_data));
-
-
 	/* create UDP payload and save the payload into sap_datas structure */
-	sap_datas->udp_payload_length = 0;
+	entry->sap_datas->udp_payload_length = 0;
 	if( entry->channelType == videoChannel ){
-		sap_datas->udp_payload =  build_SAP_msg(entry, &(sap_datas->udp_payload_length), FALSE); /* build SAP announcement message (not deletion message) */
-		for(int i = 0; i<sap_datas->udp_payload_length ; i++)
-			printf("%02X\t%d\n", sap_datas->udp_payload[i], i);
+		entry->sap_datas->udp_payload =  build_SAP_msg(entry, &(entry->sap_datas->udp_payload_length), FALSE); /* build SAP announcement message (not deletion message) */
+		/* for(int i = 0; i<entry->sap_datas->udp_payload_length ; i++)
+			printf("%02X\t%d\n", entry->sap_datas->udp_payload[i], i); */
 	}
-	entry->sap_datas = sap_datas;
 	return TRUE;
 }
 
+
+/**
+ * \brief Sends UDP datagram on the UDP socket with IP: 224.2.127.254 port 9875, payload contains SAP/SDP message (announcement or deletion)
+ * \param gpointer entry the entry in the channelTable associated to the socket
+ * \return gboolean TRUE on succed, FALSE on failure
+ */
 gboolean send_announcement(gpointer entry){
 
 	/* check channel status, this is check as a stop condition
@@ -236,7 +238,7 @@ gboolean send_announcement(gpointer entry){
 	 * we will stop to call repeteadly create_SDP
 	 */
 	int nb_bytes = -1;
-
+	printf("announcement\n");
 	struct channelTable_entry * channel_entry = entry;
 	if( channel_entry->channelStatus == stop ){
 		/* Build deletion packet */
@@ -266,6 +268,11 @@ gboolean send_announcement(gpointer entry){
 	return TRUE;
 }
 
+/**
+ * \brief Joins multicast group and receives UDP datagram on the UDP socket 224.2.127.254:9875, payload contains SAP/SDP message (announcement or deletion)
+ * \param gpointer entry the entry in the channelTable associated to the socket
+ * \return gboolean TRUE on succed, FALSE on failure
+ */
 gboolean receive_announcement(gpointer entry){
 	struct channelTable_entry * channel_entry = entry;
 
@@ -280,7 +287,7 @@ gboolean receive_announcement(gpointer entry){
 	channel_entry->sap_datas->udp_payload 			= (char*) malloc(channel_entry->sap_datas->udp_payload_length * sizeof(char));
 
 	imreq.imr_multiaddr.s_addr = inet_addr(sap_multi_addr); /* multicast group to join*/
-	imreq.imr_interface.s_addr = INADDR_ANY; /* use DEFAULT interface */
+	imreq.imr_interface.s_addr = ethernetIfTable_head->ethernetIfIpAddress; /* use DEFAULT interface */
 	/* JOIN multicast group on default interface - pass the ip_multicast_request to kernel */
 	status = setsockopt(sap_socket.udp_socket_fd,
 						IPPROTO_IP,
@@ -313,10 +320,11 @@ gboolean receive_announcement(gpointer entry){
 	if (status == -1) {
 		g_printerr("Failed to receive data from: %s\n",strerror(errno));
 		return TRUE;
-	} else if (status==sizeof(channel_entry->sap_datas->udp_payload)) {
+	} else if ( status == sizeof(channel_entry->sap_datas->udp_payload )) {
 	    g_printerr("WARNING: datagram too large for buffer: truncated");
 		return FALSE;
 	} else {
+		printf("fepziufzepfbhéep\n");
 		for(int i = 0; i<status ; i++)
 			printf("%02X\t%d\n", channel_entry->sap_datas->udp_payload[i], i);
 	}

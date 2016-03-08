@@ -92,7 +92,7 @@ int main (int   argc,  char *argv[]){
 	/* create the GMainLoop*/
 	GMainLoop 	*loop = g_main_loop_new (NULL, FALSE);
 
-	/* add the idle function that handle SNMP request everye 100ms */
+	/* add the idle function that handle SNMP request every 100ms */
 	g_timeout_add (10, handle_snmp_request, NULL);
 
 	/* init SubAgent Deamon */

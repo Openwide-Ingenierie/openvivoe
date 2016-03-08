@@ -6,6 +6,7 @@
  */
 #ifndef SAP_H
 # define SAP_H
+
 void init_sap_multicast();
 gboolean prepare_socket(struct channelTable_entry * entry );
 gboolean send_announcement(gpointer entry);
