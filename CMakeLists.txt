@@ -24,9 +24,18 @@ include_directories(
   /usr/include
 )
 
+#Check dependencies
+include(FindPkgConfig)
+pkg_check_modules(GLIB2 REQUIRED glib-2.0>=2.46.2)
+pkg_check_modules(GST 	REQUIRED gstreamer-1.0>=1.6.3)
+
+#Special case of net-snmp (that is not referenced by pkg-config)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}")
+find_package(NetSnmp)
+
 #add source and header
-file(GLOB_RECURSE openvivoe_SRC src/*)
-file(GLOB_RECURSE openvivoe_HEADER include/*)
+file(GLOB_RECURSE openvivoe_SRC 	src/*)
+file(GLOB_RECURSE openvivoe_HEADER 	include/*)
 add_executable(openvivoe ${openvivoe_SRC} ${openvivoe_HEADER} )
 
 #
