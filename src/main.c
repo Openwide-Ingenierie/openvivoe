@@ -58,8 +58,9 @@ static gboolean stop_program ( gpointer data ){
 	struct channelTable_entry *temp;
 	while(iterator != NULL){
 		temp = iterator;
-		iterator = iterator->next;		
-		delete_steaming_data(temp);
+		iterator = iterator->next;
+		if ( temp->channelType == videoChannel )
+			delete_steaming_data(temp);
 	}
 	g_main_loop_quit (loop);
 	g_main_loop_unref (loop);
