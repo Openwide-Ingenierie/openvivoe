@@ -147,6 +147,7 @@ struct channelTable_entry *
 	/* allocate memory for sap_data */
 	sap_data 	*sap_datas = (sap_data*) malloc(sizeof(sap_data));
 	entry->sap_datas = sap_datas;
+	prepare_socket(entry); //save the SAP datas
 
     entry->next 							= channelTable_head;
 	entry->valid 							= 1;
@@ -301,7 +302,7 @@ static void channelSatus_requests_handler( struct channelTable_entry * table_ent
 	switch( table_entry->channelType ){
 		case videoChannel : /* case ServiceProvider */
 			if ( table_entry->channelStatus == start){
-				prepare_socket(table_entry); //save the SAP datas
+		//		prepare_socket(table_entry); //save the SAP datas
 				g_timeout_add(table_entry->channelSapMessageInterval,send_announcement, table_entry );
 				start_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex);
 			}
@@ -312,7 +313,7 @@ static void channelSatus_requests_handler( struct channelTable_entry * table_ent
 		case serviceUser:
 			if ( table_entry->channelStatus == start){
 		//		prepare_socket(table_entry); //save the SAP datas
-				g_timeout_add(4000, receive_announcement, table_entry );
+				g_timeout_add(1000, receive_announcement, table_entry );
 			//	start_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex);
 			}
 			else if ( table_entry->channelStatus == stop){
@@ -587,7 +588,6 @@ channelTable_handler(
          */
     case MODE_SET_RESERVE1:
         for (request=requests; request; request=request->next) {
-			printf("1\n");			
             table_entry = (struct channelTable_entry *)
                               netsnmp_extract_iterator_context(request);
             table_info  =     netsnmp_extract_table_info(      request);
