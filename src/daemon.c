@@ -63,6 +63,11 @@
  */
 #include "../include/conf/mib-conf.h"
 
+/*
+ * SAP/SDP announcement
+ */
+#include "../include/announcement/sap.h"
+
 
 /*
  * Header of this file

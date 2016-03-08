@@ -84,15 +84,26 @@
 /**
  * \brief a global struct that represent the socket address on which to sent SAP/SDP announcement messages
  */
-struct sockaddr_in 	multicast_addr;
+struct {
+	struct sockaddr_in 	multicast_addr;
+	int 				udp_socket_fd;
+}sap_socket;
 
 /**
  * \brief inits the mulcast_addr parameter
  */
 void init_sap_multicast(){
-	multicast_addr.sin_family 	= AF_INET;
-	multicast_addr.sin_port 	= htons(9875);
-	inet_aton("224.2.127.254", &multicast_addr.sin_addr);
+	sap_socket.multicast_addr.sin_family 	= AF_INET;
+	sap_socket.multicast_addr.sin_port 	= htons(9875);
+	inet_aton("224.2.127.254", &sap_socket.multicast_addr.sin_addr);
+	
+	/* open UDP socket */
+	int udp_socket_fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
+	if ( udp_socket_fd == -1 ) {
+		g_printerr(" Failed to create UDP socket to send SAP/SDP announcement: %s\n",strerror(errno));
+	}
+	/* save value of socket into global structure */
+	sap_socket.udp_socket_fd = udp_socket_fd;
 }
 
 
@@ -191,14 +202,6 @@ static char*  build_SAP_msg(struct channelTable_entry * entry, int *sap_msg_leng
 gboolean prepare_socket(struct channelTable_entry * entry ){
 	sap_data 	*sap_datas = (sap_data*) malloc(sizeof(sap_data));
 
-	/* open UDP socket */
-	int udp_socket_fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
-	if ( udp_socket_fd == -1 ) {
-		g_printerr(" Failed to create UDP socket to send SAP/SDP announcement: %s\n",strerror(errno));
-		return FALSE;
-	}
-	/* save value of socket into global structure */
-	sap_datas->udp_socket_fd = udp_socket_fd;
 
 	/* create UDP payload and save the payload into sap_datas structure */
 	sap_datas->udp_payload_length = 0;
@@ -223,21 +226,21 @@ gboolean send_announcement(gpointer entry){
 	if( channel_entry->channelStatus == stop ){
 		/* Build deletion packet */
 		channel_entry->sap_datas->udp_payload = build_SAP_msg(channel_entry, &(channel_entry->sap_datas->udp_payload_length), TRUE);
-		nb_bytes = sendto( 	channel_entry->sap_datas->udp_socket_fd,
+		nb_bytes = sendto( 	sap_socket.udp_socket_fd,
 							channel_entry->sap_datas->udp_payload,
 							channel_entry->sap_datas->udp_payload_length,
 							0,
-							(struct sockaddr *) &multicast_addr,
-							sizeof(multicast_addr));
+							(struct sockaddr *) &(sap_socket.multicast_addr),
+							sizeof(sap_socket.multicast_addr));
 		return FALSE;
 	}else{
 		/* Send Annoucement message */
-		nb_bytes = sendto( 	channel_entry->sap_datas->udp_socket_fd,
+		nb_bytes = sendto( 	sap_socket.udp_socket_fd,
 							channel_entry->sap_datas->udp_payload,
 							channel_entry->sap_datas->udp_payload_length,
 							0,
-							(struct sockaddr *) &multicast_addr,
-							sizeof(multicast_addr));
+							(struct sockaddr *) &(sap_socket.multicast_addr),
+							sizeof(sap_socket.multicast_addr));
 	}
 	/* check if the number of bytes send is -1, if so an error as occured */
 	if ( nb_bytes	== -1 )
@@ -267,7 +270,7 @@ gboolean receive_announcement(gpointer entry){
 	saddr.sin_port 			= htons(9875); /* listen on port 9875 */
 	saddr.sin_addr.s_addr 	= inet_addr("10.5.18.119");
 	saddr.sin_addr.s_addr 	= ethernetIfTable_head->ethernetIfIpAddress; /* bind socket to any interface (any local ip addresse) */
-	status = bind( 	channel_entry->sap_datas->udp_socket_fd,
+	status = bind( 	sap_socket.udp_socket_fd,
 		   			(struct sockaddr *)&saddr,
 					sizeof(struct sockaddr_in) );
 
@@ -277,7 +280,7 @@ gboolean receive_announcement(gpointer entry){
 	imreq.imr_multiaddr.s_addr = inet_addr(sap_multi_addr); /* multicast group to join*/
 	imreq.imr_interface.s_addr = INADDR_ANY; /* use DEFAULT interface */
 	/* JOIN multicast group on default interface */
-	status = setsockopt(channel_entry->sap_datas->udp_socket_fd,
+	status = setsockopt(sap_socket.udp_socket_fd,
 						IPPROTO_IP,
 						IP_ADD_MEMBERSHIP,
 						(const void *)&imreq,
@@ -286,7 +289,7 @@ gboolean receive_announcement(gpointer entry){
 	struct timeval timeout;
     timeout.tv_sec = 10;
     timeout.tv_usec = 0;
-	status = setsockopt (channel_entry->sap_datas->udp_socket_fd,
+	status = setsockopt (sap_socket.udp_socket_fd,
 						 SOL_SOCKET,
 						 SO_RCVTIMEO,
 						 (char *)&timeout,
@@ -298,7 +301,7 @@ gboolean receive_announcement(gpointer entry){
 	socklen = sizeof(struct sockaddr_in);
 
 	/* receive packet from socket */
-	status = recvfrom( 	channel_entry->sap_datas->udp_socket_fd,
+	status = recvfrom( 	sap_socket.udp_socket_fd,
 		   				channel_entry->sap_datas->udp_payload,
 						channel_entry->sap_datas->udp_payload_length,
 		   				0, /* flags */
