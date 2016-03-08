@@ -206,6 +206,7 @@ static char*  build_SAP_msg(struct channelTable_entry * entry, int *sap_msg_leng
 	memcpy(sap_msg, header, SAP_header_size);
 	memcpy(sap_msg+SAP_header_size, payload, strlen(payload));
 	*sap_msg_length = sap_msg_size; // save the length if the message into sap_msg_length
+	free(payload);
 	return sap_msg;
 }
 
