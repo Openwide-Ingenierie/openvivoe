@@ -2,12 +2,3 @@ remarques générales:
 
 sap.c 
 * g_strdup alloue de la mémoire. il faut la libérer. 
-
-handler.c
-* ligne 246 : je comprends pas la logique, tu fais un memdup, qui alloue de la memoire
-  et tu perds cette mémoire ligne 250 (et aussi dans la 2eme erreur)
-  de plus old_string est perdue à la sortie de la fonction, ton MODE_SET_FREE ne peut pas marcher...
-  il faut que tu sauvegardes old_string quelque part dans la request...
-* ligne 261, l'ancienne valeur de value est invalide après un realloc. passer par un temp_string ne
-  sert à rien 
-* ligne 99 tu as le même pb de gestion de memoire

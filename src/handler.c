@@ -47,6 +47,7 @@ int handle_ROinteger(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }
 
+int old_integer = -1;
 /*this is the handler for all RW integer in the MIB*/
 int handle_RWinteger(netsnmp_mib_handler *handler,
                      netsnmp_handler_registration *reginfo,
@@ -55,7 +56,6 @@ int handle_RWinteger(netsnmp_mib_handler *handler,
                      const char* caller_name,
                      int* value)
 {
-    int * old_integer = NULL;
     int ret;
     /* We are never called for a GETNEXT if it's registered as a
        "instance", as it's "magically" handled for us.  */
@@ -81,28 +81,21 @@ int handle_RWinteger(netsnmp_mib_handler *handler,
             break;
 
         case MODE_SET_RESERVE2:
-            /* XXX malloc "undo" storage buffer */
-            old_integer =  (int*) netsnmp_memdup((int *) value,  sizeof(int));
-            if (old_integer == NULL) {
-                netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_RESOURCEUNAVAILABLE);
-            }else{
-                *old_integer = *value;
-            }
-
+            /* XXX malloc "undo" storage buffer */	
             break;
 
         case MODE_SET_FREE:
             /* XXX: free resources allocated in RESERVE1 and/or
             RESERVE2.  Something failed somewhere, and the states
             below won't be called. */
-            free(old_integer); /*free resources allocated in RESERVE2*/
             break;
 
         case MODE_SET_ACTION:
             /* XXX: perform the value change here */
-            *value = *(requests->requestvb->val.integer);
+            old_integer =  *value;
+			*value = *(requests->requestvb->val.integer);
             /*Send a message during debug to inform the update had been performed*/
-            DEBUGMSGTL((caller_name, "updated delay_time -> %d\n", *value));
+            DEBUGMSGTL((caller_name, "updated value -> %d\n", *value));
             /*get possible errors*/
             ret = netsnmp_check_requests_error(requests);
             if (ret != SNMP_ERR_NOERROR) {
@@ -113,8 +106,8 @@ int handle_RWinteger(netsnmp_mib_handler *handler,
         case MODE_SET_COMMIT:
             break;
 
-        case MODE_SET_UNDO:
-            memcpy(value, old_integer, sizeof(int));
+        case MODE_SET_UNDO: /* will be executed only if some part of MODE_SET_ACTION fails */
+			*value = old_integer;
             ret = netsnmp_check_requests_error(requests);
             if (ret != SNMP_ERR_NOERROR) {
                 /* try _really_really_ hard to never get to this point */
@@ -200,6 +193,11 @@ int handle_ROstring64(netsnmp_mib_handler *handler,
     return  handle_ROstring(handler, reginfo, reqinfo, requests, caller_name, value, DislayString64);
 }
 
+/**
+ * \brief a global string to save the old values of the MIB when a set is performed. Max size a of string in MIB is 64 bytes, so we're cool.
+ */
+char old_string[64];
+
 int
 handle_RWstring(netsnmp_mib_handler *handler,
                 netsnmp_handler_registration *reginfo,
@@ -210,9 +208,6 @@ handle_RWstring(netsnmp_mib_handler *handler,
                 int length)
 {
     int ret;
-    char * old_string = NULL; /* this will be used to perform UNDO*/
-    char * temp_string = NULL; /* this will be used to perform SET ACTION*/
-
     /* We are never called for a GETNEXT if it's registered as a
        "instance", as it's "magically" handled for us.  */
 
@@ -243,31 +238,18 @@ handle_RWstring(netsnmp_mib_handler *handler,
 
         case MODE_SET_RESERVE2:
             /* XXX malloc "undo" storage buffer */
-             old_string =  (char*) netsnmp_memdup((char *) & (value),  strlen(value));
-            if (old_string == NULL) {
-                netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_RESOURCEUNAVAILABLE);
-            }else{
-                old_string = value;
-            }
-             if( strlen((char*) requests->requestvb->val.string) > length )
+			if( strlen((char*) requests->requestvb->val.string) > length )
                 netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_TOOBIG);
-            break;
+			break;
 
         case MODE_SET_FREE:
-
-               free(old_string); /*free resources allocated in RESERVE2*/
             break;
 
         case MODE_SET_ACTION:
             /* XXX: perform the value change here */
             /*realloc to the size of the string entered bu the user*/
-            temp_string = (char*) realloc( value, strlen((char*) requests->requestvb->val.string)*sizeof(char));
-            if(temp_string == NULL){
-                netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_RESOURCEUNAVAILABLE);
-            }else{
-                value = temp_string;
-                strcpy(value,(char*)requests->requestvb->val.string);
-            }
+			strcpy( old_string, value);
+			strcpy(value,(char*)requests->requestvb->val.string); 
             /*Send a message during debug to inform the update had been performed*/
            DEBUGMSGTL((caller_name, "updated delay_time -> %s\n", value));
             /*get possible errors*/
@@ -282,7 +264,7 @@ handle_RWstring(netsnmp_mib_handler *handler,
 
         case MODE_SET_UNDO:
             /* XXX: UNDO and return to previous value for the object */
-            memcpy(value, old_string, sizeof(*old_string));
+            strcpy(value, old_string);
             ret = netsnmp_check_requests_error(requests);
             if (ret != SNMP_ERR_NOERROR) {
                 /* try _really_really_ hard to never get to this point */

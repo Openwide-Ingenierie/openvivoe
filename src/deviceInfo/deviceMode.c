@@ -23,10 +23,10 @@ void init_deviceMode(void){
         ));
 }
 
-int handle_deviceMode(netsnmp_mib_handler *handler,
-                          netsnmp_handler_registration *reginfo,
-                          netsnmp_agent_request_info   *reqinfo,
-                          netsnmp_request_info         *requests)
+int handle_deviceMode( 	netsnmp_mib_handler *handler,
+                        netsnmp_handler_registration *reginfo,
+                        netsnmp_agent_request_info   *reqinfo,
+                        netsnmp_request_info         *requests)
 {
 
    /*checking type as it is done in MODE_SET_RESERVE1
