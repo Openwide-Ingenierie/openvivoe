@@ -7,8 +7,8 @@
 #ifndef PIPELINE_H
 # define PIPELINE_H
 
-GstElement* create_pipeline( 	gpointer stream_datas,
-								GMainLoop *loop,
-							 	GstElement* input);
+GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
+											GMainLoop *loop,
+										 	GstElement* input);
 #endif /* PIPELINE_H */
 

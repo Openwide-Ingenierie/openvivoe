@@ -232,7 +232,7 @@ int init_streaming (gpointer main_loop, gpointer stream_datas /* real prototype 
 		return EXIT_FAILURE;
 	}
 	/* Create pipeline  - save videoFormatIndex into stream_data data*/
-	last = create_pipeline( stream_datas, 	loop, last );
+	last = create_pipeline_videoChannel( stream_datas, 	loop, last );
 	/* Check if everything went ok*/
 	if (last == NULL){
 		g_printerr ( "Failed to create pipeline\n");
@@ -247,8 +247,8 @@ int init_streaming (gpointer main_loop, gpointer stream_datas /* real prototype 
  * \return 0
  */
 int start_streaming (gpointer stream_datas, long channelVideoFormatIndex  ){
-	stream_data *data 	=  stream_datas;
-	struct videoFormatTable_entry * stream_entry = videoFormatTable_getEntry(channelVideoFormatIndex);
+	stream_data *data 								=  stream_datas;
+	struct videoFormatTable_entry * stream_entry 	= videoFormatTable_getEntry(channelVideoFormatIndex);
   	/* Set the pipeline to "playing" state*/
     g_print ("Now playing\n");
     gst_element_set_state (data->pipeline, GST_STATE_PLAYING);
@@ -262,8 +262,8 @@ int start_streaming (gpointer stream_datas, long channelVideoFormatIndex  ){
  * \return 0
  */
 int stop_streaming( gpointer stream_datas, long channelVideoFormatIndex ){
-	stream_data *data 	=  stream_datas;
-	struct videoFormatTable_entry * stream_entry = videoFormatTable_getEntry(channelVideoFormatIndex);
+	stream_data *data 								=  stream_datas;
+	struct videoFormatTable_entry * stream_entry 	= videoFormatTable_getEntry(channelVideoFormatIndex);
 	/* Out of the main loop, clean up nicely */
 	g_print ("Returned, stopping playback\n");
 	gst_element_set_state (data->pipeline, GST_STATE_NULL);

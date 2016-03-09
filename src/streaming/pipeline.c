@@ -136,7 +136,7 @@ static GstElement* addUDP( 	GstElement *pipeline, 	GstBus *bus,
  * \port the port to use
  * \return GstElement* the last element added to the pipeline (should be udpsink if everything went ok)
  */
-GstElement* create_pipeline( gpointer stream_datas,
+GstElement* create_pipeline_videoChannel( gpointer stream_datas,
 						 	 GMainLoop *loop,
 							 GstElement* input){
 	GstElement 		*last;
