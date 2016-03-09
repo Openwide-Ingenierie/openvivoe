@@ -269,8 +269,7 @@ int init_streaming (gpointer main_loop, GstCaps *caps, struct channelTable_entry
 	}
 	else{ /* case we are a Service User */
 		init_stream_SU( main_loop, data, caps, channel_entry);
-	    gst_element_set_state (data->pipeline, GST_STATE_PLAYING);
-		printf("1\n");		
+		channel_entry->stream_datas = data;
 		return EXIT_SUCCESS;
 	}
 }
@@ -280,13 +279,14 @@ int init_streaming (gpointer main_loop, GstCaps *caps, struct channelTable_entry
  * \param data of the stream (pipeline, bus and bust_watch_id) - see stream_data structure
  * \return 0
  */
-int start_streaming (gpointer stream_datas, long channelVideoFormatIndex  ){
+int start_streaming (gpointer stream_datas, long channelVideoFormatIndex ){
 	stream_data *data 								= stream_datas;
 	struct videoFormatTable_entry * stream_entry 	= videoFormatTable_getEntry(channelVideoFormatIndex);
   	/* Set the pipeline to "playing" state*/
     g_print ("Now playing\n");
     gst_element_set_state (data->pipeline, GST_STATE_PLAYING);
-	stream_entry->videoFormatStatus = enable;
+	if ( stream_entry != NULL)
+		stream_entry->videoFormatStatus = enable;
 	return 0;
 }
 
@@ -301,7 +301,8 @@ int stop_streaming( gpointer stream_datas, long channelVideoFormatIndex ){
 	/* Out of the main loop, clean up nicely */
 	g_print ("Returned, stopping playback\n");
 	gst_element_set_state (data->pipeline, GST_STATE_NULL);
-	stream_entry->videoFormatStatus = disable;
+	if ( stream_entry != NULL)	
+		stream_entry->videoFormatStatus = disable;
 	return 0;
 }
 
@@ -312,17 +313,19 @@ int stop_streaming( gpointer stream_datas, long channelVideoFormatIndex ){
  */
 int delete_steaming_data(gpointer channel_entry){
 	struct channelTable_entry 	*entry 	= channel_entry;
-	stream_data 				*data 	=  entry->stream_datas;
+	stream_data 				*data 	= entry->stream_datas;
 	/* delete pipeline */
-	g_print ("Deleting pipeline\n");
-	gst_element_set_state (data->pipeline, GST_STATE_NULL);
-	gst_object_unref (GST_OBJECT (data->pipeline));
-	g_source_remove (data->bus_watch_id);
-	/* free rtp_data */
-	free(data->rtp_datas);
-	/* free the sap_data */
-	free(entry->sap_datas);
-	free(data); //stream_data are no longer allocated dynamically
-	free(entry);
+	if (data != NULL ){
+		g_print ("Deleting pipeline\n");
+		gst_element_set_state (data->pipeline, GST_STATE_NULL);
+		gst_object_unref (GST_OBJECT (data->pipeline));
+		g_source_remove (data->bus_watch_id);
+		/* free rtp_data */
+		free(data->rtp_datas);
+		/* free the sap_data */
+		free(entry->sap_datas);
+		free(data); 
+	}
+//	free(entry);
 	return 0;
 }

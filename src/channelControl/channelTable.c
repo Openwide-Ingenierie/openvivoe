@@ -182,7 +182,7 @@ struct channelTable_entry *	channelTable_createEmptyEntry(){
 							   	0,
 							   	0,
 							   	0,
-							   	0,
+							   	default_SAP_interval,
 							   	0,
 							   	0,
 							 	NULL
@@ -311,11 +311,10 @@ static void channelSatus_requests_handler( struct channelTable_entry * table_ent
 			break;
 		case serviceUser:
 			if ( table_entry->channelStatus == start){
-				g_timeout_add(1000, receive_announcement, table_entry );
-	//			start_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex);
+				g_timeout_add(table_entry->channelSapMessageInterval,receive_announcement, table_entry );
 			}
 			else if ( table_entry->channelStatus == stop){
-				stop_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex );
+				delete_steaming_data(table_entry);
 			}
 			break;
 		default:
@@ -671,7 +670,7 @@ channelTable_handler(
                 break;
             case COLUMN_CHANNELRECEIVEIPADDRESS:
                 /* or possibly 'netsnmp_check_vb_int_range' */
-                ret = netsnmp_check_vb_int( request->requestvb );
+                ret = netsnmp_check_vb_type( request->requestvb, ASN_IPADDRESS );				
                 if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;
@@ -703,7 +702,7 @@ channelTable_handler(
                 break;
             case COLUMN_CHANNELDEFAULTRECEIVEIPADDRESS:
                 /* or possibly 'netsnmp_check_vb_int_range' */
-                ret = netsnmp_check_vb_int( request->requestvb );
+                ret = netsnmp_check_vb_type( request->requestvb, ASN_IPADDRESS );				
                 if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;

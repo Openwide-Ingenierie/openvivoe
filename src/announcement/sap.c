@@ -345,6 +345,13 @@ gboolean receive_announcement(gpointer entry){
 			   			MSG_DONTWAIT, flags 
 						&(sap_socket.multicast_addr),
 						&socklen );*/
+	/*
+	 * Before doing anything, just check the channel status
+	 * When channul status is stop, stop to liston on the socket 
+	 */
+	if( channel_entry->channelStatus == stop )
+		return FALSE;
+
 	status = read( 	sap_socket.udp_socket_fd_rec,
 		   			temp,
 					channel_entry->sap_datas->udp_payload_length );

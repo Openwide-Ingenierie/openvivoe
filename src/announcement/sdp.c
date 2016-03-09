@@ -253,6 +253,7 @@ gboolean get_SDP(unsigned char *array, int sdp_msg_size, struct channelTable_ent
 	printf("%s\n", gst_caps_to_string (caps));
 	init_streaming (NULL, caps, channel_entry,/* real prototype */
 					NULL, 0, 0, NULL /* extra parameters for testing purposes*/);
+	start_streaming( channel_entry->stream_datas, channel_entry->channelVideoFormatIndex);
 
 	/* modify updsrc caps parameters in the corresponding channel's stream_data */
 	return TRUE;
