@@ -229,7 +229,7 @@ gboolean create_SDP(GstSDPMessage 	*msg, struct channelTable_entry * channel_ent
  * \param array: the SDP message obtained from SAP/SDP datagram
  * \param sdp_msg_size: the size of the byte array got from SAP/SDP message
  */
-gboolean get_SDP(unsigned char *array, int sdp_msg_size){
+gboolean get_SDP(unsigned char *array, int sdp_msg_size, struct channelTable_entry * channel_entry){
 
 	GstSDPMessage *msg;
 	/* create a new SDP message */
@@ -251,8 +251,8 @@ gboolean get_SDP(unsigned char *array, int sdp_msg_size){
 	/* Update channel entry of the Service User with information extracted from SDP message */
 
 	printf("%s\n", gst_caps_to_string (caps));
-	init_streaming (NULL, caps,/* real prototype */
-					 NULL, 0, 0, NULL /* extra parameters for testing purposes*/);
+	init_streaming (NULL, caps, channel_entry,/* real prototype */
+					NULL, 0, 0, NULL /* extra parameters for testing purposes*/);
 
 	/* modify updsrc caps parameters in the corresponding channel's stream_data */
 	return TRUE;

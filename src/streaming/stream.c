@@ -210,11 +210,11 @@ static int init_stream_SP( gpointer main_loop, gpointer stream_datas /* real pro
 
 }
 
-static int init_stream_SU( gpointer main_loop, gpointer stream_datas, GstCaps *caps )
+static int init_stream_SU( gpointer main_loop, gpointer stream_datas, GstCaps *caps, struct channelTable_entry *channel_entry )
 {
     GstElement *first;		
 	/* Create pipeline  - save videoFormatIndex into stream_data data*/
-	first = create_pipeline_serviceUser( stream_datas,	main_loop, caps );
+	first = create_pipeline_serviceUser( stream_datas,	main_loop, caps, channel_entry );
 	/* Check if everything went ok*/
 	if (first == NULL){
 		g_printerr ( "Failed to create pipeline\n");
@@ -223,8 +223,6 @@ static int init_stream_SU( gpointer main_loop, gpointer stream_datas, GstCaps *c
     return EXIT_SUCCESS;
 }
 
-
-
 /**
  * \brief intialize the stream: create the pipeline and filters out non vivoe format
  * \param argc to know which source to built
@@ -232,7 +230,7 @@ static int init_stream_SU( gpointer main_loop, gpointer stream_datas, GstCaps *c
  * \param stream_datas a structure in which we will save the pipeline and the bus elements
  * \return 0
  */
-int init_streaming (gpointer main_loop, GstCaps *caps,/* real prototype */
+int init_streaming (gpointer main_loop, GstCaps *caps, struct channelTable_entry * channel_entry,/* real prototype */
 					char* format, int width, int height, char* encoding /* extra parameters for testing purposes*/)
 {
     /* Initialization of elements needed */
@@ -270,7 +268,7 @@ int init_streaming (gpointer main_loop, GstCaps *caps,/* real prototype */
 		return EXIT_SUCCESS;
 	}
 	else{ /* case we are a Service User */
-		init_stream_SU( main_loop, data, caps);
+		init_stream_SU( main_loop, data, caps, channel_entry);
 	    gst_element_set_state (data->pipeline, GST_STATE_PLAYING);
 		printf("1\n");		
 		return EXIT_SUCCESS;

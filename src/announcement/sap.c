@@ -361,7 +361,7 @@ gboolean receive_announcement(gpointer entry){
 		if ( strcmp(channel_entry->sap_datas->udp_payload, temp) != 0 ){
 			memcpy(channel_entry->sap_datas->udp_payload, temp, channel_entry->sap_datas->udp_payload_length );
 			unsigned char *sdp_msg = (unsigned char*) SAP_depay(channel_entry->sap_datas->udp_payload);
-			return get_SDP(sdp_msg, status - SAP_header_size);
+			return get_SDP(sdp_msg, status - SAP_header_size, channel_entry);
 		}
 		/* otherwise, do not do anything */
 		return TRUE;

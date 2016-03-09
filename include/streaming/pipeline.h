@@ -12,7 +12,7 @@ GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
 										 	GstElement* input);
 GstElement* create_pipeline_serviceUser( gpointer stream_datas,
 									 	 GMainLoop *loop,
-										 GstCaps 	*caps
-										);
+										 GstCaps 	*caps,
+										 struct channelTable_entry * channel_entry);
 #endif /* PIPELINE_H */
 
