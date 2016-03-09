@@ -10,5 +10,9 @@
 GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
 											GMainLoop *loop,
 										 	GstElement* input);
+GstElement* create_pipeline_serviceUser( gpointer stream_datas,
+									 	 GMainLoop *loop,
+										 GstCaps 	*caps
+										);
 #endif /* PIPELINE_H */
 

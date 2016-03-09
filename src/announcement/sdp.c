@@ -220,7 +220,6 @@ gboolean create_SDP(GstSDPMessage 	*msg, struct channelTable_entry * channel_ent
 		return error_function();
 	if ( gst_sdp_message_add_media (msg, media))
 		return error_function();
-	printf("%s\n\n", gst_sdp_message_as_text (msg));
 	 return TRUE;
 }
 
@@ -241,7 +240,6 @@ gboolean get_SDP(unsigned char *array, int sdp_msg_size){
 
 	if( gst_sdp_message_parse_buffer (array, sdp_msg_size, msg) != GST_SDP_OK)
 		return error_function();
-	printf("%s\n", gst_sdp_message_as_text (msg));
 	GstSDPMedia *media;
 	gst_sdp_media_new (&media);
 	if (gst_sdp_message_medias_len (msg) > 1 )
@@ -249,5 +247,13 @@ gboolean get_SDP(unsigned char *array, int sdp_msg_size){
 	
 	media 			= gst_sdp_message_get_media(msg , 0);
 	GstCaps *caps 	= gst_sdp_media_get_caps_from_media (media, 96);
+
+	/* Update channel entry of the Service User with information extracted from SDP message */
+
+	printf("%s\n", gst_caps_to_string (caps));
+	init_streaming (NULL, caps,/* real prototype */
+					 NULL, 0, 0, NULL /* extra parameters for testing purposes*/);
+
+	/* modify updsrc caps parameters in the corresponding channel's stream_data */
 	return TRUE;
 }

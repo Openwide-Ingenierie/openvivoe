@@ -139,8 +139,8 @@ extern parameter videoFormatNumber; /*initialize in viodeFormatNumber.c*/
  * \brief a structure to registeer the information to send the UDP datagram
  */
 typedef struct {
-	char 				*udp_payload;
-	int 				udp_payload_length;
+	char 	*udp_payload;
+	int 	udp_payload_length;
 }sap_data;
 
 extern parameter channelReset;

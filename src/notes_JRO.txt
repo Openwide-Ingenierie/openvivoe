@@ -1,4 +1,1 @@
-remarques générales:
-
-sap.c 
-* g_strdup alloue de la mémoire. il faut la libérer. 
+Nothing to be done!

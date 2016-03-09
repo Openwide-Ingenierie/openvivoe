@@ -323,6 +323,7 @@ gboolean receive_announcement(gpointer entry){
 	struct channelTable_entry * channel_entry = entry;
 
 	int 				status;
+	char 				temp[400];
 /*	unsigned int 		socklen;
 	
 	struct timeval timeout;
@@ -345,8 +346,8 @@ gboolean receive_announcement(gpointer entry){
 						&(sap_socket.multicast_addr),
 						&socklen );*/
 	status = read( 	sap_socket.udp_socket_fd_rec,
-		   				channel_entry->sap_datas->udp_payload,
-						channel_entry->sap_datas->udp_payload_length );
+		   			temp,
+					channel_entry->sap_datas->udp_payload_length );
 	if (status == -1) {
 		g_printerr("Failed to receive: %s\n",strerror(errno));
 		return TRUE;
@@ -354,8 +355,15 @@ gboolean receive_announcement(gpointer entry){
 	    g_printerr("WARNING: datagram too large for buffer: truncated");
 		return FALSE;
 	} else {
-		char *sdp_msg = SAP_depay(channel_entry->sap_datas->udp_payload);
-		get_SDP(sdp_msg, status - SAP_header_size);
+		/* compare teh payloed read on the socket with the payload read before 
+		 * if there different, save the new payload into the sap_dat of the channel
+		 */
+		if ( strcmp(channel_entry->sap_datas->udp_payload, temp) != 0 ){
+			memcpy(channel_entry->sap_datas->udp_payload, temp, channel_entry->sap_datas->udp_payload_length );
+			unsigned char *sdp_msg = (unsigned char*) SAP_depay(channel_entry->sap_datas->udp_payload);
+			return get_SDP(sdp_msg, status - SAP_header_size);
+		}
+		/* otherwise, do not do anything */
+		return TRUE;
 	}
-	return TRUE;
 }

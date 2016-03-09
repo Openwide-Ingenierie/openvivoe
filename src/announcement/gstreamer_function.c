@@ -187,7 +187,7 @@ gst_sdp_media_get_caps_from_media (const GstSDPMedia * media, gint pt)
   }
 
   tmp = g_ascii_strdown (media->media, -1);
-  caps = gst_caps_new_simple ("application/x-unknown",
+  caps = gst_caps_new_simple ("application/x-rtp",
       "media", G_TYPE_STRING, tmp, "payload", G_TYPE_INT, pt, NULL);
   g_free (tmp);
   s = gst_caps_get_structure (caps, 0);

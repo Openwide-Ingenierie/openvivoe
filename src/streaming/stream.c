@@ -184,6 +184,47 @@ static GstElement* source_creation(GstElement* pipeline, char* format, int width
 	return last;
 }
 
+static int init_stream_SP( gpointer main_loop, gpointer stream_datas /* real prototype */
+					, char* format, int width, int height, char* encoding /* extra parameters for testing purposes*/)
+{
+	stream_data *data 			= stream_datas;
+
+	GstElement 	*pipeline 		= data->pipeline;
+
+    GstElement *last;	
+	/* Source Creation */
+	last = source_creation(pipeline, format,width ,height ,encoding);
+
+	if (last == NULL ){
+		g_printerr ( "Failed to create videosource\n");
+		return EXIT_FAILURE;
+	}
+	/* Create pipeline  - save videoFormatIndex into stream_data data*/
+	last = create_pipeline_videoChannel( stream_datas, 	main_loop, last );
+	/* Check if everything went ok*/
+	if (last == NULL){
+		g_printerr ( "Failed to create pipeline\n");
+		return EXIT_FAILURE;
+	}
+    return EXIT_SUCCESS;
+
+}
+
+static int init_stream_SU( gpointer main_loop, gpointer stream_datas, GstCaps *caps )
+{
+    GstElement *first;		
+	/* Create pipeline  - save videoFormatIndex into stream_data data*/
+	first = create_pipeline_serviceUser( stream_datas,	main_loop, caps );
+	/* Check if everything went ok*/
+	if (first == NULL){
+		g_printerr ( "Failed to create pipeline\n");
+		return EXIT_FAILURE;
+	}
+    return EXIT_SUCCESS;
+}
+
+
+
 /**
  * \brief intialize the stream: create the pipeline and filters out non vivoe format
  * \param argc to know which source to built
@@ -191,23 +232,23 @@ static GstElement* source_creation(GstElement* pipeline, char* format, int width
  * \param stream_datas a structure in which we will save the pipeline and the bus elements
  * \return 0
  */
-int init_streaming (gpointer main_loop, gpointer stream_datas /* real prototype */
-					, char* format, int width, int height, char* encoding /* extra parameters for testing purposes*/)
+int init_streaming (gpointer main_loop, GstCaps *caps,/* real prototype */
+					char* format, int width, int height, char* encoding /* extra parameters for testing purposes*/)
 {
     /* Initialization of elements needed */
-    GstElement 	*pipeline, *last;
+    GstElement 	*pipeline;
     GstBus 		*bus;
     guint 		bus_watch_id;
-	GMainLoop 	*loop 				= main_loop;
+	GMainLoop 	*loop 			= main_loop;
 
 
 	/* Reference all data relevant to the stream */
-	stream_data *data 	= stream_datas;
+	stream_data *data 			= malloc(sizeof(stream_data));
 
 	/* allocate memory for the structure rtp_data of stream_data */
 	/* this will be free in the delete_stream function */
-	rtp_data 			*rtp_datas = malloc(sizeof(rtp_data));
-	data->rtp_datas = 	rtp_datas;
+	rtp_data 	*rtp_datas 		= malloc(sizeof(rtp_data));
+	data->rtp_datas 			= rtp_datas;
 	
     /* Create the pipeline */
     pipeline  = gst_pipeline_new ("pipeline");
@@ -224,21 +265,16 @@ int init_streaming (gpointer main_loop, gpointer stream_datas /* real prototype 
 	data->pipeline 		= pipeline;
 	data->bus 			= bus;
 	data->bus_watch_id 	= bus_watch_id;
-	/* Source Creation */
-	last = source_creation(pipeline, format,width ,height ,encoding);
-
-	if (last == NULL ){
-		g_printerr ( "Failed to create videosource\n");
-		return EXIT_FAILURE;
+	if( format != NULL){ /* case we are a Service Provider */
+		 init_stream_SP( main_loop, data, format, width, height, encoding);
+		return EXIT_SUCCESS;
 	}
-	/* Create pipeline  - save videoFormatIndex into stream_data data*/
-	last = create_pipeline_videoChannel( stream_datas, 	loop, last );
-	/* Check if everything went ok*/
-	if (last == NULL){
-		g_printerr ( "Failed to create pipeline\n");
-		return EXIT_FAILURE;
+	else{ /* case we are a Service User */
+		init_stream_SU( main_loop, data, caps);
+	    gst_element_set_state (data->pipeline, GST_STATE_PLAYING);
+		printf("1\n");		
+		return EXIT_SUCCESS;
 	}
-    return EXIT_SUCCESS;
 }
 
 /**
@@ -247,7 +283,7 @@ int init_streaming (gpointer main_loop, gpointer stream_datas /* real prototype 
  * \return 0
  */
 int start_streaming (gpointer stream_datas, long channelVideoFormatIndex  ){
-	stream_data *data 								=  stream_datas;
+	stream_data *data 								= stream_datas;
 	struct videoFormatTable_entry * stream_entry 	= videoFormatTable_getEntry(channelVideoFormatIndex);
   	/* Set the pipeline to "playing" state*/
     g_print ("Now playing\n");
@@ -262,7 +298,7 @@ int start_streaming (gpointer stream_datas, long channelVideoFormatIndex  ){
  * \return 0
  */
 int stop_streaming( gpointer stream_datas, long channelVideoFormatIndex ){
-	stream_data *data 								=  stream_datas;
+	stream_data *data 								= stream_datas;
 	struct videoFormatTable_entry * stream_entry 	= videoFormatTable_getEntry(channelVideoFormatIndex);
 	/* Out of the main loop, clean up nicely */
 	g_print ("Returned, stopping playback\n");
@@ -288,7 +324,7 @@ int delete_steaming_data(gpointer channel_entry){
 	free(data->rtp_datas);
 	/* free the sap_data */
 	free(entry->sap_datas);
-//	free(data); stream_data are no longer allocated dynamically
+	free(data); //stream_data are no longer allocated dynamically
 	free(entry);
 	return 0;
 }

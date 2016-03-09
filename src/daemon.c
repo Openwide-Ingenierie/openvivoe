@@ -21,7 +21,7 @@
 #include <signal.h>
 
 #include <glib-2.0/glib.h>
-
+#include <gstreamer-1.0/gst/gst.h>
 /*
  * mib parameters
  */

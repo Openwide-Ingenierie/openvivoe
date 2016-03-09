@@ -189,3 +189,166 @@ GstElement* create_pipeline_videoChannel( gpointer stream_datas,
 	return last;
 
 }
+
+/*
+ * This function add the RTP element to the pipeline
+ */
+static GstElement* addRTP_SU( 	GstElement *pipeline, 	GstBus *bus,
+								guint bus_watch_id, 	GMainLoop *loop,
+								GstElement* input, 		struct videoFormatTable_entry *video_info,
+								gpointer stream_datas, 	GstCaps *caps){
+	/*Create element that will be add to the pipeline */
+	GstElement 		*rtp = NULL;
+	GstElement 		*parser, *dec;
+	GstStructure 	*video_caps 	= gst_caps_get_structure(caps, 0);
+	char 			*encoding  		= (char*) gst_structure_get_string(video_caps, "encoding-name");
+	/* Fill the MIB a first Time */
+	fill_entry(video_caps, video_info, stream_datas);
+	if ( gst_structure_has_field( video_caps, "encoding-name")){
+		/* For Raw video */		
+		if ( strcmp( "RAW",encoding) == 0 ){
+			rtp 	= gst_element_factory_make ("rtpvrawdepay", "rtp");
+			/* Check if everything went ok */
+			if( rtp == NULL){
+				g_printerr ( "error cannot create element for: %s\n","rtp");
+				return NULL;
+			}
+		gst_bin_add(GST_BIN (pipeline), rtp);
+		gst_element_link_many( input, rtp, NULL );
+
+		}else if  ( strcmp( "MP4V-ES",encoding) == 0 ){
+			/* For MPEG-4 video */
+			rtp 	= gst_element_factory_make ("rtpmp4vdepay", "rtp");
+			/* Checek if everything went ok */
+			if( rtp == NULL){
+				g_printerr ( "error cannot create element for: %s\n","rtp");
+				return NULL;
+			}
+			parser 	= gst_element_factory_make ("mpeg4videoparse", "parser");
+			if( parser == NULL){
+				g_printerr ( "error cannot create element for: %s\n","parser");
+				return NULL;
+			}
+			dec = gst_element_factory_make ("avdec_mpeg4", "dec");
+			/* save last pipeline element */
+			if(dec == NULL){
+				g_printerr ( "error cannot create element for: %s\n","dec");
+				return NULL;
+			}
+			gst_bin_add_many(GST_BIN (pipeline), rtp, parser, dec, NULL);
+			gst_element_link_many( input, rtp, parser, dec, NULL );		
+		}
+	}else{
+		g_printerr("unknow type of video stream\n");
+		return NULL;
+	}
+	/* Media stream Type detection */
+	//	video_caps = type_detection(GST_BIN(pipeline), rtp, loop, NULL);
+	/*Fill the MIB a second time after creating payload*/
+	fill_entry(video_caps, video_info, stream_datas);
+
+	/* Finally return*/
+	return rtp;
+}
+
+/*
+ * This function add the UDP element to the pipeline / fort a ServiceUser channel
+ */
+static GstElement* addUDP_SU( 	GstElement *pipeline, 	GstBus *bus,
+								guint bus_watch_id, 	GMainLoop *loop,
+								GstCaps* caps){
+
+	/*Create element that will be add to the pipeline */
+	GstElement *udpsrc;
+		
+	/* Create the UDP sink */
+    udpsrc = gst_element_factory_make ("udpsrc", "udpsrc");
+    if(udpsrc == NULL){
+       g_printerr ( "error cannot create element for: %s\n","udpsrc");
+	   return NULL;
+    }
+	/*Set UDP sink properties */
+    g_object_set(   G_OBJECT(udpsrc),
+                	"multicast-group", 	"239.192.1.119",
+                    "port", 			DEFAULT_MULTICAST_PORT,
+					"caps", 			caps, 
+                    NULL);
+
+	/* add rtp to pipeline */
+	if ( !gst_bin_add(GST_BIN (pipeline), udpsrc )){
+		g_printerr("Unable to add %s to pipeline", gst_element_get_name(udpsrc));
+		return NULL;
+	}
+	return udpsrc;
+}
+
+/*
+ * This function add the UDP element to the pipeline / fort a ServiceUser channel
+ */
+static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
+								guint bus_watch_id, 	GMainLoop *loop,
+								GstElement *input
+								){
+	GstElement *sink;
+	/* Create the sink */
+    sink = gst_element_factory_make ("xvimagesink", "sink");
+    if(sink == NULL){
+       g_printerr ( "error cannot create element for: %s\n","sink");
+	   return NULL;
+    }
+		/* add rtp to pipeline */
+	if ( !gst_bin_add(GST_BIN (pipeline), sink )){
+		g_printerr("Unable to add %s to pipeline", gst_element_get_name(sink));
+		return NULL;
+	}
+
+	/* we link the elements together */
+	if ( !gst_element_link_many (input, sink, NULL)){
+		g_print ("Failed to build sink!\n");
+	    return NULL;
+	}
+
+	return sink;
+
+}
+
+
+/**
+ * \brief Create the pipeline, add information to MIB at the same time
+ * \param pipeline the pipepline of the stream
+ * \param bus the bus associated to the pipeline
+ * \param bust_watch_id the watch associated to the bus
+ * \param loop the GMainLoop
+ * \param input the las element of the pipeline, (avenc_mp4 or capsfilter) as we built our own source
+ * \param ip the ip to which send the stream on
+ * \port the port to use
+ * \return GstElement* the last element added to the pipeline (should be udpsink if everything went ok)
+ */
+GstElement* create_pipeline_serviceUser( gpointer stream_datas,
+									 	 GMainLoop *loop,
+										 GstCaps 	*caps
+										){
+	stream_data 	*data 	=  stream_datas;
+	/* create the empty videoFormatTable_entry structure to intiate the MIB */
+	struct videoFormatTable_entry * video_stream_info;
+	video_stream_info = SNMP_MALLOC_TYPEDEF(struct videoFormatTable_entry);
+	if( !video_stream_info){
+		g_printerr("Failed to create temporary empty entry for the table\n");
+		return NULL;
+	}
+
+	GstElement 	*pipeline 		= data->pipeline;
+	GstBus 		*bus 			= data->bus;
+    guint 		bus_watch_id 	= data->bus_watch_id;
+
+
+	GstElement *first, *last;
+	first =  addUDP_SU( pipeline, 	bus,
+						bus_watch_id, 	loop,
+						caps );
+	last = first;
+	last = addRTP_SU( pipeline, bus, bus_watch_id, loop, first, video_stream_info, data, caps);
+
+	addSink_SU( pipeline, bus, bus_watch_id, loop, last);
+	return first;
+}
