@@ -201,6 +201,13 @@ static gboolean build_SAP_header(char *header, int session_version, gboolean del
 	return TRUE;
 }
 
+/**
+ * \brief creates SAP message: header + payload returned in a buffer
+ * \param channelTable_entry * entry the entry in the channelTable associated to the socket
+ * \param sap_msg_length a location to save the lenght of the SAP message
+ * \param gboolean deletion specify if we should build the SAP deletion message
+ * \return char* buffer that contains the SAP message (the UDP payload)
+ */
 static char*  build_SAP_msg(struct channelTable_entry * entry, int *sap_msg_length, gboolean deletion){
 
 	GstSDPMessage *msg;
@@ -233,8 +240,20 @@ static char*  build_SAP_msg(struct channelTable_entry * entry, int *sap_msg_leng
 }
 
 /**
+ * \brief get SDP message from payload
+ * \param udp_payload the datagram received 
+ * \return  char* the SDP message as a byte string
+ */
+static char* SAP_depay(char* udp_payload){
+	/* set a pointer on the beginning of udp payload */
+	char *head = udp_payload;
+	head += SAP_header_size;
+	return head;
+}
+
+/**
  * \brief This function will send the SAP message, encapsulate into the payload of an UDP datagram, on the UDP socket with IP: 224.2.127.254 port 9875.
- * \param hannelTable_entry * entry the entry in the channelTable associated to the socket
+ * \param channelTable_entry * entry the entry in the channelTable associated to the socket
  * \return gboolean TRUE
  */
 gboolean prepare_socket(struct channelTable_entry * entry ){
@@ -304,9 +323,9 @@ gboolean receive_announcement(gpointer entry){
 	struct channelTable_entry * channel_entry = entry;
 
 	int 				status;
-	unsigned int 		socklen;
+/*	unsigned int 		socklen;
 	
-/*	struct timeval timeout;
+	struct timeval timeout;
     timeout.tv_sec 	= 3;
     timeout.tv_usec = 0;
 	status = setsockopt (sap_socket.udp_socket_fd_rec,
@@ -317,27 +336,26 @@ gboolean receive_announcement(gpointer entry){
     if ( status < 0)
 		g_printerr("Failed to set socket timeout: %s\n", strerror(errno)); 
 	*/
-	/* receive packet from socket */
+	/* receive packet from socket 
 	socklen = sizeof(sap_socket.multicast_addr);
-/*	status = recvfrom( 	sap_socket.udp_socket_fd_rec,
+	status = recvfrom( 	sap_socket.udp_socket_fd_rec,
 		   				channel_entry->sap_datas->udp_payload,
 						channel_entry->sap_datas->udp_payload_length,
-			   			MSG_DONTWAIT, /* flags 
+			   			MSG_DONTWAIT, flags 
 						&(sap_socket.multicast_addr),
 						&socklen );*/
 	status = read( 	sap_socket.udp_socket_fd_rec,
 		   				channel_entry->sap_datas->udp_payload,
 						channel_entry->sap_datas->udp_payload_length );
-	printf("%d\n", status);
-	if (status == 0) {
+	if (status == -1) {
 		g_printerr("Failed to receive: %s\n",strerror(errno));
 		return TRUE;
 	} else if ( status == sizeof(channel_entry->sap_datas->udp_payload )) {
 	    g_printerr("WARNING: datagram too large for buffer: truncated");
 		return FALSE;
 	} else {
-		for(int i = 0; i<status ; i++)
-			printf("%02X\t%d\n", channel_entry->sap_datas->udp_payload[i], i);
+		char *sdp_msg = SAP_depay(channel_entry->sap_datas->udp_payload);
+		get_SDP(sdp_msg, status - SAP_header_size);
 	}
 	return TRUE;
 }

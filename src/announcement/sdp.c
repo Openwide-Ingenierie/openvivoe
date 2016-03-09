@@ -11,6 +11,7 @@
 #include <glib-2.0/glib.h>
 #include <gstreamer-1.0/gst/gst.h>
 #include <gstreamer-1.0/gst/sdp/gstsdpmessage.h>
+#include <gstreamer-1.0/gst/rtp/gstrtppayloads.h>
 #include <arpa/inet.h>
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
@@ -23,6 +24,8 @@
 #include "../../include/announcement/sdp.h"
 #include "../../include/streaming/stream_registration.h"
 #include "../../include/streaming/stream.h"
+#include "../../include/announcement/gstreamer_function.h"
+
 
 /**
  * \brief 	provides a mapping between the int representation of the interlaced-mode of a stream
@@ -60,7 +63,7 @@ static gboolean create_raw_media(struct channelTable_entry * channel_entry, GstS
 										channel_entry->channelVideoBitDepth,
 										channel_entry->channelColorimetry,
 										interlace_mode_to_string (channel_entry->channelInterlaced)
-										);
+									);
 	if( gst_sdp_media_add_attribute (media, "fmtp", fmtp)!= GST_SDP_OK ){
 		g_printerr("ERROR: problem in media creation for SDP file\n");
 		return FALSE;
@@ -93,7 +96,7 @@ static gboolean create_mpeg4_media(struct channelTable_entry * channel_entry, Gs
  * \return FALSE (as it is an error ;) )
  */
 static gboolean error_function(){
-	g_printerr("ERROR:Failed SDP file\n");
+	g_printerr("ERROR:Problem SDP file\n");
 		return FALSE;
 }
 
@@ -217,5 +220,34 @@ gboolean create_SDP(GstSDPMessage 	*msg, struct channelTable_entry * channel_ent
 		return error_function();
 	if ( gst_sdp_message_add_media (msg, media))
 		return error_function();
+	printf("%s\n\n", gst_sdp_message_as_text (msg));
 	 return TRUE;
+}
+
+
+/**
+ * \brief Build a SDP Message structure from a string representation
+ * \param array: the SDP message obtained from SAP/SDP datagram
+ * \param sdp_msg_size: the size of the byte array got from SAP/SDP message
+ */
+gboolean get_SDP(unsigned char *array, int sdp_msg_size){
+
+	GstSDPMessage *msg;
+	/* create a new SDP message */
+	if (gst_sdp_message_new(&msg)){
+		g_printerr("Failed to create SDP message\n");
+		return FALSE;
+	}
+
+	if( gst_sdp_message_parse_buffer (array, sdp_msg_size, msg) != GST_SDP_OK)
+		return error_function();
+	printf("%s\n", gst_sdp_message_as_text (msg));
+	GstSDPMedia *media;
+	gst_sdp_media_new (&media);
+	if (gst_sdp_message_medias_len (msg) > 1 )
+		return error_function();	
+	
+	media 			= gst_sdp_message_get_media(msg , 0);
+	GstCaps *caps 	= gst_sdp_media_get_caps_from_media (media, 96);
+	return TRUE;
 }
