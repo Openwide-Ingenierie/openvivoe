@@ -323,9 +323,12 @@ int delete_steaming_data(gpointer channel_entry){
 		/* free rtp_data */
 		free(data->rtp_datas);
 		/* free the sap_data */
-		free(entry->sap_datas);
+		if( entry->channelType == videoChannel)
+			free(entry->sap_datas);
 		free(data); 
 	}
-//	free(entry);
+
+if( entry->channelType == videoChannel)
+	free(entry);
 	return 0;
 }

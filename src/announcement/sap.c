@@ -83,6 +83,11 @@
 
 
 /**
+ * \brief the meximum value that shall be read on the socket 224.2.127.254:9875 to get the SAP/SDP message
+ */
+#define SAP_MAX_size 				400
+
+/**
  * \brief a global struct that represent the socket address on which to sent SAP/SDP announcement messages
  */
 struct {
@@ -265,7 +270,7 @@ gboolean prepare_socket(struct channelTable_entry * entry ){
 			printf("%02X\t%d\n", entry->sap_datas->udp_payload[i], i); */
 		return TRUE;		
 	}else if(  entry->channelType == serviceUser ) {
-		entry->sap_datas->udp_payload_length 	= 400; /* set the Max size of received datagram */
+		entry->sap_datas->udp_payload_length 	= SAP_MAX_size; /* set the Max size of received datagram */
 		entry->sap_datas->udp_payload 			= (char*) malloc(entry->sap_datas->udp_payload_length * sizeof(char));
 		return TRUE;
 	}
@@ -323,7 +328,7 @@ gboolean receive_announcement(gpointer entry){
 	struct channelTable_entry * channel_entry = entry;
 
 	int 				status;
-	char 				temp[400];
+	char				temp[SAP_MAX_size];
 /*	unsigned int 		socklen;
 	
 	struct timeval timeout;
@@ -351,6 +356,7 @@ gboolean receive_announcement(gpointer entry){
 	 */
 	if( channel_entry->channelStatus == stop )
 		return FALSE;
+
 	status = read( 	sap_socket.udp_socket_fd_rec,
 		   			temp,
 					channel_entry->sap_datas->udp_payload_length );
@@ -359,8 +365,8 @@ gboolean receive_announcement(gpointer entry){
 		return TRUE;
 	} else if ( status == sizeof(channel_entry->sap_datas->udp_payload )) {
 	    g_printerr("WARNING: datagram too large for buffer: truncated");
-		return FALSE;
-	} else {
+		return TRUE;
+	} else { 
 		/* compare teh payloed read on the socket with the payload read before 
 		 * if there different, save the new payload into the sap_dat of the channel
 		 */
@@ -369,9 +375,11 @@ gboolean receive_announcement(gpointer entry){
 			memcpy(channel_entry->sap_datas->udp_payload, temp, channel_entry->sap_datas->udp_payload_length );
 			/* check if the SAP message is a deletion message */
 			if( channel_entry->sap_datas->udp_payload[0] == SAP_header_deletion )
-				return FALSE;
-			unsigned char *sdp_msg = (unsigned char*) SAP_depay(channel_entry->sap_datas->udp_payload);
-			return get_SDP(sdp_msg, status - SAP_header_size, channel_entry);
+				delete_steaming_data(channel_entry);
+			else{
+				unsigned char *sdp_msg = (unsigned char*) SAP_depay(channel_entry->sap_datas->udp_payload);
+				return get_SDP(sdp_msg, status - SAP_header_size, channel_entry);
+			}
 		}
 		/* otherwise, do not do anything */
 		return TRUE;
