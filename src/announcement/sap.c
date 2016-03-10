@@ -347,11 +347,10 @@ gboolean receive_announcement(gpointer entry){
 						&socklen );*/
 	/*
 	 * Before doing anything, just check the channel status
-	 * When channul status is stop, stop to liston on the socket 
+	 * When channel status is stop, stop to liston on the socket 
 	 */
 	if( channel_entry->channelStatus == stop )
 		return FALSE;
-
 	status = read( 	sap_socket.udp_socket_fd_rec,
 		   			temp,
 					channel_entry->sap_datas->udp_payload_length );
@@ -366,7 +365,11 @@ gboolean receive_announcement(gpointer entry){
 		 * if there different, save the new payload into the sap_dat of the channel
 		 */
 		if ( strcmp(channel_entry->sap_datas->udp_payload, temp) != 0 ){
+			/* save the sap message in the sap_data of the channel anyway, even if it is a deletion message */
 			memcpy(channel_entry->sap_datas->udp_payload, temp, channel_entry->sap_datas->udp_payload_length );
+			/* check if the SAP message is a deletion message */
+			if( channel_entry->sap_datas->udp_payload[0] == SAP_header_deletion )
+				return FALSE;
 			unsigned char *sdp_msg = (unsigned char*) SAP_depay(channel_entry->sap_datas->udp_payload);
 			return get_SDP(sdp_msg, status - SAP_header_size, channel_entry);
 		}
