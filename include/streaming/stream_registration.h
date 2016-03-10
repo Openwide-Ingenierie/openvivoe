@@ -16,7 +16,7 @@ typedef struct{
 }rtp_data ;
 
 void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *video_info,gpointer stream_datas);
-int initialize_videoFormat(struct videoFormatTable_entry *entry, gpointer stream_datas, long *ip);
+int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer stream_datas,long *channel_entry_index );
 
 #endif /* STREAM_REGISTRATION_H */
 

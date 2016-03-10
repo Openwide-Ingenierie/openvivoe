@@ -149,5 +149,10 @@ extern parameter channelNumber;
 /* --------------------------------- end Group channelControl ----------------------------- */
 
 
-#endif /* MIBPARAMETERS_H */
 
+/** 
+ * \brief The main loop of the program, because to be able to acces it everywhere in the program */
+#include <glib-2.0/glib.h>
+GMainLoop 	*loop;
+
+#endif /* MIBPARAMETERS_H */

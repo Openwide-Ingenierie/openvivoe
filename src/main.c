@@ -73,13 +73,15 @@ static gboolean service_Provider_init(gpointer loop){
 	stream_data 	stream2;*/
 
 	/* prepare the stream - initialize all the data relevant to the stream into stream-data */
-	if ( init_streaming(loop, NULL, NULL,/*&stream1, test*/ "raw", 1920, 1080,"I420" /*end test param*/)){
+	if ( init_streaming(loop, NULL, NULL,/*&stream1, test*/ "RAW", 1920, 1080 /*end test param*/)){
 		return FALSE;
 	}
+
 	/* prepare the stream - initialize all the data relevant to the stream into stream-data */
-	if ( init_streaming(loop, NULL, NULL,/*&stream2, test*/ "mp4", 1920, 1080,"I420" /*end test param*/)){
+	if ( init_streaming(loop, NULL, NULL,/*&stream2, test*/ "MP4V-ES", 1920, 1080 /*end test param*/)){
 		return  FALSE;
 	}
+
 	return TRUE;
 }
 
@@ -90,7 +92,7 @@ static gboolean service_Provider_init(gpointer loop){
  */
 int main (int   argc,  char *argv[]){
 	/* create the GMainLoop*/
-	GMainLoop 	*loop = g_main_loop_new (NULL, FALSE);
+	loop = g_main_loop_new (NULL, FALSE);
 
 	/* add the idle function that handle SNMP request every 100ms */
 	g_timeout_add (10, handle_snmp_request, NULL);

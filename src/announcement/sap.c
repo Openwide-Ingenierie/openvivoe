@@ -366,7 +366,7 @@ gboolean receive_announcement(gpointer entry){
 	} else if ( status == sizeof(channel_entry->sap_datas->udp_payload )) {
 	    g_printerr("WARNING: datagram too large for buffer: truncated");
 		return TRUE;
-	} else { 
+	} else {
 		/* compare teh payloed read on the socket with the payload read before 
 		 * if there different, save the new payload into the sap_dat of the channel
 		 */

@@ -35,15 +35,6 @@
  */
 static const char* interlace_mode_to_string(int interlaced_mode_val){
 	const char * enum_names []=  { NULL, "interlaced" , "progressive" , "none" , NULL };	
-/*	switch(interlaced_mode){
-		case 1: return "interlaced";
-				break;
-		case 2: return "progressive";
-				break;
-		case 3: return "none";
-				break;
-		default: return "";
-	}*/
 	return enum_names[interlaced_mode_val];
 }
 
@@ -225,7 +216,7 @@ gboolean create_SDP(GstSDPMessage 	*msg, struct channelTable_entry * channel_ent
 
 
 /**
- * \brief Build a SDP Message structure from a string representation
+ * \brief Builds a SDP Message structure from a string representation, creates an associated pipeline, starts it
  * \param array: the SDP message obtained from SAP/SDP datagram
  * \param sdp_msg_size: the size of the byte array got from SAP/SDP message
  */
@@ -252,7 +243,7 @@ gboolean get_SDP(unsigned char *array, int sdp_msg_size, struct channelTable_ent
 
 	printf("%s\n", gst_caps_to_string (caps));
 	init_streaming (NULL, caps, channel_entry,/* real prototype */
-					NULL, 0, 0, NULL /* extra parameters for testing purposes*/);
+					NULL, 0, 0 /* extra parameters for testing purposes*/);
 	start_streaming( channel_entry->stream_datas, channel_entry->channelVideoFormatIndex);
 
 	/* modify updsrc caps parameters in the corresponding channel's stream_data */

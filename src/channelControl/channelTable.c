@@ -11,7 +11,9 @@
 #include <glib-unix.h>
 #include <gstreamer-1.0/gst/sdp/gstsdpmessage.h>
 #include <gstreamer-1.0/gst/gst.h>
+#include <arpa/inet.h>
 #include "../../include/mibParameters.h"
+#include "../../include/multicast.h"
 #include "../../include/videoFormatInfo/videoFormatTable.h"
 #include "../../include/handler.h"
 #include "../../include/channelControl/channelTable.h"
@@ -201,23 +203,34 @@ gboolean channelTable_updateEntry(struct channelTable_entry * entry, int videoFo
        if ( videoFormatentry == NULL)
                return FALSE;
        /* upate ChannelTable_entry parameter with the ones retrieve from videoFormatTable */
-       entry->channelVideoFormatIndex 						= videoFormatNumberIndex;
-       entry->channelVideoFormat 							= strdup(videoFormatentry->videoFormatBase);
-       entry->channelVideoFormat_len 						= MIN(strlen(videoFormatentry->videoFormatBase), 		DisplayString16);
-       entry->channelVideoSampling 							= strdup(videoFormatentry->videoFormatSampling);
-       entry->channelVideoSampling_len 						= MIN(strlen(videoFormatentry->videoFormatSampling), 	DisplayString16);
-       entry->channelVideoBitDepth 							= videoFormatentry->videoFormatBitDepth;
-       entry->channelFps 									= videoFormatentry->videoFormatFps;
-       entry->channelColorimetry 							= strdup(videoFormatentry->videoFormatColorimetry);
-       entry->channelColorimetry_len 						= MIN(strlen(videoFormatentry->videoFormatColorimetry), DisplayString16);
-       entry->channelInterlaced 							= videoFormatentry->videoFormatInterlaced;
-       entry->channelCompressionFactor 						= videoFormatentry->videoFormatCompressionFactor;
-       entry->channelCompressionRate 						= videoFormatentry->videoFormatCompressionRate;
-       entry->channelHorzRes 								= videoFormatentry->videoFormatMaxHorzRes;
-       entry->channelVertRes 								= videoFormatentry->videoFormatMaxVertRes;
-       /* update the stream data */
-       entry->stream_datas 									= videoFormatentry->stream_datas;
-       return TRUE;
+		entry->channelVideoFormatIndex 						= videoFormatNumberIndex;
+		entry->channelVideoFormat 							= strdup(videoFormatentry->videoFormatBase);
+		entry->channelVideoFormat_len 						= MIN(strlen(videoFormatentry->videoFormatBase), 		DisplayString16);
+		entry->channelVideoSampling 						= strdup(videoFormatentry->videoFormatSampling);
+		entry->channelVideoSampling_len 					= MIN(strlen(videoFormatentry->videoFormatSampling), 	DisplayString16);
+		entry->channelVideoBitDepth 						= videoFormatentry->videoFormatBitDepth;
+		entry->channelFps 									= videoFormatentry->videoFormatFps;
+		entry->channelColorimetry 							= strdup(videoFormatentry->videoFormatColorimetry);
+		entry->channelColorimetry_len 						= MIN(strlen(videoFormatentry->videoFormatColorimetry), DisplayString16);
+		entry->channelInterlaced 							= videoFormatentry->videoFormatInterlaced;
+		entry->channelCompressionFactor 					= videoFormatentry->videoFormatCompressionFactor;
+		entry->channelCompressionRate 						= videoFormatentry->videoFormatCompressionRate;
+		entry->channelHorzRes 								= videoFormatentry->videoFormatMaxHorzRes;
+		entry->channelVertRes 								= videoFormatentry->videoFormatMaxVertRes;
+		/* update the stream data */
+		entry->stream_datas 								= videoFormatentry->stream_datas;
+
+		stop_streaming(entry->stream_datas , entry->channelVideoFormatIndex );
+		stream_data *data 								= entry->stream_datas;
+		/* transform IP from long to char * */
+		long ip 			= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0],entry->channelIndex);
+		struct in_addr ip_addr;
+		ip_addr.s_addr = ip;
+    	g_object_set(   G_OBJECT(data->sink),
+                   	 	"host", inet_ntoa(ip_addr),
+                    	NULL);
+
+		return TRUE;
 }
 
 
@@ -302,6 +315,7 @@ static void channelSatus_requests_handler( struct channelTable_entry * table_ent
 	switch( table_entry->channelType ){
 		case videoChannel : /* case ServiceProvider */
 			if ( table_entry->channelStatus == start){
+				prepare_socket( table_entry );
 				g_timeout_add(table_entry->channelSapMessageInterval,send_announcement, table_entry );
 				start_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex);
 			}

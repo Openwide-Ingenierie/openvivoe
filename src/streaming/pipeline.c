@@ -19,6 +19,7 @@
 #include "../../include/videoFormatInfo/videoFormatTable.h"
 #include "../../include/channelControl/channelTable.h"
 #include "../../include/streaming/stream_registration.h"
+#include "../../include/multicast.h"
 #include "../../include/mibParameters.h"
 #include "../../include/streaming/filter.h"
 #include "../../include/streaming/detect.h"
@@ -92,7 +93,7 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus *bus,
  */
 static GstElement* addUDP( 	GstElement *pipeline, 	GstBus *bus,
 							guint bus_watch_id, 	GMainLoop *loop,
-							GstElement *input, 		long ip){
+							GstElement *input, 		long channel_entry_index){
 
 	/*Create element that will be add to the pipeline */
 	GstElement *udpsink;
@@ -104,9 +105,17 @@ static GstElement* addUDP( 	GstElement *pipeline, 	GstBus *bus,
 	   return NULL;
     }
 
+	/* compute IP */
+	printf("1\n");
+	long ip 			= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0],channel_entry_index);
+	long default_ip 	= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0],channel_entry_index);
+	printf("2\n");
+
 	/* transform IP from long to char * */
 	struct in_addr ip_addr;
 	ip_addr.s_addr = ip;
+	printf("%s\n", inet_ntoa( ip_addr ));
+
 	/*Set UDP sink properties */
     g_object_set(   G_OBJECT(udpsink),
                     "host", inet_ntoa(ip_addr),
@@ -138,12 +147,11 @@ static GstElement* addUDP( 	GstElement *pipeline, 	GstBus *bus,
  * \port the port to use
  * \return GstElement* the last element added to the pipeline (should be udpsink if everything went ok)
  */
-GstElement* create_pipeline_videoChannel( gpointer stream_datas,
-						 	 GMainLoop *loop,
-							 GstElement* input){
+GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
+										 	GMainLoop *loop,
+											GstElement* input){
 	GstElement 		*last;
 	stream_data 	*data 	=  stream_datas;
-	long 			ip;
 	/* create the empty videoFormatTable_entry structure to intiate the MIB */
 	struct videoFormatTable_entry * video_stream_info;
 	video_stream_info = SNMP_MALLOC_TYPEDEF(struct videoFormatTable_entry);
@@ -170,7 +178,8 @@ GstElement* create_pipeline_videoChannel( gpointer stream_datas,
 	 * Before returning the starting the stream
 	 * Add the entry to the Table, if necessary.
 	 */
-	if( initialize_videoFormat(video_stream_info, stream_datas, &ip)){
+	long channel_entry_index = 0;
+	if( initialize_videoFormat(video_stream_info, stream_datas,  &channel_entry_index)){
 		g_printerr("Failed to add entry in the videoFormatTable or in channelEntry\n");
 		return NULL;
 	}
@@ -178,14 +187,14 @@ GstElement* create_pipeline_videoChannel( gpointer stream_datas,
 	/* Add UDP element */
 	last = addUDP( 	pipeline, 	  		bus,
 					bus_watch_id, 		loop,
-					last, 	 			ip
-					);
+					last, 	 			channel_entry_index
+				);
 
 	if (last == NULL){
 		g_printerr("Failed to create pipeline\n");
 		return NULL;
 	}
-
+	data->sink = last;
 	/* Before returning, free the entry created at the begging*/
 	free(video_stream_info);
 	return last;
@@ -211,7 +220,7 @@ static GstElement* addUDP_SU( 	GstElement *pipeline, 	GstBus *bus,
 
 	struct in_addr multicast_group;
 	multicast_group.s_addr = channel_entry->channelReceiveIpAddress;
-
+	printf("%s\n", inet_ntoa( multicast_group ));
 	/*Set UDP sink properties */
     g_object_set(   G_OBJECT(udpsrc),
                 	"multicast-group", 	inet_ntoa( multicast_group ),
@@ -262,7 +271,7 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 	GstBus *bus,
 				g_printerr ( "error cannot create element for: %s\n","rtp");
 				return NULL;
 			}
-			parser 	= gst_element_factory_make ("mpeg4videoparse", "parser");
+			parser = gst_element_factory_make ("mpeg4videoparse", "parser");
 			if( parser == NULL){
 				g_printerr ( "error cannot create element for: %s\n","parser");
 				return NULL;
@@ -351,12 +360,17 @@ GstElement* create_pipeline_serviceUser( gpointer stream_datas,
 
 
 	GstElement *first, *last;
-	first =  addUDP_SU( pipeline, 	bus,
+	first =  addUDP_SU( pipeline, 		bus,
 						bus_watch_id, 	loop,
-						caps, 
-						channel_entry);
+						caps, 			channel_entry);
+	/* one element in pipeline: first is last, and last is first */
 	last = first;
-	last = addRTP_SU( pipeline, bus, bus_watch_id, loop, first, video_stream_info, data, caps);
+
+	/* Add RTP depayloader element */
+	last = addRTP_SU( 	pipeline, 		bus,
+						bus_watch_id, 	loop,
+						first, 			video_stream_info,
+						data, 			caps);
 
 	addSink_SU( pipeline, bus, bus_watch_id, loop, last);
 	return first;

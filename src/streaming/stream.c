@@ -130,7 +130,7 @@ static int check_param(int argc, char* argv[], char** ip, gint* port, char** for
  * \param encoding the encoding to use for the video source
  * \return GstElement* the last element add and link into the pipeline
  */
-static GstElement* source_creation(GstElement* pipeline, char* format, int width, int height, char* encoding){
+static GstElement* source_creation(GstElement* pipeline, char* format, int width, int height/*, char* encoding*/){
 	/*
 	 * For now, the source is created manually, directly into the code
 	 * */
@@ -152,7 +152,7 @@ static GstElement* source_creation(GstElement* pipeline, char* format, int width
 	}
 
 	caps = gst_caps_new_full( 	gst_structure_new( 	"video/x-raw" 	,
-													"format" 		, G_TYPE_STRING , encoding,
+													//"format" 		, G_TYPE_STRING , encoding,
 													"width" 		, G_TYPE_INT 	, width,
 													"height" 		, G_TYPE_INT 	, height,
 													"interlace-mode", G_TYPE_STRING , "progressive",
@@ -167,7 +167,7 @@ static GstElement* source_creation(GstElement* pipeline, char* format, int width
 	/* save last pipeline element*/
 	last = capsfilter;
 	/* For test purposes, if user specify mp4 as format, encrypt the vidoe */
-	if( !strcmp(format, "mp4")){
+	if( !strcmp(format, "MP4V-ES")){
 		/* For test puposes, if we wanna test our program with a fake mpeg-4 source, it necessary to create is mannually with an encoder */
 		/*create the MPEG-4 encoder */
 		enc = gst_element_factory_make ("avenc_mpeg4", "enc");
@@ -185,7 +185,7 @@ static GstElement* source_creation(GstElement* pipeline, char* format, int width
 }
 
 static int init_stream_SP( gpointer main_loop, gpointer stream_datas /* real prototype */
-					, char* format, int width, int height, char* encoding /* extra parameters for testing purposes*/)
+					, char* format, int width, int height/* extra parameters for testing purposes*/)
 {
 	stream_data *data 			= stream_datas;
 
@@ -193,7 +193,7 @@ static int init_stream_SP( gpointer main_loop, gpointer stream_datas /* real pro
 
     GstElement *last;	
 	/* Source Creation */
-	last = source_creation(pipeline, format,width ,height ,encoding);
+	last = source_creation(pipeline, format,width ,height /*,encoding*/);
 
 	if (last == NULL ){
 		g_printerr ( "Failed to create videosource\n");
@@ -207,7 +207,6 @@ static int init_stream_SP( gpointer main_loop, gpointer stream_datas /* real pro
 		return EXIT_FAILURE;
 	}
     return EXIT_SUCCESS;
-
 }
 
 static int init_stream_SU( gpointer main_loop, gpointer stream_datas, GstCaps *caps, struct channelTable_entry *channel_entry )
@@ -231,7 +230,7 @@ static int init_stream_SU( gpointer main_loop, gpointer stream_datas, GstCaps *c
  * \return 0
  */
 int init_streaming (gpointer main_loop, GstCaps *caps, struct channelTable_entry * channel_entry,/* real prototype */
-					char* format, int width, int height, char* encoding /* extra parameters for testing purposes*/)
+					char* format, int width, int height/* extra parameters for testing purposes*/)
 {
     /* Initialization of elements needed */
     GstElement 	*pipeline;
@@ -264,7 +263,7 @@ int init_streaming (gpointer main_loop, GstCaps *caps, struct channelTable_entry
 	data->bus 			= bus;
 	data->bus_watch_id 	= bus_watch_id;
 	if( format != NULL){ /* case we are a Service Provider */
-		 init_stream_SP( main_loop, data, format, width, height, encoding);
+		 init_stream_SP( main_loop, data, format, width, height);
 		return EXIT_SUCCESS;
 	}
 	else{ /* case we are a Service User */

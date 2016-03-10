@@ -17,7 +17,6 @@
 #include "../../include/mibParameters.h"
 #include "../../include/channelControl/channelTable.h"
 #include "../../include/videoFormatInfo/videoFormatTable.h"
-#include "../../include/multicast.h"
 #include "../../include/streaming/stream_registration.h"
 #include "../../include/streaming/stream.h"
 #include "../../include/announcement/sap.h"
@@ -132,7 +131,7 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
  * \param ip a location to store the IP computed in order to gives it as a parameter for updsink
  * \return EXIT_SUCCESS (0) or EXIT_FAILURE (1)
  */
-int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer stream_datas, long *ip){
+int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer stream_datas, long *channel_entry_index ){
 	long 		index 			= 1;
 	long 		default_ip;
 	stream_data *data 			= stream_datas;	
@@ -165,11 +164,6 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 											data);
 			/* increase videoFormatNumber as we added an entry */
 			videoFormatNumber._value.int_val++;
-
-			/* compute IP */
-			*ip 			= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0], index);
-			default_ip 		= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0], index);
-			
 			/* At the  same time we copy all of those parameters into video channel */
 			channelTable_createEntry( 	channelNumber._value.int_val+1, 												videoChannel,
 										"channelUserDesc", 																stop,
@@ -181,9 +175,11 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 										video_info->videoFormatMaxVertRes, 												0,
 										0, 																				0,
 										0,																				data->rtp_datas->rtp_type,
-										*ip/*IP*/, 																		0 /* packet delay*/,
+										0/*IP*/, 																		0 /* packet delay*/,
  										default_SAP_interval,															index, /*defaultVideoFormatIndex*/
-										default_ip/*default receive IP*/, 												data);
+										0/*default receive IP*/, 												data);
+
+			*channel_entry_index = channelNumber._value.int_val+1;
 			/* increase channelNumber as we added an entry */
 			channelNumber._value.int_val++;
 			
@@ -224,9 +220,6 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 											data);
 			/* increase videoFormatNumber as we added an entry */
 			videoFormatNumber._value.int_val++;
-			/* compute IP */
-			*ip 			= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0], video_info->videoFormatIndex);
-			default_ip 		= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0], video_info->videoFormatIndex);
 			/* At the  same time we copy all of those parameters into video channel */
 			channelTable_createEntry( 	channelNumber._value.int_val+1, 													videoChannel,
 										"channelUserDesc", 																	stop,
@@ -238,9 +231,11 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 										video_info->videoFormatMaxVertRes, 													0,
 										0, 																					0,
 										0,																					data->rtp_datas->rtp_type,
-										*ip,/*receive Address*/ 															0 /* packet delay*/,
- 										default_SAP_interval,  																index, /*defaultVideoFormatIndex - 0 is taken by default*/
-										default_ip/*default receive IP*/, 													data);
+										0,/*receive Address*/ 																0 /* packet delay*/,
+			 							default_SAP_interval,  																index, /*defaultVideoFormatIndex-0 is taken by default*/
+										0/*default receive IP*/, 		 													data);
+
+			*channel_entry_index = channelNumber._value.int_val+1;
 			/* increase channelNumber as we added an entry */
 			channelNumber._value.int_val++;
 		}
