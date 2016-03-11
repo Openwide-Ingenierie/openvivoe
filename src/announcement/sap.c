@@ -266,17 +266,10 @@ static char* SAP_depay(char* udp_payload){
 gboolean prepare_socket(struct channelTable_entry * entry ){
 	/* create UDP payload and save the payload into sap_datas structure */
 	entry->sap_datas->udp_payload_length = 0;
-	if( entry->channelType == videoChannel ){
-		entry->sap_datas->udp_payload =  build_SAP_msg(entry, &(entry->sap_datas->udp_payload_length), FALSE); /* build SAP announcement message (not deletion message) */
+	entry->sap_datas->udp_payload =  build_SAP_msg(entry, &(entry->sap_datas->udp_payload_length), FALSE); /* build SAP announcement message (not deletion message) */
 		/* for(int i = 0; i<entry->sap_datas->udp_payload_length ; i++)
 			printf("%02X\t%d\n", entry->sap_datas->udp_payload[i], i); */
 		return TRUE;		
-	}else if(  entry->channelType == serviceUser ) {
-		entry->sap_datas->udp_payload_length 	= SAP_MAX_size; /* set the Max size of received datagram */
-		entry->sap_datas->udp_payload 			= (char*) malloc(entry->sap_datas->udp_payload_length * sizeof(char));
-		return TRUE;
-	}
-	return FALSE;
 }
 
 
@@ -327,76 +320,59 @@ gboolean send_announcement(gpointer entry){
  * \param gpointer entry the entry in the channelTable associated to the socket
  * \return gboolean TRUE on succed, FALSE on failure
  */
-gboolean receive_announcement(gpointer entry){
-	struct channelTable_entry * channel_entry = entry;
+gboolean receive_announcement(){
+	int 						status;
+	int udp_payload_length = SAP_MAX_size;
 
-	int 				status;
-	char				temp[SAP_MAX_size];
-/*	unsigned int 		socklen;
-	
-	struct timeval timeout;
-    timeout.tv_sec 	= 3;
-    timeout.tv_usec = 0;
-	status = setsockopt (sap_socket.udp_socket_fd_rec,
-						 SOL_SOCKET,
-						 SO_RCVTIMEO,
-						 (char *)&timeout,
-		 				 sizeof(timeout) );
-    if ( status < 0)
-		g_printerr("Failed to set socket timeout: %s\n", strerror(errno)); 
-	*/
-	/* receive packet from socket 
-	socklen = sizeof(sap_socket.multicast_addr);
-	status = recvfrom( 	sap_socket.udp_socket_fd_rec,
-		   				channel_entry->sap_datas->udp_payload,
-						channel_entry->sap_datas->udp_payload_length,
-			   			MSG_DONTWAIT, flags 
-						&(sap_socket.multicast_addr),
-						&socklen );*/
-	/*
-	 * Before doing anything, just check the channel status
-	 * When channel status is stop, stop to liston on the socket 
-	 */
-	if( channel_entry->channelStatus == stop )
-		return FALSE;
-
+	char udp_payload[SAP_MAX_size];
 	status = read( 	sap_socket.udp_socket_fd_rec,
-		   			temp,
-					channel_entry->sap_datas->udp_payload_length );
-	if (status == -1) {
-		g_printerr("Failed to receive: %s\n",strerror(errno));
+			udp_payload,
+			udp_payload_length );
+
+	if (status == -1)
+	{
+		g_printerr("Failed to receive: %s\n", strerror(errno));
 		return TRUE;
-	} else if ( status == sizeof(channel_entry->sap_datas->udp_payload )) {
-	    g_printerr("WARNING: datagram too large for buffer: truncated");
+	}
+	else if ( status == sizeof(udp_payload ))
+	{
+		g_printerr("WARNING: datagram too large for buffer: truncated");
 		return TRUE;
-	} else {
+	}
+	else
+	{
 		/* compare teh payloed read on the socket with the payload read before 
 		 * if there different, save the new payload into the sap_dat of the channel
 		 */
 		/* check if it is the one we should be listening to */
-		if ( strcmp(channel_entry->sap_datas->udp_payload , temp) != 0 ){
-				unsigned char *sdp_msg = (unsigned char*) SAP_depay(temp);
-				GstCaps* caps = get_SDP(sdp_msg, status - SAP_header_size, channel_entry);
-				/* if caps are null, a problem occured or this is not a SAP/SDP announcement from the right channel */
-				if(caps == NULL )
-					return TRUE; /* we cannot return FALSE, cause we need to keep on listenning for our SAP/SDP annoucement */
-			/* Now we are sure that this is our SAP/SDP annoucement */	
-			/* save the sap message in the sap_data of the channel anyway, even if it is a deletion message */
-			memcpy(channel_entry->sap_datas->udp_payload, temp, channel_entry->sap_datas->udp_payload_length );
-			/* check if the SAP message is a deletion message */
-			if( channel_entry->sap_datas->udp_payload[0] == SAP_header_deletion ){
-				delete_steaming_data(channel_entry);
-			}
-			else{
-				init_streaming (NULL, caps, channel_entry,/* real prototype */
+		unsigned char *sdp_msg = (unsigned char*) SAP_depay(udp_payload);
+		/* struct to save the multicast IP of the receive stream */
+		in_addr_t multicast_addr;
+		GstCaps* caps = get_SDP(sdp_msg, status - SAP_header_size, &multicast_addr);
+		/* if caps are null, a problem occured or this is not a SAP/SDP announcement from the right channel */
+		if(caps == NULL )
+			return TRUE; /* we cannot return FALSE, cause we need to keep on listenning for our SAP/SDP annoucement */
+		struct channelTable_entry* iterator = channelTable_head;
+		while (iterator != NULL){
+			if ( 	(iterator->channelType 		== serviceUser) &&
+					(iterator->channelStatus 	== start ) 		&&
+					(iterator->channelReceiveIpAddress == multicast_addr)){
+				/* Now we are sure that this is our SAP/SDP annoucement */	
+				/* check if the SAP message is a deletion message */
+				if( udp_payload[0] == SAP_header_deletion ){
+					delete_steaming_data(iterator);
+				}
+				else{
+					stream_data 	*data 	=  iterator->stream_datas;
+					if ( data == NULL ){
+						init_streaming (NULL, caps, iterator,/* real prototype */
 								NULL, 0, 0 /* extra parameters for testing purposes*/);
-				start_streaming( channel_entry->stream_datas, channel_entry->channelVideoFormatIndex);
+						start_streaming( iterator->stream_datas, iterator->channelVideoFormatIndex);
+					}
+				}
 			}
-			return TRUE;
+			iterator = iterator->next;
 		}
-		printf("same as before\n");
-		/* otherwise, do not do anything */
 		return TRUE;
 	}
-
 }

@@ -226,7 +226,7 @@ gboolean create_SDP(GstSDPMessage 	*msg, struct channelTable_entry * channel_ent
  * \param array: the SDP message obtained from SAP/SDP datagram
  * \param sdp_msg_size: the size of the byte array got from SAP/SDP message
  */
-GstCaps* get_SDP(unsigned char *array, int sdp_msg_size, struct channelTable_entry * channel_entry){
+GstCaps* get_SDP(unsigned char *array, int sdp_msg_size, in_addr_t *multicast_addr){
 
 	GstSDPMessage *msg;
 	/* create a new SDP message */
@@ -240,18 +240,12 @@ GstCaps* get_SDP(unsigned char *array, int sdp_msg_size, struct channelTable_ent
 		return NULL;
 	}
 
-//	printf("%s\n",  gst_sdp_message_as_text (msg));
-
 	const GstSDPConnection *connection;
 	connection = gst_sdp_message_get_connection (msg);
-		
-	/* check if the multicast group is indeed, the one we should receive */
-	struct in_addr multicast_group;
-	multicast_group.s_addr = channel_entry->channelReceiveIpAddress;
-	if ( strcmp(connection->address, inet_ntoa(multicast_group)) != 0 ){
-		return NULL;
-	}
 
+	*multicast_addr =  inet_addr(connection->address);
+	/* check if the multicast group is indeed, the one we should receive */
+	
 	GstSDPMedia *media;
 	gst_sdp_media_new (&media);
 	if (gst_sdp_message_medias_len (msg) > 1 ){
@@ -262,8 +256,5 @@ GstCaps* get_SDP(unsigned char *array, int sdp_msg_size, struct channelTable_ent
 	media 			= gst_sdp_message_get_media(msg , 0);
 	GstCaps *caps 	= gst_sdp_media_get_caps_from_media (media, 96);
 
-	/* Update channel entry of the Service User with information extracted from SDP message */
-
-//	printf("%s\n", gst_caps_to_string (caps));
 	return caps;
 }

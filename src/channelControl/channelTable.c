@@ -153,7 +153,6 @@ struct channelTable_entry *
 	/* allocate memory for sap_data */
 	sap_data 	*sap_datas = (sap_data*) malloc(sizeof(sap_data));
 	entry->sap_datas = sap_datas;
-	prepare_socket(entry); //save the SAP datas
 
     entry->next 							= channelTable_head;
 	entry->valid 							= 1;
@@ -340,10 +339,7 @@ static void channelSatus_requests_handler( struct channelTable_entry * table_ent
 			}
 			break;
 		case serviceUser:
-			if ( table_entry->channelStatus == start){
-				g_timeout_add(table_entry->channelSapMessageInterval,receive_announcement, table_entry );
-			}
-			else if ( table_entry->channelStatus == stop){
+			if ( table_entry->channelStatus == stop){
 				delete_steaming_data(table_entry);
 			}
 			break;

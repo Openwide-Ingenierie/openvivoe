@@ -26,6 +26,7 @@
 #include "../include/mibParameters.h"
 #include "../include/videoFormatInfo/videoFormatTable.h"
 #include "../include/channelControl/channelTable.h"
+#include "../include/announcement/sap.h"
 #include "../include/multicast.h"
 #include "../include/streaming/stream_registration.h"
 #include "../include/streaming/stream.h"
@@ -122,7 +123,7 @@ int main (int   argc,  char *argv[]){
 		}
 	}
 
-
+	g_timeout_add(1000, receive_announcement, NULL);
     /* Iterate */
 	g_main_loop_run (loop);
 	
