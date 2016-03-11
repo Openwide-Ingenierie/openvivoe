@@ -26,6 +26,7 @@
 /* Header file */
 #include "../../include/mibParameters.h"
 #include "../../include/deviceInfo/ethernetIfTable.h"
+#include "../../include/videoFormatInfo/videoFormatTable.h"
 #include "../../include/channelControl/channelTable.h"
 #include "../../include/announcement/sap.h"
 #include "../../include/announcement/sdp.h"
@@ -80,6 +81,7 @@
  * Total: 								24 bytes
  */
 #define SAP_header_size 			24
+#define SAP_header_OS_position		4	
 
 
 /**
@@ -370,7 +372,8 @@ gboolean receive_announcement(gpointer entry){
 		/* compare teh payloed read on the socket with the payload read before 
 		 * if there different, save the new payload into the sap_dat of the channel
 		 */
-		if ( strcmp(channel_entry->sap_datas->udp_payload, temp) != 0 ){
+		/* check if it is the one we should be listening to */
+		if ( strcmp(channel_entry->sap_datas->udp_payload , temp) != 0 ){
 			/* save the sap message in the sap_data of the channel anyway, even if it is a deletion message */
 			memcpy(channel_entry->sap_datas->udp_payload, temp, channel_entry->sap_datas->udp_payload_length );
 			/* check if the SAP message is a deletion message */
@@ -378,10 +381,15 @@ gboolean receive_announcement(gpointer entry){
 				delete_steaming_data(channel_entry);
 			else{
 				unsigned char *sdp_msg = (unsigned char*) SAP_depay(channel_entry->sap_datas->udp_payload);
-				return get_SDP(sdp_msg, status - SAP_header_size, channel_entry);
+				GstCaps* caps = get_SDP(sdp_msg, status - SAP_header_size, channel_entry);
+				init_streaming (NULL, caps, channel_entry,/* real prototype */
+								NULL, 0, 0 /* extra parameters for testing purposes*/);
+				start_streaming( channel_entry->stream_datas, channel_entry->channelVideoFormatIndex);
+					/* after launching the pipeline, fill the MIB, do it after so it does not dalay the begginning of the streaming */
 			}
 		}
 		/* otherwise, do not do anything */
 		return TRUE;
 	}
+
 }

@@ -19,7 +19,9 @@
 
 /* Header file */
 #include "../../include/mibParameters.h"
+#include "../../include/multicast.h"
 #include "../../include/deviceInfo/ethernetIfTable.h"
+#include "../../include/videoFormatInfo/videoFormatTable.h"
 #include "../../include/channelControl/channelTable.h"
 #include "../../include/announcement/sdp.h"
 #include "../../include/streaming/stream_registration.h"
@@ -173,7 +175,11 @@ gboolean create_SDP(GstSDPMessage 	*msg, struct channelTable_entry * channel_ent
 	/* connection:
 	 * c=<network type> <address type> <address>
 	 */
-	gst_sdp_message_set_connection (msg, network_type, address_type,  inet_ntoa(ip_addr) , address_ttl, 0);
+    long ip  = define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0],channel_entry->channelIndex);
+	/* transform IP from long to char * */
+	struct in_addr multicast_addr;
+	multicast_addr.s_addr = ip;
+	gst_sdp_message_set_connection (msg, network_type, address_type,  inet_ntoa(multicast_addr) , address_ttl, 0);
 
 	
 	/* time : shall be set yo 0 0 in VIVOE to describe an unbound session
@@ -220,32 +226,45 @@ gboolean create_SDP(GstSDPMessage 	*msg, struct channelTable_entry * channel_ent
  * \param array: the SDP message obtained from SAP/SDP datagram
  * \param sdp_msg_size: the size of the byte array got from SAP/SDP message
  */
-gboolean get_SDP(unsigned char *array, int sdp_msg_size, struct channelTable_entry * channel_entry){
+GstCaps* get_SDP(unsigned char *array, int sdp_msg_size, struct channelTable_entry * channel_entry){
 
 	GstSDPMessage *msg;
 	/* create a new SDP message */
 	if (gst_sdp_message_new(&msg)){
 		g_printerr("Failed to create SDP message\n");
-		return FALSE;
+		return NULL;
 	}
 
-	if( gst_sdp_message_parse_buffer (array, sdp_msg_size, msg) != GST_SDP_OK)
-		return error_function();
+	if( gst_sdp_message_parse_buffer (array, sdp_msg_size, msg) != GST_SDP_OK){
+		g_printerr("Failed to parse SDP message\n");
+		return NULL;
+	}
+
+//	printf("%s\n",  gst_sdp_message_as_text (msg));
+
+	const GstSDPConnection *connection;
+	connection = gst_sdp_message_get_connection (msg);
+		
+	/* check if the multicast group is indeed, the one we should receive */
+	struct in_addr multicast_group;
+	multicast_group.s_addr = channel_entry->channelReceiveIpAddress;
+	if ( strcmp(connection->address, inet_ntoa(multicast_group)) != 0 ){
+		return NULL;
+	}
+
+
 	GstSDPMedia *media;
 	gst_sdp_media_new (&media);
-	if (gst_sdp_message_medias_len (msg) > 1 )
-		return error_function();	
+	if (gst_sdp_message_medias_len (msg) > 1 ){
+		g_printerr("ERROR: more than one media in SDP message\n");
+		return NULL;
+	}
 	
 	media 			= gst_sdp_message_get_media(msg , 0);
 	GstCaps *caps 	= gst_sdp_media_get_caps_from_media (media, 96);
 
 	/* Update channel entry of the Service User with information extracted from SDP message */
 
-	printf("%s\n", gst_caps_to_string (caps));
-	init_streaming (NULL, caps, channel_entry,/* real prototype */
-					NULL, 0, 0 /* extra parameters for testing purposes*/);
-	start_streaming( channel_entry->stream_datas, channel_entry->channelVideoFormatIndex);
-
-	/* modify updsrc caps parameters in the corresponding channel's stream_data */
-	return TRUE;
+//	printf("%s\n", gst_caps_to_string (caps));
+	return caps;
 }
