@@ -1,8 +1,0 @@
-o=- 294498979 294498979 IN IP4 10.5.18.119
-s=This is a User Desc channelUserDesc
-c=IN IP4 10.5.18.119
-t=0 0
-m=video 5004 RTP/AVP 96
-a=rtpmap:96 MP4V-ES/90000
-a=fmtp:96  profile-level-id=1; config=000001b001000001b58913000001000000012000c48d8800f53c04871443
-a=framerate:30
