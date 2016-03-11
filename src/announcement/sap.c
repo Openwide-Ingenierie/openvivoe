@@ -294,6 +294,7 @@ gboolean send_announcement(gpointer entry){
 	int nb_bytes = -1;
 	struct channelTable_entry * channel_entry = entry;
 	if( channel_entry->channelStatus == stop ){
+		printf("sending deletion\n");
 		/* Build deletion packet */
 		channel_entry->sap_datas->udp_payload = build_SAP_msg(channel_entry, &(channel_entry->sap_datas->udp_payload_length), TRUE);
 		nb_bytes = sendto( 	sap_socket.udp_socket_fd,
@@ -383,14 +384,17 @@ gboolean receive_announcement(gpointer entry){
 			/* save the sap message in the sap_data of the channel anyway, even if it is a deletion message */
 			memcpy(channel_entry->sap_datas->udp_payload, temp, channel_entry->sap_datas->udp_payload_length );
 			/* check if the SAP message is a deletion message */
-			if( channel_entry->sap_datas->udp_payload[0] == SAP_header_deletion )
+			if( channel_entry->sap_datas->udp_payload[0] == SAP_header_deletion ){
 				delete_steaming_data(channel_entry);
+			}
 			else{
 				init_streaming (NULL, caps, channel_entry,/* real prototype */
 								NULL, 0, 0 /* extra parameters for testing purposes*/);
 				start_streaming( channel_entry->stream_datas, channel_entry->channelVideoFormatIndex);
 			}
+			return TRUE;
 		}
+		printf("same as before\n");
 		/* otherwise, do not do anything */
 		return TRUE;
 	}

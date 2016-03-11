@@ -1,3 +1,9 @@
 Checks why when 2 channelUser should receive the same stream, 
 we hae to send to Start status on the SNMP request for both pipelines to start
 
+multicast:
+same time:
+videoChannel1 --> SU1 
+videoChannel1 --> SU2
+ _ OK if videChannel is started first
+ _ Only one stream if SU1 and SU2 started first

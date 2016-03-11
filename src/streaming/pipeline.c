@@ -293,8 +293,8 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 	GstBus *bus,
 	
 	/*Fill the MIB a second time after creating payload*/
 	/* Media stream Type detection */
-	video_caps = type_detection(GST_BIN(pipeline), last, loop, NULL);
-	fill_entry(video_caps, video_info, stream_datas);
+//	video_caps = type_detection(GST_BIN(pipeline), last, loop, NULL);
+//	fill_entry(video_caps, video_info, stream_datas);
 
 	/* Finally return*/
 	return last;
