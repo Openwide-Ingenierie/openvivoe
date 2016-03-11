@@ -324,10 +324,10 @@ int delete_steaming_data(gpointer channel_entry){
 		/* free the sap_data */
 		if( entry->channelType == videoChannel)
 			free(entry->sap_datas);
-		free(data); 
+		free(data);
+		entry->stream_datas = NULL;
 	}
-
-if( entry->channelType == videoChannel)
-	free(entry);
+	if( entry->channelType == videoChannel)
+		free(entry);
 	return 0;
 }

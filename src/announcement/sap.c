@@ -352,11 +352,9 @@ gboolean receive_announcement(){
 		/* if caps are null, a problem occured or this is not a SAP/SDP announcement from the right channel */
 		if(caps == NULL )
 			return TRUE; /* we cannot return FALSE, cause we need to keep on listenning for our SAP/SDP annoucement */
-		struct channelTable_entry* iterator = channelTable_head;
+		struct channelTable_entry* iterator = channelTable_SU_head;
 		while (iterator != NULL){
-			if ( 	(iterator->channelType 		== serviceUser) &&
-					(iterator->channelStatus 	== start ) 		&&
-					(iterator->channelReceiveIpAddress == multicast_addr)){
+			if (iterator->channelReceiveIpAddress == multicast_addr){
 				/* Now we are sure that this is our SAP/SDP annoucement */	
 				/* check if the SAP message is a deletion message */
 				if( udp_payload[0] == SAP_header_deletion ){
@@ -371,7 +369,7 @@ gboolean receive_announcement(){
 					}
 				}
 			}
-			iterator = iterator->next;
+			iterator = iterator->next_SU;
 		}
 		return TRUE;
 	}

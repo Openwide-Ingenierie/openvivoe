@@ -101,9 +101,17 @@ struct channelTable_entry {
     /* Illustrate using a simple linked list */
     int   valid;
     struct channelTable_entry *next;
+    struct channelTable_entry *next_SU;
+
 };
 
+/**\brief head of the channelTalbe
+ */
 struct channelTable_entry  *channelTable_head;
+
+/** \brief head of the Service USezr channelTalbe
+ */
+struct channelTable_entry  *channelTable_SU_head;
 
 /* create a new row in the (unsorted) table */
 struct channelTable_entry * channelTable_createEntry(

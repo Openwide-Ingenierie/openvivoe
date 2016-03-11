@@ -81,6 +81,38 @@ initialize_table_channelTable(void)
 	}
 }
 
+/**
+ * \brief adds an entry into channelTable_SU
+ * \param new_entry the entry to add into the table
+ */
+static void add_in_channel_SU(struct channelTable_entry *new_entry){
+		new_entry->next_SU = channelTable_SU_head;
+		channelTable_SU_head = new_entry;
+		printf("%d\n", channelTable_SU_head->channelIndex);
+}
+
+/**
+ * \brief pops an entry  channelTable_SU
+ * \param new_entry the entry to add into the table
+ * \param entry_index the index of the entry to pop 
+ */
+static void pop_from_channel_SU( struct channelTable_entry *table_entry){
+	struct channelTable_entry *iterator = channelTable_SU_head;
+	/* check if we want to pop the head */
+	if ( table_entry == channelTable_SU_head )
+		channelTable_SU_head = NULL;
+		return;
+	while (table_entry!= NULL && iterator->next_SU != table_entry)
+		iterator = iterator->next_SU;
+	/* the entry to pop is next_SU */
+	if( iterator->next_SU != NULL)
+		iterator->next_SU =	iterator->next_SU->next_SU;
+	else /* it means we are trying to pop the last element of the table */
+		iterator->next_SU = NULL;
+	/* we don't free the memory because the entry remains in the classic channelTable */	
+}
+
+
 /* create a new row in the (unsorted) table */
 struct channelTable_entry *
 	channelTable_createEntry(
@@ -154,9 +186,9 @@ struct channelTable_entry *
 	sap_data 	*sap_datas = (sap_data*) malloc(sizeof(sap_data));
 	entry->sap_datas = sap_datas;
 
-    entry->next 							= channelTable_head;
 	entry->valid 							= 1;
-    channelTable_head 						= entry;
+	entry->next = channelTable_head;
+	channelTable_head = entry;
     return entry;
 }
 
@@ -164,7 +196,8 @@ struct channelTable_entry *
  * \brief Create an empty entry, ServiceUser must have an available entry in order to receive the Start message from the manager
  */
 struct channelTable_entry *	channelTable_createEmptyEntry(){
-	return	channelTable_createEntry(
+    struct channelTable_entry *ServiceUser_entry = 
+		channelTable_createEntry(
     	        				channelNumber._value.int_val+1, /* Appen one channel to the list, its index is just the number of channel incremented by one */
 								serviceUser,
 						    	"",
@@ -192,7 +225,11 @@ struct channelTable_entry *	channelTable_createEmptyEntry(){
 							   	0,
 							 	NULL
                 			);
+	return ServiceUser_entry;
 }
+
+
+
 /**
  * \brief fill an entry in the ChannelTable 
  * \param entry the entry in channelTable to update
@@ -244,10 +281,6 @@ gboolean channelTable_updateEntry(struct channelTable_entry * entry, int videoFo
 
 		return TRUE;
 }
-
-
-
-
 
 #if  ALLOW_REMOVING_ROW
 /* remove a row from the table */
@@ -339,8 +372,12 @@ static void channelSatus_requests_handler( struct channelTable_entry * table_ent
 			}
 			break;
 		case serviceUser:
-			if ( table_entry->channelStatus == stop){
+			if ( table_entry->channelStatus == start){
+				add_in_channel_SU(table_entry);
+			}
+			else if ( table_entry->channelStatus == stop){
 				delete_steaming_data(table_entry);
+			 	pop_from_channel_SU(table_entry);
 			}
 			break;
 		default:
