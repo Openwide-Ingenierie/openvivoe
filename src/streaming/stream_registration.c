@@ -15,8 +15,8 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "../../include/mibParameters.h"
-#include "../../include/channelControl/channelTable.h"
 #include "../../include/videoFormatInfo/videoFormatTable.h"
+#include "../../include/channelControl/channelTable.h"
 #include "../../include/streaming/stream_registration.h"
 #include "../../include/streaming/stream.h"
 #include "../../include/announcement/sap.h"
@@ -133,7 +133,6 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
  */
 int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer stream_datas, long *channel_entry_index ){
 	long 		index 			= 1;
-	long 		default_ip;
 	stream_data *data 			= stream_datas;	
 	/* Check if entry already exits;
 	 *  _ if yes, do not add a new entry, but set it status to enable if it is not already enable
@@ -151,7 +150,7 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 			return EXIT_FAILURE;
 		}else{
 			/* Then we are sure that we can create a new entry */
-			videoFormatTable_createEntry( 	index 										, 			 					videoChannel,
+			videoFormatTable_createEntry( 	index, 													 					videoChannel,
 											disable, 																	video_info->videoFormatBase,
 											video_info->videoFormatSampling, 											video_info->videoFormatBitDepth,
 											video_info->videoFormatFps,				 									video_info->videoFormatColorimetry,

@@ -24,8 +24,8 @@
 /* header file */
 #include "../include/daemon.h"
 #include "../include/mibParameters.h"
-#include "../include/channelControl/channelTable.h"
 #include "../include/videoFormatInfo/videoFormatTable.h"
+#include "../include/channelControl/channelTable.h"
 #include "../include/multicast.h"
 #include "../include/streaming/stream_registration.h"
 #include "../include/streaming/stream.h"

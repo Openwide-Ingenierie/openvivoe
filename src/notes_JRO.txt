@@ -1,1 +1,3 @@
-Nothing to be done!
+Checks why when 2 channelUser should receive the same stream, 
+we hae to send to Start status on the SNMP request for both pipelines to start
+

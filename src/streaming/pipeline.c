@@ -88,6 +88,21 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus *bus,
 	return rtp;
 }
 
+void set_udpsink_param( GstElement *udpsink, long channel_entry_index){
+	/* compute IP */
+	long ip 			= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0],channel_entry_index);
+
+	/* transform IP from long to char * */
+	struct in_addr ip_addr;
+	ip_addr.s_addr = ip;
+
+	/*Set UDP sink properties */
+    g_object_set(   G_OBJECT(udpsink),
+                    "host", inet_ntoa(ip_addr),
+                    "port", DEFAULT_MULTICAST_PORT,
+                    NULL);
+}
+
 /*
  * This function add the UDP element to the pipeline
  */
@@ -105,24 +120,10 @@ static GstElement* addUDP( 	GstElement *pipeline, 	GstBus *bus,
 	   return NULL;
     }
 
-	/* compute IP */
-	printf("1\n");
-	long ip 			= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0],channel_entry_index);
-	long default_ip 	= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0],channel_entry_index);
-	printf("2\n");
+	set_udpsink_param(udpsink, channel_entry_index);
 
-	/* transform IP from long to char * */
-	struct in_addr ip_addr;
-	ip_addr.s_addr = ip;
-	printf("%s\n", inet_ntoa( ip_addr ));
-
-	/*Set UDP sink properties */
-    g_object_set(   G_OBJECT(udpsink),
-                    "host", inet_ntoa(ip_addr),
-                    "port", DEFAULT_MULTICAST_PORT,
-                    NULL);
-
-	/* add rtp to pipeline */
+	
+	/* add udpsink to pipeline */
 	if ( !gst_bin_add(GST_BIN (pipeline), udpsink )){
 		g_printerr("Unable to add %s to pipeline", gst_element_get_name(udpsink));
 		return NULL;
@@ -220,7 +221,6 @@ static GstElement* addUDP_SU( 	GstElement *pipeline, 	GstBus *bus,
 
 	struct in_addr multicast_group;
 	multicast_group.s_addr = channel_entry->channelReceiveIpAddress;
-	printf("%s\n", inet_ntoa( multicast_group ));
 	/*Set UDP sink properties */
     g_object_set(   G_OBJECT(udpsrc),
                 	"multicast-group", 	inet_ntoa( multicast_group ),
@@ -246,7 +246,7 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 	GstBus *bus,
 								gpointer stream_datas, 	GstCaps *caps){
 	/*Create element that will be add to the pipeline */
 	GstElement 		*rtp = NULL;
-	GstElement 		*parser, *dec;
+	GstElement 		*parser, *dec, *last = NULL;
 	GstStructure 	*video_caps 	= gst_caps_get_structure(caps, 0);
 	char 			*encoding  		= (char*) gst_structure_get_string(video_caps, "encoding-name");
 	/* Fill the MIB a first Time */
@@ -262,7 +262,7 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 	GstBus *bus,
 			}
 		gst_bin_add(GST_BIN (pipeline), rtp);
 		gst_element_link_many( input, rtp, NULL );
-		return rtp;
+		last = rtp;
 		}else if  ( strcmp( "MP4V-ES",encoding) == 0 ){
 			/* For MPEG-4 video */
 			rtp 	= gst_element_factory_make ("rtpmp4vdepay", "rtp");
@@ -284,19 +284,20 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 	GstBus *bus,
 			}
 			gst_bin_add_many(GST_BIN (pipeline), rtp, parser, dec, NULL);
 			gst_element_link_many( input, rtp, parser, dec, NULL );
-			return dec;
+			last = dec;
 		}
 	}else{
 		g_printerr("unknow type of video stream\n");
 		return NULL;
 	}
-	/* Media stream Type detection */
-	//	video_caps = type_detection(GST_BIN(pipeline), rtp, loop, NULL);
+	
 	/*Fill the MIB a second time after creating payload*/
-//	fill_entry(video_caps, video_info, stream_datas);
+	/* Media stream Type detection */
+	video_caps = type_detection(GST_BIN(pipeline), last, loop, NULL);
+	fill_entry(video_caps, video_info, stream_datas);
 
 	/* Finally return*/
-//	return last;
+	return last;
 }
 
 
@@ -371,6 +372,8 @@ GstElement* create_pipeline_serviceUser( gpointer stream_datas,
 						bus_watch_id, 	loop,
 						first, 			video_stream_info,
 						data, 			caps);
+
+	channelTable_fill_entry(channel_entry, video_stream_info);	
 
 	addSink_SU( pipeline, bus, bus_watch_id, loop, last);
 	return first;

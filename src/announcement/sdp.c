@@ -252,7 +252,6 @@ GstCaps* get_SDP(unsigned char *array, int sdp_msg_size, struct channelTable_ent
 		return NULL;
 	}
 
-
 	GstSDPMedia *media;
 	gst_sdp_media_new (&media);
 	if (gst_sdp_message_medias_len (msg) > 1 ){

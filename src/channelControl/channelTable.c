@@ -20,6 +20,7 @@
 #include "../../include/announcement/sap.h"
 #include "../../include/announcement/sdp.h"
 #include "../../include/streaming/stream_registration.h"
+#include "../../include/streaming/pipeline.h"
 #include "../../include/streaming/stream.h"
 
 
@@ -71,6 +72,9 @@ initialize_table_channelTable(void)
 	 * If it is a serviceUser or both, then create an empty entry 
 	 */
 	if( deviceInfo.parameters[num_DeviceType]._value.int_val != device_SP ){
+		channelTable_createEmptyEntry();
+		/* increase channelNumber as we added an entry */			
+		channelNumber._value.int_val++;
 		channelTable_createEmptyEntry();
 		/* increase channelNumber as we added an entry */			
 		channelNumber._value.int_val++;
@@ -190,20 +194,14 @@ struct channelTable_entry *	channelTable_createEmptyEntry(){
 							 	NULL
                 			);
 }
-
 /**
- * \brief update an entry in the ChannelTable when changing its videoFormat
+ * \brief fill an entry in the ChannelTable 
  * \param entry the entry in channelTable to update
- * \param videoFormatIndex the new videoFormatIndex to use for this channel
+ * \param  videoFormatIndex the VF that will be used to get the parameters 
  * \return TRUE if we succeed to update the parameters
  */
-gboolean channelTable_updateEntry(struct channelTable_entry * entry, int videoFormatNumberIndex){
-       /* get the correspondante entry in the table of VideoFormat */
-       struct videoFormatTable_entry *videoFormatentry         = videoFormatTable_getEntry( videoFormatNumberIndex );
-       if ( videoFormatentry == NULL)
-               return FALSE;
-       /* upate ChannelTable_entry parameter with the ones retrieve from videoFormatTable */
-		entry->channelVideoFormatIndex 						= videoFormatNumberIndex;
+gboolean channelTable_fill_entry(struct channelTable_entry * entry, struct videoFormatTable_entry *videoFormatentry){
+        /* fill ChannelTable_entry parameter with the ones from videoFormatentry */
 		entry->channelVideoFormat 							= strdup(videoFormatentry->videoFormatBase);
 		entry->channelVideoFormat_len 						= MIN(strlen(videoFormatentry->videoFormatBase), 		DisplayString16);
 		entry->channelVideoSampling 						= strdup(videoFormatentry->videoFormatSampling);
@@ -217,21 +215,39 @@ gboolean channelTable_updateEntry(struct channelTable_entry * entry, int videoFo
 		entry->channelCompressionRate 						= videoFormatentry->videoFormatCompressionRate;
 		entry->channelHorzRes 								= videoFormatentry->videoFormatMaxHorzRes;
 		entry->channelVertRes 								= videoFormatentry->videoFormatMaxVertRes;
-		/* update the stream data */
-		entry->stream_datas 								= videoFormatentry->stream_datas;
+		return TRUE;
+}
 
-		stop_streaming(entry->stream_datas , entry->channelVideoFormatIndex );
-		stream_data *data 								= entry->stream_datas;
+/**
+ * \brief update an entry in the ChannelTable when changing its videoFormat
+ * \param entry the entry in channelTable to update
+ * \param videoFormatIndex the new videoFormatIndex to use for this channel
+ * \return TRUE if we succeed to update the parameters
+ */
+gboolean channelTable_updateEntry(struct channelTable_entry * entry, int videoFormatNumberIndex){
+       /* get the correspondante entry in the table of VideoFormat */
+       struct videoFormatTable_entry *videoFormatentry         = videoFormatTable_getEntry( videoFormatNumberIndex );
+       if ( videoFormatentry == NULL)
+               return FALSE;
+	   channelTable_fill_entry( entry, videoFormatentry );
+       		/* update the stream data */
+		entry->stream_datas 								= videoFormatentry->stream_datas;
+		
+		/* check if streaming was in play state */
+		struct videoFormatTable_entry * stream_entry 		= videoFormatTable_getEntry(videoFormatNumberIndex);
+
+		if( stream_entry->videoFormatStatus == enable )
+			stop_streaming(entry->stream_datas , entry->channelVideoFormatIndex );	
+
+		stream_data *data 									= entry->stream_datas;
 		/* transform IP from long to char * */
-		long ip 			= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0],entry->channelIndex);
-		struct in_addr ip_addr;
-		ip_addr.s_addr = ip;
-    	g_object_set(   G_OBJECT(data->sink),
-                   	 	"host", inet_ntoa(ip_addr),
-                    	NULL);
+		set_udpsink_param(data->sink, entry->channelIndex);
 
 		return TRUE;
 }
+
+
+
 
 
 #if  ALLOW_REMOVING_ROW

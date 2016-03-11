@@ -17,8 +17,8 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "../../include/mibParameters.h"
-#include "../../include/channelControl/channelTable.h"
 #include "../../include/videoFormatInfo/videoFormatTable.h"
+#include "../../include/channelControl/channelTable.h"
 #include "../../include/streaming/pipeline.h"
 #include "../../include/streaming/detect.h"
 #include "../../include/streaming/stream_registration.h"
