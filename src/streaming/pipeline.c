@@ -202,8 +202,8 @@ GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
 
 }
 
-/*
- * This function add the UDP element to the pipeline / fort a ServiceUser channel
+/**
+ * \brief This function add the UDP element to the pipeline / fort a ServiceUser channel
  */
 static GstElement* addUDP_SU( 	GstElement *pipeline, 	GstBus *bus,
 								guint bus_watch_id, 	GMainLoop *loop,
@@ -218,7 +218,8 @@ static GstElement* addUDP_SU( 	GstElement *pipeline, 	GstBus *bus,
        g_printerr ( "error cannot create element for: %s\n","udpsrc");
 	   return NULL;
     }
-
+	
+	/* get the multicast IP */
 	struct in_addr multicast_group;
 	multicast_group.s_addr = channel_entry->channelReceiveIpAddress;
 	/*Set UDP sink properties */
@@ -237,8 +238,8 @@ static GstElement* addUDP_SU( 	GstElement *pipeline, 	GstBus *bus,
 }
 
 
-/*
- * This function add the RTP element to the pipeline
+/**
+ * \brief This function add the RTP element to the pipeline
  */
 static GstElement* addRTP_SU( 	GstElement *pipeline, 	GstBus *bus,
 								guint bus_watch_id, 	GMainLoop *loop,
@@ -328,7 +329,6 @@ static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 	}
 
 	return sink;
-
 }
 
 /**

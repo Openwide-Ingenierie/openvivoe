@@ -90,9 +90,9 @@ int open_vivoe_daemon (char* deamon_name) {
     /* Before starting the agent, we should initialize the MIB's parameters
      * from the configuration file vivoe-mib.conf
      */
-    if ( !get_check_configuration() ){
+    if ( get_check_configuration() )
         return EXIT_FAILURE;
-    }
+    
     /* initialize the agent library */
     init_agent(basename(deamon_name));
 

@@ -10,9 +10,6 @@
 #include "../../include/handler.h"
 #include "../../include/mibParameters.h"
 
-parameter channelNumber = {"channelReset",INTEGER,0,{0}};
-
-
 /** Initializes the channelNumber module */
 void
 init_channelNumber(void)

@@ -72,12 +72,8 @@ initialize_table_channelTable(void)
 	 * If it is a serviceUser or both, then create an empty entry 
 	 */
 	if( deviceInfo.parameters[num_DeviceType]._value.int_val != device_SP ){
-		channelTable_createEmptyEntry();
-		/* increase channelNumber as we added an entry */			
-		channelNumber._value.int_val++;
-		channelTable_createEmptyEntry();
-		/* increase channelNumber as we added an entry */			
-		channelNumber._value.int_val++;
+		for(int i=0; i<channelNumber._value.int_val; i++)
+			channelTable_createEmptyEntry();
 	}
 }
 
@@ -88,7 +84,6 @@ initialize_table_channelTable(void)
 static void add_in_channel_SU(struct channelTable_entry *new_entry){
 		new_entry->next_SU = channelTable_SU_head;
 		channelTable_SU_head = new_entry;
-		printf("%d\n", channelTable_SU_head->channelIndex);
 }
 
 /**

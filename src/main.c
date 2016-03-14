@@ -99,7 +99,8 @@ int main (int   argc,  char *argv[]){
 	g_timeout_add (10, handle_snmp_request, NULL);
 
 	/* init SubAgent Deamon */
-	open_vivoe_daemon (argv[0]);
+	if ( open_vivoe_daemon (argv[0]) )
+		return EXIT_FAILURE;
 
 	/* In case of an service Provider */
 	/* Initialize GStreamer */
@@ -127,5 +128,5 @@ int main (int   argc,  char *argv[]){
     /* Iterate */
 	g_main_loop_run (loop);
 	
-	return 0;
+	return EXIT_SUCCESS;
 }
