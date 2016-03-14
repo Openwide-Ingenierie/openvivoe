@@ -139,12 +139,12 @@ static GstElement* source_creation(GstElement* pipeline, char* format, int width
 	/*
 	 * For now, the source is created manually, directly into the code
 	 * */
-	source = gst_element_factory_make ("videotestsrc", "source");
+	source = gst_element_factory_make ("v4l2src", "source");
 	if(source == NULL){
 		g_printerr ("error cannot create element: %s\n", "videotestsrc" );
 		return NULL;
 	}
-	g_object_set(source, "is-live", TRUE, NULL);
+	g_object_set(source, "device", "/dev/video0", NULL);
 	capsfilter = gst_element_factory_make ("capsfilter","capsfilter");
 	if(capsfilter == NULL){
 		g_printerr ( "error cannot create element: %s\n", "capsfilter" );
@@ -156,6 +156,7 @@ static GstElement* source_creation(GstElement* pipeline, char* format, int width
 													"width" 		, G_TYPE_INT 	, width,
 													"height" 		, G_TYPE_INT 	, height,
 													"interlace-mode", G_TYPE_STRING , "progressive",
+													"framerate" 	, GST_TYPE_FRACTION, 30, 1,
 													NULL),
 								NULL);
 	g_return_if_fail (gst_caps_is_fixed (caps));
@@ -184,6 +185,48 @@ static GstElement* source_creation(GstElement* pipeline, char* format, int width
 	return last;
 }
 
+static GstElement *get_source( GstElement* pipeline){
+	GError *error = NULL; /* an Object to save errors when they occurs */
+
+	GstIterator *iter 	= NULL; 	/* on iterator on the pipeline built */
+	gpointer data 		= NULL; 	/* an object to store each element of pipeline */
+	GstElement *last 	= NULL; 	/* to return last element of pipeline */
+	gboolean done 		= FALSE; 	/* to stop iterate on the pipeline */
+
+	pipeline = gst_parse_launch ("gst-launch-1.0 v4l2src -vvv device=/dev/video0 !video/x-raw,width=1920,height=1080,framerate=(fraction)30/1", &error);
+	if ( error != NULL){
+		g_printerr("Failed to parse: %s\n",error->message);
+	   	return NULL;	
+	}
+	/* iterates through the pipeline create to retrieve the last element of pipeline */
+	iter = gst_bin_iterate_elements (GST_BIN(pipeline));
+	while (!done) {
+		switch (gst_iterator_next (iter, &data)) {
+			case GST_ITERATOR_OK:
+				last = GST_ELEMENT (data);
+				break;
+			case GST_ITERATOR_RESYNC:
+				gst_iterator_resync (iter);
+				break;
+			case GST_ITERATOR_ERROR:
+				GST_WARNING_OBJECT (GST_BIN(pipeline), "error in iterating elements");
+				done = TRUE;
+				break;
+			case GST_ITERATOR_DONE:
+				done = TRUE;
+				break;
+		}
+	}
+  gst_iterator_free (iter);
+
+  return last;
+
+}
+
+
+
+
+
 static int init_stream_SP( gpointer main_loop, gpointer stream_datas /* real prototype */
 					, char* format, int width, int height/* extra parameters for testing purposes*/)
 {
@@ -193,7 +236,8 @@ static int init_stream_SP( gpointer main_loop, gpointer stream_datas /* real pro
 
     GstElement *last;	
 	/* Source Creation */
-	last = source_creation(pipeline, format,width ,height /*,encoding*/);
+	last = source_creation(pipeline, format,width ,height/*,encoding*/);
+/*	last = get_source(pipeline);*/
 
 	if (last == NULL ){
 		g_printerr ( "Failed to create videosource\n");
@@ -263,8 +307,7 @@ int init_streaming (gpointer main_loop, GstCaps *caps, struct channelTable_entry
 	data->bus 			= bus;
 	data->bus_watch_id 	= bus_watch_id;
 	if( format != NULL){ /* case we are a Service Provider */
-		 init_stream_SP( main_loop, data, format, width, height);
-		return EXIT_SUCCESS;
+		return init_stream_SP( main_loop, data, format, width, height);
 	}
 	else{ /* case we are a Service User */
 		init_stream_SU( main_loop, data, caps, channel_entry);

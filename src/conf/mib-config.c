@@ -29,6 +29,12 @@ static int init_deviceInfo(GKeyFile* gkf, gchar* group_name, GError* error, gsiz
      * we assign the values to the different
      * MIB's parameters
      */
+  /* Define the parameters that should be in deviceInfo group of the configuration file
+     * the parameters should be ordered the same as as the MIB, and the same way as the
+     * the configuration file. Indeed, this will allow the user to refer only the MIB's parameter
+     * he wants to initialize. If he does not need to initialize some parameters, he will just no
+     * put them as keys into the MIB.
+     */
 
     /*
      *--------------------------------deviceInfo--------------------------------
@@ -182,13 +188,7 @@ int get_check_configuration(){
     /*define a pointer to the full path were the vivoe-mib.conf file is located*/
     gchar* gkf_path = NULL;
 
-    /* Define the parameters that should be in deviceInfo group of the configuration file
-     * the parameters should be ordered the same as as the MIB, and the same way as the
-     * the configuration file. Indeed, this will allow the user to refer only the MIB's parameter
-     * he wants to initialize. If he does not need to initialize some parameters, he will just no
-     * put them as keys into the MIB.
-     */
-
+  
     /*initialization of the variable */
     gkf = g_key_file_new();
 

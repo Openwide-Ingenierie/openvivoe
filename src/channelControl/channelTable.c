@@ -72,8 +72,9 @@ initialize_table_channelTable(void)
 	 * If it is a serviceUser or both, then create an empty entry 
 	 */
 	if( deviceInfo.parameters[num_DeviceType]._value.int_val != device_SP ){
-		for(int i=0; i<channelNumber._value.int_val; i++)
-			channelTable_createEmptyEntry();
+		for(int i=0; i<channelNumber._value.int_val; i++){
+			channelTable_createEmptyEntry(i+1);
+		}
 	}
 }
 
@@ -182,18 +183,18 @@ struct channelTable_entry *
 	entry->sap_datas = sap_datas;
 
 	entry->valid 							= 1;
-	entry->next = channelTable_head;
-	channelTable_head = entry;
+	entry->next 							= channelTable_head;
+	channelTable_head 						= entry;
     return entry;
 }
 
 /**
  * \brief Create an empty entry, ServiceUser must have an available entry in order to receive the Start message from the manager
  */
-struct channelTable_entry *	channelTable_createEmptyEntry(){
+struct channelTable_entry *	channelTable_createEmptyEntry(int index){
     struct channelTable_entry *ServiceUser_entry = 
 		channelTable_createEntry(
-    	        				channelNumber._value.int_val+1, /* Appen one channel to the list, its index is just the number of channel incremented by one */
+    	        				index, /* Appen one channel to the list, its index is just the number of channel incremented by one */
 								serviceUser,
 						    	"",
     							stop,
