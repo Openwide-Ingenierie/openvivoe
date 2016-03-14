@@ -13,37 +13,6 @@
 #include "../../include/mibParameters.h"
 #include "../../include/conf/mib-conf.h"
 
-
-int check_MAC_format(u_char** mac, int ethernetIf_Number){
-    int i=0;
-    int j =0;
-    int Mac_size;
-    /* The number of Mac addresses passed into the configuration file have already been tested at this point
-     * there are no need to check it again. However, for every one of them we should check their size and their content
-     */
-     for(i=0; i< ethernetIf_Number; i++){
-        /*get the size of a mac address, should be 18*/
-        Mac_size = strlen( (const char*) mac[i]);
-        if(Mac_size != 17){
-            return EXIT_FAILURE;
-        }else{
-            /*if we are here, the length should be good, but we need to check if it's parsed correctly*/
-            if( mac[i][2] != ':' || mac[i][5] != ':' || mac[i][8] != ':' || mac[i][11] != ':' ||mac[i][14] != ':'){
-                return EXIT_FAILURE;
-            }else{
-                for(j=0; j<Mac_size; j=j+3){
-                    if(mac[i][j] < '0' || (mac[i][j] > '9' && toupper(mac[i][j]) < 'A') || toupper(mac[i][j]) > 'F')
-                        return EXIT_FAILURE;
-                    else if (mac[i][j+1] < '0' || (mac[i][j+1] > '9' && toupper(mac[i][j+1]) < 'A') || toupper(mac[i][j+1]) > 'F')
-                        return EXIT_FAILURE;
-                }
-            }
-        }
-    }
-    return EXIT_SUCCESS;
-}
-
-
 /**
  * \brief initialize the deviceInfo section from paramters enter in configuration file
  * \param gkf the GKeyFile which is the configuration_file
@@ -152,10 +121,16 @@ static int init_deviceInfo(GKeyFile* gkf, gchar* group_name, GError* error, gsiz
     }
 }
 
+/**
+ * \breif intiatition of constant paramerters of channelNumber
+ */
 parameter channelNumber = {"nb_screens", INTEGER, 0};
 
 /**
  * \brief intialize the globla variable paramer channelNumber 
+ * \param gkf the GkeyFile configuration File vivoe_mib.conf
+ * \param group_name the name of the group in which the value of channelNumber should be found
+ * \param error a object to store errors when they occurs
  * \return EXIT_SUCCESS on success, EXIT_FAILURE on FAILURE
  */
 static int init_channelNumber(GKeyFile* gkf, gchar* group_name, GError* error){
