@@ -186,58 +186,48 @@ static GstElement* source_creation(GstElement* pipeline, char* format, int width
 }
 
 static GstElement *get_source( GstElement* pipeline){
-	GError *error = NULL; /* an Object to save errors when they occurs */
-
-	GstIterator *iter 	= NULL; 	/* on iterator on the pipeline built */
-	gpointer data 		= NULL; 	/* an object to store each element of pipeline */
-	GstElement *last 	= NULL; 	/* to return last element of pipeline */
-	gboolean done 		= FALSE; 	/* to stop iterate on the pipeline */
-
-	pipeline = gst_parse_launch ("gst-launch-1.0 v4l2src -vvv device=/dev/video0 !video/x-raw,width=1920,height=1080,framerate=(fraction)30/1", &error);
+	GstIterator *iter 	= NULL; 		/* on iterator on the pipeline built */
+	GValue value 		= G_VALUE_INIT; /* an object to store each element of pipeline */
+	GstElement *last 	= NULL; 		/* to return last element of pipeline */
+	GError *error 		= NULL; /* an Object to save errors when they occurs */
+	GstElement *bin 	= NULL; 		/* to return last element of pipeline */
+	bin  = gst_parse_bin_from_description ("v4l2src device=/dev/video0 ! capsfilter caps=\"video/x-raw,width=1920,height=1080,interlace-mode=(string)progressive,framerate=(fraction)30/1\"",
+											TRUE,
+											&error);
 	if ( error != NULL){
 		g_printerr("Failed to parse: %s\n",error->message);
 	   	return NULL;	
 	}
-	/* iterates through the pipeline create to retrieve the last element of pipeline */
+/* iterates through the pipeline create to retrieve the last element of pipeline */
 	iter = gst_bin_iterate_elements (GST_BIN(pipeline));
-	while (!done) {
-		switch (gst_iterator_next (iter, &data)) {
+		switch (gst_iterator_next (iter, &value)) {
 			case GST_ITERATOR_OK:
-				last = GST_ELEMENT (data);
+				last = GST_ELEMENT(g_value_get_object (&value));
 				break;
 			case GST_ITERATOR_RESYNC:
 				gst_iterator_resync (iter);
 				break;
 			case GST_ITERATOR_ERROR:
 				GST_WARNING_OBJECT (GST_BIN(pipeline), "error in iterating elements");
-				done = TRUE;
 				break;
 			case GST_ITERATOR_DONE:
-				done = TRUE;
 				break;
-		}
 	}
-  gst_iterator_free (iter);
-
-  return last;
-
+	gst_iterator_free (iter);
+	gst_bin_add (GST_BIN(pipeline), bin);	
+	return bin;
 }
 
-
-
-
-
-static int init_stream_SP( gpointer main_loop, gpointer stream_datas /* real prototype */
-					, char* format, int width, int height/* extra parameters for testing purposes*/)
+static int init_stream_SP( gpointer main_loop, gpointer stream_datas)
 {
 	stream_data *data 			= stream_datas;
-
 	GstElement 	*pipeline 		= data->pipeline;
-
-    GstElement *last;	
+    GstElement 	*last;	
 	/* Source Creation */
+#if 0
 	last = source_creation(pipeline, format,width ,height/*,encoding*/);
-/*	last = get_source(pipeline);*/
+#endif
+	last = get_source(pipeline);
 
 	if (last == NULL ){
 		g_printerr ( "Failed to create videosource\n");
@@ -257,7 +247,7 @@ static int init_stream_SU( gpointer main_loop, gpointer stream_datas, GstCaps *c
 {
     GstElement *first;		
 	/* Create pipeline  - save videoFormatIndex into stream_data data*/
-	first = create_pipeline_serviceUser( stream_datas,	main_loop, caps, channel_entry );
+	first = create_pipeline_serviceUser( stream_datas, main_loop, caps, channel_entry );
 	/* Check if everything went ok*/
 	if (first == NULL){
 		g_printerr ( "Failed to create pipeline\n");
@@ -273,8 +263,7 @@ static int init_stream_SU( gpointer main_loop, gpointer stream_datas, GstCaps *c
  * \param stream_datas a structure in which we will save the pipeline and the bus elements
  * \return 0
  */
-int init_streaming (gpointer main_loop, GstCaps *caps, struct channelTable_entry * channel_entry,/* real prototype */
-					char* format, int width, int height/* extra parameters for testing purposes*/)
+int init_streaming (gpointer main_loop, GstCaps *caps, struct channelTable_entry * channel_entry)
 {
     /* Initialization of elements needed */
     GstElement 	*pipeline;
@@ -282,6 +271,12 @@ int init_streaming (gpointer main_loop, GstCaps *caps, struct channelTable_entry
     guint 		bus_watch_id;
 	GMainLoop 	*loop 			= main_loop;
 
+	/* Create the pipeline */
+	pipeline  = gst_pipeline_new ("pipeline");
+	if(pipeline  == NULL){
+			g_printerr ( "error cannot create: %s\n","pipeline" );
+			return EXIT_FAILURE;
+	}
 
 	/* Reference all data relevant to the stream */
 	stream_data *data 			= malloc(sizeof(stream_data));
@@ -291,23 +286,16 @@ int init_streaming (gpointer main_loop, GstCaps *caps, struct channelTable_entry
 	rtp_data 	*rtp_datas 		= malloc(sizeof(rtp_data));
 	data->rtp_datas 			= rtp_datas;
 	
-    /* Create the pipeline */
-    pipeline  = gst_pipeline_new ("pipeline");
-	if(pipeline  == NULL){
-		g_printerr ( "error cannot create: %s\n","pipeline" );
-		return EXIT_FAILURE;
-	}
-	
+	data->pipeline 		= pipeline;	
 	/* we add a message handler */
 	bus = gst_pipeline_get_bus ( GST_PIPELINE(pipeline));
     bus_watch_id = gst_bus_add_watch (bus, bus_call, loop);
     gst_object_unref (bus);
 
-	data->pipeline 		= pipeline;
 	data->bus 			= bus;
 	data->bus_watch_id 	= bus_watch_id;
-	if( format != NULL){ /* case we are a Service Provider */
-		return init_stream_SP( main_loop, data, format, width, height);
+	if( channel_entry == NULL){ /* case we are a Service Provider */
+		return init_stream_SP( main_loop, data);
 	}
 	else{ /* case we are a Service User */
 		init_stream_SU( main_loop, data, caps, channel_entry);

@@ -74,15 +74,9 @@ static gboolean service_Provider_init(gpointer loop){
 	stream_data 	stream2;*/
 
 	/* prepare the stream - initialize all the data relevant to the stream into stream-data */
-	if ( init_streaming(loop, NULL, NULL,/*&stream1, test*/ "RAW", 1920, 1080 /*end test param*/)){
+	if ( init_streaming(loop, NULL, NULL)){
 		return FALSE;
 	}
-
-	/* prepare the stream - initialize all the data relevant to the stream into stream-data */
-	if ( init_streaming(loop, NULL, NULL,/*&stream2, test*/ "MP4V-ES", 1920, 1080 /*end test param*/)){
-		return  FALSE;
-	}
-
 	return TRUE;
 }
 

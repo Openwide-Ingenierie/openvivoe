@@ -246,8 +246,7 @@ GstCaps* get_SDP(unsigned char *array, int sdp_msg_size, in_addr_t *multicast_ad
 	*multicast_addr =  inet_addr(connection->address);
 	/* check if the multicast group is indeed, the one we should receive */
 	
-	GstSDPMedia *media;
-	gst_sdp_media_new (&media);
+	const	GstSDPMedia *media;
 	if (gst_sdp_message_medias_len (msg) > 1 ){
 		g_printerr("ERROR: more than one media in SDP message\n");
 		return NULL;

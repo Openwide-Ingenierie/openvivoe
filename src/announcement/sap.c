@@ -363,8 +363,7 @@ gboolean receive_announcement(){
 				else{
 					stream_data 	*data 	=  iterator->stream_datas;
 					if ( data == NULL ){
-						init_streaming (NULL, caps, iterator,/* real prototype */
-								NULL, 0, 0 /* extra parameters for testing purposes*/);
+						init_streaming (NULL, caps, iterator);
 						start_streaming( iterator->stream_datas, iterator->channelVideoFormatIndex);
 					}
 				}

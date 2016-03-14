@@ -18,7 +18,7 @@ typedef struct{
 	rtp_data 		*rtp_datas;
 }stream_data;
 
-int init_streaming (gpointer main_loop, GstCaps *caps, struct channelTable_entry * channel_entry,char* format, int width, int height);
+int init_streaming (gpointer main_loop, GstCaps *caps, struct channelTable_entry * channel_entry);
 int start_streaming (gpointer stream_datas, long channelVideoFormatIndex );
 int stop_streaming( gpointer stream_datas, long channelVideoFormatIndex  );
 int delete_steaming_data(gpointer channel_entry ); /* need to have chanelEntry because we need to free the sap_data */

@@ -55,7 +55,7 @@ static void cb_typefound ( 	GstElement  			*typefind,
 	g_idle_add (idle_exit_loop, loop);
 }
 
-static GstStructure* type_detection_with_sink( GstBin *pipeline, GstElement *input_video, GMainLoop *loop, GstElement *sink ){
+static GstStructure* type_detection_with_sink(GstBin *pipeline, GstElement *input_video, GMainLoop *loop, GstElement *sink ){
 	GstElement *typefind;
 	data_type_detection data;
 	data.loop 	= loop;
@@ -108,7 +108,7 @@ GstStructure* type_detection(GstBin *pipeline, GstElement *input_video, GMainLoo
 			g_printerr ("Fail to detect Media Stream type\n");
 			return NULL;
 		}
-		str_detected = type_detection_with_sink( pipeline, input_video, loop, fakesink);
+		str_detected = type_detection_with_sink(pipeline, input_video, loop, fakesink);
 		gst_bin_remove(GST_BIN(pipeline), fakesink);
 	}else{
 		str_detected = type_detection_with_sink( pipeline, input_video, loop, sink);

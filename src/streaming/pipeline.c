@@ -59,8 +59,7 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus *bus,
 			return NULL;
 		}
 		rtp 	= gst_element_factory_make ("rtpmp4vpay", "rtp");
-		//g_object_set(G_OBJECT(rtp), "timestamp", 1, NULL);
-		/* Checek if everything went ok */
+		/* Check if everything went ok */
 		if( rtp == NULL){
 			g_printerr ( "error cannot create element for: %s\n","rtp");
 			return NULL;
