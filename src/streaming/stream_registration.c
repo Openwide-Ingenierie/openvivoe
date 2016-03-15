@@ -25,6 +25,7 @@
  * This function compares two entries in the videoFormatTable
  * if those entries are equal: return TRUE, otherwise return FALSE
  */
+ 
 static gboolean compare_entries(struct videoFormatTable_entry* origin, struct videoFormatTable_entry* new){
 	 return(( !strcmp( origin->videoFormatBase 		, 	new->videoFormatBase 				)) 	&&
 			( !strcmp(origin->videoFormatSampling 	, 	new->videoFormatSampling 			)) 	&&
@@ -39,6 +40,42 @@ static gboolean compare_entries(struct videoFormatTable_entry* origin, struct vi
 	   		);
 }
 
+/**
+ * \brief a definition of all the potential values of the colorspace field of openjpegenc src pad template
+ */
+#define colo_RGB 	"sRGB"
+#define colo_YUV 	"sYUV"
+#define colo_GRAY 	"GRAY"
+
+/**
+ * \brief the mapped values for videoFormatSampling field of viddeoFormatTable_entry 
+ */
+#define sampling_RGB 	"RGB"
+#define sampling_YUV 	"YCbCr-4:2:2"
+#define samping_GRAY 	"GRAYSCALE"
+
+/**
+ * \brief J2K videos caps have a field names "colorspace" that can be map to a classic 
+ * \param colorimetru the colorimetry srting value in detected caps
+ * \return gchar* the mapped value
+ */
+static gchar* map_colorimetry_to_sampling_j2k(const gchar *colorspace){
+
+	/* compare values that can be in the colorimetry field to the actual value in caps */
+	/* the values that can takes the colorimetry field can be found by launching the following command
+	 * "gst-inspect-1.0 openjpegenc" 
+	 */
+	if ( !strcmp(colorspace ,colo_RGB ))
+		return sampling_RGB;
+	else if ( !strcmp(colorspace ,colo_YUV ))
+		return sampling_YUV;
+	else if ( !strcmp(colorspace ,colo_GRAY ))
+		return samping_GRAY;
+	else 
+		return "";
+}
+
+
 /* 
  * This function tries to save a maximum of information (in the form of capabilities) 
  * of a video stream. As each new element in pipeline may be used to gathered new relevant information 
@@ -49,15 +86,23 @@ static gboolean compare_entries(struct videoFormatTable_entry* origin, struct vi
 void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *video_info, gpointer stream_datas){
 	stream_data *data 			= stream_datas;
 	/*videoFormatBase*/
-	if( gst_structure_has_field(source_str_caps, "encoding-name")){
+	if( gst_structure_has_field(source_str_caps, "encoding-name") ){
 		video_info->videoFormatBase					= (char*) g_value_dup_string (gst_structure_get_value(source_str_caps, "encoding-name"));
-	}else{
+	}else if ( video_info->videoFormatBase==NULL ){
 		video_info->videoFormatBase 				= "";
 	}
 	/*VideoFormatSampling*/
-	if( gst_structure_has_field(source_str_caps, "sampling")){
+	/* case of RAW type video */
+	if( gst_structure_has_field(source_str_caps, "sampling") ){
 		video_info->videoFormatSampling 			= (char*) g_value_dup_string (gst_structure_get_value(source_str_caps, "sampling"));
-	}else{
+	}else if( video_info->videoFormatSampling==NULL ){
+		video_info->videoFormatSampling				= "";
+	}
+	/* case of J2K type video */
+	if( gst_structure_has_field(source_str_caps, "colorspace")){
+		gchar* colorspace 							= (char*) g_value_dup_string (gst_structure_get_value(source_str_caps, "colorspace"));	
+		video_info->videoFormatSampling 			= g_strdup(map_colorimetry_to_sampling_j2k(colorspace));
+	}else if( video_info->videoFormatSampling==NULL ){
 		video_info->videoFormatSampling				= "";
 	}
 	/*videoFormatBitDepth*/	
@@ -73,7 +118,7 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
 	/*videoFormatColorimetry*/	
 	if( gst_structure_has_field(source_str_caps, "colorimetry")){
 		video_info->videoFormatColorimetry 			= (char*)g_value_dup_string (gst_structure_get_value(source_str_caps, "colorimetry"));
-	}else{
+	}else if( video_info->videoFormatColorimetry==NULL ){
 		video_info->videoFormatColorimetry			= "";
 	}
 	/*videoFormatInterlaced*/

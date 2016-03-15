@@ -179,7 +179,7 @@ static int init_stream_SP( gpointer main_loop, gpointer stream_datas)
 	GstElement 	*pipeline 		= data->pipeline;
     GstElement 	*last;	
 	/* Source Creation */
-	last = source_creation(pipeline, "RAW",1920 ,1080/*,encoding*/);
+	last = source_creation(pipeline, "JPEG2000",1920 ,1080/*,encoding*/);
 #if 0
 	last = get_source(pipeline);
 #endif
