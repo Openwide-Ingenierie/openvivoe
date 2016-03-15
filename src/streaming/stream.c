@@ -147,6 +147,7 @@ static GstElement *get_source( GstElement* pipeline){
 	   	return NULL;	
 	}
 	gst_bin_add (GST_BIN(pipeline), bin);
+	free(cmdline);
 	return bin;
 }
 
