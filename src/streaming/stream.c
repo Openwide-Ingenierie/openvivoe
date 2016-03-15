@@ -132,8 +132,13 @@ static GstElement* source_creation(GstElement* pipeline, char* format, int width
 
 static GstElement *get_source( GstElement* pipeline){
 	GError 		*error 		= NULL; /* an Object to save errors when they occurs */
-	GstElement 	*bin 		= NULL; 		/* to return last element of pipeline */
+	GstElement 	*bin 		= NULL; /* to return last element of pipeline */
 	gchar 		*cmdline 	= init_sources_from_conf(videoFormatNumber._value.int_val + 1 );
+
+	/* check if everything went ok */	
+	if (cmdline == NULL)
+		return NULL;
+
 	bin  = gst_parse_bin_from_description (cmdline,
 											TRUE,
 											&error);

@@ -294,8 +294,17 @@ gchar* init_sources_from_conf(int index){
 		fprintf (stderr, "Group %s not found in configuration file\nIt should be written in the form [%s]\n",source_name ,source_name);
 		return NULL;
 	}
-	cmdline = (char*) g_key_file_get_string(gkf,source_name , GST_SOURCE_CMDLINE , &error);
-	printf("%s\n", cmdline);
-	free(source_name);	
-	return cmdline;
+	if(g_key_file_has_key(gkf,source_name , (const gchar*)GST_SOURCE_CMDLINE , &error)){
+		cmdline = (char*) g_key_file_get_string(gkf,source_name , GST_SOURCE_CMDLINE , &error);
+		if(error != NULL)
+			g_printerr("Invalid format for key %s: %s\n", GST_SOURCE_CMDLINE  , error->message);
+	}
+	else {
+		g_printerr("ERROR: key not found %s for group: %s\n", GST_SOURCE_CMDLINE, source_name);
+		return NULL;
+	}
+		printf("%s\n", cmdline);
+		free(source_name);	
+		return cmdline;
+
 }
