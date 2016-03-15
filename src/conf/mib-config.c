@@ -13,6 +13,65 @@
 #include "../../include/mibParameters.h"
 #include "../../include/conf/mib-conf.h"
 
+GKeyFile * open_mib_configuration_file(GError* error){
+	GKeyFile* gkf;
+
+    /*defined the paths from were we should retrieve our configuration files */
+    const gchar* search_dirs[] = {(gchar*)"./conf",(gchar*)"/usr/share/vivoe",(gchar*)"$HOME/.vivoe",(gchar*)".", NULL};
+
+    /*define a pointer to the full path were the vivoe-mib.conf file is located*/
+    gchar* gkf_path = NULL;
+  
+    /*initialization of the variable */
+    gkf = g_key_file_new();
+    /*
+     * Loads the conf file and tests that everything went OK. Problems can occur if the file doesn't exist,
+     * or if user doesn't have read permission to it.
+     * If a problem occurs, print it and exit.
+     */
+
+    if (!g_key_file_load_from_dirs(gkf,CONFIG_FILE, search_dirs, &gkf_path,G_KEY_FILE_NONE, &error)){
+        fprintf (stderr, "Could not read config file %s\n%s\n",CONFIG_FILE,error->message);
+        return NULL;
+    }
+	return gkf;
+}
+
+/**
+ * \biref the number of group in vivoe_mib.conf
+ */
+#define NUM_GROUP 	2
+
+/**
+ * \brief check if mandatory groups are present
+ * \param gkf the configuration file
+ * \param groups an array of string to store the groups' names found in the configuration file
+ * \param error an Gerror to save errors if theeu occurs
+ */
+gchar** check_mib_group(GKeyFile *gkf, GError *error){
+
+	/*Declaration of a  gsize variable, that will be used to get the size of the list associated to some keys*/
+     gsize length;
+
+	 /* the array of string to return */
+	 gchar **groups;
+
+	/*first we load the different Groups of the configuration file
+     * second parameter "gchar* length" is optional*/
+	groups = g_key_file_get_groups(gkf, &length);
+
+	gchar* needed[NUM_GROUP] = {"deviceInfo", "channelControl"};
+	/* check that the groups are present in configuration file */
+	for (int i=0; i<NUM_GROUP; i++){
+		if( !(g_strv_contains((const gchar* const*) groups, needed[i] ))){
+			fprintf (stderr, "Group %s not found in configuration file\nIt should be written in the form [%s]\n",needed[i] , needed[i]);
+			return NULL;
+    	}
+	}
+	return groups;
+}
+
+
 /**
  * \brief initialize the deviceInfo section from paramters enter in configuration file
  * \param gkf the GKeyFile which is the configuration_file
@@ -20,7 +79,11 @@
  * \param error a Gerror to check if errors occurs
  * \return EXIT_FAILURE (1) on failure, EXIT_SUCCES (0) on sucess
  */
-static int init_deviceInfo(GKeyFile* gkf, gchar* group_name, GError* error, gsize *length){
+static int init_deviceInfo(GKeyFile* gkf, gchar* group_name, GError* error){
+
+	/*Declaration of a  gsize variable, that will be used to get the size of the list associated to some keys*/
+     gsize length;
+	
     /* This is a boolean used to check if everything went ok, otherwise the function will return EXIT_FAILURE
      * This will allow to print all the synthax errors to the user before exiting the program
      */
@@ -88,7 +151,7 @@ static int init_deviceInfo(GKeyFile* gkf, gchar* group_name, GError* error, gsiz
                             }
                             break;
                     case T_INTEGER:
-                            deviceInfo_parameters[i]._value.array_int_val = (int*) g_key_file_get_integer_list(gkf, group_name, (const gchar*) deviceInfo_parameters[i]._name, length,  &error);
+                            deviceInfo_parameters[i]._value.array_int_val = (int*) g_key_file_get_integer_list(gkf, group_name, (const gchar*) deviceInfo_parameters[i]._name, &length,  &error);
                             if(error != NULL){
                                 fprintf(stderr, "Invalid format for %s: %s\n", (const gchar*) deviceInfo_parameters[i]._name, error->message);
                                 error = NULL; /* resetting the error pointer*/
@@ -96,7 +159,7 @@ static int init_deviceInfo(GKeyFile* gkf, gchar* group_name, GError* error, gsiz
                             }
                             break;
                     case T_STRING: /* only case here is ethernetInterface, from that we should compute ethernetIfNumber */
-                            deviceInfo_parameters[i]._value.array_string_val =  (char**) g_key_file_get_string_list(gkf, group_name, (const gchar*) deviceInfo_parameters[i]._name, length, &error);
+                            deviceInfo_parameters[i]._value.array_string_val =  (char**) g_key_file_get_string_list(gkf, group_name, (const gchar*) deviceInfo_parameters[i]._name, &length, &error);
                             if(error != NULL){
                                 fprintf(stderr, "Invalid format for %s: %s\n", (const gchar*) deviceInfo_parameters[i]._name, error->message);
                                 error = NULL; /* resetting the error pointer*/
@@ -104,7 +167,7 @@ static int init_deviceInfo(GKeyFile* gkf, gchar* group_name, GError* error, gsiz
                             }
 							/* check that the key is indeed ethernetInterface */
 							if( !strcmp(deviceInfo_parameters[i]._name, "ethernetInterface"))
-								deviceInfo_parameters[num_ethernetIFnumber]._value.int_val = (int) *length;
+								deviceInfo_parameters[num_ethernetIFnumber]._value.int_val = (int) length;
                             break;
             }
         }else{
@@ -131,7 +194,6 @@ static int init_deviceInfo(GKeyFile* gkf, gchar* group_name, GError* error, gsiz
  * \breif intiatition of constant paramerters of channelNumber
  */
 parameter channelNumber = {"nb_screens", INTEGER, 0};
-
 /**
  * \brief intialize the globla variable paramer channelNumber 
  * \param gkf the GkeyFile configuration File vivoe_mib.conf
@@ -156,10 +218,9 @@ static int init_channelNumber(GKeyFile* gkf, gchar* group_name, GError* error){
 	}
 	return	EXIT_SUCCESS;
 }
-/**
- * \biref the number of group in vivoe_mib.conf
- */
-#define NUM_GROUP 	2
+
+
+
 /**
  * \brief this function is used to get the information to place in the VIVOE MIB
  * from the configuration file associated to it: "vivoe-mib.conf". It will
@@ -167,66 +228,74 @@ static int init_channelNumber(GKeyFile* gkf, gchar* group_name, GError* error){
  * \return error messages for the parameters that are not Valid, and initialize the other
  */
 int get_check_configuration(){
-
-    /* Declaration of a pointer that will contain our configuration file*/
-    GKeyFile* gkf;
-    
-	/*Declaration of a  gsize variable, that will be used to get the size of the list associated to some keys*/
-     gsize length;
-
+ 
+	/* Define the error pointer we will be using to check for errors in the configuration file */
+    GError* error = NULL;
     /* Declaration of an array of gstring (gchar**) that will contain the name of the different groups
      * declared in the configuration file
      */
     gchar** groups;
 
-    /* Define the error pointer we will be using to check for errors in the configuration file */
-    GError* error = NULL;
-
-    /*defined the paths from were we should retrieve our configuration files */
-    const gchar* search_dirs[] = {(gchar*)"./conf",(gchar*)"/usr/share/vivoe",(gchar*)"$HOME/.vivoe",(gchar*)".", NULL};
-
-    /*define a pointer to the full path were the vivoe-mib.conf file is located*/
-    gchar* gkf_path = NULL;
-
-  
-    /*initialization of the variable */
-    gkf = g_key_file_new();
-
-    /*
-     * Loads the conf file and tests that everything went OK. Problems can occur if the file doesn't exist,
-     * or if user doesn't have read permission to it.
-     * If a problem occurs, print it and exit.
-     */
-
-    if (!g_key_file_load_from_dirs(gkf,CONFIG_FILE, search_dirs, &gkf_path,G_KEY_FILE_NONE, &error)){
-        fprintf (stderr, "Could not read config file %s\n%s\n",CONFIG_FILE,error->message);
-        return EXIT_FAILURE;
-    }
+	/* Declaration of a pointer that will contain our configuration file*/
+    GKeyFile* gkf = open_mib_configuration_file(error);
+	
+	/* check if the MIB groups are present */
+	groups = check_mib_group(gkf, error);
+	if ( groups == NULL)
+		return EXIT_FAILURE;
 
 	/* Defined what separator will be used in the list when the parameter can have several values (for a table for example)*/
     g_key_file_set_list_separator (gkf, (gchar) ';');
-
-    /*first we load the different Groups of the configuration file
-     * second parameter "gchar* length" is optional*/
-    groups = g_key_file_get_groups(gkf, NULL);
-
-	gchar* needed[NUM_GROUP] = {"deviceInfo", "channelControl"};
-	/* check that the groups are present in configuration file */
-	for (int i=0; i<NUM_GROUP; i++){
-		if( !(g_strv_contains((const gchar* const*) groups, needed[i] ))){
-			fprintf (stderr, "Group %s not found in configuration file\nIt should be written in the form [%s]\n",needed[i] , needed[i]);
-			return EXIT_FAILURE;
-    	}
-	}
-
-	if (!init_deviceInfo(gkf, groups[0], error, &length))
+ 
+	if (!init_deviceInfo(gkf, groups[0], error))
 		return EXIT_FAILURE;
-
 	if ( init_channelNumber(gkf,groups[1], error))
 		return EXIT_FAILURE;
 
     /* free the GKeyFile before leaving the function*/
     g_key_file_free (gkf);
 
+	/* free the memory allocated for the array of strings groups */
+	 g_strfreev(groups);
+
 	return EXIT_SUCCESS;
+}
+
+/**
+ * \brief get the command line entered by the user in configuration file to get the video source
+ * \param index the index of the initiated stream
+ * \return gchar* the command line found in a string form or NULL if no ones has been found
+ */
+gchar* init_sources_from_conf(int index){
+	/* Define the error pointer we will be using to check for errors in the configuration file */
+    GError 		*error 	= NULL;
+	 /* Declaration of a pointer that will contain our configuration file*/
+	GKeyFile 	*gkf 	= open_mib_configuration_file(error);
+
+	/* Declaration of an array of gstring (gchar**) that will contain the name of the different groups
+	 * declared in the configuration file
+	 */
+	gchar 		**groups;
+
+	/*
+	 * the command line string retreive from the configuration file
+	 */
+	gchar 		*cmdline;
+
+	/*first we load the different Groups of the configuration file
+	 * second parameter "gchar* length" is optional*/
+	groups = g_key_file_get_groups(gkf, NULL);
+
+	char *source_prefix = "source_";
+	char *source_name = (char*) malloc( strlen(source_prefix)+2 * sizeof(char));
+	/* Build the name that the group should have */
+	sprintf(source_name, "%s%d", source_prefix, index);
+	if( !(g_strv_contains((const gchar* const*) groups, source_name ))){
+		fprintf (stderr, "Group %s not found in configuration file\nIt should be written in the form [%s]\n",source_name ,source_name);
+		return NULL;
+	}
+	cmdline = (char*) g_key_file_get_string(gkf,source_name , GST_SOURCE_CMDLINE , &error);
+	printf("%s\n", cmdline);
+	free(source_name);	
+	return cmdline;
 }

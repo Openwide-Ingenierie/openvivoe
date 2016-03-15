@@ -17,6 +17,7 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "../../include/mibParameters.h"
+#include "../../include/conf/mib-conf.h"
 #include "../../include/videoFormatInfo/videoFormatTable.h"
 #include "../../include/channelControl/channelTable.h"
 #include "../../include/streaming/pipeline.h"
@@ -64,62 +65,6 @@ static gboolean bus_call (  GstBus     *bus,
 
 	return TRUE;
 }
-
-#if 0
-/**
- * \brief check the parameters used for intialize the stream
- * \param argc: as in main (should be 3)
- * \param argv: as in main (should begin with ip=... port=... format=...)
- * \return int EXIT_FAILURE if wrong parameters passed to the program, EXIT_SUCCESS otherwise
- */
-static int check_param(int argc, char* argv[], char** ip, gint* port, char** format){
-
-	/* this will be used to check wether the DEFAULT_IP address has a goot format or not */
-	struct in_addr* check_addr = malloc(sizeof(struct in_addr));
-	if (argc != 4) {
-		g_printerr ("Usage: %s ip=ddd.ddd.ddd.ddd port=[1024,65535] format=[raw;mp4]\n", argv[0]);
-		g_print ("Default settings taken: ip=%s port=%d format=%s\n",(char*) *ip, *port, *format);
-		return EXIT_FAILURE;
-	/*Check that parameters are indeed: ip= and port= */
-	}else if( strncmp("ip=", argv[1], strlen("ip=")) || strncmp("port=", argv[2], strlen("port=")) || strncmp("format=", argv[3], strlen("format=")) ) {
-		g_printerr ("Usage: %s ip=ddd.ddd.ddd.ddd port=[1024,65535] format=[raw;mp4]\n", argv[0]);
-		g_print ("Default settings taken: ip=%s port=%d format=%s\n",(char*) *ip, *port, *format);
-		return EXIT_FAILURE;
-	}
-	/*Here, the fromat of the command line entered is good, we just need te check the format of the DEFAULT_IP Address given, and the port number */
-
-	/* First check DEFAULT_IP address format */
-	char* temp_ip = strdup(argv[1] + strlen("ip="));
-	if (! inet_pton(AF_INET, temp_ip, check_addr)){
-		g_printerr ("Ip should be Ipv4 dotted-decimal format\n");
-		g_print ("Default settings taken: ip=%s port=%d format=%s\n",(char*) *ip, *port, *format);
-		return EXIT_FAILURE;
-	}
-
-	/* Then, chek port number ( should be greater than 1024 and less than 65535 as it is coded on a short int (16-bits) */
-	char* temp_port = strdup(argv[2] + strlen("port="));
-	int temp_numport = atoi(temp_port);
-	if(temp_numport< MIN_DEFAULT_PORT || temp_numport>MAX_DEFAULT_PORT){
-		g_printerr ("Port number should in the range: %d -> %d\n", MIN_DEFAULT_PORT, MAX_DEFAULT_PORT);
-		g_print ("Default settings taken: ip=%s port=%d format=%s\n",(char*) *ip, *port, *format);
-		return EXIT_FAILURE;
-	}
-
-	/*Then, check the value of the format given should be raw  or mp4 */
-	char* temp_format = strdup(argv[3] + strlen("format="));
-	if( strcmp("raw", temp_format) &&  strcmp("mp4", temp_format) ){
-		g_printerr ("Format should be: %s or %s\n", "raw", "mp4");
-		g_print ("Default settings taken: ip=%s port=%d format=%s\n",(char*) *ip, *port, *format);
-		return EXIT_FAILURE;
-	}
-
-	/* replace ip's value by the value entered by the user */
-	strcpy(*ip, temp_ip);
-	*port = (gint) temp_numport;
-	strcpy(*format, temp_format);
-	return EXIT_SUCCESS;
-}
-#endif //if 0
 
 /**
  * \brief create a fake source for test purposes
@@ -186,38 +131,26 @@ static GstElement* source_creation(GstElement* pipeline, char* format, int width
 }
 
 static GstElement *get_source( GstElement* pipeline){
-	GstIterator *iter 	= NULL; 		/* on iterator on the pipeline built */
-	GValue value 		= G_VALUE_INIT; /* an object to store each element of pipeline */
-	GstElement *last 	= NULL; 		/* to return last element of pipeline */
-	GError *error 		= NULL; /* an Object to save errors when they occurs */
-	GstElement *bin 	= NULL; 		/* to return last element of pipeline */
-	bin  = gst_parse_bin_from_description ("v4l2src device=/dev/video0 ! capsfilter caps=\"video/x-raw,width=1920,height=1080,interlace-mode=(string)progressive,framerate=(fraction)30/1\"",
+	GError 		*error 		= NULL; /* an Object to save errors when they occurs */
+	GstElement 	*bin 		= NULL; 		/* to return last element of pipeline */
+	gchar 		*cmdline 	= init_sources_from_conf(videoFormatNumber._value.int_val + 1 );
+	bin  = gst_parse_bin_from_description (cmdline,
 											TRUE,
 											&error);
 	if ( error != NULL){
 		g_printerr("Failed to parse: %s\n",error->message);
 	   	return NULL;	
 	}
-/* iterates through the pipeline create to retrieve the last element of pipeline */
-	iter = gst_bin_iterate_elements (GST_BIN(pipeline));
-		switch (gst_iterator_next (iter, &value)) {
-			case GST_ITERATOR_OK:
-				last = GST_ELEMENT(g_value_get_object (&value));
-				break;
-			case GST_ITERATOR_RESYNC:
-				gst_iterator_resync (iter);
-				break;
-			case GST_ITERATOR_ERROR:
-				GST_WARNING_OBJECT (GST_BIN(pipeline), "error in iterating elements");
-				break;
-			case GST_ITERATOR_DONE:
-				break;
-	}
-	gst_iterator_free (iter);
-	gst_bin_add (GST_BIN(pipeline), bin);	
+	gst_bin_add (GST_BIN(pipeline), bin);
 	return bin;
 }
 
+/**
+ * \brief intialize the stream: create the pipeline and filters out non vivoe format
+ * \param loop the main loop
+ * \param stream_datas a structure in which we will save the pipeline and the bus elements
+ * \return EXIT_SUCCESS or EXIT_FAILURE
+ */
 static int init_stream_SP( gpointer main_loop, gpointer stream_datas)
 {
 	stream_data *data 			= stream_datas;
@@ -225,14 +158,14 @@ static int init_stream_SP( gpointer main_loop, gpointer stream_datas)
     GstElement 	*last;	
 	/* Source Creation */
 #if 0
-	last = source_creation(pipeline, format,width ,height/*,encoding*/);
+	last = source_creation(pipeline, "raw",1920 ,1080/*,encoding*/);
 #endif
 	last = get_source(pipeline);
-
 	if (last == NULL ){
 		g_printerr ( "Failed to create videosource\n");
 		return EXIT_FAILURE;
 	}
+    gst_element_set_state (data->pipeline, GST_STATE_PLAYING);
 	/* Create pipeline  - save videoFormatIndex into stream_data data*/
 	last = create_pipeline_videoChannel( stream_datas, 	main_loop, last );
 	/* Check if everything went ok*/
@@ -243,6 +176,14 @@ static int init_stream_SP( gpointer main_loop, gpointer stream_datas)
     return EXIT_SUCCESS;
 }
 
+/**
+ * \brief initiate a pipeline to display received stream
+ * \param main_loop the main loop
+ * \param stream_datas a structure in which we will save the pipeline and the bus elements
+ * \param caps the GstCaps made from the SDP file received with the stream
+ * \param channel_entry the serviceUser corresponding channel 
+ * \return EXIT_SUCCESS or EXIT_FAILURE
+ */
 static int init_stream_SU( gpointer main_loop, gpointer stream_datas, GstCaps *caps, struct channelTable_entry *channel_entry )
 {
     GstElement *first;		
@@ -257,12 +198,13 @@ static int init_stream_SU( gpointer main_loop, gpointer stream_datas, GstCaps *c
 }
 
 /**
- * \brief intialize the stream: create the pipeline and filters out non vivoe format
- * \param argc to know which source to built
- * \param argv to know which source to built
- * \param stream_datas a structure in which we will save the pipeline and the bus elements
- * \return 0
+ * \brief initiate a pipeline for a SP or a SU
+ * \param main_loop the main loop
+ * \param caps the GstCaps made from the SDP file received with the stream
+ * \param channel_entry the serviceUser corresponding channel 
+ * \return EXIT_SUCCESS or EXIT_FAILURE
  */
+
 int init_streaming (gpointer main_loop, GstCaps *caps, struct channelTable_entry * channel_entry)
 {
     /* Initialization of elements needed */
@@ -296,6 +238,8 @@ int init_streaming (gpointer main_loop, GstCaps *caps, struct channelTable_entry
 	data->bus_watch_id 	= bus_watch_id;
 	if( channel_entry == NULL){ /* case we are a Service Provider */
 		return init_stream_SP( main_loop, data);
+//		init_stream_SP( main_loop, data);
+//		start_streaming(data, 1);
 	}
 	else{ /* case we are a Service User */
 		init_stream_SU( main_loop, data, caps, channel_entry);
@@ -312,12 +256,17 @@ int init_streaming (gpointer main_loop, GstCaps *caps, struct channelTable_entry
 int start_streaming (gpointer stream_datas, long channelVideoFormatIndex ){
 	stream_data *data 								= stream_datas;
 	struct videoFormatTable_entry * stream_entry 	= videoFormatTable_getEntry(channelVideoFormatIndex);
+	if ( data->pipeline != NULL){
   	/* Set the pipeline to "playing" state*/
-    g_print ("Now playing\n");
+    g_print ("Now playing: %s\n", gst_element_get_name(data->pipeline) );
     gst_element_set_state (data->pipeline, GST_STATE_PLAYING);
+	if ( GST_STATE( data->pipeline) != GST_STATE_PLAYING)
+		return EXIT_FAILURE;
 	if ( stream_entry != NULL)
 		stream_entry->videoFormatStatus = enable;
-	return 0;
+	return EXIT_SUCCESS;
+	}
+	return EXIT_FAILURE;
 }
 
 /**

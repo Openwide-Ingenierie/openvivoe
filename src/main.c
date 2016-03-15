@@ -69,10 +69,6 @@ static gboolean stop_program ( gpointer data ){
 }
 
 static gboolean service_Provider_init(gpointer loop){
-	/* data associated to stream */	
-/*	stream_data 	stream1;
-	stream_data 	stream2;*/
-
 	/* prepare the stream - initialize all the data relevant to the stream into stream-data */
 	if ( init_streaming(loop, NULL, NULL)){
 		return FALSE;
@@ -89,6 +85,15 @@ int main (int   argc,  char *argv[]){
 	/* create the GMainLoop*/
 	loop = g_main_loop_new (NULL, FALSE);
 
+	/* data associated to stream */
+	stop_program_data 		stop_data;
+	stop_data.deamon_name 	= argv[0];
+	stop_data.loop 			= loop;
+
+	/* Exit the program nicely when kill signals are received */
+	g_unix_signal_add (SIGINT, 	stop_program, &stop_data);
+	g_unix_signal_add (SIGTERM, stop_program, &stop_data);
+
 	/* add the idle function that handle SNMP request every 100ms */
 	g_timeout_add (10, handle_snmp_request, NULL);
 
@@ -99,15 +104,6 @@ int main (int   argc,  char *argv[]){
 	/* In case of an service Provider */
 	/* Initialize GStreamer */
 	gst_init (&argc, &argv);
-
-	/* data associated to stream */
-	stop_program_data 		stop_data;
-	stop_data.deamon_name 	= argv[0];
-	stop_data.loop 			= loop;
-
-	/* Exit the program nicely when kill signals are received */
-	g_unix_signal_add (SIGINT, 	stop_program, &stop_data);
-	g_unix_signal_add (SIGTERM, stop_program, &stop_data);
 
 	/* start the program: SNMP SubAgent deamon, and streaming */
 	if ( 	deviceInfo.parameters[num_DeviceType]._value.int_val == device_SP

@@ -76,7 +76,7 @@ static GstStructure* type_detection_with_sink(GstBin *pipeline, GstElement *inpu
 	if( g_main_loop_is_running (loop) ){
   		g_main_loop_quit (loop);		
 	}
-		g_main_loop_run (loop);
+	g_main_loop_run (loop);
 
 	/* Video type found */	
   	gst_element_set_state (GST_ELEMENT (pipeline), GST_STATE_NULL);
@@ -108,6 +108,7 @@ GstStructure* type_detection(GstBin *pipeline, GstElement *input_video, GMainLoo
 			g_printerr ("Fail to detect Media Stream type\n");
 			return NULL;
 		}
+
 		str_detected = type_detection_with_sink(pipeline, input_video, loop, fakesink);
 		gst_bin_remove(GST_BIN(pipeline), fakesink);
 	}else{

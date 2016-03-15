@@ -359,9 +359,9 @@ static void channelSatus_requests_handler( struct channelTable_entry * table_ent
 	switch( table_entry->channelType ){
 		case videoChannel : /* case ServiceProvider */
 			if ( table_entry->channelStatus == start){
+				start_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex);
 				prepare_socket( table_entry );
 				g_timeout_add(table_entry->channelSapMessageInterval,send_announcement, table_entry );
-				start_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex);
 			}
 			else if ( table_entry->channelStatus == stop){
 				stop_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex );
@@ -660,6 +660,7 @@ channelTable_handler(
                 break;
             case COLUMN_CHANNELSTATUS:
                 /* or possibly 'netsnmp_check_vb_int_range' */
+
                 ret = netsnmp_check_vb_int_range( request->requestvb, start, singleFrame );
                 if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );

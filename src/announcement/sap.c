@@ -298,6 +298,7 @@ gboolean send_announcement(gpointer entry){
 							sizeof(sap_socket.multicast_addr));
 		return FALSE;
 	}else{
+		printf("sending announcement\n");
 		/* Send Annoucement message */
 		nb_bytes = sendto( 	sap_socket.udp_socket_fd,
 							channel_entry->sap_datas->udp_payload,
@@ -307,7 +308,7 @@ gboolean send_announcement(gpointer entry){
 							sizeof(sap_socket.multicast_addr));
 	}
 	/* check if the number of bytes send is -1, if so an error as occured */
-	if ( nb_bytes	== -1 )
+	if ( nb_bytes == -1 )
 	{
     	g_printerr("Failed to send SAP/SDP announcement: %s",strerror(errno));
 		return FALSE;

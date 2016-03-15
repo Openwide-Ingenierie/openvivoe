@@ -7,13 +7,19 @@
 #ifndef MIB_CONF_H
 # define MIB_CONF_H
 
-/* This is the name of the configuration file to use for the subAgent
- * handling the VIVOE MIB
+/**
+ * \brief This is the name of the configuration file to use for the subAgent handling the VIVOE MIB
  */
-#define CONFIG_FILE "vivoe-mib.conf"
+#define CONFIG_FILE 		"vivoe-mib.conf"
+
+/**
+ * \brief the name of the Gstreamer command line used by the user to give the input video to vivoe
+ */
+#define GST_SOURCE_CMDLINE 	"gst_source"
 
 /*functions' definitions*/
 int get_check_configuration(); /*check the groups, key and values of the MIB's parameters*/
+gchar* init_sources_from_conf(int index); /* get the command line used to initiate the streams */
 
 #endif /* MIB_CONF_H */
 
