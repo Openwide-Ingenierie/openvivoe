@@ -85,6 +85,29 @@ static gboolean create_mpeg4_media(struct channelTable_entry * channel_entry, Gs
 }
 
 /**
+ * \brief create Media for in J2K video style
+ * \param channel_entry an entry in the channelTable to retrieve relevant inforlation
+ * \param media the media to modify: where to store the new information
+ */
+static gboolean create_j2k_media(struct channelTable_entry * channel_entry, GstSDPMedia *media)
+{
+	stream_data *data = channel_entry->stream_datas;
+	gchar *fmtp =  g_strdup_printf ("%ld sampling=%s; width=%ld; height=%ld; %s",
+										data->rtp_datas->rtp_type,
+										channel_entry->channelVideoSampling,
+										channel_entry->channelVertRes,
+										channel_entry->channelHorzRes,
+										interlace_mode_to_string (channel_entry->channelInterlaced)
+									);
+	if( gst_sdp_media_add_attribute (media, "fmtp", fmtp)!= GST_SDP_OK ){
+		g_printerr("ERROR: problem in media creation for SDP file\n");
+		return FALSE;
+	}
+	return TRUE;
+}
+
+
+/**
  * \brief an function that display an appropriate error message
  * \return FALSE (as it is an error ;) )
  */
@@ -106,10 +129,10 @@ static gboolean create_fmtp_media(struct channelTable_entry * channel_entry, Gst
 	}else if ( !strcmp(channel_entry->channelVideoFormat , "MP4V-ES")){ // case MPEG-4 format
 		if( !create_mpeg4_media(channel_entry, media))
 			return error_function();
-	}/*else if ( !strcmp( channel_entry->channelVideoFormat , "J2000")){ // case J2000 format
-		if( !create_mpeg4_media(channel_entry, media))
+	}else if ( !strcmp( channel_entry->channelVideoFormat , "JPEG2000")){ // case J2000 format
+		if( !create_j2k_media(channel_entry, media))
 			return error_function();
-	}*/else{
+	}else{
 		return error_function();
 	}
 	return TRUE;
@@ -217,6 +240,7 @@ gboolean create_SDP(GstSDPMessage 	*msg, struct channelTable_entry * channel_ent
 		return error_function();
 	if ( gst_sdp_message_add_media (msg, media))
 		return error_function();
+	printf("%s\n", gst_sdp_message_as_text(msg));
 	 return TRUE;
 }
 

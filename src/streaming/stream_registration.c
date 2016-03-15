@@ -78,10 +78,10 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
 	}
 	/*videoFormatInterlaced*/
 	if( gst_structure_has_field(source_str_caps, "interlace-mode")){
-		 gchar* interlaced_mode						= g_value_dup_string(gst_structure_get_value(source_str_caps, "interlace-mode"));
-		 if 	( !strcmp( (char*)interlaced_mode, "progressive"))
+		 gchar* video_interlaced_mode						= g_value_dup_string(gst_structure_get_value(source_str_caps, "interlace-mode"));
+		 if 	( !strcmp( (char*)video_interlaced_mode, "progressive"))
 		 	video_info->videoFormatInterlaced 		= vivoe_progressive;
-		else if ( !strcmp( (char*)interlaced_mode, "interlaced"))
+		else if ( !strcmp( (char*)video_interlaced_mode, "interlaced"))
 			video_info->videoFormatInterlaced 		= vivoe_interlaced;
 		else
 			video_info->videoFormatInterlaced 		= vivoe_none;

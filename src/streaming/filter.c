@@ -328,74 +328,94 @@ static GstStructure* build_MPEG4_filter(GKeyFile* gkf){
 
 }
 
-gboolean
-my_gst_element_link_pads_filtered (GstElement * src, const gchar * srcpadname,
-    GstElement * dest, const gchar * destpadname, GstCaps * filter)
-{
-  /* checks */
-  g_return_val_if_fail (GST_IS_ELEMENT (src), FALSE);
-  g_return_val_if_fail (GST_IS_ELEMENT (dest), FALSE);
-  g_return_val_if_fail (filter == NULL || GST_IS_CAPS (filter), FALSE);
+/**
+ * \brief Build the J2K filter caps
+ * \param gkf a pointer to the opened configuration file
+ * \return GstStructure* a caps structure built from the incformation found in configuration file under MPEG-4 group name
+ */
+static GstStructure* build_J2K_filter(GKeyFile* gkf){
+	const gchar * const * 		resolution 	= (const gchar * const *)	get_j2k_res(gkf);
+	GstStructure* 				j2k_filter = gst_structure_new_from_string ("image/x-j2c");
+	int width_small[length_width_576] 	= {544, 576, 720, 768};
+	int heigth_small[length_height_576] = {576, 704};
+	int* width 							= (int*) malloc(length_width * sizeof(int));
+	int* height 						= (int*) malloc(length_height * sizeof(int));
+	char* interlace_mode[num_inter_mode];
+	char* interlaced[1]					={"interlaced"};
+	char* progressive[1] 				={"progressive"};
+	int offset_width					= 0;
+	int offset_height					= 0;
+	int offset_im 						= 0;
+	/* Add resolution part */
+	if( all_resolutions( resolution ) )
+	{
+		/* witdth */
+		memcpy(width, width_small, length_width_576 * sizeof(int));
+		offset_width += length_width_576;
+		*(width + offset_width) = 1280;
+		offset_width ++;
+		*(width + offset_width) = 1920;
+		offset_width ++;
+		set_filter_field(j2k_filter, "width", 	width, 	NULL, length_width);
+		/* height */
+		memcpy(height, heigth_small, length_height_576 * sizeof(int));
+		offset_height += length_height_576;
+		*(height + offset_height) = 720;
+		offset_height ++;
+		*(height + offset_height) = 1080;
+		offset_height ++;
+		set_filter_field(j2k_filter, "height", 	height, NULL, length_height);
+		/* interlaced-mode */
+		copy(interlace_mode, num_inter_mode, 0, interlaced, 1 );
+		offset_im++;
+		copy(interlace_mode, num_inter_mode, offset_im, progressive, 1 );
+		set_filter_field(j2k_filter,"interlace-mode",NULL, interlace_mode, num_inter_mode);		
+	}else{
+		if( g_strv_contains(resolution,"576i") ){
+			memcpy(width, width_small, length_width_576 * sizeof(int));
+			offset_width += length_width_576;
+			memcpy(height, heigth_small, length_height_576 * sizeof(int));
+			offset_height += length_height_576;
+			copy(interlace_mode, num_inter_mode,offset_im , interlaced, 1 );
+			offset_im++;
+		}
+		if( g_strv_contains(resolution, "720p") ){
+			*(width + offset_width) = 1280;
+			offset_width ++;
+			*(height + offset_height) = 720;
+			offset_height ++;
+			copy(interlace_mode, num_inter_mode,offset_im , progressive, 1 );
+			offset_im++;
+		}
+		if( g_strv_contains(resolution, "1080p" ) ){
+			*(width + offset_width) = 1920;
+			offset_width ++;
+			*(height + offset_height) = 1080;
+			offset_height ++;
+			copy(interlace_mode, num_inter_mode,offset_im , progressive, 1 );
+			offset_im++;
+		}
+		else if( g_strv_contains(resolution, "1080i") ){
+			if( g_strv_contains(resolution, "1080p" ) ){
+				copy(interlace_mode, num_inter_mode,offset_im , interlaced, 1 );
+				offset_im++;
+			}else{
+				*(width + offset_width) = 1920;
+				offset_width ++;
+				*(height + offset_height) = 1080;
+				offset_height ++;
+				copy(interlace_mode, num_inter_mode,offset_im , interlaced, 1 );
+				offset_im++;
+			}
+		}
+		set_filter_field(j2k_filter, "width", 			width, 	NULL, 			offset_width);
+		set_filter_field(j2k_filter, "height", 		height, NULL, 			offset_height);
+		set_filter_field(j2k_filter,"interlace-mode", 	NULL, 	interlace_mode, MIN(num_inter_mode,offset_im));
+	}
+	//	set_filter_field(raw_filter, "framerate", GST_VIDEO_FPS_RANGE);
+//	printf("%s\n", gst_structure_to_string (j2k_filter) );
+	return j2k_filter;
 
-  if (filter) {
-    GstElement *capsfilter;
-    GstObject *parent;
-    GstState state, pending;
-    gboolean lr1, lr2;
-
-    capsfilter = gst_element_factory_make ("capsfilter", NULL);
-    if (!capsfilter) {
-      GST_ERROR ("Could not make a capsfilter");
-      return FALSE;
-    }
-
-    parent = gst_object_get_parent (GST_OBJECT (src));
-    g_return_val_if_fail (GST_IS_BIN (parent), FALSE);
-
-    gst_element_get_state (GST_ELEMENT_CAST (parent), &state, &pending, 0);
-
-    if (!gst_bin_add (GST_BIN (parent), capsfilter)) {
-      GST_ERROR ("Could not add capsfilter");
-      gst_object_unref (capsfilter);
-      gst_object_unref (parent);
-      return FALSE;
-    }
-
-    if (pending != GST_STATE_VOID_PENDING)
-      state = pending;
-
-    gst_element_set_state (capsfilter, state);
-
-    gst_object_unref (parent);
-	
-    g_object_set (capsfilter, "caps", filter, NULL);
-
-    lr1 = gst_element_link_pads (src, srcpadname, capsfilter, "sink");
-    lr2 = gst_element_link_pads (capsfilter, "src", dest, destpadname);
-    if (lr1 && lr2) {
-      return TRUE;
-    } else {
-      if (!lr1) {
-        GST_INFO ("Could not link pads: %s:%s - capsfilter:sink",
-            GST_ELEMENT_NAME (src), srcpadname);
-      } else {
-        GST_INFO ("Could not link pads: capsfilter:src - %s:%s",
-            GST_ELEMENT_NAME (dest), destpadname);
-      }
-      gst_element_set_state (capsfilter, GST_STATE_NULL);
-      /* this will unlink and unref as appropriate */
-      gst_bin_remove (GST_BIN (GST_OBJECT_PARENT (capsfilter)), capsfilter);
-      return FALSE;
-    }
-  } else {
-    if (gst_element_link_pads (src, srcpadname, dest, destpadname)) {
-      return TRUE;
-    } else {
-      GST_INFO ("Could not link pads: %s:%s - %s:%s", GST_ELEMENT_NAME (src),
-          srcpadname, GST_ELEMENT_NAME (dest), destpadname);
-      return FALSE;
-    }
-  }
 }
 
 /**
@@ -409,8 +429,8 @@ my_gst_element_link_pads_filtered (GstElement * src, const gchar * srcpadname,
 gboolean filter_VIVOE(GstStructure* input_caps_str, GstElement* input, GstElement* output){
 	GstStructure *raw_filter 	= NULL;
 	GstStructure *mpeg_filter 	= NULL;
-// 	GstStructure* j2k_filter 	= NULL; will be needed after 
-	GstCaps *vivoe_filter 	= NULL; /* the final filter to use to filters out non stream video */
+ 	GstStructure* j2k_filter 	= NULL; 
+	GstCaps *vivoe_filter 		= NULL; /* the final filter to use to filters out non stream video */
 	
 	/* this function does the following: 
 	 * _ open configuration file
@@ -429,13 +449,14 @@ gboolean filter_VIVOE(GstStructure* input_caps_str, GstElement* input, GstElemen
 		raw_filter 	= build_RAW_filter(gkf);
 	if( vivoe_use_format(gkf, "MPEG-4") )
 		mpeg_filter = build_MPEG4_filter(gkf);
-	//	if( vivoe_use_format(gkf, "JPEG2000") will be needed after
-	//	j2k_filter 	= build_J2K_filter(gkf); will be neeeded after
+	if( vivoe_use_format(gkf, "JPEG2000") )
+		j2k_filter 	= build_J2K_filter(gkf);
 
 	/* close configuration file */
 	close_configuration_file(gkf);
 	vivoe_filter = gst_caps_new_full (  raw_filter,
-										mpeg_filter, 
+										mpeg_filter,
+										j2k_filter,
 										NULL);
 	/* When building a new caps from a Structure, the structure is not copied, instead the caps own the structure 
 	 * it is not wan we want there, so we built a copy the structure before building the input_caps */ 
@@ -447,7 +468,6 @@ gboolean filter_VIVOE(GstStructure* input_caps_str, GstElement* input, GstElemen
 	}else{
 		g_print ("WARNING: Video source input has been filtered out: not a VIVOE format!\n");
 		return FALSE;
-
 	}
 }
 

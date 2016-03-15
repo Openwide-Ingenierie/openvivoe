@@ -26,6 +26,7 @@
 #include "../../include/streaming/pipeline.h"
 #include "../../include/streaming/stream.h"
 
+
 /*
  * This function add the RTP element to the pipeline
  */
@@ -37,12 +38,13 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus *bus,
 	GstElement *rtp = NULL;
 	GstElement *parser;
 	GstStructure* video_caps;
-
+	
 	/* Media stream Type detection */
 	video_caps = type_detection(GST_BIN(pipeline), input, loop, NULL);
 	/* Fill the MIB a first Time */
 	fill_entry(video_caps, video_info, stream_datas);
-
+	
+ 	/* in case RAW video type has been detected */
 	if ( gst_structure_has_name( video_caps, "video/x-raw")){
 		/* For Raw video */
 		rtp 	= gst_element_factory_make ("rtpvrawpay", "rtp");
@@ -51,7 +53,9 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus *bus,
 			g_printerr ( "error cannot create element for: %s\n","rtp");
 			return NULL;
 		}
-	}else if  (gst_structure_has_name( video_caps, "video/mpeg")){
+	}
+	/* in case MPEG4 video type has been detected */
+	else if  (gst_structure_has_name( video_caps, "video/mpeg")){
 		/* For MPEG-4 video */
 		parser 	= gst_element_factory_make ("mpeg4videoparse", "parser");
 		if( parser == NULL){
@@ -67,7 +71,20 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus *bus,
 		gst_bin_add(GST_BIN(pipeline),parser);
 		gst_element_link(input, parser);
 		input = parser;
-	}else{
+	} 
+	/* in case J2K video type has been detected */
+	else if  (gst_structure_has_name( video_caps, "image/x-j2c")){
+		/* For J2K video */
+		rtp 	= gst_element_factory_make ("rtpj2kpay", "rtp");
+		/* Check if everything went ok */
+		if( rtp == NULL){
+			g_printerr ( "error cannot create element for: %s\n","rtp");
+			return NULL;
+		}
+	}
+ 	/* in case the video type detected is unknown */	
+	else
+	{
 		g_printerr("unknow type of video stream\n");
 		return NULL;
 	}
@@ -285,9 +302,30 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 	GstBus *bus,
 			gst_bin_add_many(GST_BIN (pipeline), rtp, parser, dec, NULL);
 			gst_element_link_many( input, rtp, parser, dec, NULL );
 			last = dec;
+		} 		/* For J2K video */		
+		else if ( strcmp( "JPEG2000",encoding) == 0 ){
+			rtp 	= gst_element_factory_make ("rtpj2kdepay", "rtp");
+			/* Check if everything went ok */
+			if( rtp == NULL){
+				g_printerr ( "error cannot create element for: %s\n","rtp");
+				return NULL;
+			}
+			dec = gst_element_factory_make ("openjpegdec", "dec");
+			/* save last pipeline element */
+			if(dec == NULL){
+				g_printerr ( "error cannot create element for: %s\n","dec");
+				return NULL;
+			}
+			gst_bin_add_many(GST_BIN (pipeline), rtp, dec, NULL);
+			gst_element_link_many( input, rtp, dec, NULL );
+			last = dec;
+		}
+		else {
+			g_printerr("unknow type of video stream\n");
+			return NULL;
 		}
 	}else{
-		g_printerr("unknow type of video stream\n");
+		g_printerr("ERROR: encoding format not found\n");
 		return NULL;
 	}
 	

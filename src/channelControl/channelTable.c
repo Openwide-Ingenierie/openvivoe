@@ -361,7 +361,8 @@ static void channelSatus_requests_handler( struct channelTable_entry * table_ent
 			if ( table_entry->channelStatus == start){
 				start_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex);
 				prepare_socket( table_entry );
-				g_timeout_add(table_entry->channelSapMessageInterval,send_announcement, table_entry );
+				//g_timeout_add(table_entry->channelSapMessageInterval,send_announcement, table_entry );
+				send_announcement(table_entry);
 			}
 			else if ( table_entry->channelStatus == stop){
 				stop_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex );

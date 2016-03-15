@@ -84,12 +84,13 @@ static GstElement* source_creation(GstElement* pipeline, char* format, int width
 	/*
 	 * For now, the source is created manually, directly into the code
 	 * */
-	source = gst_element_factory_make ("v4l2src", "source");
+//	source = gst_element_factory_make ("v4l2src", "source");
+	source = gst_element_factory_make ("videotestsrc", "source");
 	if(source == NULL){
 		g_printerr ("error cannot create element: %s\n", "videotestsrc" );
 		return NULL;
 	}
-	g_object_set(source, "device", "/dev/video0", NULL);
+//	g_object_set(source, "device", "/dev/video0", NULL);
 	capsfilter = gst_element_factory_make ("capsfilter","capsfilter");
 	if(capsfilter == NULL){
 		g_printerr ( "error cannot create element: %s\n", "capsfilter" );
@@ -127,6 +128,21 @@ static GstElement* source_creation(GstElement* pipeline, char* format, int width
 		gst_element_link_many (capsfilter, enc,NULL);
 		last = enc;
 	}
+	if( !strcmp(format, "JPEG2000")){
+		/* For test puposes, if we wanna test our program with a fake mpeg-4 source, it necessary to create is mannually with an encoder */
+		/*create the MPEG-4 encoder */
+		enc = gst_element_factory_make ("openjpegenc", "enc");
+		/* save last pipeline element */
+		if(enc == NULL){
+			g_printerr ( "error cannot create element for: %s\n","enc");
+			return NULL;
+		}
+		/* add encryptor to pipeline, link it to the source */
+		gst_bin_add_many (GST_BIN(pipeline), enc, NULL);
+		gst_element_link_many (capsfilter, enc,NULL);
+		last = enc;
+	}
+
 	return last;
 }
 
@@ -163,10 +179,10 @@ static int init_stream_SP( gpointer main_loop, gpointer stream_datas)
 	GstElement 	*pipeline 		= data->pipeline;
     GstElement 	*last;	
 	/* Source Creation */
+	last = source_creation(pipeline, "RAW",1920 ,1080/*,encoding*/);
 #if 0
-	last = source_creation(pipeline, "raw",1920 ,1080/*,encoding*/);
-#endif
 	last = get_source(pipeline);
+#endif
 	if (last == NULL ){
 		g_printerr ( "Failed to create videosource\n");
 		return EXIT_FAILURE;
