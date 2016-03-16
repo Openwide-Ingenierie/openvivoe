@@ -58,5 +58,5 @@ struct ethernetIfTableEntry {
 };
 
 struct ethernetIfTableEntry  *ethernetIfTable_head;
-
+void ethernetIfTableEntry_delete();
 #endif /* ETHERNETIFTABLE_H */

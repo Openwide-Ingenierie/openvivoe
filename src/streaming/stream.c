@@ -57,8 +57,22 @@ static gboolean bus_call (  GstBus     *bus,
 								   g_error_free (error);
 
 								   g_main_loop_quit (loop);
-								   break;
 							   }
+			break;
+
+		case GST_MESSAGE_WARNING:{
+								   gchar  *debug;
+								   GError *error;
+								   gst_message_parse_warning (msg, &error, &debug);
+								   g_free (debug);
+
+								   g_printerr ("Error: %s\n", error->message);
+								   g_error_free (error);
+
+								   g_main_loop_quit (loop);
+							   }
+			break;
+
 		default:
 			break;
 	}
@@ -179,10 +193,10 @@ static int init_stream_SP( gpointer main_loop, gpointer stream_datas)
 	GstElement 	*pipeline 		= data->pipeline;
     GstElement 	*last;	
 	/* Source Creation */
-	last = source_creation(pipeline, "JPEG2000",1920 ,1080/*,encoding*/);
 #if 0
-	last = get_source(pipeline);
+	last = source_creation(pipeline, "JPEG2000",1920 ,1080/*,encoding*/);
 #endif
+	last = get_source(pipeline);
 	if (last == NULL ){
 		g_printerr ( "Failed to create videosource\n");
 		return EXIT_FAILURE;
@@ -275,20 +289,19 @@ int init_streaming (gpointer main_loop, GstCaps *caps, struct channelTable_entry
  * \param data of the stream (pipeline, bus and bust_watch_id) - see stream_data structure
  * \return 0
  */
-int start_streaming (gpointer stream_datas, long channelVideoFormatIndex ){
+gboolean start_streaming (gpointer stream_datas, long channelVideoFormatIndex ){
 	stream_data *data 								= stream_datas;
 	struct videoFormatTable_entry * stream_entry 	= videoFormatTable_getEntry(channelVideoFormatIndex);
 	if ( data->pipeline != NULL){
-  	/* Set the pipeline to "playing" state*/
-    g_print ("Now playing: %s\n", gst_element_get_name(data->pipeline) );
-    gst_element_set_state (data->pipeline, GST_STATE_PLAYING);
-	if ( GST_STATE( data->pipeline) != GST_STATE_PLAYING)
-		return EXIT_FAILURE;
-	if ( stream_entry != NULL)
-		stream_entry->videoFormatStatus = enable;
-	return EXIT_SUCCESS;
-	}
-	return EXIT_FAILURE;
+		/* Set the pipeline to "playing" state*/
+		g_print ("Now playing\n");
+		gst_element_set_state (data->pipeline, GST_STATE_PLAYING);
+		g_print ("pipeline playing\n");
+		if ( stream_entry != NULL)
+			stream_entry->videoFormatStatus = enable;
+		return TRUE;
+	}		
+	return FALSE;
 }
 
 /**
@@ -324,12 +337,8 @@ int delete_steaming_data(gpointer channel_entry){
 		/* free rtp_data */
 		free(data->rtp_datas);
 		/* free the sap_data */
-		if( entry->channelType == videoChannel)
-			free(entry->sap_datas);
 		free(data);
 		entry->stream_datas = NULL;
 	}
-	if( entry->channelType == videoChannel)
-		free(entry);
 	return 0;
 }

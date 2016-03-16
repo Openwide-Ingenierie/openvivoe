@@ -78,7 +78,6 @@
 
 int open_vivoe_daemon (char* deamon_name) {
     int syslog = 0; /* change this if you want to use syslog */
-
     /* print log errors to syslog or stderr */
     if (syslog)
         snmp_enable_calllog();
@@ -87,6 +86,7 @@ int open_vivoe_daemon (char* deamon_name) {
 	/* make us a agentx client. */
     netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE, 1);
 
+	debug_register_tokens( "agentx/subagent" );
     /* Before starting the agent, we should initialize the MIB's parameters
      * from the configuration file vivoe-mib.conf
      */
@@ -121,7 +121,7 @@ int open_vivoe_daemon (char* deamon_name) {
 	init_sap_multicast();
 	init_channelTable();	
 
-	/* example-demon will be used to read example-demon.conf files. */
+	/* openvivoe-demon will be used to read openvivoe-demon.conf files. */
 	init_snmp(basename(deamon_name));
 
   snmp_log(LOG_INFO,"%s is up and running.\n", basename(deamon_name));
@@ -129,6 +129,7 @@ int open_vivoe_daemon (char* deamon_name) {
 }
 
 gboolean handle_snmp_request( void ){
+	printf("handle_snmp_request\n");
     agent_check_and_process(0); /* 0 == don't block */
 	return TRUE;
 }

@@ -99,5 +99,6 @@ struct videoFormatTable_entry * videoFormatTable_createEntry( 	long  videoFormat
 																gpointer stream_datas);
 
 struct videoFormatTable_entry * videoFormatTable_getEntry(int index);
+void 							videoFormatTable_delete();
 
 #endif /* VIDEOFORMATTABLE_H */

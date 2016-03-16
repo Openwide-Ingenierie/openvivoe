@@ -202,7 +202,9 @@ gboolean create_SDP(GstSDPMessage 	*msg, struct channelTable_entry * channel_ent
 	/* transform IP from long to char * */
 	struct in_addr multicast_addr;
 	multicast_addr.s_addr = ip;
+	printf("It seeems to be a problem here\n");
 	gst_sdp_message_set_connection (msg, network_type, address_type,  inet_ntoa(multicast_addr) , address_ttl, 0);
+	printf("Yeah definitely\n");
 
 	
 	/* time : shall be set yo 0 0 in VIVOE to describe an unbound session

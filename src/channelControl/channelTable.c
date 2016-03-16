@@ -83,6 +83,7 @@ initialize_table_channelTable(void)
  * \param new_entry the entry to add into the table
  */
 static void add_in_channel_SU(struct channelTable_entry *new_entry){
+		printf("add\n");
 		new_entry->next_SU = channelTable_SU_head;
 		channelTable_SU_head = new_entry;
 }
@@ -93,6 +94,7 @@ static void add_in_channel_SU(struct channelTable_entry *new_entry){
  * \param entry_index the index of the entry to pop 
  */
 static void pop_from_channel_SU( struct channelTable_entry *table_entry){
+	printf("pop\n");
 	struct channelTable_entry *iterator = channelTable_SU_head;
 	/* check if we want to pop the head */
 	if ( table_entry == channelTable_SU_head )
@@ -278,6 +280,16 @@ gboolean channelTable_updateEntry(struct channelTable_entry * entry, int videoFo
 		return TRUE;
 }
 
+void channelTable_delete(){
+	struct channelTable_entry *iterator = channelTable_head;
+	struct channelTable_entry *temp;
+	while(iterator != NULL){
+		temp = iterator;
+		iterator = iterator->next;
+		free(temp);
+	}
+}
+
 #if  ALLOW_REMOVING_ROW
 /* remove a row from the table */
 void
@@ -359,10 +371,11 @@ static void channelSatus_requests_handler( struct channelTable_entry * table_ent
 	switch( table_entry->channelType ){
 		case videoChannel : /* case ServiceProvider */
 			if ( table_entry->channelStatus == start){
-				start_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex);
 				prepare_socket( table_entry );
 				g_timeout_add(table_entry->channelSapMessageInterval,send_announcement, table_entry );
-//				send_announcement(table_entry);
+				/* run the main loop until type is found so we execute callback function */
+				if ( !start_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex))
+					g_printerr( "ERROR: failed to start streaming\n");
 			}
 			else if ( table_entry->channelStatus == stop){
 				stop_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex );

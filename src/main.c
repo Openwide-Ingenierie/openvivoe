@@ -22,18 +22,16 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 /* header file */
-#include "../include/daemon.h"
 #include "../include/mibParameters.h"
+#include "../include/deviceInfo/ethernetIfTable.h"
 #include "../include/videoFormatInfo/videoFormatTable.h"
 #include "../include/channelControl/channelTable.h"
 #include "../include/announcement/sap.h"
 #include "../include/multicast.h"
 #include "../include/streaming/stream_registration.h"
 #include "../include/streaming/stream.h"
+#include "../include/daemon.h"
 
-
-
-#include "../include/announcement/sap.h"
 
 /**
  * \brief the data needed to pass to functions used to exit the program nicely
@@ -52,7 +50,7 @@ static gboolean stop_program ( gpointer data ){
 	stop_program_data *stop_data = data;
 	GMainLoop *loop = (GMainLoop *) stop_data->loop;
 
-	/* Stop net snmp subAgetnt deamon */
+	/* Stop net snmp subAgent deamon */
 	snmp_shutdown(stop_data->deamon_name);
 	/* delete all streams associated to all channels */
 	struct channelTable_entry *iterator = channelTable_head;
@@ -63,6 +61,14 @@ static gboolean stop_program ( gpointer data ){
 		if ( temp->channelType == videoChannel )
 			delete_steaming_data(temp);
 	}
+	/* free tables */
+	/* channel table */
+	channelTable_delete();
+	/* videoFormatTable */
+	videoFormatTable_delete();	
+	/* ethernetIfTable */
+	ethernetIfTableEntry_delete();
+	/* unref and quit main loop */
 	g_main_loop_quit (loop);
 	g_main_loop_unref (loop);
 	return TRUE;

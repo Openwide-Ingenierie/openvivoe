@@ -96,6 +96,15 @@ struct videoFormatTable_entry * videoFormatTable_getEntry(int index){
 	return iterator;
 }
 
+void videoFormatTable_delete(){
+	struct videoFormatTable_entry *iterator = videoFormatTable_head;
+	struct videoFormatTable_entry *temp;
+	while(iterator != NULL){
+		temp = iterator;
+		iterator = iterator->next;
+		free(temp);
+	}
+}
 /* Initialize the videoFormatTable table by defining its contents and how it's structured */
 void
 initialize_table_videoFormatTable(void)

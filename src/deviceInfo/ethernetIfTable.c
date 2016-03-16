@@ -66,6 +66,17 @@ struct ethernetIfTableEntry * ethernetIfTableEntry_create(  long  ethernetIfInde
     return entry;
 }
 
+void ethernetIfTableEntry_delete(){
+	struct ethernetIfTableEntry *iterator = ethernetIfTable_head;
+	struct ethernetIfTableEntry  *temp;
+	while(iterator != NULL){
+		temp = iterator;
+		iterator = iterator->next;
+		free(temp);
+	}
+}
+
+
 /** Initialize the ethernetIfTable table by defining its contents and how it's structured */
 static void initialize_table_ethernetIfTable(void)
 {
