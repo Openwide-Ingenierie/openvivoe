@@ -83,7 +83,6 @@ initialize_table_channelTable(void)
  * \param new_entry the entry to add into the table
  */
 static void add_in_channel_SU(struct channelTable_entry *new_entry){
-		printf("add\n");
 		new_entry->next_SU = channelTable_SU_head;
 		channelTable_SU_head = new_entry;
 }
@@ -94,7 +93,6 @@ static void add_in_channel_SU(struct channelTable_entry *new_entry){
  * \param entry_index the index of the entry to pop 
  */
 static void pop_from_channel_SU( struct channelTable_entry *table_entry){
-	printf("pop\n");
 	struct channelTable_entry *iterator = channelTable_SU_head;
 	/* check if we want to pop the head */
 	if ( table_entry == channelTable_SU_head )
@@ -791,6 +789,49 @@ channelTable_handler(
         break;
 	/* protect yoursefl against inconsistent (meaningless values) */
     case MODE_SET_RESERVE2:
+        for (request=requests; request; request=request->next) {
+            table_entry = (struct channelTable_entry *)
+                              netsnmp_extract_iterator_context(request);
+            table_info  =     netsnmp_extract_table_info(      request);
+    
+            switch (table_info->colnum) {
+            case COLUMN_CHANNELUSERDESC:
+				if ( deviceInfo.parameters[num_DeviceMode]._value.int_val	!= maintenanceMode){
+					netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_RESOURCEUNAVAILABLE  );
+					return SNMP_ERR_NOERROR;
+				}
+                break;
+
+            case COLUMN_CHANNELINTERPACKETDELAY:
+				if ( deviceInfo.parameters[num_DeviceMode]._value.int_val	!= maintenanceMode){
+					netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_RESOURCEUNAVAILABLE  );
+					return SNMP_ERR_NOERROR;
+				}
+                break;
+            case COLUMN_CHANNELSAPMESSAGEINTERVAL:
+				if ( deviceInfo.parameters[num_DeviceMode]._value.int_val	!= maintenanceMode){
+					netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_RESOURCEUNAVAILABLE  );
+					return SNMP_ERR_NOERROR;
+				}
+                break;
+            case COLUMN_CHANNELDEFAULTVIDEOFORMATINDEX:
+				if ( deviceInfo.parameters[num_DeviceMode]._value.int_val	!= maintenanceMode){
+					netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_RESOURCEUNAVAILABLE  );
+					return SNMP_ERR_NOERROR;
+				}
+                break;
+            case COLUMN_CHANNELDEFAULTRECEIVEIPADDRESS:
+				if ( deviceInfo.parameters[num_DeviceMode]._value.int_val	!= maintenanceMode){
+					netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_RESOURCEUNAVAILABLE  );
+					return SNMP_ERR_NOERROR;
+				}
+                break;
+            default:
+				netsnmp_set_request_error( reqinfo, request,
+							SNMP_ERR_NOTWRITABLE );
+					return SNMP_ERR_NOERROR;
+            }
+        }
 			break;
 
 	case MODE_SET_FREE:

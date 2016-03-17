@@ -507,6 +507,66 @@ videoFormatTable_handler(
         break;
 
     case MODE_SET_RESERVE2:
+        for (request=requests; request; request=request->next) {
+            table_entry = (struct videoFormatTable_entry *)
+                              netsnmp_extract_iterator_context(request);
+            table_info  =     netsnmp_extract_table_info(      request);
+    
+            switch (table_info->colnum) {
+            case COLUMN_VIDEOFORMATCOMPRESSIONRATE:
+				if ( deviceInfo.parameters[num_DeviceMode]._value.int_val	!= maintenanceMode){
+					netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_RESOURCEUNAVAILABLE  );
+					return SNMP_ERR_NOERROR;
+				}
+                break;
+            case COLUMN_VIDEOFORMATROIHORZRES:
+			  	if ( deviceInfo.parameters[num_DeviceMode]._value.int_val	!= maintenanceMode){
+					netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_RESOURCEUNAVAILABLE  );
+					return SNMP_ERR_NOERROR;
+				}
+                break;
+            case COLUMN_VIDEOFORMATROIVERTRES:
+				if ( deviceInfo.parameters[num_DeviceMode]._value.int_val	!= maintenanceMode){
+					netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_RESOURCEUNAVAILABLE  );
+					return SNMP_ERR_NOERROR;
+				}
+                break;
+            case COLUMN_VIDEOFORMATROIORIGINTOP:
+				if ( deviceInfo.parameters[num_DeviceMode]._value.int_val	!= maintenanceMode){
+					netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_RESOURCEUNAVAILABLE  );
+					return SNMP_ERR_NOERROR;
+				}
+                break;
+            case COLUMN_VIDEOFORMATROIORIGINLEFT:
+				if ( deviceInfo.parameters[num_DeviceMode]._value.int_val	!= maintenanceMode){
+					netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_RESOURCEUNAVAILABLE  );
+					return SNMP_ERR_NOERROR;
+				}
+                break;
+            case COLUMN_VIDEOFORMATROIEXTENTBOTTOM:
+				if ( deviceInfo.parameters[num_DeviceMode]._value.int_val	!= maintenanceMode){
+					netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_RESOURCEUNAVAILABLE  );
+					return SNMP_ERR_NOERROR;
+				}
+                break;
+            case COLUMN_VIDEOFORMATROIEXTENTRIGHT:
+				if ( deviceInfo.parameters[num_DeviceMode]._value.int_val	!= maintenanceMode){
+					netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_RESOURCEUNAVAILABLE  );
+					return SNMP_ERR_NOERROR;
+				}
+                break;
+            case COLUMN_VIDEOFORMATRTPPT:
+				if ( deviceInfo.parameters[num_DeviceMode]._value.int_val	!= maintenanceMode){
+					netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_RESOURCEUNAVAILABLE  );
+					return SNMP_ERR_NOERROR;
+				}
+                break;
+            default:
+                netsnmp_set_request_error( reqinfo, request,
+                                           SNMP_ERR_NOTWRITABLE );
+                return SNMP_ERR_NOERROR;
+            }
+        }
         break;
 
     case MODE_SET_FREE:
