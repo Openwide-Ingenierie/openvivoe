@@ -331,6 +331,8 @@ int delete_steaming_data(gpointer channel_entry){
 	/* delete pipeline */
 	if (data != NULL ){
 		g_print ("Deleting pipeline\n");
+		gst_element_set_state (data->pipeline, GST_STATE_PAUSED);
+		gst_element_set_state (data->pipeline, GST_STATE_READY);
 		gst_element_set_state (data->pipeline, GST_STATE_NULL);
 		gst_object_unref (GST_OBJECT (data->pipeline));
 		g_source_remove (data->bus_watch_id);

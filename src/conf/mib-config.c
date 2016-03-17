@@ -13,6 +13,39 @@
 #include "../../include/mibParameters.h"
 #include "../../include/conf/mib-conf.h"
 
+/**
+ * \brief the number of parameters in the maintenance group
+ */
+#define MAINTENANCE_GROUP_SIZE 	19
+
+/**
+ * \brief set the mainenance flag to one for the given parameter if necesseray, otherwise, set it to false
+ * \param param the MIB parameter that need to be modify
+ * \return TRUE if the param is in the maintenance group, FALSE otherwise
+ */
+static gboolean set_maintenencef_flag(parameter *param){
+	 /* maintenance group */
+const gchar* maintenance_group[MAINTENANCE_GROUP_SIZE]= { 	"deviceUserDesc", 			"ethernetIfIpAddress",
+															"ethernetIfSubnetMask", 		"ethernetIfIpAddressConflict",
+															"deviceReset", 				"videoFormatCompressionRate",
+															"videoFormatRoiHorzRes", 		"videoFormatRoiVertRes",
+															"videoFormatRoiOriginTop", 	"videoFormatRoiOriginLeft",
+															"videoFormatRoiExtentBottom", "videoFormatRoiExtentRight",
+															"videoFormatRtpPt", 		"channelReset",
+															"channelUserDesc", 			"channelInterPacketDelay",
+															"channelSapMessageInterval", 	"channelDefaultVideoFormatIndex",
+															"channelDefaultReceiveIpAddress"};
+	for(int i = 0 ; i < MAINTENANCE_GROUP_SIZE; i++){
+		/* if the name of param is in maintenance group, set maintenance flag to TRUE and return */
+		if ( !strcmp( param->_name , maintenance_group[i] )){
+			param->_mainenance_group = TRUE;
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+
 GKeyFile * open_mib_configuration_file(GError* error){
 	GKeyFile* gkf;
 
@@ -83,6 +116,7 @@ static int init_deviceInfo(GKeyFile* gkf, gchar* group_name, GError* error){
 
 	/*Declaration of a  gsize variable, that will be used to get the size of the list associated to some keys*/
      gsize length;
+
 	
     /* This is a boolean used to check if everything went ok, otherwise the function will return EXIT_FAILURE
      * This will allow to print all the synthax errors to the user before exiting the program
@@ -129,9 +163,14 @@ static int init_deviceInfo(GKeyFile* gkf, gchar* group_name, GError* error){
                                                                deviceReset, 		  ethernetInterface,
 															   ethernetIfNumber	
 															};
+
    
     /* Get the value of all parameter that are present into the configuration file*/
-    for(int i=0; i<DEVICEINFO_NUM_PARAM - 1; i++) {
+    for(int  i=0; i<DEVICEINFO_NUM_PARAM - 1; i++) {
+
+		/* set maintenance flag for each parameter */
+		set_maintenencef_flag( &deviceInfo_parameters[i] );
+
 		if(g_key_file_has_key(gkf, group_name, (const gchar*) deviceInfo_parameters[i]._name , &error)){
             switch(deviceInfo_parameters[i]._type){
                     case INTEGER:
@@ -201,7 +240,12 @@ parameter channelNumber = {"nb_screens", INTEGER, 0};
  * \param error a object to store errors when they occurs
  * \return EXIT_SUCCESS on success, EXIT_FAILURE on FAILURE
  */
-static int init_channelNumber(GKeyFile* gkf, gchar* group_name, GError* error){
+static int init_channelNumber_param(GKeyFile* gkf, gchar* group_name, GError* error){
+
+	/* set maintenance flag for channelNumber */
+	set_maintenencef_flag( &channelNumber);
+
+
 	if(g_key_file_has_key(gkf, group_name, (const gchar*) channelNumber._name , &error)){
 		channelNumber._value.int_val = (int) g_key_file_get_integer(gkf, group_name, (const gchar*)channelNumber._name, &error);
 		 if(error != NULL){
@@ -219,6 +263,22 @@ static int init_channelNumber(GKeyFile* gkf, gchar* group_name, GError* error){
 	return	EXIT_SUCCESS;
 }
 
+parameter videoFormatNumber = {"videoFormatNumber", INTEGER, 0, {0} };
+parameter channelReset 		= {"channelReset", 		INTEGER, 0, {0} };
+
+/**
+ * \brief initalize global variable which value cannot be found in vivoe_mib.conf 
+ * \param void
+ */
+static void init_mib_global_parameter(){
+
+	/* set maintenance flag for videoForamatNumber */
+	set_maintenencef_flag( &videoFormatNumber );
+
+	/* set maintenance flag for videoForamatNumber */
+	set_maintenencef_flag( &channelReset );
+	
+}
 
 
 /**
@@ -227,7 +287,7 @@ static int init_channelNumber(GKeyFile* gkf, gchar* group_name, GError* error){
  * get the values of the different parameters of the MIB, check their validity
  * \return error messages for the parameters that are not Valid, and initialize the other
  */
-int get_check_configuration(){
+int init_mib_content(){
  
 	/* Define the error pointer we will be using to check for errors in the configuration file */
     GError* error = NULL;
@@ -249,7 +309,7 @@ int get_check_configuration(){
  
 	if (!init_deviceInfo(gkf, groups[0], error))
 		return EXIT_FAILURE;
-	if ( init_channelNumber(gkf,groups[1], error))
+	if ( init_channelNumber_param(gkf,groups[1], error))
 		return EXIT_FAILURE;
 
     /* free the GKeyFile before leaving the function*/
@@ -257,6 +317,10 @@ int get_check_configuration(){
 
 	/* free the memory allocated for the array of strings groups */
 	 g_strfreev(groups);
+
+	 /* initialize global parameter of the mib that value cannot be found inside conguration file */
+	init_mib_global_parameter();
+
 
 	return EXIT_SUCCESS;
 }

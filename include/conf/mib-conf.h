@@ -18,8 +18,8 @@
 #define GST_SOURCE_CMDLINE 	"gst_source"
 
 /*functions' definitions*/
-int get_check_configuration(); /*check the groups, key and values of the MIB's parameters*/
-gchar* init_sources_from_conf(int index); /* get the command line used to initiate the streams */
+int init_mib_content(); /*check the groups, key and values of the MIB's parameters*/
+gchar 	*init_sources_from_conf(int index); /* get the command line used to initiate the streams */
 
 #endif /* MIB_CONF_H */
 

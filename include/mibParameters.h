@@ -4,6 +4,7 @@
  * Main authors:
  *     - hoel <hvasseur@openwide.fr>
  */
+#include <glib-2.0/glib.h>
 # ifndef MIBPARAMETERS_H
 # define MIBPARAMETERS_H
 
@@ -79,17 +80,18 @@ typedef enum {INTEGER, STRING, T_INTEGER, T_STRING} type;
   */
 
 typedef union{
-    int     int_val;
-    int*    array_int_val;
-    char*   string_val;
-    char**  array_string_val;
+    int     	int_val;
+    int*    	array_int_val;
+    char*   	string_val;
+    char**  	array_string_val;
 }value;
 
 typedef struct {
-    char*   _name; /*name of the parameter as it is stored in the vivoe-mib.conf file*/
-    int     _type; /*type of the parameter: INT or STRING*/
-    int     _optional;/*Specify of the parameter is optional or not (can be leaved empty, or should have a default value: 1 it is optional, 0 it is mand.*/
-    value   _value; /*the value of tha parameter*/
+    char*   	_name; /*name of the parameter as it is stored in the vivoe-mib.conf file*/
+    int     	_type; /*type of the parameter: INT or STRING*/
+    int     	_optional;/*Specify of the parameter is optional or not (can be leaved empty, or should have a default value: 1 it is optional, 0 it is mand.*/
+    value   	_value; /*the value of tha parameter*/
+	gboolean 	_mainenance_group;
 }parameter;
 
 /*
@@ -152,7 +154,6 @@ extern parameter channelNumber;
 
 /** 
  * \brief The main loop of the program, because to be able to acces it everywhere in the program */
-#include <glib-2.0/glib.h>
 GMainLoop 	*loop;
 
 #endif /* MIBPARAMETERS_H */
