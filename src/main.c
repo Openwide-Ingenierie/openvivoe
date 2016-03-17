@@ -61,6 +61,7 @@ static gboolean stop_program ( gpointer data ){
 		if ( temp->channelType == videoChannel )
 			delete_steaming_data(temp);
 	}
+	free(deviceInfo.parameters);
 	/* free tables */
 	/* channel table */
 	channelTable_delete();
