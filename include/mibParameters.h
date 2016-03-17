@@ -29,6 +29,11 @@
 #define device_SU 					2
 #define device_both					3
 
+/* values for devideMode */
+#define normal 						1
+#define defaultStartUp 				2
+#define maintenanceMode 			3
+
 
 /* values for videoFormatType */
 #define videoChannel 				1

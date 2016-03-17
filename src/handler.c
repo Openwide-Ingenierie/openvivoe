@@ -20,6 +20,20 @@
 /*For 64 bytes string handler*/
 #define DislayString64 64
 
+/**
+ * \brief return appropriate code value in case object should modify only in maintenance mode
+ * \param parameter the given parameter to test
+ */
+static void check_maintenance( 	netsnmp_handler_registration *reginfo,
+                     			netsnmp_agent_request_info   *reqinfo,
+								netsnmp_request_info         *requests,
+								parameter *mib_param){
+	int ret = SNMP_ERR_NOERROR;
+	if ( mib_param->_mainenance_group && deviceInfo.parameters[num_DeviceMode]._value.int_val	!= maintenanceMode){
+		ret = SNMP_ERR_RESOURCEUNAVAILABLE;
+		netsnmp_set_request_error(reqinfo, requests, ret );
+	}
+}
 
 /*--------------------------------INTEGER--------------------------------*/
 
@@ -81,6 +95,7 @@ int handle_RWinteger(netsnmp_mib_handler *handler,
             if ( ret != SNMP_ERR_NOERROR ) {
                 netsnmp_set_request_error(reqinfo, requests, ret );
             }
+			check_maintenance( reginfo, reqinfo, requests, mib_param);
             break;
 
         case MODE_SET_RESERVE2:
@@ -234,6 +249,7 @@ handle_RWstring(netsnmp_mib_handler *handler,
             if ( ret != SNMP_ERR_NOERROR ) {
                 netsnmp_set_request_error(reqinfo, requests, ret );
             }
+			check_maintenance( reginfo, reqinfo, requests, mib_param);
             break;
 
         case MODE_SET_RESERVE2:

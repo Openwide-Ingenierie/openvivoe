@@ -129,7 +129,6 @@ int open_vivoe_daemon (char* deamon_name) {
 }
 
 gboolean handle_snmp_request( void ){
-	printf("handle_snmp_request\n");
     agent_check_and_process(0); /* 0 == don't block */
 	return TRUE;
 }

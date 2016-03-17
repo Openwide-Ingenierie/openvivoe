@@ -149,7 +149,7 @@ static int init_deviceInfo(GKeyFile* gkf, gchar* group_name, GError* error){
     parameter deviceUserDesc                = {"deviceUserDesc",                STRING,     1};
     parameter deviceNatoStockNumber         = {"deviceNatoStockNumber",         STRING,     1};
     parameter deviceMode                    = {"deviceMode",                    INTEGER,    1};
-    parameter deviceReset                   = {"deviceReset",                   STRING,     0};
+    parameter deviceReset                   = {"deviceReset",                   INTEGER,     0};
     parameter ethernetInterface             = {"ethernetInterface",             T_STRING,   1};
     parameter ethernetIfNumber       	    = {"ethernetIfNumber",             	INTEGER,    1};
 
@@ -167,7 +167,6 @@ static int init_deviceInfo(GKeyFile* gkf, gchar* group_name, GError* error){
    
     /* Get the value of all parameter that are present into the configuration file*/
     for(int  i=0; i<DEVICEINFO_NUM_PARAM - 1; i++) {
-
 		/* set maintenance flag for each parameter */
 		set_maintenencef_flag( &deviceInfo_parameters[i] );
 
