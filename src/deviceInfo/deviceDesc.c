@@ -10,8 +10,8 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "../../include/deviceInfo/deviceDesc.h"
-#include "../../include/handler.h"
 #include "../../include/mibParameters.h"
+#include "../../include/handler.h"
 
 
 /** Initializes the deviceDesc module */
@@ -32,6 +32,6 @@ int handle_deviceDesc(  netsnmp_mib_handler *handler,
                         netsnmp_agent_request_info   *reqinfo,
                         netsnmp_request_info         *requests)
 {
-        return handle_ROstring32(handler, reginfo, reqinfo, requests, "deviceDesc" , deviceInfo.parameters[num_DeviceDesc]._value.string_val);
+        return handle_ROstring32(handler, reginfo, reqinfo, requests, &deviceInfo.parameters[num_DeviceDesc]);
 
 }

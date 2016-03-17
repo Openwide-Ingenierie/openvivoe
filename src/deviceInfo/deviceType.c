@@ -62,6 +62,6 @@ handle_deviceType(netsnmp_mib_handler *handler,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
 {
-    return handle_ROinteger(handler, reginfo, reqinfo, requests, "deviceType" , &(deviceInfo.parameters[num_DeviceType]._value.int_val) );
+    return handle_ROinteger(handler, reginfo, reqinfo, requests, &deviceInfo.parameters[num_DeviceType] );
 }
 

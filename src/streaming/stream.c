@@ -193,10 +193,10 @@ static int init_stream_SP( gpointer main_loop, gpointer stream_datas)
 	GstElement 	*pipeline 		= data->pipeline;
     GstElement 	*last;	
 	/* Source Creation */
-#if 0
 	last = source_creation(pipeline, "JPEG2000",1920 ,1080/*,encoding*/);
-#endif
+#if 0
 	last = get_source(pipeline);
+#endif
 	if (last == NULL ){
 		g_printerr ( "Failed to create videosource\n");
 		return EXIT_FAILURE;

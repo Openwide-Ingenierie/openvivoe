@@ -5,6 +5,10 @@
  *     - hoel <hoel.vasseur@openwide.fr>
  */
 #include <glib-2.0/glib.h>
+#include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+#include "../include/mibParameters.h"
 #include "../include/handler.h"
 
 /*For 16 bytes string handler*/
@@ -16,6 +20,7 @@
 /*For 64 bytes string handler*/
 #define DislayString64 64
 
+
 /*--------------------------------INTEGER--------------------------------*/
 
 /*this is the handler for all RO integer in the MIB*/
@@ -23,8 +28,7 @@ int handle_ROinteger(netsnmp_mib_handler *handler,
                      netsnmp_handler_registration *reginfo,
                      netsnmp_agent_request_info *reqinfo,
                      netsnmp_request_info *requests,
-                     const char* caller_name,
-                     int* value)
+                     parameter *mib_param)
 {
     /* We are never called for a GETNEXT if it's registered as a
        "instance", as it's "magically" handled for us.  */
@@ -34,16 +38,15 @@ int handle_ROinteger(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER, (void*) value ,sizeof(int));
+            snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER, (void*) &(mib_param->_value.int_val) ,sizeof(int));
             break;
 
 
         default:
             /* we should never get here, so this is a really bad error */
-            snmp_log(LOG_ERR, "unknown mode (%d) in %s\n", reqinfo->mode, caller_name);
+            snmp_log(LOG_ERR, "unknown mode (%d) in %s\n", reqinfo->mode, mib_param->_name);
             return SNMP_ERR_GENERR;
     }
-
     return SNMP_ERR_NOERROR;
 }
 
@@ -53,8 +56,8 @@ int handle_RWinteger(netsnmp_mib_handler *handler,
                      netsnmp_handler_registration *reginfo,
                      netsnmp_agent_request_info   *reqinfo,
                      netsnmp_request_info         *requests,
-                     const char* caller_name,
-                     int* value)
+					 parameter *mib_param
+                     )
 {
     int ret;
     /* We are never called for a GETNEXT if it's registered as a
@@ -67,7 +70,7 @@ int handle_RWinteger(netsnmp_mib_handler *handler,
 
         case MODE_GET:
             snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                     value, sizeof(int));
+                                     &(mib_param->_value.int_val), sizeof(int));
             break;
 
         /*
@@ -92,10 +95,10 @@ int handle_RWinteger(netsnmp_mib_handler *handler,
 
         case MODE_SET_ACTION:
             /* XXX: perform the value change here */
-            old_integer =  *value;
-			*value = *(requests->requestvb->val.integer);
+            old_integer =  mib_param->_value.int_val;
+			mib_param->_value.int_val = *(requests->requestvb->val.integer);
             /*Send a message during debug to inform the update had been performed*/
-            DEBUGMSGTL((caller_name, "updated value -> %d\n", *value));
+            DEBUGMSGTL((mib_param->_name, "updated value -> %d\n",mib_param->_value.int_val ));
             /*get possible errors*/
             ret = netsnmp_check_requests_error(requests);
             if (ret != SNMP_ERR_NOERROR) {
@@ -107,7 +110,7 @@ int handle_RWinteger(netsnmp_mib_handler *handler,
             break;
 
         case MODE_SET_UNDO: /* will be executed only if some part of MODE_SET_ACTION fails */
-			*value = old_integer;
+			mib_param->_value.int_val = old_integer;
             ret = netsnmp_check_requests_error(requests);
             if (ret != SNMP_ERR_NOERROR) {
                 /* try _really_really_ hard to never get to this point */
@@ -117,10 +120,9 @@ int handle_RWinteger(netsnmp_mib_handler *handler,
 
         default:
             /* we should never get here, so this is a really bad error */
-            snmp_log(LOG_ERR, "unknown mode (%d) in handle_%s\n",reqinfo->mode , caller_name);
+            snmp_log(LOG_ERR, "unknown mode (%d) in handle_%s\n",reqinfo->mode ,mib_param->_name);
             return SNMP_ERR_GENERR;
     }
-
     return SNMP_ERR_NOERROR;
 }
 
@@ -128,14 +130,15 @@ int handle_RWinteger(netsnmp_mib_handler *handler,
 /*--------------------------------STRING--------------------------------*/
 
 /*this is the handler for all RO strings in the program*/
-int handle_ROstring(netsnmp_mib_handler *handler,
-                    netsnmp_handler_registration *reginfo,
-                    netsnmp_agent_request_info   *reqinfo,
-                    netsnmp_request_info         *requests,
-                    const char* caller_name,
-                    char* value,
-                    int length)
+static int handle_ROstring( netsnmp_mib_handler *handler,
+       			            netsnmp_handler_registration *reginfo,
+                    		netsnmp_agent_request_info   *reqinfo,
+                    		netsnmp_request_info         *requests,
+							parameter *mib_param,
+ 							int 		length
+                    )
 {
+
     /* We are never called for a GETNEXT if it's registered as a
        "instance", as it's "magically" handled for us.  */
 
@@ -146,13 +149,13 @@ int handle_ROstring(netsnmp_mib_handler *handler,
 
         case MODE_GET:
             snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
-                                      value,MIN(strlen(value), length));
+                                      mib_param->_value.string_val,MIN(strlen(mib_param->_value.string_val), length));
             break;
 
 
         default:
             /* we should never get here, so this is a really bad error */
-            snmp_log(LOG_ERR, "unknown mode (%d) in %s\n", reqinfo->mode, caller_name);
+            snmp_log(LOG_ERR, "unknown mode (%d) in %s\n", reqinfo->mode,mib_param->_name );
             return SNMP_ERR_GENERR;
     }
 
@@ -164,10 +167,9 @@ int handle_ROstring16(netsnmp_mib_handler *handler,
                     netsnmp_handler_registration *reginfo,
                     netsnmp_agent_request_info   *reqinfo,
                     netsnmp_request_info         *requests,
-                    const char* caller_name,
-                    char* value)
+					parameter *mib_param)
 {
-    return  handle_ROstring(handler, reginfo, reqinfo, requests, caller_name, value, DislayString16);
+    return  handle_ROstring(handler, reginfo, reqinfo, requests, mib_param, DislayString16);
 }
 
 /*this is the handler for all 32 bytes RO strings in the program*/
@@ -175,10 +177,10 @@ int handle_ROstring32(netsnmp_mib_handler *handler,
                     netsnmp_handler_registration *reginfo,
                     netsnmp_agent_request_info   *reqinfo,
                     netsnmp_request_info         *requests,
-                    const char* caller_name,
-                    char* value)
+					parameter *mib_param
+                    )
 {
-    return  handle_ROstring(handler, reginfo, reqinfo, requests, caller_name, value, DislayString32);
+    return  handle_ROstring(handler, reginfo, reqinfo, requests,mib_param , DislayString32);
 }
 
 
@@ -187,10 +189,10 @@ int handle_ROstring64(netsnmp_mib_handler *handler,
                     netsnmp_handler_registration *reginfo,
                     netsnmp_agent_request_info   *reqinfo,
                     netsnmp_request_info         *requests,
-                    const char* caller_name,
-                    char* value)
+					parameter *mib_param
+                    )
 {
-    return  handle_ROstring(handler, reginfo, reqinfo, requests, caller_name, value, DislayString64);
+    return  handle_ROstring(handler, reginfo, reqinfo, requests,mib_param , DislayString64);
 }
 
 /**
@@ -203,8 +205,7 @@ handle_RWstring(netsnmp_mib_handler *handler,
                 netsnmp_handler_registration *reginfo,
                 netsnmp_agent_request_info   *reqinfo,
                 netsnmp_request_info         *requests,
-                const char* caller_name,
-                char* value,
+                parameter *mib_param,
                 int length)
 {
     int ret;
@@ -218,8 +219,7 @@ handle_RWstring(netsnmp_mib_handler *handler,
 
         case MODE_GET:
             snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
-                                     value,MIN(strlen(value), length
-                                    ));
+                                     mib_param->_value.string_val,MIN(strlen(mib_param->_value.string_val), length));
             break;
 
         /*
@@ -248,10 +248,10 @@ handle_RWstring(netsnmp_mib_handler *handler,
         case MODE_SET_ACTION:
             /* XXX: perform the value change here */
             /*realloc to the size of the string entered bu the user*/
-			strcpy( old_string, value);
-			strcpy(value,(char*)requests->requestvb->val.string); 
+			strcpy( old_string, mib_param->_value.string_val);
+			strcpy(mib_param->_value.string_val,(char*)requests->requestvb->val.string); 
             /*Send a message during debug to inform the update had been performed*/
-           DEBUGMSGTL((caller_name, "updated delay_time -> %s\n", value));
+           DEBUGMSGTL((mib_param->_name, "updated delay_time -> %s\n",mib_param->_value.string_val ));
             /*get possible errors*/
             ret = netsnmp_check_requests_error(requests);
            if (ret != SNMP_ERR_NOERROR) {
@@ -264,7 +264,7 @@ handle_RWstring(netsnmp_mib_handler *handler,
 
         case MODE_SET_UNDO:
             /* XXX: UNDO and return to previous value for the object */
-            strcpy(value, old_string);
+            strcpy(mib_param->_value.string_val, old_string);
             ret = netsnmp_check_requests_error(requests);
             if (ret != SNMP_ERR_NOERROR) {
                 /* try _really_really_ hard to never get to this point */
@@ -277,7 +277,6 @@ handle_RWstring(netsnmp_mib_handler *handler,
             snmp_log(LOG_ERR, "unknown mode (%d) in handle_deviceUserDesc\n", reqinfo->mode );
             return SNMP_ERR_GENERR;
     }
-
     return SNMP_ERR_NOERROR;
 }
 
@@ -287,10 +286,10 @@ int handle_RWstring16(netsnmp_mib_handler *handler,
                     netsnmp_handler_registration *reginfo,
                     netsnmp_agent_request_info   *reqinfo,
                     netsnmp_request_info         *requests,
-                    const char* caller_name,
-                    char* value)
+					parameter *mib_param
+                    )
 {
-    return  handle_RWstring(handler, reginfo, reqinfo, requests, caller_name, value, DislayString16);
+    return  handle_RWstring(handler, reginfo, reqinfo, requests, mib_param, DislayString16);
 }
 
 /*this is the handler for all 32 bytes RW strings in the program*/
@@ -298,10 +297,10 @@ int handle_RWstring32(netsnmp_mib_handler *handler,
                     netsnmp_handler_registration *reginfo,
                     netsnmp_agent_request_info   *reqinfo,
                     netsnmp_request_info         *requests,
-                    const char* caller_name,
-                    char* value)
+					parameter *mib_param
+                    )
 {
-    return  handle_RWstring(handler, reginfo, reqinfo, requests, caller_name, value, DislayString32);
+    return  handle_RWstring(handler, reginfo, reqinfo, requests,mib_param , DislayString32);
 }
 
 
@@ -310,8 +309,8 @@ int handle_RWstring64(netsnmp_mib_handler *handler,
                     netsnmp_handler_registration *reginfo,
                     netsnmp_agent_request_info   *reqinfo,
                     netsnmp_request_info         *requests,
-                    const char* caller_name,
-                    char* value)
+					parameter *mib_param
+                    )
 {
-    return  handle_RWstring(handler, reginfo, reqinfo, requests, caller_name, value, DislayString64);
+    return  handle_RWstring(handler, reginfo, reqinfo, requests,mib_param , DislayString64);
 }

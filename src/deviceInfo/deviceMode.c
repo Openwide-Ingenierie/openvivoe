@@ -39,6 +39,6 @@ int handle_deviceMode( 	netsnmp_mib_handler *handler,
         netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_BADVALUE);
         return SNMP_ERR_BADVALUE;
     }else{
-        return handle_RWinteger(handler, reginfo, reqinfo, requests, "deviceMode" , &(deviceInfo.parameters[num_DeviceMode]._value.int_val));
+        return handle_RWinteger(handler, reginfo, reqinfo, requests, &(deviceInfo.parameters[num_DeviceMode]));
     }
 }

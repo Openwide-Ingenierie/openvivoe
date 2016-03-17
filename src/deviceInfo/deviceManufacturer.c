@@ -7,8 +7,8 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "../../include/deviceInfo/deviceManufacturer.h"
-#include "../../include/handler.h"
 #include "../../include/mibParameters.h"
+#include "../../include/handler.h"
 
 
 /** Initializes the deviceManufacturer module */
@@ -31,5 +31,5 @@ handle_deviceManufacturer(netsnmp_mib_handler *handler,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
 {
-    return handle_ROstring64(handler, reginfo, reqinfo, requests, "deviceManufacturer" , deviceInfo.parameters[num_DeviceManu]._value.string_val);
+    return handle_ROstring64(handler, reginfo, reqinfo, requests, &deviceInfo.parameters[num_DeviceManu]);
 }

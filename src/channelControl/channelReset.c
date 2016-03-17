@@ -7,8 +7,8 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "../../include/channelControl/channelReset.h"
-#include "../../include/handler.h"
 #include "../../include/mibParameters.h"
+#include "../../include/handler.h"
 
 /** Initializes the channelReset module */
 void
@@ -32,6 +32,6 @@ handle_channelReset(netsnmp_mib_handler *handler,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
 {
-        return handle_RWinteger(handler, reginfo, reqinfo, requests, channelReset._name, &(channelReset._value.int_val) );
+        return handle_RWinteger(handler, reginfo, reqinfo, requests, &channelReset );
 }
 

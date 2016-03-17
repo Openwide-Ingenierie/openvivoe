@@ -7,8 +7,8 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "../../include/deviceInfo/deviceMibVersion.h"
-#include "../../include/handler.h"
 #include "../../include/mibParameters.h"
+#include "../../include/handler.h"
 
 
 /** Initializes the deviceMibVersion module */
@@ -32,6 +32,6 @@ handle_deviceMibVersion(netsnmp_mib_handler *handler,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
 {
-    return handle_ROstring16(handler, reginfo, reqinfo, requests, "deviceMibVersion" , deviceInfo.parameters[num_DeviceMibV]._value.string_val);
+    return handle_ROstring16(handler, reginfo, reqinfo, requests, &deviceInfo.parameters[num_DeviceMibV]);
 
 }

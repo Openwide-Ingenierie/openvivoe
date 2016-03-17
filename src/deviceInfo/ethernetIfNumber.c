@@ -26,5 +26,5 @@ void init_ethernetIfNumber(void)
 
 int handle_ethernetIfNumber(netsnmp_mib_handler *handler, netsnmp_handler_registration *reginfo, netsnmp_agent_request_info *reqinfo, netsnmp_request_info *requests)
 {
-    return handle_ROinteger(handler, reginfo, reqinfo, requests, "ethernetIfNumber" , &(deviceInfo.parameters[num_ethernetIFnumber]._value.int_val));
+    return handle_ROinteger(handler, reginfo, reqinfo, requests, &(deviceInfo.parameters[num_ethernetIFnumber]) );
 }

@@ -8,8 +8,8 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <glib-2.0/glib.h>
 #include "../../include/deviceInfo/deviceSerialNumber.h"
-#include "../../include/handler.h"
 #include "../../include/mibParameters.h"
+#include "../../include/handler.h"
 
 
 /** Initializes the deviceSerialNumber module */
@@ -33,5 +33,5 @@ handle_deviceSerialNumber(netsnmp_mib_handler *handler,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
 {
-    return handle_ROstring32(handler, reginfo, reqinfo, requests, "deviceSerialNumber" , deviceInfo.parameters[num_deviceSN]._value.string_val );
+    return handle_ROstring32(handler, reginfo, reqinfo, requests, &deviceInfo.parameters[num_deviceSN]);
 }

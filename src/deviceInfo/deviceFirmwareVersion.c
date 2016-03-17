@@ -30,5 +30,5 @@ handle_deviceFirmwareVersion(netsnmp_mib_handler *handler,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
 {
-        return handle_ROstring16(handler, reginfo, reqinfo, requests, "deviceFirmwareVersion" ,  deviceInfo.parameters[num_DeviceFV]._value.string_val);
+        return handle_ROstring16(handler, reginfo, reqinfo, requests, &deviceInfo.parameters[num_DeviceFV]);
 }

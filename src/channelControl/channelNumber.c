@@ -7,8 +7,8 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "../../include/channelControl/channelNumber.h"
-#include "../../include/handler.h"
 #include "../../include/mibParameters.h"
+#include "../../include/handler.h"
 
 /** Initializes the channelNumber module */
 void
@@ -31,5 +31,5 @@ handle_channelNumber(netsnmp_mib_handler *handler,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
 {
-	return handle_ROinteger(handler, reginfo, reqinfo, requests, channelNumber._name, &(channelNumber._value.int_val) );
+	return handle_ROinteger(handler, reginfo, reqinfo, requests, &channelNumber );
 }
