@@ -825,6 +825,8 @@ channelTable_handler(
 					return SNMP_ERR_NOERROR;
 				}
                 break;
+			default:
+				break; /* it might be a writable object not in maintenance group */
             }
         }
 			break;
