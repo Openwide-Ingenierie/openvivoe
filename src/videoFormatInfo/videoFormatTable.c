@@ -561,11 +561,7 @@ videoFormatTable_handler(
 					return SNMP_ERR_NOERROR;
 				}
                 break;
-            default:
-                netsnmp_set_request_error( reqinfo, request,
-                                           SNMP_ERR_NOTWRITABLE );
-                return SNMP_ERR_NOERROR;
-            }
+			}
         }
         break;
 

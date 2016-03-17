@@ -672,7 +672,6 @@ channelTable_handler(
                 break;
             case COLUMN_CHANNELSTATUS:
                 /* or possibly 'netsnmp_check_vb_int_range' */
-
                 ret = netsnmp_check_vb_int_range( request->requestvb, start, singleFrame );
                 if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
@@ -826,10 +825,6 @@ channelTable_handler(
 					return SNMP_ERR_NOERROR;
 				}
                 break;
-            default:
-				netsnmp_set_request_error( reqinfo, request,
-							SNMP_ERR_NOTWRITABLE );
-					return SNMP_ERR_NOERROR;
             }
         }
 			break;
