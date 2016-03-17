@@ -116,6 +116,7 @@ void set_udpsink_param( GstElement *udpsink, long channel_entry_index){
     g_object_set(   G_OBJECT(udpsink),
                     "host", inet_ntoa(ip_addr),
                     "port", DEFAULT_MULTICAST_PORT,
+					"sync", FALSE,
                     NULL);
 }
 

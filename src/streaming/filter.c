@@ -261,7 +261,7 @@ static GstStructure* build_MPEG4_filter(GKeyFile* gkf){
 	/* Add resolution part */
 	if( all_resolutions( resolution ) )
 	{
-		/* witdht */
+		/* witdth */
 		memcpy(width, width_small, length_width_576 * sizeof(int));
 		offset_width += length_width_576;
 		*(width + offset_width) = 1280;

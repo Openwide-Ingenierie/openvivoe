@@ -193,15 +193,14 @@ static int init_stream_SP( gpointer main_loop, gpointer stream_datas)
 	GstElement 	*pipeline 		= data->pipeline;
     GstElement 	*last;	
 	/* Source Creation */
-	last = source_creation(pipeline, "JPEG2000",1920 ,1080/*,encoding*/);
 #if 0
-	last = get_source(pipeline);
+	last = source_creation(pipeline, "MP4V-ES",1920 ,1080/*,encoding*/);
 #endif
+	last = get_source(pipeline);
 	if (last == NULL ){
 		g_printerr ( "Failed to create videosource\n");
 		return EXIT_FAILURE;
 	}
-    gst_element_set_state (data->pipeline, GST_STATE_PLAYING);
 	/* Create pipeline  - save videoFormatIndex into stream_data data*/
 	last = create_pipeline_videoChannel( stream_datas, 	main_loop, last );
 	/* Check if everything went ok*/
@@ -273,9 +272,9 @@ int init_streaming (gpointer main_loop, GstCaps *caps, struct channelTable_entry
 	data->bus 			= bus;
 	data->bus_watch_id 	= bus_watch_id;
 	if( channel_entry == NULL){ /* case we are a Service Provider */
-		return init_stream_SP( main_loop, data);
-//		init_stream_SP( main_loop, data);
-//		start_streaming(data, 1);
+//		return init_stream_SP( main_loop, data);
+		init_stream_SP( main_loop, data);
+		return !start_streaming(data, 1);
 	}
 	else{ /* case we are a Service User */
 		init_stream_SU( main_loop, data, caps, channel_entry);
@@ -300,7 +299,7 @@ gboolean start_streaming (gpointer stream_datas, long channelVideoFormatIndex ){
 		if ( stream_entry != NULL)
 			stream_entry->videoFormatStatus = enable;
 		return TRUE;
-	}		
+	}
 	return FALSE;
 }
 
