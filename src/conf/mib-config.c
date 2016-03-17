@@ -25,14 +25,14 @@
  */
 static gboolean set_maintenencef_flag(parameter *param){
 	 /* maintenance group */
-const gchar* maintenance_group[MAINTENANCE_GROUP_SIZE]= { 	"deviceUserDesc", 			"ethernetIfIpAddress",
+const gchar* maintenance_group[MAINTENANCE_GROUP_SIZE]= { 	"deviceUserDesc", 				"ethernetIfIpAddress",
 															"ethernetIfSubnetMask", 		"ethernetIfIpAddressConflict",
-															"deviceReset", 				"videoFormatCompressionRate",
+															"deviceReset", 					"videoFormatCompressionRate",
 															"videoFormatRoiHorzRes", 		"videoFormatRoiVertRes",
-															"videoFormatRoiOriginTop", 	"videoFormatRoiOriginLeft",
-															"videoFormatRoiExtentBottom", "videoFormatRoiExtentRight",
-															"videoFormatRtpPt", 		"channelReset",
-															"channelUserDesc", 			"channelInterPacketDelay",
+															"videoFormatRoiOriginTop", 		"videoFormatRoiOriginLeft",
+															"videoFormatRoiExtentBottom", 	"videoFormatRoiExtentRight",
+															"videoFormatRtpPt", 			"channelReset",
+															"channelUserDesc", 				"channelInterPacketDelay",
 															"channelSapMessageInterval", 	"channelDefaultVideoFormatIndex",
 															"channelDefaultReceiveIpAddress"};
 	for(int i = 0 ; i < MAINTENANCE_GROUP_SIZE; i++){
@@ -44,7 +44,6 @@ const gchar* maintenance_group[MAINTENANCE_GROUP_SIZE]= { 	"deviceUserDesc", 			
 	}
 	return FALSE;
 }
-
 
 GKeyFile * open_mib_configuration_file(GError* error){
 	GKeyFile* gkf;

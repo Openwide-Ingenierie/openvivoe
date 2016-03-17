@@ -26,15 +26,15 @@ Netsnmp_Next_Data_Point 	ethernetIfTable_get_next_data_point;
 
 
 /* column number definitions for table ethernetIfTable */
-       #define COLUMN_ETHERNETIFINDEX                   1
-       #define COLUMN_ETHERNETIFSPEED		            2
-       #define COLUMN_ETHERNETIFMACADDRESS	        	3
-       #define COLUMN_ETHERNETIFIPADDRESS	           	4
-       #define COLUMN_ETHERNETIFSUBNETMASK	        	5
-       #define COLUMN_ETHERNETIFIPADDRESSCONFLICT		6
+#define COLUMN_ETHERNETIFINDEX                  1
+#define COLUMN_ETHERNETIFSPEED		            2
+#define COLUMN_ETHERNETIFMACADDRESS	        	3
+#define COLUMN_ETHERNETIFIPADDRESS	           	4
+#define COLUMN_ETHERNETIFSUBNETMASK	        	5
+#define COLUMN_ETHERNETIFIPADDRESSCONFLICT		6
 
 /* define the size in bytes, that should be a MAC address */
-		#define MAC_ADDRESS_SIZE						6
+#define MAC_ADDRESS_SIZE						6
 
 /* Typical data structure for a row entry */
 struct ethernetIfTableEntry {

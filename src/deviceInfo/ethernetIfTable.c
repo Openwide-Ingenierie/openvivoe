@@ -280,6 +280,11 @@ ethernetIfTable_handler(
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;
                 }
+				if ( deviceInfo.parameters[num_DeviceMode]._value.int_val	!= maintenanceMode){
+					ret = SNMP_ERR_RESOURCEUNAVAILABLE;
+					netsnmp_set_request_error(reqinfo, requests, ret );
+					return SNMP_ERR_NOERROR;
+				}
                 break;
             case COLUMN_ETHERNETIFSUBNETMASK:
                 /* or possibly 'netsnmp_check_vb_int_range' */
@@ -306,6 +311,35 @@ ethernetIfTable_handler(
         break;
 
     case MODE_SET_RESERVE2:
+		for (request=requests; request; request=request->next) {
+            table_entry = (struct ethernetIfTableEntry *)
+                              netsnmp_extract_iterator_context(request);
+            table_info  =     netsnmp_extract_table_info(      request);
+            switch (table_info->colnum) {
+            case COLUMN_ETHERNETIFIPADDRESS:
+               	if ( deviceInfo.parameters[num_DeviceMode]._value.int_val	!= maintenanceMode){
+					netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_RESOURCEUNAVAILABLE  );
+					return SNMP_ERR_NOERROR;
+				}
+                break;
+            case COLUMN_ETHERNETIFSUBNETMASK:
+				if ( deviceInfo.parameters[num_DeviceMode]._value.int_val	!= maintenanceMode){
+					netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_RESOURCEUNAVAILABLE  );
+					return SNMP_ERR_NOERROR;
+				}
+              break;
+            case COLUMN_ETHERNETIFIPADDRESSCONFLICT:
+			  if ( deviceInfo.parameters[num_DeviceMode]._value.int_val	!= maintenanceMode){
+					netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_RESOURCEUNAVAILABLE  );
+					return SNMP_ERR_NOERROR;
+				}
+              break;
+            default:
+                netsnmp_set_request_error( reqinfo, request,
+                                           SNMP_ERR_NOTWRITABLE );
+                return SNMP_ERR_NOERROR;
+            }
+        }
         break;
 
     case MODE_SET_FREE:
