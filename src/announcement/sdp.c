@@ -61,6 +61,7 @@ static gboolean create_raw_media(struct channelTable_entry * channel_entry, GstS
 		g_printerr("ERROR: problem in media creation for SDP file\n");
 		return FALSE;
 	}
+	free(fmtp);
 	return TRUE;
 }
 
@@ -81,6 +82,7 @@ static gboolean create_mpeg4_media(struct channelTable_entry * channel_entry, Gs
 		g_printerr("ERROR: problem in media creation for SDP file\n");
 		return FALSE;
 	}
+	free(fmtp);
 	return TRUE;
 }
 
@@ -103,6 +105,7 @@ static gboolean create_j2k_media(struct channelTable_entry * channel_entry, GstS
 		g_printerr("ERROR: problem in media creation for SDP file\n");
 		return FALSE;
 	}
+	free(fmtp);
 	return TRUE;
 }
 
@@ -243,6 +246,8 @@ gboolean create_SDP(GstSDPMessage 	*msg, struct channelTable_entry * channel_ent
 	if ( gst_sdp_message_add_media (msg, media))
 		return error_function();
 	printf("%s\n", gst_sdp_message_as_text(msg));
+	free(rtmpmap);
+	free(framerate);
 	 return TRUE;
 }
 
