@@ -56,12 +56,12 @@ GKeyFile * open_mib_configuration_file(GError* error){
   
     /*initialization of the variable */
     gkf = g_key_file_new();
+
     /*
      * Loads the conf file and tests that everything went OK. Problems can occur if the file doesn't exist,
      * or if user doesn't have read permission to it.
      * If a problem occurs, print it and exit.
      */
-
     if (!g_key_file_load_from_dirs(gkf,CONFIG_FILE, search_dirs, &gkf_path,G_KEY_FILE_NONE, &error)){
         fprintf (stderr, "Could not read config file %s\n%s\n",CONFIG_FILE,error->message);
         return NULL;
@@ -367,5 +367,50 @@ gchar* init_sources_from_conf(int index){
 	}
 		free(source_name);	
 		return cmdline;
-
 }
+
+/** 
+ * \brief returned the channel User Description enter by the user to decribed the channel 
+ * \param the corresponding number of the source to refer it in the configuration file
+ */
+gchar* get_desc_from_conf(int index){
+	/* Define the error pointer we will be using to check for errors in the configuration file */
+    GError 		*error 	= NULL;
+	 /* Declaration of a pointer that will contain our configuration file*/
+	GKeyFile 	*gkf 	= open_mib_configuration_file(error);
+
+	/* Declaration of an array of gstring (gchar**) that will contain the name of the different groups
+	 * declared in the configuration file
+	 */
+	gchar 		**groups;
+
+	/*
+	 * the command line string retreive from the configuration file
+	 */
+	gchar 		*channelUserDesc;
+
+	/*first we load the different Groups of the configuration file
+	 * second parameter "gchar* length" is optional*/
+	groups = g_key_file_get_groups(gkf, NULL);
+
+	char *source_prefix = "source_";
+	char *source_name = (char*) malloc( strlen(source_prefix)+2 * sizeof(char));
+	/* Build the name that the group should have */
+	sprintf(source_name, "%s%d", source_prefix, index);
+	if( !(g_strv_contains((const gchar* const*) groups, source_name ))){
+		fprintf (stderr, "Group %s not found in configuration file\nIt should be written in the form [%s]\n",source_name ,source_name);
+		return NULL;
+	}
+	if(g_key_file_has_key(gkf,source_name, (const gchar*)"channelUserDesc" , &error)){
+		channelUserDesc = (char*) g_key_file_get_string(gkf,source_name , (const gchar*)"channelUserDesc" , &error);
+		if(error != NULL)
+			g_printerr("Invalid format for key %s: %s\n", "channelUserDesc"  , error->message);
+	}
+	else {
+		g_printerr("ERROR: key not found %s for group: %s\n","channelUserDesc" , source_name);
+		return NULL;
+	}
+		free(source_name);	
+		return channelUserDesc;
+}
+

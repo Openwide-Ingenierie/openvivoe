@@ -20,6 +20,6 @@
 /*functions' definitions*/
 int init_mib_content(); /*check the groups, key and values of the MIB's parameters*/
 gchar 	*init_sources_from_conf(int index); /* get the command line used to initiate the streams */
-
+gchar* get_desc_from_conf(int index); /* get the channelUserDesc associated to the stream */
 #endif /* MIB_CONF_H */
 

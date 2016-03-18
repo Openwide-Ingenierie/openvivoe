@@ -16,6 +16,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "../../include/mibParameters.h"
 #include "../../include/videoFormatInfo/videoFormatTable.h"
+#include "../../include/conf/mib-conf.h"
 #include "../../include/channelControl/channelTable.h"
 #include "../../include/streaming/stream_registration.h"
 #include "../../include/streaming/stream.h"
@@ -206,11 +207,16 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 											0,																			0,
 											0, 																			0,
 											data);
+			
 			/* increase videoFormatNumber as we added an entry */
 			videoFormatNumber._value.int_val++;
+
+			char *channelUserDesc = get_desc_from_conf(videoFormatNumber._value.int_val);
+			if (channelUserDesc == NULL)
+				channelUserDesc="";
 			/* At the  same time we copy all of those parameters into video channel */
 			channelTable_createEntry( 	channelNumber._value.int_val+1, 												videoChannel,
-										"channelUserDesc", 																stop,
+										channelUserDesc, 																stop,
 										index, 																			video_info->videoFormatBase,
 										video_info->videoFormatSampling, 												video_info->videoFormatBitDepth,
 										video_info->videoFormatFps,				 										video_info->videoFormatColorimetry,
@@ -221,12 +227,11 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 										0,																				data->rtp_datas->rtp_type,
 										0/*IP*/, 																		0 /* packet delay*/,
  										default_SAP_interval,															index, /*defaultVideoFormatIndex*/
-										0/*default receive IP*/, 												data);
+										0/*default receive IP*/, 														data);
 
 			*channel_entry_index = channelNumber._value.int_val+1;
 			/* increase channelNumber as we added an entry */
 			channelNumber._value.int_val++;
-			
 		}
 	}else{
 		/* if the table of video format is not empty for this device, check if this format is already in the table
@@ -264,9 +269,14 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 											data);
 			/* increase videoFormatNumber as we added an entry */
 			videoFormatNumber._value.int_val++;
+
+			char *channelUserDesc = get_desc_from_conf(videoFormatNumber._value.int_val);
+			if (channelUserDesc == NULL)
+				channelUserDesc="";
+
 			/* At the  same time we copy all of those parameters into video channel */
 			channelTable_createEntry( 	channelNumber._value.int_val+1, 													videoChannel,
-										"channelUserDesc", 																	stop,
+										channelUserDesc, 																	stop,
 										video_info->videoFormatIndex, 														video_info->videoFormatBase,
 										video_info->videoFormatSampling, 													video_info->videoFormatBitDepth,
 										video_info->videoFormatFps,				 											video_info->videoFormatColorimetry,

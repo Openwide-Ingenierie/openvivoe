@@ -79,7 +79,7 @@ static gboolean bus_call (  GstBus     *bus,
 
 	return TRUE;
 }
-
+#if 0
 /**
  * \brief create a fake source for test purposes
  * \param pipeline: the pipeline in which add the source
@@ -159,7 +159,13 @@ static GstElement* source_creation(GstElement* pipeline, char* format, int width
 
 	return last;
 }
+#endif
 
+/**
+ * \brief get the command line to use to get the source from configuration file
+ * \param pipeline the pipeline to wich adding the bin made from the cmd line description 
+ * return GstElement* the last element added in the pipeline: the bin made
+ */
 static GstElement *get_source( GstElement* pipeline){
 	GError 		*error 		= NULL; /* an Object to save errors when they occurs */
 	GstElement 	*bin 		= NULL; /* to return last element of pipeline */
@@ -211,6 +217,7 @@ static int init_stream_SP( gpointer main_loop, gpointer stream_datas)
 		return EXIT_FAILURE;
 	}
 
+	/* set pipeline to PAUSED state will open /dev/video0, so it will not be done in start_streaming */
 	gst_element_set_state (data->pipeline, GST_STATE_PAUSED);
 
     return EXIT_SUCCESS;
@@ -234,6 +241,9 @@ static int init_stream_SU( gpointer main_loop, gpointer stream_datas, GstCaps *c
 		g_printerr ( "Failed to create pipeline\n");
 		return EXIT_FAILURE;
 	}
+	stream_data *data 			= stream_datas;
+	gst_element_set_state (data->pipeline, GST_STATE_PAUSED);
+
     return EXIT_SUCCESS;
 }
 
@@ -278,8 +288,6 @@ int init_streaming (gpointer main_loop, GstCaps *caps, struct channelTable_entry
 	data->bus_watch_id 	= bus_watch_id;
 	if( channel_entry == NULL){ /* case we are a Service Provider */
 		return init_stream_SP( main_loop, data);
-//		init_stream_SP( main_loop, data);
-//		return !start_streaming(data, 1);
 	}
 	else{ /* case we are a Service User */
 		init_stream_SU( main_loop, data, caps, channel_entry);

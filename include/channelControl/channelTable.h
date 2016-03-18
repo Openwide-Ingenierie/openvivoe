@@ -142,7 +142,7 @@ struct channelTable_entry * channelTable_createEntry(
 						 						   	in_addr_t 	channelDefaultReceiveIpAddress,
 													gpointer 	stream_datas);
 gboolean channelTable_fill_entry(struct channelTable_entry * entry, struct videoFormatTable_entry *videoFormatentry);
-struct channelTable_entry *	channelTable_createEmptyEntry(int index);
+struct channelTable_entry *	channelTable_create_SU_entry(int index);
 void channelTable_delete();
 
 #endif /* CHANNELTABLE_H */
