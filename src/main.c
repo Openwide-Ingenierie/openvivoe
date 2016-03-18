@@ -102,7 +102,7 @@ int main (int   argc,  char *argv[]){
 	g_unix_signal_add (SIGTERM, stop_program, &stop_data);
 
 	/* add the idle function that handle SNMP request every 100ms */
-	g_timeout_add (10, handle_snmp_request, NULL);
+	g_timeout_add (100, handle_snmp_request, NULL);
 
 	/* init SubAgent Deamon */
 	if ( open_vivoe_daemon (argv[0]) )

@@ -371,9 +371,9 @@ static void channelSatus_requests_handler( struct channelTable_entry * table_ent
 			if ( table_entry->channelStatus == start){
 				prepare_socket( table_entry );
 				g_timeout_add(table_entry->channelSapMessageInterval,send_announcement, table_entry );
-				/* run the main loop until type is found so we execute callback function */
 				if ( !start_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex))
 					g_printerr( "ERROR: failed to start streaming\n");
+
 			}
 			else if ( table_entry->channelStatus == stop){
 				stop_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex );

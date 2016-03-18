@@ -98,13 +98,13 @@ static GstElement* source_creation(GstElement* pipeline, char* format, int width
 	/*
 	 * For now, the source is created manually, directly into the code
 	 * */
-//	source = gst_element_factory_make ("v4l2src", "source");
-	source = gst_element_factory_make ("videotestsrc", "source");
+	source = gst_element_factory_make ("v4l2src", "source");
+//	source = gst_element_factory_make ("videotestsrc", "source");
 	if(source == NULL){
 		g_printerr ("error cannot create element: %s\n", "videotestsrc" );
 		return NULL;
 	}
-//	g_object_set(source, "device", "/dev/video0", NULL);
+	g_object_set(source, "device", "/dev/video0", NULL);
 	capsfilter = gst_element_factory_make ("capsfilter","capsfilter");
 	if(capsfilter == NULL){
 		g_printerr ( "error cannot create element: %s\n", "capsfilter" );
@@ -112,7 +112,7 @@ static GstElement* source_creation(GstElement* pipeline, char* format, int width
 	}
 
 	caps = gst_caps_new_full( 	gst_structure_new( 	"video/x-raw" 	,
-													//"format" 		, G_TYPE_STRING , encoding,
+													"format" 		, G_TYPE_STRING ,"I420" ,
 													"width" 		, G_TYPE_INT 	, width,
 													"height" 		, G_TYPE_INT 	, height,
 													"interlace-mode", G_TYPE_STRING , "progressive",
@@ -193,8 +193,9 @@ static int init_stream_SP( gpointer main_loop, gpointer stream_datas)
 	GstElement 	*pipeline 		= data->pipeline;
     GstElement 	*last;	
 	/* Source Creation */
+
 #if 0
-	last = source_creation(pipeline, "MP4V-ES",1920 ,1080/*,encoding*/);
+	last = source_creation(pipeline, "RAW",1920 ,1080/*,encoding*/);
 #endif
 	last = get_source(pipeline);
 	if (last == NULL ){
@@ -203,11 +204,15 @@ static int init_stream_SP( gpointer main_loop, gpointer stream_datas)
 	}
 	/* Create pipeline  - save videoFormatIndex into stream_data data*/
 	last = create_pipeline_videoChannel( stream_datas, 	main_loop, last );
+
 	/* Check if everything went ok*/
 	if (last == NULL){
 		g_printerr ( "Failed to create pipeline\n");
 		return EXIT_FAILURE;
 	}
+
+	gst_element_set_state (data->pipeline, GST_STATE_PAUSED);
+
     return EXIT_SUCCESS;
 }
 
@@ -272,9 +277,9 @@ int init_streaming (gpointer main_loop, GstCaps *caps, struct channelTable_entry
 	data->bus 			= bus;
 	data->bus_watch_id 	= bus_watch_id;
 	if( channel_entry == NULL){ /* case we are a Service Provider */
-//		return init_stream_SP( main_loop, data);
-		init_stream_SP( main_loop, data);
-		return !start_streaming(data, 1);
+		return init_stream_SP( main_loop, data);
+//		init_stream_SP( main_loop, data);
+//		return !start_streaming(data, 1);
 	}
 	else{ /* case we are a Service User */
 		init_stream_SU( main_loop, data, caps, channel_entry);
