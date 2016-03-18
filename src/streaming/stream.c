@@ -233,7 +233,7 @@ static int init_stream_SP( gpointer main_loop, gpointer stream_datas)
  */
 static int init_stream_SU( gpointer main_loop, gpointer stream_datas, GstCaps *caps, struct channelTable_entry *channel_entry )
 {
-    GstElement *first;		
+    GstElement *first;
 	/* Create pipeline  - save videoFormatIndex into stream_data data*/
 	first = create_pipeline_serviceUser( stream_datas, main_loop, caps, channel_entry );
 	/* Check if everything went ok*/
@@ -290,14 +290,14 @@ int init_streaming (gpointer main_loop, GstCaps *caps, struct channelTable_entry
 		if (init_stream_SP( main_loop, data))
 			return EXIT_FAILURE;
 		/* if we are in the defaultStartUp Mode, launch the last VF register in the table */
-		if ( deviceInfo.parameters[num_DeviceType]._value.int_val != defaultStartUp)
+		if ( deviceInfo.parameters[num_DeviceType]._value.int_val == defaultStartUp)
 			return !start_streaming(data, videoFormatNumber._value.int_val);
 	}
 	else{ /* case we are a Service User */
 		if (init_stream_SU( main_loop, data, caps, channel_entry))
 			return EXIT_FAILURE;
 		channel_entry->stream_datas = data;
-		if ( deviceInfo.parameters[num_DeviceType]._value.int_val != defaultStartUp)
+		if ( deviceInfo.parameters[num_DeviceType]._value.int_val == defaultStartUp)
 			return !start_streaming(data, channel_entry->channelVideoFormatIndex);
 	}
 		return EXIT_SUCCESS;

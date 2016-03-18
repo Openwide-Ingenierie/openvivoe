@@ -12,6 +12,7 @@
 #include <glib-2.0/glib.h>
 #include "../../include/mibParameters.h"
 #include "../../include/deviceInfo/ethernetIfTable.h"
+#include "../../include/handler.h"
 
 /** 
  * \brief get the last element of the Table
@@ -273,13 +274,21 @@ ethernetIfTable_handler(
             table_entry = (struct ethernetIfTableEntry *)
                               netsnmp_extract_iterator_context(request);
             table_info  =     netsnmp_extract_table_info(      request);
+			
+			/* check if the index we are trying to modify is in the table, if no, return */
+			if ( index_out_of_range( reginfo,
+                     		   	reqinfo,
+							    requests,
+							 	table_info,
+							deviceInfo.parameters[num_ethernetIFnumber]._value.int_val ) )
+				return SNMP_ERR_NOERROR;
             switch (table_info->colnum) {
             case COLUMN_ETHERNETIFIPADDRESS:
                 ret = netsnmp_check_vb_type( request->requestvb, ASN_IPADDRESS );
                 if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;
-                }
+                }	
 				if ( deviceInfo.parameters[num_DeviceMode]._value.int_val	!= maintenanceMode){
 					ret = SNMP_ERR_RESOURCEUNAVAILABLE;
 					netsnmp_set_request_error(reqinfo, requests, ret );

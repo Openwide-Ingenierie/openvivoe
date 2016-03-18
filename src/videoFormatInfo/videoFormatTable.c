@@ -11,6 +11,7 @@
 #include <gstreamer-1.0/gst/gst.h>
 #include "../../include/mibParameters.h"
 #include "../../include/videoFormatInfo/videoFormatTable.h"
+#include "../../include/handler.h"
 
 /** Initializes the videoFormatTable module */
 void
@@ -427,7 +428,15 @@ videoFormatTable_handler(
             table_entry = (struct videoFormatTable_entry *)
                               netsnmp_extract_iterator_context(request);
             table_info  =     netsnmp_extract_table_info(      request);
-    
+
+    		/* check if the index we are trying to modify is in the table, if no, return */
+			if ( index_out_of_range( reginfo,
+                     			   	reqinfo,
+								    requests,
+								 	table_info,
+									videoFormatNumber._value.int_val ) )
+				return SNMP_ERR_NOERROR;
+
             switch (table_info->colnum) {
             case COLUMN_VIDEOFORMATCOMPRESSIONFACTOR:
                 /* or possibly 'netsnmp_check_vb_int_range' */

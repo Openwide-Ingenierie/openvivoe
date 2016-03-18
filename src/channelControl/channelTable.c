@@ -368,22 +368,20 @@ static void channelSatus_requests_handler( struct channelTable_entry * table_ent
 	/* the behaviour will be different wether the device is a ServiceProvider or a ServiceUser */
 	switch( table_entry->channelType ){
 		case videoChannel : /* case ServiceProvider */
-			if ( table_entry->channelStatus == start){
+			if ( table_entry->channelStatus 		== start){
 				prepare_socket( table_entry );
 				g_timeout_add(table_entry->channelSapMessageInterval,send_announcement, table_entry );
 				if ( !start_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex))
 					g_printerr( "ERROR: failed to start streaming\n");
-
 			}
-			else if ( table_entry->channelStatus == stop){
-				stop_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex );
-			}
+			else if ( table_entry->channelStatus 	== stop)
+				stop_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex );	
 			break;
 		case serviceUser:
-			if ( table_entry->channelStatus == start){
+			if ( table_entry->channelStatus 		== start){
 				add_in_channel_SU(table_entry);
 			}
-			else if ( table_entry->channelStatus == stop){
+			else if ( table_entry->channelStatus 	== stop){
 				delete_steaming_data(table_entry);
 			 	pop_from_channel_SU(table_entry);
 			}
@@ -659,7 +657,15 @@ channelTable_handler(
             table_entry = (struct channelTable_entry *)
                               netsnmp_extract_iterator_context(request);
             table_info  =     netsnmp_extract_table_info(      request);
-    
+			
+			/* check if the index we are trying to modify is in the table, if no, return */
+			if ( index_out_of_range( reginfo,
+                     			   	reqinfo,
+								    requests,
+								 	table_info,
+									channelNumber._value.int_val ) )
+				return SNMP_ERR_NOERROR;
+
             switch (table_info->colnum) {
             case COLUMN_CHANNELUSERDESC:
 				/* check this is at most a 64 byte string */

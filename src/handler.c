@@ -22,6 +22,9 @@
 
 /**
  * \brief return appropriate code value in case object should modify only in maintenance mode
+ * \param reginfo same as the handler's one
+ * \param reqinfo same as the handler's one
+ * \param requests same as the handler's one
  * \param parameter the given parameter to test
  */
 static void check_maintenance( 	netsnmp_handler_registration *reginfo,
@@ -34,6 +37,27 @@ static void check_maintenance( 	netsnmp_handler_registration *reginfo,
 		netsnmp_set_request_error(reqinfo, requests, ret );
 	}
 }
+
+/**
+ * \brief check if the index given to the function is out of the range of the table
+ * \param reginfo same as the handler's one
+ * \param reqinfo same as the handler's one
+ * \param requests same as the handler's one
+ * \param parameter the given parameter to test
+ */
+gboolean index_out_of_range( 	netsnmp_handler_registration 	*reginfo,
+                     		netsnmp_agent_request_info   	*reqinfo,
+							netsnmp_request_info         	*requests,
+							netsnmp_table_request_info 		*table_info,
+							int max_index){
+
+	if ( *(table_info->indexes->val.integer) > max_index){
+		netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_NOSUCHNAME );
+		return TRUE;
+	}else
+		return FALSE;
+} 
+
 
 /*--------------------------------INTEGER--------------------------------*/
 

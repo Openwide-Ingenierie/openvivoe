@@ -352,8 +352,7 @@ gboolean receive_announcement(){
 		if(caps == NULL )
 			return TRUE; /* we cannot return FALSE, cause we need to keep on listenning for our SAP/SDP annoucement */
 		struct channelTable_entry* iterator = channelTable_SU_head;
-		int i =0;
-		while (iterator != NULL && i<20){
+		while (iterator != NULL ){
 			if (iterator->channelReceiveIpAddress == multicast_addr){
 				/* Now we are sure that this is our SAP/SDP annoucement */	
 				/* check if the SAP message is a deletion message */
@@ -369,7 +368,6 @@ gboolean receive_announcement(){
 				}
 			}
 			iterator = iterator->next_SU;
-			i++;
 		}
 		return TRUE;
 	}
