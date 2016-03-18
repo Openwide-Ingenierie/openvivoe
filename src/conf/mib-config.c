@@ -68,6 +68,12 @@ GKeyFile * open_mib_configuration_file(GError* error){
     }
 	return gkf;
 }
+void close_mib_configuration_file(GKeyFile *gkf){
+
+    /* free the GKeyFile before leaving the function*/
+    g_key_file_free (gkf);
+}
+
 
 /**
  * \biref the number of group in vivoe_mib.conf
@@ -310,15 +316,13 @@ int init_mib_content(){
 	if ( init_channelNumber_param(gkf,groups[1], error))
 		return EXIT_FAILURE;
 
-    /* free the GKeyFile before leaving the function*/
-    g_key_file_free (gkf);
-
 	/* free the memory allocated for the array of strings groups */
 	 g_strfreev(groups);
 
 	 /* initialize global parameter of the mib that value cannot be found inside conguration file */
 	init_mib_global_parameter();
 
+	close_mib_configuration_file(gkf);
 
 	return EXIT_SUCCESS;
 }
@@ -365,7 +369,8 @@ gchar* init_sources_from_conf(int index){
 		g_printerr("ERROR: key not found %s for group: %s\n", GST_SOURCE_CMDLINE, source_name);
 		return NULL;
 	}
-		free(source_name);	
+		free(source_name);
+		close_mib_configuration_file(gkf);
 		return cmdline;
 }
 
@@ -410,7 +415,8 @@ gchar* get_desc_from_conf(int index){
 		g_printerr("ERROR: key not found %s for group: %s\n","channelUserDesc" , source_name);
 		return NULL;
 	}
-		free(source_name);	
+		free(source_name);
+		close_mib_configuration_file(gkf);
 		return channelUserDesc;
 }
 
