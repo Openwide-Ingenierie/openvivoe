@@ -247,6 +247,7 @@ gboolean channelTable_fill_entry(struct channelTable_entry * entry, struct video
 		entry->channelCompressionRate 						= videoFormatentry->videoFormatCompressionRate;
 		entry->channelHorzRes 								= videoFormatentry->videoFormatMaxHorzRes;
 		entry->channelVertRes 								= videoFormatentry->videoFormatMaxVertRes;
+		entry->channelRtpPt 								= videoFormatentry->videoFormatRtpPt;
 		return TRUE;
 }
 

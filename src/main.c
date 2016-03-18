@@ -124,6 +124,5 @@ int main (int   argc,  char *argv[]){
 	g_timeout_add(1000, receive_announcement, NULL);
     /* Iterate */
 	g_main_loop_run (loop);
-	
 	return EXIT_SUCCESS;
 }

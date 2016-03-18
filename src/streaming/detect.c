@@ -71,11 +71,13 @@ static GstStructure* type_detection_with_sink(GstBin *pipeline, GstElement *inpu
 	gst_bin_add_many (GST_BIN (pipeline), typefind, sink, NULL);
 	gst_element_link_many (input_video, typefind, sink, NULL);
 	gst_element_set_state (GST_ELEMENT (pipeline), GST_STATE_PLAYING);
-
+	
 	/* run the main loop until type is found so we execute callback function */
 	if( g_main_loop_is_running (loop) ){
-  		g_main_loop_quit (loop);		
+  		g_main_loop_quit (loop);
 	}
+
+	/* run the main loop so the typefind can be performed */
 	g_main_loop_run (loop);
 
 	/* Video type found */	
@@ -89,7 +91,6 @@ static GstStructure* type_detection_with_sink(GstBin *pipeline, GstElement *inpu
 	GstCaps 		*detected 		= data.caps;
 	//printf("%s\n", gst_caps_to_string(detected));
 	GstStructure 	*str_detected 	= gst_caps_get_structure(detected, 0);
-
 	return str_detected;
 }
 

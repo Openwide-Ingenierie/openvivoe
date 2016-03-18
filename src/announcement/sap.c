@@ -340,7 +340,7 @@ gboolean receive_announcement(){
 	}
 	else
 	{
-		/* compare teh payloed read on the socket with the payload read before 
+		/* compare the payloed read on the socket with the payload read before 
 		 * if there different, save the new payload into the sap_dat of the channel
 		 */
 		/* check if it is the one we should be listening to */
@@ -362,7 +362,7 @@ gboolean receive_announcement(){
 				else{
 					stream_data 	*data 	=  iterator->stream_datas;
 					if ( data == NULL ){
-						init_streaming (NULL, caps, iterator);
+						init_streaming (loop, caps, iterator);
 						start_streaming( iterator->stream_datas, iterator->channelVideoFormatIndex);
 					}
 				}

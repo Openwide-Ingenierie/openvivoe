@@ -148,8 +148,11 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
 	}
 	/*channelRTppt (saved in rtp_datas - payload type of the channel should be something like 96 or 127*/
 	if( gst_structure_has_field(source_str_caps, "payload")){
-		if (G_VALUE_HOLDS_INT(gst_structure_get_value(source_str_caps, "payload")))
+		if (G_VALUE_HOLDS_INT(gst_structure_get_value(source_str_caps, "payload"))){
 			data->rtp_datas->rtp_type 				= (long) g_value_get_int( gst_structure_get_value(source_str_caps, "payload"));
+			/* case of a service USer, we need to initialize Rtppt */
+			video_info->videoFormatRtpPt 			= (long) g_value_get_int( gst_structure_get_value(source_str_caps, "payload"));
+		}
 	}
 	/* clock-rate */
 	if( gst_structure_has_field(source_str_caps, "clock-rate")){
