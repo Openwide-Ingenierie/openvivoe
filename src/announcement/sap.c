@@ -287,7 +287,6 @@ gboolean send_announcement(gpointer entry){
 	int nb_bytes = -1;
 	struct channelTable_entry * channel_entry = entry;
 	if( channel_entry->channelStatus == stop ){
-		printf("sending deletion\n");
 		/* Build deletion packet */
 		channel_entry->sap_datas->udp_payload = build_SAP_msg(channel_entry, &(channel_entry->sap_datas->udp_payload_length), TRUE);
 		nb_bytes = sendto( 	sap_socket.udp_socket_fd,
@@ -298,7 +297,6 @@ gboolean send_announcement(gpointer entry){
 							sizeof(sap_socket.multicast_addr));
 		return FALSE;
 	}else{
-		printf("sending announcement\n");
 		/* Send Annoucement message */
 		nb_bytes = sendto( 	sap_socket.udp_socket_fd,
 							channel_entry->sap_datas->udp_payload,
@@ -356,7 +354,6 @@ gboolean receive_announcement(){
 		struct channelTable_entry* iterator = channelTable_SU_head;
 		int i =0;
 		while (iterator != NULL && i<20){
-			printf("receive_announcement\n");
 			if (iterator->channelReceiveIpAddress == multicast_addr){
 				/* Now we are sure that this is our SAP/SDP annoucement */	
 				/* check if the SAP message is a deletion message */

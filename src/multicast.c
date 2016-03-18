@@ -86,7 +86,7 @@ long define_vivoe_multicast(const char* multicast_iface, const short int multica
 		g_printerr("ERROR: Failed to retrieve IP on %s\n", multicast_iface);
 	}
 	if(result < 0){
-		printf("Failed to generate multicast IP for udpsink, using default address: %s\n", DEFAULT_MULTICAST_ADDR );
+		g_printerr("Failed to generate multicast IP for udpsink, using default address: %s\n", DEFAULT_MULTICAST_ADDR );
 		return ntohl(inet_addr( DEFAULT_MULTICAST_ADDR ));
 	}
 	return ntohl(result);

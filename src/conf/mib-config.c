@@ -365,7 +365,6 @@ gchar* init_sources_from_conf(int index){
 		g_printerr("ERROR: key not found %s for group: %s\n", GST_SOURCE_CMDLINE, source_name);
 		return NULL;
 	}
-		printf("%s\n", cmdline);
 		free(source_name);	
 		return cmdline;
 

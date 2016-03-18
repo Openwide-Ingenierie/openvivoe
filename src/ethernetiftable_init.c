@@ -68,7 +68,7 @@ static gboolean list_interfaces(char*** if_names, int* if_num){
 	/* set the number of interfaces found to 0 */
 	*if_num = 0;
     if( getifaddrs(&ifap) < 0){
-		printf("ERROR: Failed to get system's network interfaces\n");
+		g_printerr("ERROR: Failed to get system's network interfaces\n");
 		return FALSE;
 	}
 	/* listing interfaces */
