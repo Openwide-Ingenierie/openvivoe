@@ -287,13 +287,20 @@ int init_streaming (gpointer main_loop, GstCaps *caps, struct channelTable_entry
 	data->bus 			= bus;
 	data->bus_watch_id 	= bus_watch_id;
 	if( channel_entry == NULL){ /* case we are a Service Provider */
-		return init_stream_SP( main_loop, data);
+		if (init_stream_SP( main_loop, data))
+			return EXIT_FAILURE;
+		/* if we are in the defaultStartUp Mode, launch the last VF register in the table */
+		if ( deviceInfo.parameters[num_DeviceType]._value.int_val != defaultStartUp)
+			return !start_streaming(data, videoFormatNumber._value.int_val);
 	}
 	else{ /* case we are a Service User */
-		init_stream_SU( main_loop, data, caps, channel_entry);
+		if (init_stream_SU( main_loop, data, caps, channel_entry))
+			return EXIT_FAILURE;
 		channel_entry->stream_datas = data;
-		return EXIT_SUCCESS;
+		if ( deviceInfo.parameters[num_DeviceType]._value.int_val != defaultStartUp)
+			return !start_streaming(data, channel_entry->channelVideoFormatIndex);
 	}
+		return EXIT_SUCCESS;
 }
 
 /**

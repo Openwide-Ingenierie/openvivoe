@@ -96,6 +96,9 @@ struct videoFormatTable_entry * videoFormatTable_getEntry(int index){
 	return iterator;
 }
 
+/** 
+ * \brief delete all entries in the table
+ */
 void videoFormatTable_delete(){
 	struct videoFormatTable_entry *iterator = videoFormatTable_head;
 	struct videoFormatTable_entry *temp;
