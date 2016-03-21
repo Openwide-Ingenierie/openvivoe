@@ -279,6 +279,22 @@ gboolean channelTable_updateEntry(struct channelTable_entry * entry, int videoFo
 		return TRUE;
 }
 
+/** 
+ * \brief retrieve the entry in the channelTable corresponding to the index given in parameter
+ * \param index the index of the entry we want
+ * \return channelTable_entry*  a pointer on that entry
+ */
+struct channelTable_entry * channelTable_getEntry(int index){
+	struct channelTable_entry *iterator = channelTable_head;
+	while(iterator->channelIndex != index){
+		if(iterator->next != NULL)
+			iterator = iterator->next;
+		else
+			return NULL;
+	}
+	return iterator;
+}
+
 void channelTable_delete(){
 	struct channelTable_entry *iterator = channelTable_head;
 	struct channelTable_entry *temp;

@@ -106,7 +106,7 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus *bus,
 
 void set_udpsink_param( GstElement *udpsink, long channel_entry_index){
 	/* compute IP */
-	long ip 			= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0],channel_entry_index);
+	long ip 			= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0], channel_entry_index);
 
 	/* transform IP from long to char * */
 	struct in_addr ip_addr;
@@ -118,6 +118,11 @@ void set_udpsink_param( GstElement *udpsink, long channel_entry_index){
                     "port", DEFAULT_MULTICAST_PORT,
 					"sync", FALSE,
                     NULL);
+
+	/* initialize the channel field ReceiveIP */
+	/* get corresponding entry in table */
+	struct channelTable_entry *entry = channelTable_getEntry( channel_entry_index );
+	entry->channelReceiveIpAddress = ip;
 }
 
 /*
