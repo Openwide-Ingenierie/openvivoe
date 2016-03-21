@@ -268,7 +268,6 @@ GstCaps* get_SDP(unsigned char *array, int sdp_msg_size, in_addr_t *multicast_ad
 		g_printerr("Failed to parse SDP message\n");
 		return NULL;
 	}
-
 	const GstSDPConnection *connection;
 	connection = gst_sdp_message_get_connection (msg);
 
@@ -283,6 +282,15 @@ GstCaps* get_SDP(unsigned char *array, int sdp_msg_size, in_addr_t *multicast_ad
 	
 	media 			= gst_sdp_message_get_media(msg , 0);
 	GstCaps *caps 	= gst_sdp_media_get_caps_from_media (media, 96);
+
+	/* set framerate to caps */
+	GValue res = G_VALUE_INIT;
+	g_value_init (&res, GST_TYPE_FRACTION);
+	int framerate_num = strtol(gst_sdp_media_get_attribute_val (media, "framerate"), NULL, 10);
+	gst_value_set_fraction(&res,  framerate_num, 1 );
+	gst_caps_set_value ( caps,
+                  		 "framerate",
+                   		&res);
 
 	return caps;
 }
