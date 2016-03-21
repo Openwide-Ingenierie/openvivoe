@@ -955,6 +955,9 @@ channelTable_handler(
             case COLUMN_CHANNELDEFAULTRECEIVEIPADDRESS:
                 table_entry->old_channelDefaultReceiveIpAddress = table_entry->channelDefaultReceiveIpAddress;
                 table_entry->channelDefaultReceiveIpAddress     = *request->requestvb->val.integer;
+				struct in_addr new_default_ip;
+				new_default_ip.s_addr 							= table_entry->channelDefaultReceiveIpAddress;
+				set_default_IP_from_conf(table_entry->channelIndex,  inet_ntoa(new_default_ip));
                 break;
             }
         }

@@ -45,15 +45,12 @@ const gchar* maintenance_group[MAINTENANCE_GROUP_SIZE]= { 	"deviceUserDesc", 			
 	return FALSE;
 }
 
-GKeyFile * open_mib_configuration_file(GError* error){
+GKeyFile * open_mib_configuration_file(GError* error, gchar** gkf_path){
 	GKeyFile* gkf;
 
     /*defined the paths from were we should retrieve our configuration files */
-    const gchar* search_dirs[] = {(gchar*)"./conf",(gchar*)"/usr/share/vivoe",(gchar*)"$HOME/.vivoe",(gchar*)".", NULL};
+    const gchar* search_dirs[] = {(gchar*)"./conf",(gchar*)"/etc/vivoe",(gchar*)"$HOME/.vivoe",(gchar*)".", NULL};
 
-    /*define a pointer to the full path were the vivoe-mib.conf file is located*/
-    gchar* gkf_path = NULL;
-  
     /*initialization of the variable */
     gkf = g_key_file_new();
 
@@ -62,7 +59,7 @@ GKeyFile * open_mib_configuration_file(GError* error){
      * or if user doesn't have read permission to it.
      * If a problem occurs, print it and exit.
      */
-    if (!g_key_file_load_from_dirs(gkf,CONFIG_FILE, search_dirs, &gkf_path,G_KEY_FILE_NONE, &error)){
+    if (!g_key_file_load_from_dirs(gkf,CONFIG_FILE, search_dirs, gkf_path,G_KEY_FILE_KEEP_COMMENTS, &error)){
         fprintf (stderr, "Could not read config file %s\n%s\n",CONFIG_FILE,error->message);
         return NULL;
     }
@@ -298,9 +295,12 @@ int init_mib_content(){
      * declared in the configuration file
      */
     gchar** groups;
+	
+	/* a location to store the path of the openned configuration file */
+	gchar* gkf_path = NULL;
 
 	/* Declaration of a pointer that will contain our configuration file*/
-    GKeyFile* gkf = open_mib_configuration_file(error);
+    GKeyFile* gkf = open_mib_configuration_file(error, &gkf_path);
 	
 	/* check if the MIB groups are present if so we know that GROUP_NAME_DEVICEINFO and FROUP_NAME_CHANNELCONTROL are indeed present*/
 	groups = check_mib_group(gkf, error);
@@ -334,8 +334,12 @@ int init_mib_content(){
 gchar* init_sources_from_conf(int index){
 	/* Define the error pointer we will be using to check for errors in the configuration file */
     GError 		*error 	= NULL;
+
+	/* a location to store the path of the openned configuration file */
+	gchar* gkf_path = NULL;
+
 	 /* Declaration of a pointer that will contain our configuration file*/
-	GKeyFile 	*gkf 	= open_mib_configuration_file(error);
+	GKeyFile 	*gkf 	= open_mib_configuration_file(error, &gkf_path);
 
 	/* Declaration of an array of gstring (gchar**) that will contain the name of the different groups
 	 * declared in the configuration file
@@ -368,9 +372,9 @@ gchar* init_sources_from_conf(int index){
 		g_printerr("ERROR: key not found %s for group: %s\n", GST_SOURCE_CMDLINE, source_name);
 		return NULL;
 	}
-		free(source_name);
-		close_mib_configuration_file(gkf);
-		return cmdline;
+	free(source_name);
+	close_mib_configuration_file(gkf);
+	return cmdline;
 }
 
 /** 
@@ -380,8 +384,12 @@ gchar* init_sources_from_conf(int index){
 gchar* get_desc_from_conf(int index){
 	/* Define the error pointer we will be using to check for errors in the configuration file */
     GError 		*error 	= NULL;
+
+	/* a location to store the path of the openned configuration file */
+	gchar* gkf_path = NULL;
+
 	 /* Declaration of a pointer that will contain our configuration file*/
-	GKeyFile 	*gkf 	= open_mib_configuration_file(error);
+	GKeyFile 	*gkf 	= open_mib_configuration_file(error, &gkf_path);
 
 	/* Declaration of an array of gstring (gchar**) that will contain the name of the different groups
 	 * declared in the configuration file
@@ -389,7 +397,7 @@ gchar* get_desc_from_conf(int index){
 	gchar 		**groups;
 
 	/*
-	 * the command line string retreive from the configuration file
+	 * the channelUserDesc retreive from the configuration file
 	 */
 	gchar 		*channelUserDesc;
 
@@ -414,9 +422,9 @@ gchar* get_desc_from_conf(int index){
 		g_printerr("ERROR: key not found %s for group: %s\n", KEY_NAME_CHANNEL_DESC , source_name);
 		return NULL;
 	}
-		free(source_name);
-		close_mib_configuration_file(gkf);
-		return channelUserDesc;
+	free(source_name);
+	close_mib_configuration_file(gkf);
+	return channelUserDesc;
 }
 
 /** 
@@ -426,8 +434,12 @@ gchar* get_desc_from_conf(int index){
 gchar *get_default_IP_from_conf(int index){
 	/* Define the error pointer we will be using to check for errors in the configuration file */
     GError 		*error 	= NULL;
+
+	/* a location to store the path of the openned configuration file */
+	gchar* gkf_path = NULL;
+
 	 /* Declaration of a pointer that will contain our configuration file*/
-	GKeyFile 	*gkf 	= open_mib_configuration_file(error);
+	GKeyFile 	*gkf 	= open_mib_configuration_file(error, &gkf_path);
 
 	/* Declaration of an array of gstring (gchar**) that will contain the name of the different groups
 	 * declared in the configuration file
@@ -435,9 +447,9 @@ gchar *get_default_IP_from_conf(int index){
 	gchar 		**groups;
 
 	/*
-	 * the command line string retreive from the configuration file
+	 * the default receive IP retreive from the configuration file
 	 */
-	gchar 		*default_recevie_ip;
+	gchar 		*default_receive_ip;
 
 	/*first we load the different Groups of the configuration file
 	 * second parameter "gchar* length" is optional*/
@@ -452,7 +464,7 @@ gchar *get_default_IP_from_conf(int index){
 		return NULL;
 	}
 	if(g_key_file_has_key(gkf,receiver_name, (const gchar*)KEY_NAME_DEFAULT_IP , &error)){
-		default_recevie_ip = (char*) g_key_file_get_string(gkf,receiver_name , (const gchar*)KEY_NAME_DEFAULT_IP , &error);
+		default_receive_ip = (char*) g_key_file_get_string(gkf,receiver_name , (const gchar*)KEY_NAME_DEFAULT_IP , &error);
 		if(error != NULL)
 			g_printerr("Invalid format for key %s: %s\n", KEY_NAME_DEFAULT_IP  , error->message);
 	}
@@ -460,7 +472,47 @@ gchar *get_default_IP_from_conf(int index){
 		g_printerr("ERROR: key not found %s for group: %s\n",KEY_NAME_DEFAULT_IP , receiver_name);
 		return NULL;
 	}
-		free(receiver_name);
-		close_mib_configuration_file(gkf);
-		return default_recevie_ip;
+	free(receiver_name);
+	close_mib_configuration_file(gkf);
+	return default_receive_ip;
+}
+
+/** 
+ * \brief returned the DefaultIPaddress enter by the user to use for SU in defaultStartUPMode 
+ * \param the corresponding number of the source to refer it in the configuration file
+ */
+void set_default_IP_from_conf(int index, const char* new_default_ip){
+	/* Define the error pointer we will be using to check for errors in the configuration file */
+    GError 		*error 	= NULL;
+
+	/* a location to store the path of the openned configuration file */
+	gchar* gkf_path = NULL;
+
+	 /* Declaration of a pointer that will contain our configuration file*/
+	GKeyFile 	*gkf 	= open_mib_configuration_file(error, &gkf_path);
+
+	/* Declaration of an array of gstring (gchar**) that will contain the name of the different groups
+	 * declared in the configuration file
+	 */
+	gchar 		**groups;
+
+	/*first we load the different Groups of the configuration file
+	 * second parameter "gchar* length" is optional*/
+	groups = g_key_file_get_groups(gkf, NULL);
+	char *receiver_prefix = "receiver_";
+	char *receiver_name = (char*) malloc( strlen(receiver_prefix)+2 * sizeof(char));
+	/* Build the name that the group should have */
+	sprintf(receiver_name, "%s%d", receiver_prefix, index);
+	if( !(g_strv_contains((const gchar* const*) groups, receiver_name )))
+		fprintf (stderr, "Group %s not found in configuration file\nIt should be written in the form [%s]\n",receiver_name ,receiver_name);
+	if(g_key_file_has_key(gkf,receiver_name, (const gchar*)KEY_NAME_DEFAULT_IP , &error)){
+		g_key_file_set_string(gkf,receiver_name , (const gchar*)KEY_NAME_DEFAULT_IP ,new_default_ip );	
+		g_key_file_save_to_file(gkf, gkf_path , &error);
+		if(error != NULL)
+			g_printerr("ERROR: failed to write to configuration file %s: %s\n",CONFIG_FILE , error->message);
+	}
+	else 
+		g_printerr("ERROR: key not found %s for group: %s\n",KEY_NAME_DEFAULT_IP , receiver_name);
+	free(receiver_name);
+	close_mib_configuration_file(gkf);
 }
