@@ -10,7 +10,19 @@
 /**
  * \brief This is the name of the configuration file to use for the subAgent handling the VIVOE MIB
  */
-#define CONFIG_FILE 		"vivoe-mib.conf"
+#define CONFIG_FILE 				"vivoe-mib.conf"
+
+/**
+ * \brief the names of the groups that should be found in the configuration file
+ */
+#define GROUP_NAME_DEVICEINFO		"deviceInfo"
+#define GROUP_NAME_CHANNELCONTROL	"channelControl"
+
+/**
+ * \brief the names of the groups that could be found in the configuration file
+ */
+#define GROUP_NAME_SOURCE			"source_"
+#define GROUP_NAME_RECEIVER			"receiver_"
 
 /**
  * \brief the name of the Gstreamer command line used by the user to give the input video to vivoe

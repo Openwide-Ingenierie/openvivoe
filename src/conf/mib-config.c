@@ -98,7 +98,7 @@ gchar** check_mib_group(GKeyFile *gkf, GError *error){
      * second parameter "gchar* length" is optional*/
 	groups = g_key_file_get_groups(gkf, &length);
 
-	gchar* needed[NUM_GROUP] = {"deviceInfo", "channelControl"};
+	gchar* needed[NUM_GROUP] = {GROUP_NAME_DEVICEINFO, GROUP_NAME_CHANNELCONTROL};
 	/* check that the groups are present in configuration file */
 	for (int i=0; i<NUM_GROUP; i++){
 		if( !(g_strv_contains((const gchar* const*) groups, needed[i] ))){
@@ -284,7 +284,6 @@ static void init_mib_global_parameter(){
 	
 }
 
-
 /**
  * \brief this function is used to get the information to place in the VIVOE MIB
  * from the configuration file associated to it: "vivoe-mib.conf". It will
@@ -303,7 +302,7 @@ int init_mib_content(){
 	/* Declaration of a pointer that will contain our configuration file*/
     GKeyFile* gkf = open_mib_configuration_file(error);
 	
-	/* check if the MIB groups are present */
+	/* check if the MIB groups are present if so we know that GROUP_NAME_DEVICEINFO and FROUP_NAME_CHANNELCONTROL are indeed present*/
 	groups = check_mib_group(gkf, error);
 	if ( groups == NULL)
 		return EXIT_FAILURE;
@@ -311,9 +310,9 @@ int init_mib_content(){
 	/* Defined what separator will be used in the list when the parameter can have several values (for a table for example)*/
     g_key_file_set_list_separator (gkf, (gchar) ';');
  
-	if (!init_deviceInfo(gkf, groups[0], error))
+	if (!init_deviceInfo(gkf, GROUP_NAME_DEVICEINFO , error))
 		return EXIT_FAILURE;
-	if ( init_channelNumber_param(gkf,groups[1], error))
+	if ( init_channelNumber_param(gkf, GROUP_NAME_CHANNELCONTROL , error))
 		return EXIT_FAILURE;
 
 	/* free the memory allocated for the array of strings groups */
