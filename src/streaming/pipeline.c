@@ -123,7 +123,9 @@ void set_udpsink_param( GstElement *udpsink, long channel_entry_index){
 	/* get corresponding entry in table */
 	struct channelTable_entry *entry = channelTable_getEntry( channel_entry_index );
 	entry->channelReceiveIpAddress 			= ip;
-	entry->channelDefaultReceiveIpAddress 	= ip;
+	if ( entry->channelDefaultReceiveIpAddress == 0 )
+		/*if the field channelDefaultIpAddress has not already been initialized, initialize it */
+		entry->channelDefaultReceiveIpAddress 	= ip;
 }
 
 /*
