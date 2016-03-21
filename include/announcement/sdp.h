@@ -8,7 +8,6 @@
 #define SDP_H
 
 gboolean create_SDP(GstSDPMessage 	*msg, struct channelTable_entry * channel_entry);
-GstCaps* get_SDP(unsigned char *array, int sdp_msg_size, in_addr_t *multicast_addr);
-
+GstCaps* get_SDP(unsigned char *array, int sdp_msg_size, in_addr_t *multicast_addr, char *channel_desc);
 #endif /* SDP_H */
 

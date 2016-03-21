@@ -347,7 +347,9 @@ gboolean receive_announcement(){
 		unsigned char *sdp_msg = (unsigned char*) SAP_depay(udp_payload);
 		/* struct to save the multicast IP of the receive stream */
 		in_addr_t multicast_addr;
-		GstCaps* caps = get_SDP(sdp_msg, status - SAP_header_size, &multicast_addr);
+		char channel_desc[DisplayString64]; /* the maximum size of the channelDesc is 64 bytes */
+		GstCaps* caps = get_SDP(sdp_msg, status - SAP_header_size, &multicast_addr, channel_desc);
+
 		/* if caps are null, a problem occured or this is not a SAP/SDP announcement from the right channel */
 		if(caps == NULL )
 			return TRUE; /* we cannot return FALSE, cause we need to keep on listenning for our SAP/SDP annoucement */
@@ -357,13 +359,16 @@ gboolean receive_announcement(){
 				/* Now we are sure that this is our SAP/SDP annoucement */	
 				/* check if the SAP message is a deletion message */
 				if( udp_payload[0] == SAP_header_deletion ){
-					delete_steaming_data(iterator);
+					delete_steaming_data(iterator); /* delet streaming has it is stopped */
 				}
 				else{
 					stream_data 	*data 	=  iterator->stream_datas;
-					if ( data == NULL ){
+					if ( data == NULL ){ /* if pipeline is not created yet, create it and start to display the stream */
 						init_streaming (loop, caps, iterator);
 						start_streaming( iterator->stream_datas, iterator->channelVideoFormatIndex);
+						/* init the video channelUserDesc field */
+						iterator->channelUserDesc 		= strdup( (const char*) channel_desc);	
+						iterator->channelUserDesc_len 	= strlen(channel_desc);
 					}
 				}
 			}

@@ -255,7 +255,7 @@ gboolean create_SDP(GstSDPMessage 	*msg, struct channelTable_entry * channel_ent
  * \param array: the SDP message obtained from SAP/SDP datagram
  * \param sdp_msg_size: the size of the byte array got from SAP/SDP message
  */
-GstCaps* get_SDP(unsigned char *array, int sdp_msg_size, in_addr_t *multicast_addr){
+GstCaps* get_SDP(unsigned char *array, int sdp_msg_size, in_addr_t *multicast_addr, char *channel_desc){
 
 	GstSDPMessage *msg;
 	/* create a new SDP message */
@@ -268,6 +268,8 @@ GstCaps* get_SDP(unsigned char *array, int sdp_msg_size, in_addr_t *multicast_ad
 		g_printerr("Failed to parse SDP message\n");
 		return NULL;
 	}
+	
+	/* get the multicast address of the incoming SDP message */
 	const GstSDPConnection *connection;
 	connection = gst_sdp_message_get_connection (msg);
 
@@ -280,6 +282,10 @@ GstCaps* get_SDP(unsigned char *array, int sdp_msg_size, in_addr_t *multicast_ad
 		return NULL;
 	}
 	
+	/* get session description */
+	strcpy(channel_desc , gst_sdp_message_get_session_name(msg));
+
+	/* get caps from the SDP's media field */
 	media 			= gst_sdp_message_get_media(msg , 0);
 	GstCaps *caps 	= gst_sdp_media_get_caps_from_media (media, 96);
 
@@ -290,7 +296,7 @@ GstCaps* get_SDP(unsigned char *array, int sdp_msg_size, in_addr_t *multicast_ad
 	gst_value_set_fraction(&res,  framerate_num, 1 );
 	gst_caps_set_value ( caps,
                   		 "framerate",
-                   		&res);
+                   		&res );
 
 	return caps;
 }
