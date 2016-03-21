@@ -135,7 +135,11 @@ int main (int   argc,  char *argv[]){
 	if ( deviceInfo.parameters[num_DeviceMode]._value.int_val == defaultStartUp)
 		default_startUp_mode(loop);	
 
-	g_timeout_add(1000, receive_announcement, NULL);
+	/* listen to SAP/SDP announcement */
+	if ( 	deviceInfo.parameters[num_DeviceType]._value.int_val == device_SU
+	  	 || deviceInfo.parameters[num_DeviceType]._value.int_val == device_both)
+		g_timeout_add(1000, receive_announcement, NULL);
+
     /* Iterate */
 	g_main_loop_run (loop);
 	return EXIT_SUCCESS;
