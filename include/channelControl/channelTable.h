@@ -144,6 +144,8 @@ struct channelTable_entry * channelTable_createEntry(
 gboolean channelTable_fill_entry(struct channelTable_entry * entry, struct videoFormatTable_entry *videoFormatentry);
 struct channelTable_entry *	channelTable_create_SU_entry(int index);
 struct channelTable_entry * channelTable_getEntry(int index);
+struct channelTable_entry * channelTable_get_from_VF_index(int index);
 void channelTable_delete();
+int channelSatus_requests_handler( struct channelTable_entry * table_entry );
 
 #endif /* CHANNELTABLE_H */

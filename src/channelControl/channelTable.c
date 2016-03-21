@@ -278,7 +278,6 @@ gboolean channelTable_updateEntry(struct channelTable_entry * entry, int videoFo
 
 		return TRUE;
 }
-
 /** 
  * \brief retrieve the entry in the channelTable corresponding to the index given in parameter
  * \param index the index of the entry we want
@@ -287,6 +286,22 @@ gboolean channelTable_updateEntry(struct channelTable_entry * entry, int videoFo
 struct channelTable_entry * channelTable_getEntry(int index){
 	struct channelTable_entry *iterator = channelTable_head;
 	while(iterator->channelIndex != index){
+		if(iterator->next != NULL)
+			iterator = iterator->next;
+		else
+			return NULL;
+	}
+	return iterator;
+}
+
+/** 
+ * \brief retrieve the entry in the channelTable corresponding to the VF index given in parameter
+ * \param index the index of the entry we want
+ * \return channelTable_entry*  a pointer on that entry
+ */
+struct channelTable_entry * channelTable_get_from_VF_index(int index){
+	struct channelTable_entry *iterator = channelTable_head;
+	while(iterator->channelVideoFormatIndex	!= index){
 		if(iterator->next != NULL)
 			iterator = iterator->next;
 		else
@@ -380,19 +395,23 @@ channelTable_get_next_data_point(void **my_loop_context,
 /**
  * \brief handles the call of function according to the new channeltStatus value received from SNMP request
  * \param table_entry the table entry on which the request applies
+ * \return TRUE on success, FALSE on failure
  */
-static void channelSatus_requests_handler( struct channelTable_entry * table_entry ){
+gboolean channelSatus_requests_handler( struct channelTable_entry * table_entry ){
 	/* the behaviour will be different wether the device is a ServiceProvider or a ServiceUser */
 	switch( table_entry->channelType ){
 		case videoChannel : /* case ServiceProvider */
 			if ( table_entry->channelStatus 		== start){
 				prepare_socket( table_entry );
 				g_timeout_add(table_entry->channelSapMessageInterval,send_announcement, table_entry );
-				if ( !start_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex))
+				if ( !start_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex)){
 					g_printerr( "ERROR: failed to start streaming\n");
+					return FALSE;
+				}
+				return TRUE;
 			}
 			else if ( table_entry->channelStatus 	== stop)
-				stop_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex );	
+				return stop_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex );	
 			break;
 		case serviceUser:
 			if ( table_entry->channelStatus 		== start){
@@ -402,10 +421,12 @@ static void channelSatus_requests_handler( struct channelTable_entry * table_ent
 				delete_steaming_data(table_entry);
 			 	pop_from_channel_SU(table_entry);
 			}
+			return TRUE;
 			break;
 		default:
 			/* this is a really really bad error, we should never get there */
 			g_printerr("Unknown channel Type\n");
+			return FALSE;
 			break;
 	}
 }

@@ -290,14 +290,20 @@ int init_streaming (gpointer main_loop, GstCaps *caps, struct channelTable_entry
 		if (init_stream_SP( main_loop, data))
 			return EXIT_FAILURE;
 		/* if we are in the defaultStartUp Mode, launch the last VF register in the table */
-		if ( deviceInfo.parameters[num_DeviceType]._value.int_val == defaultStartUp)
-			return !start_streaming(data, videoFormatNumber._value.int_val);
+		if ( deviceInfo.parameters[num_DeviceMode]._value.int_val == defaultStartUp){
+			struct channelTable_entry *entry 	= channelTable_get_from_VF_index(videoFormatNumber._value.int_val);
+			entry->channelStatus 				= start;
+ 			if (channelSatus_requests_handler( entry ))
+				return EXIT_SUCCESS;
+			else
+				return EXIT_FAILURE;
+		}
 	}
 	else{ /* case we are a Service User */
 		if (init_stream_SU( main_loop, data, caps, channel_entry))
 			return EXIT_FAILURE;
 		channel_entry->stream_datas = data;
-		if ( deviceInfo.parameters[num_DeviceType]._value.int_val == defaultStartUp)
+		if ( deviceInfo.parameters[num_DeviceMode]._value.int_val == defaultStartUp)
 			return !start_streaming(data, channel_entry->channelVideoFormatIndex);
 	}
 		return EXIT_SUCCESS;

@@ -418,4 +418,3 @@ gchar* get_desc_from_conf(int index){
 		close_mib_configuration_file(gkf);
 		return channelUserDesc;
 }
-
