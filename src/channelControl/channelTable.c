@@ -705,7 +705,7 @@ channelTable_handler(
                 /* or possibly 'netsnmp_check_vb_int_range' */
                 ret = netsnmp_check_vb_int_range( request->requestvb, 1, videoFormatNumber._value.int_val );
                 if ( ret != SNMP_ERR_NOERROR ) {
-                    netsnmp_set_request_error( reqinfo, request, ret );
+                    netsnmp_set_request_error( reqinfo, request, SNMP_ERR_INCONSISTENTVALUE ); /* the VIVOE norm specify to return InconsistentValue error in that case */
                     return SNMP_ERR_NOERROR;
                 }
                 break;
