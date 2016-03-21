@@ -374,7 +374,7 @@ gchar* init_sources_from_conf(int index){
 }
 
 /** 
- * \brief returned the channel User Description enter by the user to decribed the channel 
+ * \brief returned the channel User Description enter by the user to described the channel 
  * \param the corresponding number of the source to refer it in the configuration file
  */
 gchar* get_desc_from_conf(int index){
@@ -405,16 +405,62 @@ gchar* get_desc_from_conf(int index){
 		fprintf (stderr, "Group %s not found in configuration file\nIt should be written in the form [%s]\n",source_name ,source_name);
 		return NULL;
 	}
-	if(g_key_file_has_key(gkf,source_name, (const gchar*)"channelUserDesc" , &error)){
-		channelUserDesc = (char*) g_key_file_get_string(gkf,source_name , (const gchar*)"channelUserDesc" , &error);
+	if(g_key_file_has_key(gkf,source_name, (const gchar*)KEY_NAME_CHANNEL_DESC , &error)){
+		channelUserDesc = (char*) g_key_file_get_string(gkf,source_name , (const gchar*)KEY_NAME_CHANNEL_DESC , &error);
 		if(error != NULL)
-			g_printerr("Invalid format for key %s: %s\n", "channelUserDesc"  , error->message);
+			g_printerr("Invalid format for key %s: %s\n", KEY_NAME_CHANNEL_DESC , error->message);
 	}
 	else {
-		g_printerr("ERROR: key not found %s for group: %s\n","channelUserDesc" , source_name);
+		g_printerr("ERROR: key not found %s for group: %s\n", KEY_NAME_CHANNEL_DESC , source_name);
 		return NULL;
 	}
 		free(source_name);
 		close_mib_configuration_file(gkf);
 		return channelUserDesc;
+}
+
+/** 
+ * \brief returned the DefaultIPaddress enter by the user to use for SU in defaultStartUPMode 
+ * \param the corresponding number of the source to refer it in the configuration file
+ */
+gchar *get_default_IP_from_conf(int index){
+	/* Define the error pointer we will be using to check for errors in the configuration file */
+    GError 		*error 	= NULL;
+	 /* Declaration of a pointer that will contain our configuration file*/
+	GKeyFile 	*gkf 	= open_mib_configuration_file(error);
+
+	/* Declaration of an array of gstring (gchar**) that will contain the name of the different groups
+	 * declared in the configuration file
+	 */
+	gchar 		**groups;
+
+	/*
+	 * the command line string retreive from the configuration file
+	 */
+	gchar 		*default_recevie_ip;
+
+	/*first we load the different Groups of the configuration file
+	 * second parameter "gchar* length" is optional*/
+	groups = g_key_file_get_groups(gkf, NULL);
+
+	char *receiver_prefix = "receiver_";
+	char *receiver_name = (char*) malloc( strlen(receiver_prefix)+2 * sizeof(char));
+	/* Build the name that the group should have */
+	sprintf(receiver_name, "%s%d", receiver_prefix, index);
+	if( !(g_strv_contains((const gchar* const*) groups, receiver_name ))){
+		fprintf (stderr, "Group %s not found in configuration file\nIt should be written in the form [%s]\n",receiver_name ,receiver_name);
+		return NULL;
+	}
+	if(g_key_file_has_key(gkf,receiver_name, (const gchar*)KEY_NAME_DEFAULT_IP , &error)){
+		default_recevie_ip = (char*) g_key_file_get_string(gkf,receiver_name , (const gchar*)KEY_NAME_DEFAULT_IP , &error);
+		if(error != NULL)
+			g_printerr("Invalid format for key %s: %s\n", KEY_NAME_DEFAULT_IP  , error->message);
+	}
+	else {
+		g_printerr("ERROR: key not found %s for group: %s\n",KEY_NAME_DEFAULT_IP , receiver_name);
+		return NULL;
+	}
+		free(receiver_name);
+		close_mib_configuration_file(gkf);
+		return default_recevie_ip;
 }

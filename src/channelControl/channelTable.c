@@ -13,6 +13,7 @@
 #include <gstreamer-1.0/gst/gst.h>
 #include <arpa/inet.h>
 #include "../../include/mibParameters.h"
+#include "../../include/conf/mib-conf.h"
 #include "../../include/multicast.h"
 #include "../../include/videoFormatInfo/videoFormatTable.h"
 #include "../../include/handler.h"
@@ -71,9 +72,12 @@ initialize_table_channelTable(void)
 	/* check if the device is a serviceProvider or a ServiceUser
 	 * If it is a serviceUser or both, then create an empty entry 
 	 */
+	long default_receive_IP; /* a variable to retreive the default receive IP entered by the user in configuration file */
 	if( deviceInfo.parameters[num_DeviceType]._value.int_val != device_SP ){
 		for(int i=0; i<channelNumber._value.int_val; i++){
-			channelTable_create_SU_entry(i+1);
+			/* get the default IP address to use for defaultStartUp mode if it has been entered in the configuration file */
+			default_receive_IP 	= inet_addr(get_default_IP_from_conf(i+1));
+			channelTable_create_SU_entry(i+1, default_receive_IP );
 		}
 	}
 }
@@ -82,7 +86,7 @@ initialize_table_channelTable(void)
  * \brief adds an entry into channelTable_SU
  * \param new_entry the entry to add into the table
  */
-static void add_in_channel_SU(struct channelTable_entry *new_entry){
+void add_in_channel_SU(struct channelTable_entry *new_entry){
 		new_entry->next_SU = channelTable_SU_head;
 		channelTable_SU_head = new_entry;
 }
@@ -191,7 +195,7 @@ struct channelTable_entry *
 /**
  * \brief Create an empty entry, ServiceUser must have an available entry in order to receive the Start message from the manager
  */
-struct channelTable_entry *	channelTable_create_SU_entry(int index){
+struct channelTable_entry *	channelTable_create_SU_entry(int index, long default_IP_address){
     struct channelTable_entry *ServiceUser_entry = 
 		channelTable_createEntry(
     	        				index, /* Appen one channel to the list, its index is just the number of channel incremented by one */
@@ -218,7 +222,7 @@ struct channelTable_entry *	channelTable_create_SU_entry(int index){
 							   	0,
 							   	default_SAP_interval,
 							   	0,
-							   	0,
+							   	default_IP_address,
 							 	NULL
                 			);
 	return ServiceUser_entry;
@@ -429,6 +433,7 @@ gboolean channelSatus_requests_handler( struct channelTable_entry * table_entry 
 			return FALSE;
 			break;
 	}
+	return FALSE;
 }
 
 

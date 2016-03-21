@@ -254,7 +254,6 @@ static int init_stream_SU( gpointer main_loop, gpointer stream_datas, GstCaps *c
  * \param channel_entry the serviceUser corresponding channel 
  * \return EXIT_SUCCESS or EXIT_FAILURE
  */
-
 int init_streaming (gpointer main_loop, GstCaps *caps, struct channelTable_entry * channel_entry)
 {
     /* Initialization of elements needed */
@@ -293,7 +292,7 @@ int init_streaming (gpointer main_loop, GstCaps *caps, struct channelTable_entry
 		if ( deviceInfo.parameters[num_DeviceMode]._value.int_val == defaultStartUp){
 			struct channelTable_entry *entry 	= channelTable_get_from_VF_index(videoFormatNumber._value.int_val);
 			entry->channelStatus 				= start;
- 			if (channelSatus_requests_handler( entry ))
+ 			if ( channelSatus_requests_handler( entry ))
 				return EXIT_SUCCESS;
 			else
 				return EXIT_FAILURE;
@@ -302,9 +301,7 @@ int init_streaming (gpointer main_loop, GstCaps *caps, struct channelTable_entry
 	else{ /* case we are a Service User */
 		if (init_stream_SU( main_loop, data, caps, channel_entry))
 			return EXIT_FAILURE;
-		channel_entry->stream_datas = data;
-		if ( deviceInfo.parameters[num_DeviceMode]._value.int_val == defaultStartUp)
-			return !start_streaming(data, channel_entry->channelVideoFormatIndex);
+		channel_entry->stream_datas = data;	
 	}
 		return EXIT_SUCCESS;
 }

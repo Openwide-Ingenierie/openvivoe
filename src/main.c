@@ -83,6 +83,17 @@ static gboolean service_Provider_init(gpointer loop){
 	return TRUE;
 }
 
+static void default_startUp_mode(gpointer loop){
+		
+	for (int i=1; i<channelNumber._value.int_val; i++){
+		struct channelTable_entry * entry 	= channelTable_getEntry(i);
+		entry->channelStatus 				= start;
+		if ( entry->channelDefaultReceiveIpAddress ) 
+			entry->channelReceiveIpAddress = entry->channelDefaultReceiveIpAddress;
+		add_in_channel_SU(entry);
+	}
+}
+
 /**
  * \brief the data needed to pass to functions used to exit the program nicely
  * \param data the data we need to know to exit the program nicely see stop_program_dat
@@ -112,14 +123,17 @@ int main (int   argc,  char *argv[]){
 	/* Initialize GStreamer */
 	gst_init (&argc, &argv);
 
-	/* start the program: SNMP SubAgent deamon, and streaming */
+	/* init streamings */
 	if ( 	deviceInfo.parameters[num_DeviceType]._value.int_val == device_SP
 	  	 || deviceInfo.parameters[num_DeviceType]._value.int_val == device_both){
 		if ( !service_Provider_init( loop )) {
 			g_printerr("Failed to load streams\n");
-			return 1;
+			return stop_program(&stop_data);
 		}
 	}
+	/* checking for start up mode */
+	if ( deviceInfo.parameters[num_DeviceMode]._value.int_val == defaultStartUp)
+		default_startUp_mode(loop);	
 
 	g_timeout_add(1000, receive_announcement, NULL);
     /* Iterate */
