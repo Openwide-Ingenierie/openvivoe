@@ -90,7 +90,7 @@ static void default_startUp_mode(gpointer loop){
 		entry->channelStatus 				= start;
 		if ( entry->channelDefaultReceiveIpAddress ) 
 			entry->channelReceiveIpAddress = entry->channelDefaultReceiveIpAddress;
-		add_in_channel_SU(entry);
+		channelSatus_requests_handler( entry );
 	}
 }
 

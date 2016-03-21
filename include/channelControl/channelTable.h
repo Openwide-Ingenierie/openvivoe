@@ -145,7 +145,6 @@ gboolean channelTable_fill_entry(struct channelTable_entry * entry, struct video
 struct channelTable_entry *	channelTable_create_SU_entry(int index, long default_IP_address);
 struct channelTable_entry * channelTable_getEntry(int index);
 struct channelTable_entry * channelTable_get_from_VF_index(int index);
-void add_in_channel_SU(struct channelTable_entry *new_entry);
 void channelTable_delete();
 int channelSatus_requests_handler( struct channelTable_entry * table_entry );
 

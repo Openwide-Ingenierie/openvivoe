@@ -86,7 +86,7 @@ initialize_table_channelTable(void)
  * \brief adds an entry into channelTable_SU
  * \param new_entry the entry to add into the table
  */
-void add_in_channel_SU(struct channelTable_entry *new_entry){
+static void add_in_channel_SU(struct channelTable_entry *new_entry){
 		new_entry->next_SU = channelTable_SU_head;
 		channelTable_SU_head = new_entry;
 }
