@@ -263,7 +263,8 @@ GstCaps* get_SDP(unsigned char *array, int sdp_msg_size, in_addr_t *multicast_ad
 		g_printerr("Failed to create SDP message\n");
 		return NULL;
 	}
-
+	
+	/* parse the octet string to fill the SDP msg structure */
 	if( gst_sdp_message_parse_buffer (array, sdp_msg_size, msg) != GST_SDP_OK){
 		g_printerr("Failed to parse SDP message\n");
 		return NULL;

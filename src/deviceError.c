@@ -11,6 +11,10 @@
 extern const oid snmptrap_oid[];
 extern const size_t snmptrap_oid_len;
 
+/**
+ * \brief send a TRAP message with the content of deviceUserDesc or deviceMode if a unexpected error occurs 
+ * \return SNMP_ERR_NOERROR
+ */
 int
 send_deviceError_trap( void )
 {
@@ -28,7 +32,7 @@ send_deviceError_trap( void )
         deviceError_oid, sizeof(deviceError_oid));
 
     /*
-     * Add any objects from the trap definition
+     * Add any objects from the trap definition, here deviceUserDesc and deviceMode
      */
     snmp_varlist_add_variable(&var_list,
         deviceUserDesc_oid, OID_LENGTH(deviceUserDesc_oid),
@@ -42,7 +46,7 @@ send_deviceError_trap( void )
         NULL, 0);
 
     /*
-     * Add any extra (optional) objects here
+     * Add any extra (optional) objects here, not used for now 
      */
 
     /*

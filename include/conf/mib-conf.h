@@ -42,6 +42,7 @@
 int 	init_mib_content(); /*check the groups, key and values of the MIB's parameters*/
 gchar 	*init_sources_from_conf(int index); /* get the command line used to initiate the streams */
 gchar 	*get_desc_from_conf(int index); /* get the channelUserDesc associated to the stream */
+void 	set_desc_to_conf(int index, const char* new_desc); /* save the new channelUserDesc in configuration file */
 gchar 	*get_default_IP_from_conf(int index); /* get the defaultReceiveIP for the defaultStartUp mode for Service User */
 void 	set_default_IP_from_conf(int index, const char* new_default_ip); /* set the defaultReceiveIP for the defaultStartUp mode for Service User */
 #endif /* MIB_CONF_H */

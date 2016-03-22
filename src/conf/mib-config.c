@@ -329,6 +329,12 @@ int init_mib_content(){
 
 /**
  * \brief check if the group contains the given key, get the corresponding value or display appropriate error to the user
+ * \param gkf the GKeyFile openned
+ * \param groups the names of groups present in configuration file
+ * \param group_name the group's name in which we are interested 
+ * \param key_name the name of the key we are loooking for
+ * \param error a variable to store errors 
+ * \return gchar* the value of the found key or NULL is the key has not been found
  */
 static gchar *get_key_value(GKeyFile* gkf, const gchar* const* groups ,char *group_name, const gchar *key_name, GError* error){
 	gchar *key_value;
@@ -346,6 +352,37 @@ static gchar *get_key_value(GKeyFile* gkf, const gchar* const* groups ,char *gro
 		return NULL;
 	}
 	return key_value;
+}
+
+
+/**
+ * \brief check if the group contains the given key, set the corresponding value or display appropriate error to the user, save the new version of conf file
+ * \param gkf the GKeyFile openned
+ * \param groups the names of groups present in configuration file
+ * \param group_name the group's name in which we are interested 
+ * \param key_name the name of the key we are loooking for
+ * \param error a variable to store errors 
+ * \return gchar* the value of the found key or NULL is the key has not been found
+ */
+gboolean set_key_value(GKeyFile* gkf, const gchar* const* groups ,char *group_name, gchar* gkf_path,  const gchar *key_name,const gchar *new_value, GError* error){
+
+	if( !(g_strv_contains((const gchar* const*) groups, group_name )))
+		fprintf (stderr, "Group %s not found in configuration file\nIt should be written in the form [%s]\n",group_name,group_name );
+	if(g_key_file_has_key(gkf,group_name,key_name , &error)){
+		g_key_file_set_string(gkf,group_name ,key_name ,new_value );	
+		g_key_file_save_to_file(gkf, gkf_path , &error);
+		if(error != NULL){
+			g_printerr("ERROR: failed to write to configuration file %s: %s\n",CONFIG_FILE , error->message);
+			return FALSE;
+		}
+	}
+	else{ 
+		g_printerr("ERROR: key not found %s for group: %s\n",key_name ,group_name );
+		return FALSE;
+	}
+
+	return TRUE;
+
 }
 
 /**
@@ -429,6 +466,42 @@ gchar* get_desc_from_conf(int index){
 	return channelUserDesc;
 }
 
+
+/** 
+ * \brief save the value of ChannelUserDesc enter by the user in configuration file 
+ * \param index the corresponding number of the source to refer it in the configuration file
+ * \param new_default_ip the new value of DefaultReceiveIPaddress
+ */
+void set_desc_to_conf(int index, const char* new_desc){
+	/* Define the error pointer we will be using to check for errors in the configuration file */
+    GError 		*error 	= NULL;
+
+	/* a location to store the path of the openned configuration file */
+	gchar* gkf_path = NULL;
+
+	 /* Declaration of a pointer that will contain our configuration file*/
+	GKeyFile 	*gkf 	= open_mib_configuration_file(error, &gkf_path);
+
+	/* Declaration of an array of gstring (gchar**) that will contain the name of the different groups
+	 * declared in the configuration file
+	 */
+	gchar 		**groups;
+
+	/*first we load the different Groups of the configuration file
+	 * second parameter "gchar* length" is optional*/
+	groups = g_key_file_get_groups(gkf, NULL);
+
+	char *source_prefix = "source_";
+	char *source_name = (char*) malloc( strlen(source_prefix)+2 * sizeof(char));
+	/* Build the name that the group should have */
+	sprintf(source_name, "%s%d", source_prefix, index);
+
+	set_key_value(gkf,(const gchar* const*) groups , source_name , gkf_path ,KEY_NAME_CHANNEL_DESC  ,new_desc , error);
+
+	free(source_name);
+	close_mib_configuration_file(gkf);
+}
+
 /** 
  * \brief returned the DefaultIPaddress enter by the user to use for SU in defaultStartUPMode 
  * \param the corresponding number of the source to refer it in the configuration file
@@ -462,7 +535,7 @@ gchar *get_default_IP_from_conf(int index){
 	/* Build the name that the group should have */
 	sprintf(receiver_name, "%s%d", receiver_prefix, index);
 
-	default_receive_ip = get_key_value(gkf,(const gchar* const*) groups ,receiver_name  ,KEY_NAME_DEFAULT_IP , error);
+	default_receive_ip = get_key_value(gkf,(const gchar* const*) groups ,receiver_name, KEY_NAME_DEFAULT_IP , error);
 
 	free(receiver_name);
 	close_mib_configuration_file(gkf);
@@ -496,16 +569,9 @@ void set_default_IP_from_conf(int index, const char* new_default_ip){
 	char *receiver_name = (char*) malloc( strlen(receiver_prefix)+2 * sizeof(char));
 	/* Build the name that the group should have */
 	sprintf(receiver_name, "%s%d", receiver_prefix, index);
-	if( !(g_strv_contains((const gchar* const*) groups, receiver_name )))
-		fprintf (stderr, "Group %s not found in configuration file\nIt should be written in the form [%s]\n",receiver_name ,receiver_name);
-	if(g_key_file_has_key(gkf,receiver_name, (const gchar*)KEY_NAME_DEFAULT_IP , &error)){
-		g_key_file_set_string(gkf,receiver_name , (const gchar*)KEY_NAME_DEFAULT_IP ,new_default_ip );	
-		g_key_file_save_to_file(gkf, gkf_path , &error);
-		if(error != NULL)
-			g_printerr("ERROR: failed to write to configuration file %s: %s\n",CONFIG_FILE , error->message);
-	}
-	else 
-		g_printerr("ERROR: key not found %s for group: %s\n",KEY_NAME_DEFAULT_IP , receiver_name);
+
+	set_key_value(gkf,(const gchar* const*) groups , receiver_name , gkf_path , KEY_NAME_DEFAULT_IP ,new_default_ip , error);
+
 	free(receiver_name);
 	close_mib_configuration_file(gkf);
 }

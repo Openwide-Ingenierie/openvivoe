@@ -897,6 +897,7 @@ channelTable_handler(
                         (char*) request->requestvb->val.string);
                 table_entry->channelUserDesc_len =
                         request->requestvb->val_len;
+				set_desc_to_conf(table_entry->channelVideoFormatIndex,table_entry->channelUserDesc );
                 break;
             case COLUMN_CHANNELSTATUS:
                 table_entry->old_channelStatus 					= table_entry->channelStatus;
