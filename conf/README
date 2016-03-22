@@ -1,8 +1,0 @@
-snmp.conf:
-Configuration file for the agent, tell the agent which MIB to load by default.
-See man snmp.conf for further information.
-
-snmpd.conf:
-Configuration file for the deamon. It indicates the addresses allowed to establish
-a connection, as well as the community name to use (for RO and RW accesses). It also 
-indicates to the Xagent on which socket to connect. 
