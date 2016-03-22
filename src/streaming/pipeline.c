@@ -16,6 +16,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <arpa/inet.h>
 #include "../../include/mibParameters.h"
+#include "../../include/conf/mib-conf.h"
 #include "../../include/videoFormatInfo/videoFormatTable.h"
 #include "../../include/channelControl/channelTable.h"
 #include "../../include/streaming/stream_registration.h"
@@ -341,11 +342,24 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 	GstBus *bus,
  */
 static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 								guint bus_watch_id, 	GMainLoop *loop,
-								GstElement *input
+								GstElement *input, 		struct channelTable_entry * channel_entry
 								){
-	GstElement *sink;
+//	GstElement *sink;
+
+	GError 		*error 		= NULL; /* an Object to save errors when they occurs */
+	GstElement 	*sink 		= NULL; /* to return last element of pipeline */
+	gchar 		*cmdline 	= init_sink_from_conf( channel_entry->channelIndex );
+
+	/* check if everything went ok */	
+	if (cmdline == NULL)
+		return NULL;
+
+	sink  = gst_parse_bin_from_description (cmdline,
+											TRUE,
+											&error);
+
 	/* Create the sink */
-    sink = gst_element_factory_make ("xvimagesink", "sink");
+   // sink = gst_element_factory_make ("xvimagesink", "sink");
     if(sink == NULL){
        g_printerr ( "error cannot create element for: %s\n","sink");
 	   return NULL;
@@ -409,6 +423,6 @@ GstElement* create_pipeline_serviceUser( gpointer stream_datas,
 
 	channelTable_fill_entry(channel_entry, video_stream_info);	
 
-	addSink_SU( pipeline, bus, bus_watch_id, loop, last);
+	addSink_SU( pipeline, bus, bus_watch_id, loop, last, channel_entry);
 	return first;
 }

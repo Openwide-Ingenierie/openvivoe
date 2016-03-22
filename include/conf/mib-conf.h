@@ -38,9 +38,15 @@
  */
 #define GST_SOURCE_CMDLINE 			"gst_source"
 
+/**
+ * \brief the name of the Gstreamer command line used by the user to output the video 
+ */
+#define GST_SINK_CMDLINE 			"gst_sink"
+
 /*functions' definitions*/
 int 	init_mib_content(); /*check the groups, key and values of the MIB's parameters*/
 gchar 	*init_sources_from_conf(int index); /* get the command line used to initiate the streams */
+gchar 	*init_sink_from_conf(int index); /* get the command line used to sink the streams in ServiceUsers */
 gchar 	*get_desc_from_conf(int index); /* get the channelUserDesc associated to the stream */
 void 	set_desc_to_conf(int index, const char* new_desc); /* save the new channelUserDesc in configuration file */
 gchar 	*get_default_IP_from_conf(int index); /* get the defaultReceiveIP for the defaultStartUp mode for Service User */

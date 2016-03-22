@@ -426,6 +426,48 @@ gchar *init_sources_from_conf(int index){
 	return cmdline;
 }
 
+/**
+ * \brief get the command line entered by the user in configuration file to get the video source
+ * \param index the index of the initiated stream
+ * \return gchar* the command line found in a string form or NULL if no ones has been found
+ */
+gchar *init_sink_from_conf(int index){
+	/* Define the error pointer we will be using to check for errors in the configuration file */
+    GError 		*error 	= NULL;
+
+	/* a location to store the path of the openned configuration file */
+	gchar* gkf_path = NULL;
+
+	 /* Declaration of a pointer that will contain our configuration file*/
+	GKeyFile 	*gkf 	= open_mib_configuration_file(error, &gkf_path);
+
+	/* Declaration of an array of gstring (gchar**) that will contain the name of the different groups
+	 * declared in the configuration file
+	 */
+	gchar 		**groups;
+
+	/*
+	 * the command line string retreive from the configuration file
+	 */
+	gchar 		*cmdline;
+
+	/*first we load the different Groups of the configuration file
+	 * second parameter "gchar* length" is optional*/
+	groups = g_key_file_get_groups(gkf, NULL);
+
+	char *receiver_prefix = "receiver_";
+	char *receiver_name = (char*) malloc( strlen(receiver_prefix)+2 * sizeof(char));
+	/* Build the name that the group should have */
+	sprintf(receiver_name, "%s%d", receiver_prefix, index);
+
+	cmdline = get_key_value(gkf,(const gchar* const*) groups , receiver_name ,GST_SINK_CMDLINE , error);
+
+	free(receiver_name);
+	close_mib_configuration_file(gkf);
+	return cmdline;
+}
+
+
 /** 
  * \brief returned the channel User Description enter by the user to described the channel 
  * \param the corresponding number of the source to refer it in the configuration file
