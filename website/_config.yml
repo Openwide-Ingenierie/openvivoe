@@ -6,16 +6,18 @@
 # 'jekyll serve'. If you change this file, please restart the server process.
 
 # Site settings
-title: Your awesome title
-email: your-email@domain.com
+title: OpenVivoe Website 
+email: hoel.vasseur@openwide.fr
 description: > # this means to ignore newlines until "baseurl:"
-  Write an awesome description for your new site here. You can edit this
-  line in _config.yml. It will appear in your document head meta (for
-  Google search results) and in your feed.xml site description.
+  VIVOE is a military norm to stream video from several sources to
+  several sinks. Video streaming uses is based on RTP and SAP/SDP
+  while streaming management uses SNMP. OpenVivoe is the Open Source
+  impementation realized by OpenWide Ingenierie, a French Open Source
+  architecte.
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "http://yourdomain.com" # the base hostname & protocol for your site
-twitter_username: jekyllrb
-github_username:  jekyll
+twitter_username: OpenWide_Inge
+github_username: Openwide-Ingenierie
 
 # Build settings
 markdown: kramdown
