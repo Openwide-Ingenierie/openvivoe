@@ -344,7 +344,6 @@ static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 								guint bus_watch_id, 	GMainLoop *loop,
 								GstElement *input, 		struct channelTable_entry * channel_entry
 								){
-//	GstElement *sink;
 
 	GError 		*error 		= NULL; /* an Object to save errors when they occurs */
 	GstElement 	*sink 		= NULL; /* to return last element of pipeline */
@@ -359,7 +358,6 @@ static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 											&error);
 
 	/* Create the sink */
-   // sink = gst_element_factory_make ("xvimagesink", "sink");
     if(sink == NULL){
        g_printerr ( "error cannot create element for: %s\n","sink");
 	   return NULL;
