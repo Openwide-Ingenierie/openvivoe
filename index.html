@@ -236,14 +236,25 @@
 			<h3 class="sub-title text-center">Try OpenVivoe</h3>
 			<div class="block">
 				<h4 class="sub-title text-center">Configure net-snmp</h4>
-				<p>First, you need to configure net-snmp for OpenVivoe. Net-SNMP is the library used by VIVOE to implement SNMP, the protocol used to managed the streams.<a href="https://fr.wikipedia.org/wiki/Simple_Network_Management_Protocol" target="_blank"> SNMPv2 protcole</a>.</p>
+				<p>First, you need to configure net-snmp for OpenVivoe. Net-SNMP is the library used by VIVOE to implement SNMP, the protocol used to managed the streams.<a href="https://fr.wikipedia.org/wiki/Simple_Network_Management_Protocol" target="_blank"> SNMPv2 protcole</a> works with a Management Information Base "MIB", which acts as a data base. VIVOE implements its own. Furthermore, Net-SNMP cames with several configuration files. To simplify the configuration OpenVivoe already wrote all those files. First, create a directory ".snmp" in your home folder and copy the content of the conf directory in there.</p>
 				<div class="code-block">
 					<pre><code class="language-markup">
-	~$ cmake -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles"
-	~$ make
+	~$ make $HOME/.snmp
+	~$ mv conf/* $HOME/.snmp 
 					</code></pre>
 				</div><!--//code-block-->
-			</div><!--//block-->  
+				<p>Congratulations, your openvivoe is fully configured. However, you can take a look to configuration files, especially to vivoe-mib.conf, that you can use to fill your some of your MIB's parameters.</p>
+			</div><!--//block--> 
+
+		<h4 class="sub-title text-center">Launch OpenVivoe</h4>
+				<p>Now you can try OpenVivoe. To do so, you first launch the biary file. This binary is located in openvivoe/bin/Debug or in openvivoe/bin/Release depending the OpenVivoe's version you built. In the following example debug's version is used, as it is the default selected version when building.</p>
+				<div class="code-block">
+					<pre><code class="language-markup">
+	$~ cd bin/Debug && ./openvivoe
+					</code></pre>
+				</div><!--//code-block-->
+				<p>If your terminal look to something like this, then openvivoe has been successfully started! Congratulations!</p>
+			</div><!--//block--> 
 
             <div class="block">
                 <h3 class="sub-title text-center">Full Documentation</h3>
