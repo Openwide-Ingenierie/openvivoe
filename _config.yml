@@ -15,9 +15,14 @@ description: > # this means to ignore newlines until "baseurl:"
   impementation realized by OpenWide Ingenierie, a French Open Source
   architecte.
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "http://yourdomain.com" # the base hostname & protocol for your site
+url: "http://openwide-ingenierie.github.io" # the base hostname & protocol for your site
 twitter_username: OpenWide_Inge
 github_username: Openwide-Ingenierie
+
+#Rewards
+author:
+  fullname: Hoël Vasseur
+  github: hvasseur
 
 # Build settings
 markdown: kramdown
