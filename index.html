@@ -82,7 +82,7 @@
             <ul class="meta list-inline">
                 <li><a href="https://github.com/Openwide-Ingenierie/openvivoe" target="_blank">View on GitHub</a></li>
                 <li><a href="https://github.com/Openwide-Ingenierie/openvivoe/wiki" target="_blank">Wiki</a></li>
-                <li>Created by: <a href="https://github.com/hvasseur" target="_blank">Hoel Vasseur</a> at <a href="https://github.com/Openwide-Ingenierie" target="_blank">OpenWide Ingenierie</a></li>
+                <li>Created by: <a href="https://github.com/hvasseur" target="_blank">Hoël Vasseur</a> at <a href="https://github.com/Openwide-Ingenierie" target="_blank">OpenWide Ingenierie</a></li>
             </ul><!--//meta-->
         </div><!--//container-->
         <div class="social-media">
@@ -96,7 +96,7 @@
     <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
                     </li><!--//twitter-tweet-->
                     <!--// Generate github buttons: https://github.com/mdo/github-buttons -->
-                    <li class="github-star"><iframe src="http://ghbtns.com/github-btn.html?user=Openwide-Ingenierie&repo=openvivoe&type=watch&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="110" height="20"></iframe></li>
+                    <li class="github-star"><iframe src="http://ghbtns.com/github-btn.html?user=Openwide-Ingenierie&repo=openvivoe&type=watch&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="50" height="20"></iframe></li>
                     <li class="github-fork"><iframe src="http://ghbtns.com/github-btn.html?user=Openwide-Ingenierie&repo=openvivoe&type=fork" allowtransparency="true" frameborder="0" scrolling="0" width="53" height="20"></iframe></li>
                     <li class="github-follow"><iframe src="http://ghbtns.com/github-btn.html?user=Openwide-Ingenierie&type=follow"  allowtransparency="true" frameborder="0" scrolling="0" width="200" height="20"></iframe></li>
                 </ul>
@@ -108,7 +108,7 @@
     <section id="about" class="about section">
         <div class="container">
             <h2 class="title text-center">What is OpenVivoe?</h2>
-            <p class="intro text-center">VIVOE is the name of the Defense Standard 00-82 military norm, written by the UK's Ministry of Defence, a military norm to multicast video streams between device inside a terrestrial vehicles. OpenVivoe is its open source implementation realized by OpenWide Ingenierie, a French Open Source architecte.</p>
+            <p class="intro text-center">VIVOE is the name of the Defense Standard 00-82 military norm, written by the UK's Ministry of Defence, a military standard to multicast video streams between device inside a terrestrial vehicles over a ethernet network (Vetronics Infrastructure for Video Over Ethernet). OpenVivoe is its open source implementation realized by OpenWide Ingenierie, a French Open Source architecte.</p>
             <div class="row">
                 <div class="item col-md-4 col-sm-6 col-xs-12">
                     <div class="icon-holder">
@@ -116,7 +116,7 @@
                     </div>
                     <div class="content">
                         <h3 class="sub-title">Multicast video streams</h3>
-                        <p>VIVOE aims to multicast video streams between devices over the same network, inside the same vehicle. It means that one video source can send it stream to many video sinks using a unique mulicast IP address. OpenVivoe uses Real Time Streaming Protocol (RTP) to carry those videos. To automatically play the streams, OpenVivoe implements its own version of the SAP/SDPprotocol.</p>
+                        <p>VIVOE aims to multicast video streams between devices over the same network, inside the same vehicle. It means that one video source can send it stream to many video sinks using a unique mulicast IP address. OpenVivoe uses Real Time Streaming Protocol (RTP) to carry those videos. To automatically play the streams, OpenVivoe implements its own version of the SAP/SDP protocol.</p>
                     </div><!--//content-->
                 </div><!--//item-->
                 <div class="item col-md-4 col-sm-6 col-xs-12">
@@ -125,7 +125,7 @@
                     </div>
                     <div class="content">
                         <h3 class="sub-title">Manage the streams with SNMP</h3>
-                        <p>Not only OpenVivoe implement steaming, but it uses Simple Network Management Protocole to control. Indeed, with OpenVivoe, one of the device remaining in the network is defined as the "Manager". From the manager you can remotely start and stop the streams on other devices, choose wich screens displays which streams.</p>
+                        <p>Not only OpenVivoe implement steaming, but it uses Simple Network Management Protocole to control it. Indeed, with OpenVivoe, one of the device remaining in the network is defined as the "Manager". From the manager you can remotely start and stop the streams on other devices, choose wich screens will displays which streams.</p>
                     </div><!--//content-->
                 </div><!--//item-->
                 <div class="item col-md-4 col-sm-6 col-xs-12">
@@ -134,13 +134,13 @@
                     </div>
                     <div class="content">
                         <h3 class="sub-title">Linux Based</h3>
-                        <p>OpenVivoe has been developped on Linux. For now, only Linux version is available. However, OpenViveo could be multi-platform in a close the future.</p>
+                        <p>OpenVivoe has been developped on Linux. For now, only Linux version is available. However, OpenViveo could be multi-platform in a close the future. </p>
                     </div><!--//content-->
                 </div><!--//item-->
 				<div class="clearfix visible-md"></div> 
 				<div class="item col-md-4 col-sm-6 col-xs-12">
 					<div class="icon-holder">
-						<i class="fa fa-crosshairs"></i>
+						<i class="fa fa-spinner"></i>
 					</div>
 					<div class="content">
 						<h3 class="sub-title">Still under development</h3>
@@ -244,8 +244,8 @@
 				</div><!--//code-block-->
 				<p>Congratulations, your openvivoe is fully configured. However, you can take a look to configuration files, especially to vivoe-mib.conf, that you can use to fill your some of your MIB's parameters.</p>
 			</div><!--//block--> 
-
-		<h4 class="sub-title text-center">Launch OpenVivoe and Start Streaming</h4>
+			<div class="block">
+			<h4 class="sub-title text-center">Launch OpenVivoe and Start Streaming</h4>
 				<p>Now you can try OpenVivoe. To do so, you first launch the biary file. This binary is located in openvivoe/bin/Debug or in openvivoe/bin/Release depending the OpenVivoe's version you built. In the following example debug's version is used, as it is the default selected version when building. First, connect a webcam to your computer. In this example we assume that you only have one device available for testing. To test openvivoe you will stream from your computer to ... your computer. Now, you can start the program.</p>
 				<div class="code-block">
 					<pre><code class="language-markup">
@@ -253,7 +253,6 @@
 					</code></pre>
 				</div><!--//code-block-->
 				</div><!--//block-->
-
 				<p>The program should be started, and the streams should have started. If your terminal look to something like this, then openvivoe has been successfully started! Congratulations!</p>
 				<div class="code-block">
 					<pre><code class="language-markup">
@@ -263,8 +262,6 @@
 	Now playing
 					</code></pre>
 				</div><!--//code-block-->
-				</div><!--//block--> 
-
             <div class="block">
                 <h3 class="sub-title text-center">Full Documentation</h3>
                 <p>For more detail information go and visit our wiki!</p>
@@ -341,4 +338,3 @@
     <script type="text/javascript" src="assets/js/main.js"></script>       
 </body>
 </html> 
-
