@@ -10,7 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">    
-    <link rel="shortcut icon" href="favicon.ico">  
+    <link rel="shortcut icon" href="assets/images/OW_icon.png">  
     <link href='http://fonts.googleapis.com/css?family=Lato:300,400,300italic,400italic' rel='stylesheet' type='text/css'>
     <link href='http://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'> 
     <!-- Global CSS -->
@@ -75,9 +75,8 @@
     <section id="promo" class="promo section offset-header">
         <div class="container text-center">
             <h2 class="title">Open<span class="highlight">Vivoe</span></h2>
-            <p class="intro">The Open Source Implementation of the VIVOE Norm</p>
+            <p class="intro">The Open Source Implementation of the VIVOE Standard</p>
             <div class="btns">
-                <a class="btn btn-cta-secondary" href="http://themes.3rdwavemedia.com/" target="_blank">Demo</a>
                 <a class="btn btn-cta-primary" href="https://github.com/Openwide-Ingenierie/openvivoe/archive/master.zip" target="_blank">Download</a>
             </div>
             <ul class="meta list-inline">
@@ -246,15 +245,25 @@
 				<p>Congratulations, your openvivoe is fully configured. However, you can take a look to configuration files, especially to vivoe-mib.conf, that you can use to fill your some of your MIB's parameters.</p>
 			</div><!--//block--> 
 
-		<h4 class="sub-title text-center">Launch OpenVivoe</h4>
-				<p>Now you can try OpenVivoe. To do so, you first launch the biary file. This binary is located in openvivoe/bin/Debug or in openvivoe/bin/Release depending the OpenVivoe's version you built. In the following example debug's version is used, as it is the default selected version when building.</p>
+		<h4 class="sub-title text-center">Launch OpenVivoe and Start Streaming</h4>
+				<p>Now you can try OpenVivoe. To do so, you first launch the biary file. This binary is located in openvivoe/bin/Debug or in openvivoe/bin/Release depending the OpenVivoe's version you built. In the following example debug's version is used, as it is the default selected version when building. First, connect a webcam to your computer. In this example we assume that you only have one device available for testing. To test openvivoe you will stream from your computer to ... your computer. Now, you can start the program.</p>
 				<div class="code-block">
 					<pre><code class="language-markup">
 	$~ cd bin/Debug && ./openvivoe
 					</code></pre>
 				</div><!--//code-block-->
-				<p>If your terminal look to something like this, then openvivoe has been successfully started! Congratulations!</p>
-			</div><!--//block--> 
+				</div><!--//block-->
+
+				<p>The program should be started, and the streams should have started. If your terminal look to something like this, then openvivoe has been successfully started! Congratulations!</p>
+				<div class="code-block">
+					<pre><code class="language-markup">
+	~$ ./openvivoe
+	NET-SNMP version 5.7.3 AgentX subagent connected
+	openvivoe is up and running
+	Now playing
+					</code></pre>
+				</div><!--//code-block-->
+				</div><!--//block--> 
 
             <div class="block">
                 <h3 class="sub-title text-center">Full Documentation</h3>
@@ -274,7 +283,7 @@
             <div class="license-inner">
             <h2 class="title text-center">License</h2>
                 <div class="info">
-                    <p>This software is designed by <a href="http://ingenierie.openwide.fr/" target="_blank">OpenWide Ingenierie</a> and is  <strong>100% FREE and OPEN SOURCE</strong> under the <a href="http://www.gnu.org/licenses/gpl-2.0.html" target="_blank">GNU General Public License, version 2</a></p>
+                    <p>This software designed by <a href="http://ingenierie.openwide.fr/" target="_blank">OpenWide Ingenierie</a> is  <strong>100% FREE and OPEN SOURCE</strong> and is under the <a href="http://www.gnu.org/licenses/gpl-2.0.html" target="_blank">GNU General Public License, version 2</a></p>
 					<p><strong>[For developers]:</strong> Please if free to try OpenVivoe, and tell us what you think about it. If you have ideas, suggestion, contact us.</p>
             </div><!--//license-inner-->
         </div><!--//container-->
@@ -291,14 +300,13 @@
                         <img class="img-responsive" src="assets/images/OW_icon.png" alt="" />
                     </div><!--//profile-->
                     <div class="speech-bubble">
-                        <h3 class="sub-title">Want to get more freebies in the future?</h3>
-                        <p>I tweet about #UX and #webdev related resources/content at <a href="https://twitter.com/3rdwave_themes" target="_blank">@3rdwave_themes</a> 
-                        <p>If you like what I do, you can follow me on twitter and I will keep you informed about my next free template there :)</p>
-                        <p><strong>[Tip for developers]:</strong> If you take on freelance work you can put a tailored message here about your availability to attract potential clients. Be creative and good luck!</p> 
+                        <h3 class="sub-title">Want to see more of OpenWide Ingenierie?</h3>
+                        <p>Go and check our website at <a href="http://ingenierie.openwide.fr/" target="_blank">OpenWide Ingenierie</a> 
+                        <p>If you like what we do, you can follow us on twitter and you will be informed about our latest news</p>
                         <div class="source">
-                            <span class="name"><a href="https://twitter.com/3rdwave_themes" target="_blank">Xiaoying Riley</a></span>
+                            <span class="name"><a href="https://github.com/hvasseur" target="_blank">Hoël Vasseur</a></span>
                             <br />
-                            <span class="title">UX/UI Designer</span>
+                            <span class="title">Embedded Linux developer</span>
                         </div><!--//source-->
                     </div><!--//speech-bubble-->                        
                 </div><!--//author-message-->
@@ -306,12 +314,10 @@
                 <div class="info text-center">
                     <h4 class="sub-title">Get Connected</h4>
                     <ul class="social-icons list-inline">
-                        <li><a href="https://twitter.com/3rdwave_themes" target="_blank"><i class="fa fa-twitter"></i></a></li>
-                        <li><a href="https://www.facebook.com/3rdwavethemes" target="_blank"><i class="fa fa-facebook"></i></a></li>
-                        <li><a href="https://www.linkedin.com/in/xiaoying"><i class="fa fa-linkedin"></i></a></li>
-                        <li><a href="http://instagram.com/xyriley"><i class="fa fa-instagram"></i></a></li>  
-                        <li><a href="https://dribbble.com/Xiaoying"><i class="fa fa-dribbble"></i></a></li>   
-                        <li class="last"><a href="mailto:hello@3rdwavemedia.com"><i class="fa fa-envelope"></i></a></li>              
+                        <li><a href="https://twitter.com/OpenWide_Inge" target="_blank"><i class="fa fa-twitter"></i></a></li>
+                        <li><a href="https://github.com/Openwide-Ingenierie" target="_blank"><i class="fa fa-github"></i></a></li>
+                        <li><a href="https://www.linkedin.com/company/open-wide"><i class="fa fa-linkedin"></i></a></li>
+                        <li class="last"><a href="mailto:hoel.vasseur@openwide.fr"><i class="fa fa-envelope"></i></a></li>              
                     </ul>
                 </div><!--//info-->
             </div><!--//contact-inner-->
