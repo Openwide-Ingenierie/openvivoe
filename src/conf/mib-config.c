@@ -351,6 +351,12 @@ static gchar *get_key_value(GKeyFile* gkf, const gchar* const* groups ,char *gro
 		g_printerr("ERROR: key not found %s for group: %s\n", key_name ,group_name );
 		return NULL;
 	}
+
+	if ( !strcmp( key_value, "") ){
+		g_printerr("ERROR: invalid key value for %s in %s\n", key_name ,group_name );
+		return NULL;
+	}
+
 	return key_value;
 }
 

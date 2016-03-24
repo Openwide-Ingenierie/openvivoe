@@ -413,8 +413,9 @@ GstElement* create_pipeline_serviceUser( gpointer stream_datas,
 	gchar 		*cmdline 	= init_sink_from_conf( channel_entry->channelIndex );
 
 	/* check if everything went ok */	
-	if (cmdline == NULL)
+	if (cmdline == NULL )
 		return NULL;
+	
 
 	GstElement 	*pipeline 		= data->pipeline;
 	GstBus 		*bus 			= data->bus;
@@ -437,5 +438,6 @@ GstElement* create_pipeline_serviceUser( gpointer stream_datas,
 	channelTable_fill_entry(channel_entry, video_stream_info);	
 
 	addSink_SU( pipeline, bus, bus_watch_id, loop, last, channel_entry, cmdline);
+
 	return first;
 }
