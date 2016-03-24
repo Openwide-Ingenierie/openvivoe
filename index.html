@@ -189,20 +189,21 @@
             <h2 class="title text-center">Get Started</h2>            
             <div class="block">
                 <h3 class="sub-title text-center">Project's installation</h3>
-                <p>To install and use OpenVivoe on Debian based distribution follow this steps:
+                <p>To install and use OpenVivoe on Debian based distributions follow this steps:
 				</p>
                 <div class="code-block">
                     <!--//Use Prismjs - http://prismjs.com/index.html#basic-usage -->
                     <pre><code class="language-markup">
-   ~$ sudo apt-get install gstreamer gst-libav gst-plugins-base gst-plugins-base-libs gst-plugins-good gst-plugins-ugly
-   ~$ sudo apt-get install glib2
-   ~$ sudo apt-get install net-snmp
+	~$ sudo apt-get install cmake
+	~$ sudo apt-get install gstreamer gst-libav gst-plugins-base gst-plugins-base-libs gst-plugins-good gst-plugins-ugly
+	~$ sudo apt-get install glib2
+	~$ sudo apt-get install net-snmp
                      </code></pre>
                 </div><!--//code-block-->
             </div><!--//block-->
             
             <div class="block">
-				<p>Once depedencies are installed, clone the <a href="https://github.com/Openwide-Ingenierie/openvivoe" target="_blank"> master branch</a> of the GitHub repository. Or simply click on the <a class="scrollto" href="#promo">Download</a> button</p>
+				<p>Once depedencies are installed, clone the <a href="https://github.com/Openwide-Ingenierie/openvivoe" target="_blank"> master branch</a> of the GitHub repository or simply click on the <a class="scrollto" href="#promo">Download</a> button.</p>
                 
                 <div class="code-block">
                     <!--//Use Prismjs - http://prismjs.com/index.html#basic-usage -->
@@ -214,7 +215,7 @@
             </div><!--//block-->
             
             <div class="block">
-                <p>Then, just build the project</p>
+                <p>Then, just build the project.</p>
                 <div class="code-block">
                     <pre><code class="language-markup">
 	~$ cmake -G "Unix Makefiles"
@@ -224,7 +225,7 @@
             </div><!--//block-->   
 
 			<div class="block">
-				<p>If you prefer, you can build a Release version</p>
+				<p>If you prefer, you can build a Release version:</p>
 				<div class="code-block">
 					<pre><code class="language-markup">
 	~$ cmake -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles"
@@ -235,25 +236,25 @@
 			<h3 class="sub-title text-center">Try OpenVivoe</h3>
 			<div class="block">
 				<h4 class="sub-title text-center">Configure net-snmp</h4>
-				<p>First, you need to configure net-snmp for OpenVivoe. Net-SNMP is the library used by VIVOE to implement SNMP, the protocol used to managed the streams.<a href="https://fr.wikipedia.org/wiki/Simple_Network_Management_Protocol" target="_blank"> SNMPv2 protcole</a> works with a Management Information Base "MIB", which acts as a data base. VIVOE implements its own. Furthermore, Net-SNMP cames with several configuration files. To simplify the configuration OpenVivoe already wrote all those files. First, create a directory ".snmp" in your home folder and copy the content of the conf directory in there.</p>
+				<p>First, you need to configure net-snmp for OpenVivoe. Net-SNMP is the library used by VIVOE to implement SNMP, the protocol used to control  the streams.<a href="https://fr.wikipedia.org/wiki/Simple_Network_Management_Protocol" target="_blank"> SNMPv2 protcol</a> works with a Management Information Base "MIB", which acts as a data base. VIVOE implements its own. Furthermore, Net-SNMP cames with several configuration files. To simplify the configuration we already have wrote all those files. First, create a directory <strong>".snmp"</strong> in your home folder and copy the content of the <strong>"conf"</strong> directory in there.</p>
 				<div class="code-block">
 					<pre><code class="language-markup">
 	~$ make $HOME/.snmp
 	~$ cp -r conf/mibs conf/s* $HOME/.snmp 
 					</code></pre>
 				</div><!--//code-block-->
-				<p>Congratulations, your openvivoe is fully configured. However, you can take a look to configuration files, especially to vivoe-mib.conf, that you can use to fill your some of your MIB's parameters.</p>
+				<p>Congratulations, your openvivoe is fully configured. However, you can take a look to configuration files, especially to vivoe-mib.conf, that you can use to fill some of your MIB's parameters.</p>
 			</div><!--//block--> 
 			<div class="block">
 			<h4 class="sub-title text-center">Launch OpenVivoe and Start Streaming</h4>
-				<p>Now you can try OpenVivoe. To do so, you first launch the biary file. This binary is located in openvivoe/bin/Debug or in openvivoe/bin/Release depending the OpenVivoe's version you built. In the following example debug's version is used, as it is the default selected version when building. First, connect a webcam to your computer. In this example we assume that you only have one device available for testing. To test openvivoe you will stream from your computer to ... your computer. Now, you can start the program.</p>
+				<p>Now you can try OpenVivoe. To do so, you first launch the biary file. This binary is located in openvivoe/bin/Debug or in openvivoe/bin/Release depending the OpenVivoe's version you built. In the following example debug's version is used, as it is the default selected version when building. <strong>First, connect a webcam to your computer</strong>. In this example we assume that you only have one device available for testing. To test openvivoe you will stream from your computer to ... your computer! Now, you can start the program.</p>
 				<div class="code-block">
 					<pre><code class="language-markup">
-	$~ cd bin/Debug && ./openvivoe
+	~$ cd bin/Debug && ./openvivoe
 					</code></pre>
 				</div><!--//code-block-->
 				</div><!--//block-->
-				<p>The program should be started, and the streams should have started. If your terminal look to something like this, then openvivoe has been successfully started! Congratulations!</p>
+				<p>The program should be started, and the streams should have started. If your terminal looks to something like this, then openvivoe has been successfully started! Congratulations!</p>
 				<div class="code-block">
 					<pre><code class="language-markup">
 	~$ ./openvivoe
@@ -281,7 +282,7 @@
             <h2 class="title text-center">License</h2>
                 <div class="info">
                     <p>This software designed by <a href="http://ingenierie.openwide.fr/" target="_blank">OpenWide Ingenierie</a> is  <strong>100% FREE and OPEN SOURCE</strong> and is under the <a href="http://www.gnu.org/licenses/gpl-2.0.html" target="_blank">GNU General Public License, version 2</a></p>
-					<p><strong>[For developers]:</strong> Please if free to try OpenVivoe, and tell us what you think about it. If you have ideas, suggestion, contact us.</p>
+					<p><strong>[For developers]:</strong> Please feel free to try OpenVivoe, and tell us what you think about it. If you have ideas, suggestion, please, contact us.</p>
             </div><!--//license-inner-->
         </div><!--//container-->
     </section><!--//how-->
@@ -291,7 +292,7 @@
         <div class="container">
             <div class="contact-inner">
                 <h2 class="title  text-center">Contact</h2>
-                <p class="intro  text-center">OpenVivoe is an open Source software. <br />Feel free to get in touch if you have any questions or suggestions.</p>
+                <p class="intro  text-center">OpenVivoe is an Open Source software. <br />Feel free to get in touch if you have any questions or suggestions.</p>
                 <div class="author-message">                      
                     <div class="profile">
                         <img class="img-responsive" src="assets/images/OW_icon.png" alt="" />
@@ -299,7 +300,7 @@
                     <div class="speech-bubble">
                         <h3 class="sub-title">Want to see more of OpenWide Ingenierie?</h3>
                         <p>Go and check our website at <a href="http://ingenierie.openwide.fr/" target="_blank">OpenWide Ingenierie</a> 
-                        <p>If you like what we do, you can follow us on twitter and you will be informed about our latest news</p>
+                        <p>If you like what we do, you can follow us on twitter and you will be informed about our latest news.</p>
                         <div class="source">
                             <span class="name"><a href="https://github.com/hvasseur" target="_blank">Hoël Vasseur</a></span>
                             <br />
