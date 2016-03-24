@@ -335,19 +335,6 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 	GstBus *bus,
 	return last;
 }
 
-#if 0
-static gboolean vivoe_redirect_module(gchar *cmdline){
-
-	gchar **splitted;
-	/* parse entirely the command line */
-	splitted = g_strsplit ( cmdline , " ", -1);
-	/* get the encoding parameter */
-	if (g_strv_contains ((const gchar * const *) splitted, "encoding"))
-	/* free splitted */
-}
-#endif
-
-
 /*
  * This function add the UDP element to the pipeline / fort a ServiceUser channel
  */
@@ -361,8 +348,8 @@ static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 	GstElement 	*sink 		= NULL; /* to return last element of pipeline */
 
 	sink  = gst_parse_bin_from_description (cmdline,
-												TRUE,
-												&error);
+											TRUE,
+											&error);
 
 	/* Create the sink */
     if(sink == NULL){
@@ -382,6 +369,26 @@ static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 	}
 
 	return sink;
+}
+
+#define VIVOE_REDIRECT_NAME 	"vivoe-redirect"
+
+static gboolean vivoe_redirect(gchar *cmdline){
+
+	gboolean redirect = FALSE;
+	gchar **splitted;
+
+	/* parse entirely the command line */
+	splitted = g_strsplit ( cmdline , " ", -1);
+
+	/* get the encoding parameter */
+	if (g_strv_contains ((const gchar * const *) splitted,VIVOE_REDIRECT_NAME ))
+		redirect =TRUE;
+
+	/* free splitted */
+	g_strfreev(splitted);
+
+	return redirect;
 }
 
 /**
@@ -408,7 +415,6 @@ GstElement* create_pipeline_serviceUser( gpointer 					stream_datas,
 		g_printerr("Failed to create temporary empty entry for the table\n");
 		return NULL;
 	}
-
 	
 	GstElement 	*pipeline 		= data->pipeline;
 	GstBus 		*bus 			= data->bus;
@@ -416,9 +422,15 @@ GstElement* create_pipeline_serviceUser( gpointer 					stream_datas,
 
 
 	GstElement *first, *last;
+
 	first =  addUDP_SU( pipeline, 		bus,
 						bus_watch_id, 	loop,
 						caps, 			channel_entry);
+
+	/* check if everything went ok */
+	if ( first == NULL )
+		return NULL;
+
 	/* one element in pipeline: first is last, and last is first */
 	last = first;
 
@@ -428,7 +440,12 @@ GstElement* create_pipeline_serviceUser( gpointer 					stream_datas,
 						first, 			video_stream_info,
 						data, 			caps);
 
-	channelTable_fill_entry(channel_entry, video_stream_info);	
+	channelTable_fill_entry(channel_entry, video_stream_info);
+	
+	if ( vivoe_redirect(cmdline) ){
+		
+		return first;	
+	}
 
 	addSink_SU( pipeline, bus, bus_watch_id, loop, last, channel_entry, cmdline);
 

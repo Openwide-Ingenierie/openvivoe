@@ -193,21 +193,23 @@ static GstElement *get_source( GstElement* pipeline){
  * \param stream_datas a structure in which we will save the pipeline and the bus elements
  * \return EXIT_SUCCESS or EXIT_FAILURE
  */
-static int init_stream_SP( gpointer main_loop, gpointer stream_datas)
+static int init_stream_SP( gpointer main_loop, gpointer stream_datas, GstElement *source)
 {
 	stream_data *data 			= stream_datas;
 	GstElement 	*pipeline 		= data->pipeline;
     GstElement 	*last;	
 	/* Source Creation */
 
-#if 0
-	last = source_creation(pipeline, "RAW",1920 ,1080/*,encoding*/);
-#endif
-	last = get_source(pipeline);
-	if (last == NULL ){
-		g_printerr ( "Failed to create videosource\n");
-		return EXIT_FAILURE;
-	}
+	/* if source is not NULL we are in case of a redirection */
+	
+	if (source == NULL ){
+		last = get_source(pipeline);
+		if (last == NULL ){
+			g_printerr ( "Failed to create videosource\n");
+			return EXIT_FAILURE;
+		}
+	}else
+		last = source;
 	/* Create pipeline  - save videoFormatIndex into stream_data data*/
 	last = create_pipeline_videoChannel( stream_datas, 	main_loop, last );
 
@@ -233,7 +235,7 @@ static int init_stream_SP( gpointer main_loop, gpointer stream_datas)
  */
 static int init_stream_SU( gpointer main_loop, gpointer stream_datas, GstCaps *caps, struct channelTable_entry *channel_entry )
 {
-    GstElement *first;
+    GstElement *last;
 
 	gchar 		*cmdline 	= init_sink_from_conf( channel_entry->channelIndex );
 
@@ -242,9 +244,10 @@ static int init_stream_SU( gpointer main_loop, gpointer stream_datas, GstCaps *c
 		return EXIT_FAILURE;
 
 	/* Create pipeline  - save videoFormatIndex into stream_data data*/
-	first = create_pipeline_serviceUser( stream_datas, main_loop, caps, channel_entry, cmdline );
+	last = create_pipeline_serviceUser( stream_datas, main_loop, caps, channel_entry, cmdline );
+
 	/* Check if everything went ok*/
-	if (first == NULL){
+	if (last == NULL){
 		g_printerr ( "Failed to create pipeline\n");
 		return EXIT_FAILURE;
 	}
@@ -293,7 +296,7 @@ int init_streaming (gpointer main_loop, GstCaps *caps, struct channelTable_entry
 	data->bus 			= bus;
 	data->bus_watch_id 	= bus_watch_id;
 	if( channel_entry == NULL){ /* case we are a Service Provider */
-		if (init_stream_SP( main_loop, data))
+		if (init_stream_SP( main_loop, data, NULL))
 			return EXIT_FAILURE;
 		/* if we are in the defaultStartUp Mode, launch the last VF register in the table */
 		if ( deviceInfo.parameters[num_DeviceMode]._value.int_val == defaultStartUp){
