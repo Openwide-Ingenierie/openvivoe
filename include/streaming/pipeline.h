@@ -17,6 +17,7 @@ GstElement* create_pipeline_serviceUser( 	gpointer 					stream_datas,
 									 	 	GMainLoop 					*loop,
 										 	GstCaps 					*caps,
 										 	struct channelTable_entry 	*channel_entry, 
-										 	gchar 						*cmdline);
+										 	gchar 						*cmdline, 
+											gboolean 					redirect);
 #endif /* PIPELINE_H */
 

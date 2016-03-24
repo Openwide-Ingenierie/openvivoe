@@ -225,6 +225,48 @@ static int init_stream_SP( gpointer main_loop, gpointer stream_datas, GstElement
     return EXIT_SUCCESS;
 }
 
+static int stream_SP( gpointer main_loop, gpointer stream_datas, GstElement *source ){
+
+	stream_data *data 			= stream_datas;
+
+	/* build pipeline */
+	if (init_stream_SP( main_loop, data, NULL))
+			return EXIT_FAILURE;
+
+	/* if we are in the defaultStartUp Mode, launch the last VF register in the table */
+	if ( deviceInfo.parameters[num_DeviceMode]._value.int_val == defaultStartUp){
+		struct channelTable_entry *entry 	= channelTable_get_from_VF_index(videoFormatNumber._value.int_val);
+		entry->channelStatus 				= start;
+ 		if ( channelSatus_requests_handler( entry ))
+			return EXIT_SUCCESS;
+		else
+			return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
+
+}
+
+#define VIVOE_REDIRECT_NAME 	"vivoe-redirect"
+
+static gboolean vivoe_redirect(gchar *cmdline){
+
+	gboolean redirect = FALSE;
+	gchar **splitted;
+
+	/* parse entirely the command line */
+	splitted = g_strsplit ( cmdline , " ", -1);
+
+	/* get the encoding parameter */
+	if (g_strv_contains ((const gchar * const *) splitted,VIVOE_REDIRECT_NAME )){
+		redirect =TRUE;
+	}
+	/* free splitted */
+	g_strfreev(splitted);
+
+	return redirect;
+}
+
 /**
  * \brief initiate a pipeline to display received stream
  * \param main_loop the main loop
@@ -243,8 +285,13 @@ static int init_stream_SU( gpointer main_loop, gpointer stream_datas, GstCaps *c
 	if (cmdline == NULL )
 		return EXIT_FAILURE;
 
+	/* declare the boolean used to check if this is a redirection */
+	gboolean redirect = FALSE;
+
+	redirect = vivoe_redirect(cmdline); 
+
 	/* Create pipeline  - save videoFormatIndex into stream_data data*/
-	last = create_pipeline_serviceUser( stream_datas, main_loop, caps, channel_entry, cmdline );
+	last = create_pipeline_serviceUser( stream_datas, main_loop, caps, channel_entry, cmdline, redirect );
 
 	/* Check if everything went ok*/
 	if (last == NULL){
@@ -253,6 +300,10 @@ static int init_stream_SU( gpointer main_loop, gpointer stream_datas, GstCaps *c
 	}
 	stream_data *data 			= stream_datas;
 	gst_element_set_state (data->pipeline, GST_STATE_PAUSED);
+	/* now we check if this channel is a redirection */
+	if (redirect){
+		stream_SP(main_loop, data, NULL);
+	}
 
     return EXIT_SUCCESS;
 }
@@ -267,20 +318,20 @@ static int init_stream_SU( gpointer main_loop, gpointer stream_datas, GstCaps *c
 int init_streaming (gpointer main_loop, GstCaps *caps, struct channelTable_entry * channel_entry)
 {
     /* Initialization of elements needed */
+	GMainLoop 	*loop 			= main_loop;
     GstElement 	*pipeline;
     GstBus 		*bus;
     guint 		bus_watch_id;
-	GMainLoop 	*loop 			= main_loop;
-
+	
 	/* Create the pipeline */
 	pipeline  = gst_pipeline_new ("pipeline");
 	if(pipeline  == NULL){
-			g_printerr ( "error cannot create: %s\n","pipeline" );
-			return EXIT_FAILURE;
+		g_printerr ( "error cannot create: %s\n","pipeline" );
+		return EXIT_FAILURE;
 	}
 
 	/* Reference all data relevant to the stream */
-	stream_data *data 			= malloc(sizeof(stream_data));
+	stream_data 	*data 		= malloc(sizeof(stream_data));
 
 	/* allocate memory for the structure rtp_data of stream_data */
 	/* this will be free in the delete_stream function */
@@ -295,18 +346,10 @@ int init_streaming (gpointer main_loop, GstCaps *caps, struct channelTable_entry
 
 	data->bus 			= bus;
 	data->bus_watch_id 	= bus_watch_id;
-	if( channel_entry == NULL){ /* case we are a Service Provider */
-		if (init_stream_SP( main_loop, data, NULL))
-			return EXIT_FAILURE;
-		/* if we are in the defaultStartUp Mode, launch the last VF register in the table */
-		if ( deviceInfo.parameters[num_DeviceMode]._value.int_val == defaultStartUp){
-			struct channelTable_entry *entry 	= channelTable_get_from_VF_index(videoFormatNumber._value.int_val);
-			entry->channelStatus 				= start;
- 			if ( channelSatus_requests_handler( entry ))
-				return EXIT_SUCCESS;
-			else
-				return EXIT_FAILURE;
-		}
+
+	/* case we are a Service Provider */
+	if( channel_entry == NULL){
+ 		stream_SP(main_loop, data, NULL);
 	}
 	else{ /* case we are a Service User */
 		if (init_stream_SU( main_loop, data, caps, channel_entry))

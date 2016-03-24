@@ -371,26 +371,6 @@ static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 	return sink;
 }
 
-#define VIVOE_REDIRECT_NAME 	"vivoe-redirect"
-
-static gboolean vivoe_redirect(gchar *cmdline){
-
-	gboolean redirect = FALSE;
-	gchar **splitted;
-
-	/* parse entirely the command line */
-	splitted = g_strsplit ( cmdline , " ", -1);
-
-	/* get the encoding parameter */
-	if (g_strv_contains ((const gchar * const *) splitted,VIVOE_REDIRECT_NAME ))
-		redirect =TRUE;
-
-	/* free splitted */
-	g_strfreev(splitted);
-
-	return redirect;
-}
-
 /**
  * \brief Create the pipeline, add information to MIB at the same time
  * \param pipeline the pipepline of the stream
@@ -406,7 +386,8 @@ GstElement* create_pipeline_serviceUser( gpointer 					stream_datas,
 									 	 GMainLoop 					*loop,
 										 GstCaps 					*caps,
 										 struct channelTable_entry 	*channel_entry,
-										 gchar 						*cmdline){
+										 gchar 						*cmdline,
+										 gboolean 					redirect){
 	stream_data 	*data 	=  stream_datas;
 	/* create the empty videoFormatTable_entry structure to intiate the MIB */
 	struct videoFormatTable_entry * video_stream_info;
@@ -442,12 +423,8 @@ GstElement* create_pipeline_serviceUser( gpointer 					stream_datas,
 
 	channelTable_fill_entry(channel_entry, video_stream_info);
 	
-	if ( vivoe_redirect(cmdline) ){
-		
-		return first;	
-	}
+	if ( !redirect )
+		last = addSink_SU( pipeline, bus, bus_watch_id, loop, last, channel_entry, cmdline);
 
-	addSink_SU( pipeline, bus, bus_watch_id, loop, last, channel_entry, cmdline);
-
-	return first;
+	return last;
 }
