@@ -55,7 +55,6 @@ static gboolean bus_call (  GstBus     *bus,
 
 								   g_printerr ("Error: %s\n", error->message);
 								   g_error_free (error);
-
 								   g_main_loop_quit (loop);
 							   }
 			break;
@@ -68,7 +67,6 @@ static gboolean bus_call (  GstBus     *bus,
 
 								   g_printerr ("Error: %s\n", error->message);
 								   g_error_free (error);
-
 								   g_main_loop_quit (loop);
 							   }
 			break;
@@ -174,7 +172,6 @@ static GstElement *get_source( GstElement* pipeline){
 	/* check if everything went ok */	
 	if (cmdline == NULL)
 		return NULL;
-
 	bin  = gst_parse_bin_from_description (cmdline,
 											TRUE,
 											&error);
@@ -198,18 +195,19 @@ static int init_stream_SP( gpointer main_loop, gpointer stream_datas, GstElement
 	stream_data *data 			= stream_datas;
 	GstElement 	*pipeline 		= data->pipeline;
     GstElement 	*last;	
-	/* Source Creation */
 
-	/* if source is not NULL we are in case of a redirection */
-	
+	/* Source Creation */
+	/* if source is not NULL we are in case of a redirection */	
 	if (source == NULL ){
 		last = get_source(pipeline);
 		if (last == NULL ){
 			g_printerr ( "Failed to create videosource\n");
 			return EXIT_FAILURE;
 		}
-	}else
+	}else{
 		last = source;
+	}
+	
 	/* Create pipeline  - save videoFormatIndex into stream_data data*/
 	last = create_pipeline_videoChannel( stream_datas, 	main_loop, last );
 
@@ -218,7 +216,6 @@ static int init_stream_SP( gpointer main_loop, gpointer stream_datas, GstElement
 		g_printerr ( "Failed to create pipeline\n");
 		return EXIT_FAILURE;
 	}
-
 	/* set pipeline to PAUSED state will open /dev/video0, so it will not be done in start_streaming */
 	gst_element_set_state (data->pipeline, GST_STATE_PAUSED);
 
@@ -230,8 +227,8 @@ static int stream_SP( gpointer main_loop, gpointer stream_datas, GstElement *sou
 	stream_data *data 			= stream_datas;
 
 	/* build pipeline */
-	if (init_stream_SP( main_loop, data, NULL))
-			return EXIT_FAILURE;
+	if (init_stream_SP( main_loop, data, source))
+		return EXIT_FAILURE;
 
 	/* if we are in the defaultStartUp Mode, launch the last VF register in the table */
 	if ( deviceInfo.parameters[num_DeviceMode]._value.int_val == defaultStartUp){
@@ -239,6 +236,7 @@ static int stream_SP( gpointer main_loop, gpointer stream_datas, GstElement *sou
 		entry->channelStatus 				= start;
  		if ( channelSatus_requests_handler( entry ))
 			return EXIT_SUCCESS;
+		
 		else
 			return EXIT_FAILURE;
 	}
@@ -248,7 +246,6 @@ static int stream_SP( gpointer main_loop, gpointer stream_datas, GstElement *sou
 }
 
 #define VIVOE_REDIRECT_NAME 	"vivoe-redirect"
-
 static gboolean vivoe_redirect(gchar *cmdline){
 
 	gboolean redirect = FALSE;
@@ -275,7 +272,7 @@ static gboolean vivoe_redirect(gchar *cmdline){
  * \param channel_entry the serviceUser corresponding channel 
  * \return EXIT_SUCCESS or EXIT_FAILURE
  */
-static int init_stream_SU( gpointer main_loop, gpointer stream_datas, GstCaps *caps, struct channelTable_entry *channel_entry )
+static int init_stream_SU( gpointer main_loop, gpointer stream_datas, GstCaps *caps, struct channelTable_entry *channel_entry)
 {
     GstElement *last;
 
@@ -298,12 +295,13 @@ static int init_stream_SU( gpointer main_loop, gpointer stream_datas, GstCaps *c
 		g_printerr ( "Failed to create pipeline\n");
 		return EXIT_FAILURE;
 	}
+
 	stream_data *data 			= stream_datas;
 	gst_element_set_state (data->pipeline, GST_STATE_PAUSED);
 	/* now we check if this channel is a redirection */
 	if (redirect){
-		stream_SP(main_loop, data, NULL);
-	}
+		stream_SP(main_loop, data, last);
+	}	
 
     return EXIT_SUCCESS;
 }
@@ -369,9 +367,8 @@ gboolean start_streaming (gpointer stream_datas, long channelVideoFormatIndex ){
 	struct videoFormatTable_entry * stream_entry 	= videoFormatTable_getEntry(channelVideoFormatIndex);
 	if ( data->pipeline != NULL){
 		/* Set the pipeline to "playing" state*/
-		g_print ("Now playing\n");
+		g_print ("Now playing channel: %d\n",channelVideoFormatIndex );
 		gst_element_set_state (data->pipeline, GST_STATE_PLAYING);
-		g_print ("pipeline playing\n");
 		if ( stream_entry != NULL)
 			stream_entry->videoFormatStatus = enable;
 		return TRUE;

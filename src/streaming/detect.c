@@ -91,6 +91,7 @@ static GstStructure* type_detection_with_sink(GstBin *pipeline, GstElement *inpu
 	GstCaps 		*detected 		= data.caps;
 	//printf("%s\n", gst_caps_to_string(detected));
 	GstStructure 	*str_detected 	= gst_caps_get_structure(detected, 0);
+
 	return str_detected;
 }
 

@@ -47,10 +47,10 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus *bus,
  	/* in case RAW video type has been detected */
 	if ( gst_structure_has_name( video_caps, "video/x-raw")){
 		/* For Raw video */
-		rtp 	= gst_element_factory_make ("rtpvrawpay", "rtp");
+		rtp 	= gst_element_factory_make ("rtpvrawpay", "rtppay");
 		/* Check if everything went ok */
 		if( rtp == NULL){
-			g_printerr ( "error cannot create element for: %s\n","rtp");
+			g_printerr ( "error cannot create element for: %s\n","rtppay");
 			return NULL;
 		}
 	}
@@ -62,10 +62,10 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus *bus,
 			g_printerr ( "error cannot create element for: %s\n","parser");
 			return NULL;
 		}
-		rtp 	= gst_element_factory_make ("rtpmp4vpay", "rtp");
+		rtp 	= gst_element_factory_make ("rtpmp4vpay", "rtppay");
 		/* Check if everything went ok */
 		if( rtp == NULL){
-			g_printerr ( "error cannot create element for: %s\n","rtp");
+			g_printerr ( "error cannot create element for: %s\n","rtppay");
 			return NULL;
 		}
 		gst_bin_add(GST_BIN(pipeline),parser);
@@ -75,10 +75,10 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus *bus,
 	/* in case J2K video type has been detected */
 	else if  (gst_structure_has_name( video_caps, "image/x-j2c")){
 		/* For J2K video */
-		rtp 	= gst_element_factory_make ("rtpj2kpay", "rtp");
+		rtp 	= gst_element_factory_make ("rtpj2kpay", "rtppay");
 		/* Check if everything went ok */
 		if( rtp == NULL){
-			g_printerr ( "error cannot create element for: %s\n","rtp");
+			g_printerr ( "error cannot create element for: %s\n","rtppay");
 			return NULL;
 		}
 	}
@@ -182,12 +182,13 @@ GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
 	GstElement 	*pipeline 		= data->pipeline;
 	GstBus 		*bus 			= data->bus;
     guint 		bus_watch_id 	= data->bus_watch_id;
+
    	/* Add RTP element */
  	last = addRTP( 	pipeline, 	  bus,
 					bus_watch_id, loop,
 					input, 		  video_stream_info,
 					stream_datas);
-
+	
 	if(last == NULL){
 		g_printerr("Failed to create pipeline\n");
 		return NULL;
@@ -273,10 +274,10 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 	GstBus *bus,
 	if ( gst_structure_has_field( video_caps, "encoding-name")){
 		/* For Raw video */		
 		if ( strcmp( "RAW",encoding) == 0 ){
-			rtp 	= gst_element_factory_make ("rtpvrawdepay", "rtp");
+			rtp 	= gst_element_factory_make ("rtpvrawdepay", "rtpdepay");
 			/* Check if everything went ok */
 			if( rtp == NULL){
-				g_printerr ( "error cannot create element for: %s\n","rtp");
+				g_printerr ( "error cannot create element for: %s\n","rtpdepay");
 				return NULL;
 			}
 		gst_bin_add(GST_BIN (pipeline), rtp);
@@ -284,10 +285,10 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 	GstBus *bus,
 		last = rtp;
 		}else if  ( strcmp( "MP4V-ES",encoding) == 0 ){
 			/* For MPEG-4 video */
-			rtp 	= gst_element_factory_make ("rtpmp4vdepay", "rtp");
+			rtp 	= gst_element_factory_make ("rtpmp4vdepay", "rtpdepay");
 			/* Checek if everything went ok */
 			if( rtp == NULL){
-				g_printerr ( "error cannot create element for: %s\n","rtp");
+				g_printerr ( "error cannot create element for: %s\n","rtpdepay");
 				return NULL;
 			}
 			parser = gst_element_factory_make ("mpeg4videoparse", "parser");
@@ -306,10 +307,10 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 	GstBus *bus,
 			last = dec;
 		} 		/* For J2K video */		
 		else if ( strcmp( "JPEG2000",encoding) == 0 ){
-			rtp 	= gst_element_factory_make ("rtpj2kdepay", "rtp");
+			rtp 	= gst_element_factory_make ("rtpj2kdepay", "rtpdepay");
 			/* Check if everything went ok */
 			if( rtp == NULL){
-				g_printerr ( "error cannot create element for: %s\n","rtp");
+				g_printerr ( "error cannot create element for: %s\n","rtpdepay");
 				return NULL;
 			}
 			dec = gst_element_factory_make ("openjpegdec", "dec");

@@ -32,7 +32,6 @@
 #include "../include/streaming/stream.h"
 #include "../include/daemon.h"
 
-
 /**
  * \brief the data needed to pass to functions used to exit the program nicely
  */
@@ -142,5 +141,7 @@ int main (int   argc,  char *argv[]){
 
     /* Iterate */
 	g_main_loop_run (loop);
+	g_main_loop_run (loop);
+
 	return EXIT_SUCCESS;
 }

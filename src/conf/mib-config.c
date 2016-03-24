@@ -405,7 +405,6 @@ gchar *init_sources_from_conf(int index){
 
 	 /* Declaration of a pointer that will contain our configuration file*/
 	GKeyFile 	*gkf 	= open_mib_configuration_file(error, &gkf_path);
-
 	/* Declaration of an array of gstring (gchar**) that will contain the name of the different groups
 	 * declared in the configuration file
 	 */
