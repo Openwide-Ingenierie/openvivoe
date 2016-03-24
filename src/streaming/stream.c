@@ -234,8 +234,15 @@ static int init_stream_SP( gpointer main_loop, gpointer stream_datas)
 static int init_stream_SU( gpointer main_loop, gpointer stream_datas, GstCaps *caps, struct channelTable_entry *channel_entry )
 {
     GstElement *first;
+
+	gchar 		*cmdline 	= init_sink_from_conf( channel_entry->channelIndex );
+
+	/* check if everything went ok */	
+	if (cmdline == NULL )
+		return EXIT_FAILURE;
+
 	/* Create pipeline  - save videoFormatIndex into stream_data data*/
-	first = create_pipeline_serviceUser( stream_datas, main_loop, caps, channel_entry );
+	first = create_pipeline_serviceUser( stream_datas, main_loop, caps, channel_entry, cmdline );
 	/* Check if everything went ok*/
 	if (first == NULL){
 		g_printerr ( "Failed to create pipeline\n");

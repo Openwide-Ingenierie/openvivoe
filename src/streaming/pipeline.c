@@ -16,7 +16,6 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <arpa/inet.h>
 #include "../../include/mibParameters.h"
-#include "../../include/conf/mib-conf.h"
 #include "../../include/videoFormatInfo/videoFormatTable.h"
 #include "../../include/channelControl/channelTable.h"
 #include "../../include/streaming/stream_registration.h"
@@ -396,10 +395,11 @@ static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
  * \port the port to use
  * \return GstElement* the last element added to the pipeline (should be udpsink if everything went ok)
  */
-GstElement* create_pipeline_serviceUser( gpointer stream_datas,
-									 	 GMainLoop *loop,
-										 GstCaps 	*caps,
-										 struct channelTable_entry * channel_entry){
+GstElement* create_pipeline_serviceUser( gpointer 					stream_datas,
+									 	 GMainLoop 					*loop,
+										 GstCaps 					*caps,
+										 struct channelTable_entry 	*channel_entry,
+										 gchar 						*cmdline){
 	stream_data 	*data 	=  stream_datas;
 	/* create the empty videoFormatTable_entry structure to intiate the MIB */
 	struct videoFormatTable_entry * video_stream_info;
@@ -410,13 +410,6 @@ GstElement* create_pipeline_serviceUser( gpointer stream_datas,
 	}
 
 	
-	gchar 		*cmdline 	= init_sink_from_conf( channel_entry->channelIndex );
-
-	/* check if everything went ok */	
-	if (cmdline == NULL )
-		return NULL;
-	
-
 	GstElement 	*pipeline 		= data->pipeline;
 	GstBus 		*bus 			= data->bus;
     guint 		bus_watch_id 	= data->bus_watch_id;
