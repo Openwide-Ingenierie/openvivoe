@@ -336,33 +336,41 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 	GstBus *bus,
 	return last;
 }
 
+#if 0
+static gboolean vivoe_redirect_module(gchar *cmdline){
+
+	gchar **splitted;
+	/* parse entirely the command line */
+	splitted = g_strsplit ( cmdline , " ", -1);
+	/* get the encoding parameter */
+	if (g_strv_contains ((const gchar * const *) splitted, "encoding"))
+	/* free splitted */
+}
+#endif
+
 
 /*
  * This function add the UDP element to the pipeline / fort a ServiceUser channel
  */
 static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 								guint bus_watch_id, 	GMainLoop *loop,
-								GstElement *input, 		struct channelTable_entry * channel_entry
+								GstElement *input, 		struct channelTable_entry * channel_entry,
+								gchar *cmdline
 								){
 
 	GError 		*error 		= NULL; /* an Object to save errors when they occurs */
 	GstElement 	*sink 		= NULL; /* to return last element of pipeline */
-	gchar 		*cmdline 	= init_sink_from_conf( channel_entry->channelIndex );
-
-	/* check if everything went ok */	
-	if (cmdline == NULL)
-		return NULL;
 
 	sink  = gst_parse_bin_from_description (cmdline,
-											TRUE,
-											&error);
+												TRUE,
+												&error);
 
 	/* Create the sink */
     if(sink == NULL){
        g_printerr ( "error cannot create element for: %s\n","sink");
 	   return NULL;
     }
-		/* add rtp to pipeline */
+	/* add rtp to pipeline */
 	if ( !gst_bin_add(GST_BIN (pipeline), sink )){
 		g_printerr("Unable to add %s to pipeline", gst_element_get_name(sink));
 		return NULL;
@@ -401,6 +409,13 @@ GstElement* create_pipeline_serviceUser( gpointer stream_datas,
 		return NULL;
 	}
 
+	
+	gchar 		*cmdline 	= init_sink_from_conf( channel_entry->channelIndex );
+
+	/* check if everything went ok */	
+	if (cmdline == NULL)
+		return NULL;
+
 	GstElement 	*pipeline 		= data->pipeline;
 	GstBus 		*bus 			= data->bus;
     guint 		bus_watch_id 	= data->bus_watch_id;
@@ -421,6 +436,6 @@ GstElement* create_pipeline_serviceUser( gpointer stream_datas,
 
 	channelTable_fill_entry(channel_entry, video_stream_info);	
 
-	addSink_SU( pipeline, bus, bus_watch_id, loop, last, channel_entry);
+	addSink_SU( pipeline, bus, bus_watch_id, loop, last, channel_entry, cmdline);
 	return first;
 }
