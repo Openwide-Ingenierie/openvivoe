@@ -141,6 +141,8 @@ int main (int   argc,  char *argv[]){
 
     /* Iterate */
 	g_main_loop_run (loop);
+	/* if we go here, then it means that we are in case of a redirection, the main loop has been quit 
+	 * to preform the typefind on the redirection, so we need to run it one more time */
 	g_main_loop_run (loop);
 
 	return EXIT_SUCCESS;

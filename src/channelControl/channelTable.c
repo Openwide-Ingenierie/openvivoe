@@ -72,11 +72,14 @@ initialize_table_channelTable(void)
 	/* check if the device is a serviceProvider or a ServiceUser
 	 * If it is a serviceUser or both, then create an empty entry 
 	 */
-	long default_receive_IP; /* a variable to retreive the default receive IP entered by the user in configuration file */
+	long default_receive_IP = 0; /* a variable to retreive the default receive IP entered by the user in configuration file */
+	char *ip; /* the receive IP in a string form */
 	if( deviceInfo.parameters[num_DeviceType]._value.int_val != device_SP ){
 		for(int i=0; i<channelNumber._value.int_val; i++){
 			/* get the default IP address to use for defaultStartUp mode if it has been entered in the configuration file */
-			default_receive_IP 	= inet_addr(get_default_IP_from_conf(i+1));
+			ip = get_default_IP_from_conf(i+1);
+			if (ip)
+				default_receive_IP 	= inet_addr(get_default_IP_from_conf(i+1));	
 			channelTable_create_SU_entry(i+1, default_receive_IP );
 		}
 	}
