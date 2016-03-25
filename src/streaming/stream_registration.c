@@ -181,7 +181,6 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
  * \return EXIT_SUCCESS (0) or EXIT_FAILURE (1)
  */
 int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer stream_datas, long *channel_entry_index ){
-	long 		index 			= 1;
 	stream_data *data 			= stream_datas;	
 	/* Check if entry already exits;
 	 *  _ if yes, do not add a new entry, but set it status to enable if it is not already enable
@@ -189,17 +188,8 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 	 */
 
 	if(videoFormatTable_head == NULL){
-		/* 	it means that this will be the first video format to be set into the table
-		 *	so check if videoFormatNumber equals to zero as a second security
-		 *	exit if not
-		 */
-		if((videoFormatNumber._value.int_val != 0)){
-			g_printerr("Invalid videoFormatNumber in MIB\n");
-			g_printerr("No entry found in %s, so %s should be 0\n","videoFormatTable",videoFormatNumber._name );
-			return EXIT_FAILURE;
-		}else{
 			/* Then we are sure that we can create a new entry */
-			videoFormatTable_createEntry( 	index, 													 					videoChannel,
+			videoFormatTable_createEntry( 	video_info->videoFormatIndex, 												videoChannel,
 											disable, 																	video_info->videoFormatBase,
 											video_info->videoFormatSampling, 											video_info->videoFormatBitDepth,
 											video_info->videoFormatFps,				 									video_info->videoFormatColorimetry,
@@ -211,16 +201,13 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 											0, 																			0,
 											data);
 			
-			/* increase videoFormatNumber as we added an entry */
-			videoFormatNumber._value.int_val++;
-
 			char *channelUserDesc = get_desc_from_conf(videoFormatNumber._value.int_val);
 			if (channelUserDesc == NULL)
 				channelUserDesc="";
 			/* At the  same time we copy all of those parameters into video channel */
 			channelTable_createEntry( 	channelNumber._value.int_val+1, 												videoChannel,
 										channelUserDesc, 																stop,
-										index, 																			video_info->videoFormatBase,
+										video_info->videoFormatIndex, 																			video_info->videoFormatBase,
 										video_info->videoFormatSampling, 												video_info->videoFormatBitDepth,
 										video_info->videoFormatFps,				 										video_info->videoFormatColorimetry,
 										video_info->videoFormatInterlaced, 												video_info->videoFormatCompressionFactor,
@@ -229,19 +216,17 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 										0, 																				0,
 										0,																				data->rtp_datas->rtp_type,
 										0/*IP*/, 																		0 /* packet delay*/,
- 										default_SAP_interval,															index, /*defaultVideoFormatIndex*/
+ 										default_SAP_interval,															video_info->videoFormatIndex, /*defaultVideoFormatIndex*/
 										0/*default receive IP*/, 														data);
 
 			*channel_entry_index = channelNumber._value.int_val+1;
 			/* increase channelNumber as we added an entry */
-			channelNumber._value.int_val++;
-		}
+			channelNumber._value.int_val++;	
 	}else{
 		/* if the table of video format is not empty for this device, check if this format is already in the table
 		 * for that, iterate the table
 		 */
 		struct videoFormatTable_entry *iterator = videoFormatTable_head ;
-		video_info->videoFormatIndex = videoFormatNumber._value.int_val +1 ;
 		gboolean exists = FALSE; /* a boolean to indicate weather the entry already exists in the table or not*/
 		while(iterator != NULL && !exists ){
 			/* compare streaming entry format to iterator format*/
@@ -271,8 +256,7 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 											0, 																				0,
 											data);
 			/* increase videoFormatNumber as we added an entry */
-			videoFormatNumber._value.int_val++;
-
+//			videoFormatNumber._value.int_val++;
 			char *channelUserDesc = get_desc_from_conf(videoFormatNumber._value.int_val);
 			if (channelUserDesc == NULL)
 				channelUserDesc="";
@@ -289,7 +273,7 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 										0, 																					0,
 										0,																					data->rtp_datas->rtp_type,
 										0,/*receive Address*/ 																0 /* packet delay*/,
-			 							default_SAP_interval,  																index, /*defaultVideoFormatIndex-0 is taken by default*/
+			 							default_SAP_interval,  																video_info->videoFormatIndex, /*defaultVideoFormatIndex-0 is taken by default*/
 										0/*default receive IP*/, 		 													data);
 
 			*channel_entry_index = channelNumber._value.int_val+1;

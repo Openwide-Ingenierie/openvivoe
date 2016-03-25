@@ -86,7 +86,6 @@ int open_vivoe_daemon (char* deamon_name) {
 	/* make us a agentx client. */
     netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE, 1);
 
-	debug_register_tokens( "agentx/subagent" );
     /* Before starting the agent, we should initialize the MIB's parameters
      * from the configuration file vivoe-mib.conf
      */
@@ -114,12 +113,12 @@ int open_vivoe_daemon (char* deamon_name) {
     init_deviceNatoStockNumber();
     init_deviceMode();
     init_deviceReset();
-	init_videoFormatNumber();
-	init_videoFormatTable();
 	init_channelNumber();
 	init_channelReset();
 	init_sap_multicast();
-	init_channelTable();	
+	init_channelTable();
+	init_videoFormatNumber();
+	init_videoFormatTable();
 
 	/* openvivoe-demon will be used to read openvivoe-demon.conf files. */
 	init_snmp(basename(deamon_name));

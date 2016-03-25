@@ -12,6 +12,10 @@
 #include "../../include/mibParameters.h"
 #include "../../include/videoFormatInfo/videoFormatTable.h"
 #include "../../include/handler.h"
+#include "../../include/channelControl/channelTable.h"
+#include "../../include/streaming/stream_registration.h"
+#include "../../include/streaming/pipeline.h"
+#include "../../include/streaming/stream.h"
 
 /** Initializes the videoFormatTable module */
 void
@@ -140,6 +144,13 @@ initialize_table_videoFormatTable(void)
     iinfo->table_reginfo        = table_info;
     
     netsnmp_register_table_iterator( reg, iinfo );
+
+	/* get all the source configuration for configuration file, init the corresponding streams */
+	if( deviceInfo.parameters[num_DeviceType]._value.int_val != device_SP ){
+		for(int i=1; i<=videoFormatNumber._value.int_val; i++)
+			stream_SP(loop, i);
+	}
+
 }
 
 #if ALLOW_REMOVING_ROW /* No right to remove a line from the table */

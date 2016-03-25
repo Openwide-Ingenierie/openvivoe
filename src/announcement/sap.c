@@ -364,7 +364,8 @@ gboolean receive_announcement(){
 				else{
 					stream_data 	*data 	=  iterator->stream_datas;
 					if ( data == NULL ){ /* if pipeline is not created yet, create it and start to display the stream */
-						if ( !init_streaming (loop, caps, iterator))
+						printf("%ld\n",  iterator->channelVideoFormatIndex);
+						if ( !init_stream_SU (loop, caps, iterator))
 							start_streaming( iterator->stream_datas, iterator->channelVideoFormatIndex);
 						/* init the video channelUserDesc field */
 						iterator->channelUserDesc 		= strdup( (const char*) channel_desc);	

@@ -168,12 +168,14 @@ static GstElement* addUDP( 	GstElement *pipeline, 	GstBus *bus,
  */
 GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
 										 	GMainLoop *loop,
-											GstElement* input){
+											GstElement* input,
+											long videoChannelIndex){
 	GstElement 		*last;
 	stream_data 	*data 	=  stream_datas;
 	/* create the empty videoFormatTable_entry structure to intiate the MIB */
 	struct videoFormatTable_entry * video_stream_info;
 	video_stream_info = SNMP_MALLOC_TYPEDEF(struct videoFormatTable_entry);
+	video_stream_info->videoFormatIndex = videoChannelIndex;
 	if( !video_stream_info){
 		g_printerr("Failed to create temporary empty entry for the table\n");
 		return NULL;

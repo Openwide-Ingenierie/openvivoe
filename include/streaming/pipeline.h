@@ -9,9 +9,11 @@
 
 void set_udpsink_param( GstElement *udpsink, long channel_entry_index);
 
-GstElement* create_pipeline_videoChannel( 	gpointer 				stream_datas,
-											GMainLoop 				*loop,
-										 	GstElement 				*input);
+GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
+										 	GMainLoop *loop,
+											GstElement* input,
+											long videoChannelIndex);
+
 
 GstElement* create_pipeline_serviceUser( 	gpointer 					stream_datas,
 									 	 	GMainLoop 					*loop,

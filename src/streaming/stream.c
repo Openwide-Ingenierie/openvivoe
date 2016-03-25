@@ -164,10 +164,10 @@ static GstElement* source_creation(GstElement* pipeline, char* format, int width
  * \param pipeline the pipeline to wich adding the bin made from the cmd line description 
  * return GstElement* the last element added in the pipeline: the bin made
  */
-static GstElement *get_source( GstElement* pipeline){
+static GstElement *get_source( GstElement* pipeline, long videoFormartIndex){
 	GError 		*error 		= NULL; /* an Object to save errors when they occurs */
 	GstElement 	*bin 		= NULL; /* to return last element of pipeline */
-	gchar 		*cmdline 	= init_sources_from_conf(videoFormatNumber._value.int_val + 1 );
+	gchar 		*cmdline 	= init_sources_from_conf( videoFormartIndex );
 
 	/* check if everything went ok */	
 	if (cmdline == NULL)
@@ -190,26 +190,20 @@ static GstElement *get_source( GstElement* pipeline){
  * \param stream_datas a structure in which we will save the pipeline and the bus elements
  * \return EXIT_SUCCESS or EXIT_FAILURE
  */
-static int init_stream_SP( gpointer main_loop, gpointer stream_datas, GstElement *source)
+static int init_stream_SP( gpointer main_loop, gpointer stream_datas, long videoFormatIndex)
 {
 	stream_data *data 			= stream_datas;
 	GstElement 	*pipeline 		= data->pipeline;
     GstElement 	*last;	
 
-	/* Source Creation */
-	/* if source is not NULL we are in case of a redirection */	
-	if (source == NULL ){
-		last = get_source(pipeline);
-		if (last == NULL ){
-			g_printerr ( "Failed to create videosource\n");
-			return EXIT_FAILURE;
-		}
-	}else{
-		last = source;
+	last = get_source(pipeline, videoFormatIndex);
+	if (last == NULL ){
+		g_printerr ( "Failed to create videosource\n");
+		return EXIT_FAILURE;
 	}
 	
 	/* Create pipeline  - save videoFormatIndex into stream_data data*/
-	last = create_pipeline_videoChannel( stream_datas, 	main_loop, last );
+	last = create_pipeline_videoChannel( stream_datas, 	main_loop, last, videoFormatIndex );
 
 	/* Check if everything went ok*/
 	if (last == NULL){
@@ -222,12 +216,40 @@ static int init_stream_SP( gpointer main_loop, gpointer stream_datas, GstElement
     return EXIT_SUCCESS;
 }
 
-static int stream_SP( gpointer main_loop, gpointer stream_datas, GstElement *source ){
+int stream_SP( gpointer main_loop, int videoFormatIndex){
 
-	stream_data *data 			= stream_datas;
+	/* Initialization of elements needed */
+	GMainLoop 	*loop 			= main_loop;
+    GstElement 	*pipeline;
+    GstBus 		*bus;
+    guint 		bus_watch_id;
+	
+	/* Create the pipeline */
+	pipeline  = gst_pipeline_new ("pipeline");
+	if(pipeline  == NULL){
+		g_printerr ( "error cannot create: %s\n","pipeline" );
+		return EXIT_FAILURE;
+	}
+
+	/* Reference all data relevant to the stream */
+	stream_data 	*data 		= malloc(sizeof(stream_data));
+
+	/* allocate memory for the structure rtp_data of stream_data */
+	/* this will be free in the delete_stream function */
+	rtp_data 	*rtp_datas 		= malloc(sizeof(rtp_data));
+	data->rtp_datas 			= rtp_datas;
+	
+	data->pipeline 		= pipeline;	
+	/* we add a message handler */
+	bus = gst_pipeline_get_bus ( GST_PIPELINE(pipeline));
+    bus_watch_id = gst_bus_add_watch (bus, bus_call, loop);
+    gst_object_unref (bus);
+
+	data->bus 			= bus;
+	data->bus_watch_id 	= bus_watch_id;
 
 	/* build pipeline */
-	if (init_stream_SP( main_loop, data, source))
+	if (init_stream_SP( main_loop, data, videoFormatIndex))
 		return EXIT_FAILURE;
 
 	/* if we are in the defaultStartUp Mode, launch the last VF register in the table */
@@ -272,9 +294,39 @@ static gboolean vivoe_redirect(gchar *cmdline){
  * \param channel_entry the serviceUser corresponding channel 
  * \return EXIT_SUCCESS or EXIT_FAILURE
  */
-static int init_stream_SU( gpointer main_loop, gpointer stream_datas, GstCaps *caps, struct channelTable_entry *channel_entry)
+int init_stream_SU( gpointer main_loop,GstCaps *caps, struct channelTable_entry *channel_entry)
 {
-    GstElement *last;
+    
+  /* Initialization of elements needed */
+	GMainLoop 	*loop 			= main_loop;
+    GstElement 	*pipeline;
+    GstBus 		*bus;
+    guint 		bus_watch_id;
+	GstElement *last;
+
+	/* Create the pipeline */
+	pipeline  = gst_pipeline_new ("pipeline");
+	if(pipeline  == NULL){
+		g_printerr ( "error cannot create: %s\n","pipeline" );
+		return EXIT_FAILURE;
+	}
+
+	/* Reference all data relevant to the stream */
+	stream_data 	*data 		= malloc(sizeof(stream_data));
+
+	/* allocate memory for the structure rtp_data of stream_data */
+	/* this will be free in the delete_stream function */
+	rtp_data 	*rtp_datas 		= malloc(sizeof(rtp_data));
+	data->rtp_datas 			= rtp_datas;
+	
+	data->pipeline 		= pipeline;	
+	/* we add a message handler */
+	bus = gst_pipeline_get_bus ( GST_PIPELINE(pipeline));
+    bus_watch_id = gst_bus_add_watch (bus, bus_call, loop);
+    gst_object_unref (bus);
+
+	data->bus 			= bus;
+	data->bus_watch_id 	= bus_watch_id;
 
 	gchar 		*cmdline 	= init_sink_from_conf( channel_entry->channelIndex );
 
@@ -288,7 +340,7 @@ static int init_stream_SU( gpointer main_loop, gpointer stream_datas, GstCaps *c
 	redirect = vivoe_redirect(cmdline); 
 
 	/* Create pipeline  - save videoFormatIndex into stream_data data*/
-	last = create_pipeline_serviceUser( stream_datas, main_loop, caps, channel_entry, cmdline, redirect );
+	last = create_pipeline_serviceUser( data, main_loop, caps, channel_entry, cmdline, redirect );
 
 	/* Check if everything went ok*/
 	if (last == NULL){
@@ -296,16 +348,14 @@ static int init_stream_SU( gpointer main_loop, gpointer stream_datas, GstCaps *c
 		return EXIT_FAILURE;
 	}
 
-	stream_data *data 			= stream_datas;
 	gst_element_set_state (data->pipeline, GST_STATE_PAUSED);
-	/* now we check if this channel is a redirection */
-	if (redirect){
-		stream_SP(main_loop, data, last);
-	}	
-
+	channel_entry->stream_datas = data;
+	printf("1\n");
     return EXIT_SUCCESS;
 }
 
+
+#if 0
 /**
  * \brief initiate a pipeline for a SP or a SU
  * \param main_loop the main loop
@@ -345,18 +395,13 @@ int init_streaming (gpointer main_loop, GstCaps *caps, struct channelTable_entry
 	data->bus 			= bus;
 	data->bus_watch_id 	= bus_watch_id;
 
-	/* case we are a Service Provider */
-	if( channel_entry == NULL){
- 		stream_SP(main_loop, data, NULL);
-	}
-	else{ /* case we are a Service User */
-		if (init_stream_SU( main_loop, data, caps, channel_entry))
-			return EXIT_FAILURE;
-		channel_entry->stream_datas = data;	
-	}
-		return EXIT_SUCCESS;
-}
+	if (init_stream_SU( main_loop, data, caps, channel_entry))
+		return EXIT_FAILURE;
+	channel_entry->stream_datas = data;	
 
+	return EXIT_SUCCESS;
+}
+#endif 
 /**
  * \brief start the streaming: set pipeling into PLAYING state
  * \param data of the stream (pipeline, bus and bust_watch_id) - see stream_data structure
@@ -367,7 +412,7 @@ gboolean start_streaming (gpointer stream_datas, long channelVideoFormatIndex ){
 	struct videoFormatTable_entry * stream_entry 	= videoFormatTable_getEntry(channelVideoFormatIndex);
 	if ( data->pipeline != NULL){
 		/* Set the pipeline to "playing" state*/
-		g_print ("Now playing channel: %d\n",channelVideoFormatIndex );
+		g_print ("Now playing channel: %ld\n",channelVideoFormatIndex );
 		gst_element_set_state (data->pipeline, GST_STATE_PLAYING);
 		if ( stream_entry != NULL)
 			stream_entry->videoFormatStatus = enable;

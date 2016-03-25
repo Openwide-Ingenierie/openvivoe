@@ -75,7 +75,7 @@ void close_mib_configuration_file(GKeyFile *gkf){
 /**
  * \biref the number of group in vivoe_mib.conf
  */
-#define NUM_GROUP 	2
+#define NUM_GROUP 	1
 
 /**
  * \brief check if mandatory groups are present
@@ -95,7 +95,7 @@ gchar** check_mib_group(GKeyFile *gkf, GError *error){
      * second parameter "gchar* length" is optional*/
 	groups = g_key_file_get_groups(gkf, &length);
 
-	gchar* needed[NUM_GROUP] = {GROUP_NAME_DEVICEINFO, GROUP_NAME_CHANNELCONTROL};
+	gchar* needed[NUM_GROUP] = {GROUP_NAME_DEVICEINFO };
 	/* check that the groups are present in configuration file */
 	for (int i=0; i<NUM_GROUP; i++){
 		if( !(g_strv_contains((const gchar* const*) groups, needed[i] ))){
@@ -241,40 +241,62 @@ parameter channelNumber = {"nb_screens", INTEGER, 0};
  * \param error a object to store errors when they occurs
  * \return EXIT_SUCCESS on success, EXIT_FAILURE on FAILURE
  */
-static int init_channelNumber_param(GKeyFile* gkf, gchar* group_name, GError* error){
+static gboolean init_channelNumber_param(GKeyFile* gkf, gchar **groups, GError* error){
 
-	/* set maintenance flag for channelNumber */
-	set_maintenencef_flag( &channelNumber);
+	/* set maintenance flag for videoForamatNumber */
+	set_maintenencef_flag( &channelNumber );
 
+	char *receiver_prefix = "receiver_";
+	char *receiver_name = (char*) malloc( strlen(receiver_prefix)+2 * sizeof(char));
 
-	if(g_key_file_has_key(gkf, group_name, (const gchar*) channelNumber._name , &error)){
-		channelNumber._value.int_val = (int) g_key_file_get_integer(gkf, group_name, (const gchar*)channelNumber._name, &error);
-		 if(error != NULL){
-			fprintf(stderr, "Invalid format for %s: %s\n", (const gchar*) channelNumber._name, error->message);
-			return EXIT_FAILURE;
-		}
-	}else{
-		/*if the parameter is mandatory, print an error message to the user, and exit the program*/
-		if(!channelNumber._optional){
-			fprintf(stderr, "Parameter mandatory and not found: %s\n", (const gchar*)channelNumber._name);
-			return EXIT_FAILURE;
-		}
-		/*if the parameter is optional, do not do anything special, just keep running!*/
+	int i=1;
+	for (i=1; i<g_strv_length (groups); i++){
+		/* Build the name that the group should have */
+		sprintf(receiver_name, "%s%d",receiver_prefix , i);
+		if ( !g_strv_contains((const gchar * const *) groups,receiver_name ))
+			break;
 	}
-	return	EXIT_SUCCESS;
+
+	channelNumber._value.int_val = i -1 ;
+	if( channelNumber._value.int_val )
+		return FALSE;
+	else
+		return TRUE;
+
 }
 
 parameter videoFormatNumber = {"videoFormatNumber", INTEGER, 0, {0} };
 parameter channelReset 		= {"channelReset", 		INTEGER, 0, {0} };
+
+
+static gboolean init_videoFormatNumber_param(GKeyFile *gkf, gchar **groups, GError *error){
+
+	/* set maintenance flag for videoForamatNumber */
+	set_maintenencef_flag( &videoFormatNumber );
+
+	char *source_prefix = "source_";
+	char *source_name = (char*) malloc( strlen(source_prefix)+2 * sizeof(char));
+	int i=1;
+	for (i=1; i<g_strv_length (groups); i++){
+		/* Build the name that the group should have */
+		sprintf(source_name, "%s%d", source_prefix, i);
+		if ( !g_strv_contains((const gchar * const *) groups, source_name))
+			break;
+	}
+
+	videoFormatNumber._value.int_val = i -1 ;
+	if( videoFormatNumber._value.int_val )
+		return FALSE;
+	else
+		return TRUE;
+
+}
 
 /**
  * \brief initalize global variable which value cannot be found in vivoe_mib.conf 
  * \param void
  */
 static void init_mib_global_parameter(){
-
-	/* set maintenance flag for videoForamatNumber */
-	set_maintenencef_flag( &videoFormatNumber );
 
 	/* set maintenance flag for videoForamatNumber */
 	set_maintenencef_flag( &channelReset );
@@ -312,7 +334,9 @@ int init_mib_content(){
  
 	if (!init_deviceInfo(gkf, GROUP_NAME_DEVICEINFO , error))
 		return EXIT_FAILURE;
-	if ( init_channelNumber_param(gkf, GROUP_NAME_CHANNELCONTROL , error))
+	if ( init_channelNumber_param(gkf, groups , error))
+		return EXIT_FAILURE;
+	if ( init_videoFormatNumber_param(gkf, groups, error) )
 		return EXIT_FAILURE;
 
 	/* free the memory allocated for the array of strings groups */

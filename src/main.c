@@ -32,6 +32,7 @@
 #include "../include/streaming/stream.h"
 #include "../include/daemon.h"
 
+
 /**
  * \brief the data needed to pass to functions used to exit the program nicely
  */
@@ -74,13 +75,6 @@ static gboolean stop_program ( gpointer data ){
 	return TRUE;
 }
 
-static gboolean service_Provider_init(gpointer loop){
-	/* prepare the stream - initialize all the data relevant to the stream into stream-data */
-	if ( init_streaming(loop, NULL, NULL)){
-		return FALSE;
-	}
-	return TRUE;
-}
 
 static void default_startUp_mode(gpointer loop){
 		
@@ -111,38 +105,28 @@ int main (int   argc,  char *argv[]){
 	g_unix_signal_add (SIGINT, 	stop_program, &stop_data);
 	g_unix_signal_add (SIGTERM, stop_program, &stop_data);
 
-	/* add the idle function that handle SNMP request every 100ms */
-	g_timeout_add (100, handle_snmp_request, NULL);
-
-	/* init SubAgent Deamon */
-	if ( open_vivoe_daemon (argv[0]) )
-		return EXIT_FAILURE;
 
 	/* In case of an service Provider */
 	/* Initialize GStreamer */
 	gst_init (&argc, &argv);
 
-	/* init streamings */
-	if ( 	deviceInfo.parameters[num_DeviceType]._value.int_val == device_SP
-	  	 || deviceInfo.parameters[num_DeviceType]._value.int_val == device_both){
-		if ( !service_Provider_init( loop )) {
-			g_printerr("Failed to load streams\n");
-			return stop_program(&stop_data);
-		}
-	}
+	/* init SubAgent Deamon */
+	if ( open_vivoe_daemon (argv[0]) )
+		return EXIT_FAILURE;
+
+	/* add the idle function that handle SNMP request every 100ms */
+	g_timeout_add (100, handle_snmp_request, NULL);
+
 	/* checking for start up mode */
 	if ( deviceInfo.parameters[num_DeviceMode]._value.int_val == defaultStartUp)
 		default_startUp_mode(loop);	
-
+	
 	/* listen to SAP/SDP announcement */
 	if ( 	deviceInfo.parameters[num_DeviceType]._value.int_val == device_SU
 	  	 || deviceInfo.parameters[num_DeviceType]._value.int_val == device_both)
 		g_timeout_add(1000, receive_announcement, NULL);
 
     /* Iterate */
-	g_main_loop_run (loop);
-	/* if we go here, then it means that we are in case of a redirection, the main loop has been quit 
-	 * to preform the typefind on the redirection, so we need to run it one more time */
 	g_main_loop_run (loop);
 
 	return EXIT_SUCCESS;
