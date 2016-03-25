@@ -259,6 +259,15 @@ static GstElement* addUDP_SU( 	GstElement *pipeline, 	GstBus *bus,
 
 /**
  * \brief This function add the RTP element to the pipeline
+ * \param pipeline the associated pipeline of the channel
+ * \param bus the bus the channel
+ * \param bus_watch_id an id watch on the bus
+ * \param loop the GMainLoop
+ * \param input the gstelement to link in input
+ * \param video_info a videoFormatTable_entry to store detected caps 
+ * \param stream_data the stream_data associated to the pipeline
+ * \param caps the input video caps
+ * \return GstElement the last element added in pipeline 
  */
 static GstElement* addRTP_SU( 	GstElement *pipeline, 	GstBus *bus,
 								guint bus_watch_id, 	GMainLoop *loop,
@@ -266,7 +275,7 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 	GstBus *bus,
 								gpointer stream_datas, 	GstCaps *caps){
 	/*Create element that will be add to the pipeline */
 	GstElement 		*rtp = NULL;
-	GstElement 		*parser, *dec, *last = NULL;
+	GstElement 		*last = NULL;
 	GstStructure 	*video_caps 	= gst_caps_get_structure(caps, 0);
 	char 			*encoding  		= (char*) gst_structure_get_string(video_caps, "encoding-name");
 	/* Fill the MIB a first Time */
@@ -280,9 +289,6 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 	GstBus *bus,
 				g_printerr ( "error cannot create element for: %s\n","rtpdepay");
 				return NULL;
 			}
-		gst_bin_add(GST_BIN (pipeline), rtp);
-		gst_element_link_many( input, rtp, NULL );
-		last = rtp;
 		}else if  ( strcmp( "MP4V-ES",encoding) == 0 ){
 			/* For MPEG-4 video */
 			rtp 	= gst_element_factory_make ("rtpmp4vdepay", "rtpdepay");
@@ -291,20 +297,6 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 	GstBus *bus,
 				g_printerr ( "error cannot create element for: %s\n","rtpdepay");
 				return NULL;
 			}
-			parser = gst_element_factory_make ("mpeg4videoparse", "parser");
-			if( parser == NULL){
-				g_printerr ( "error cannot create element for: %s\n","parser");
-				return NULL;
-			}
-			dec = gst_element_factory_make ("avdec_mpeg4", "dec");
-			/* save last pipeline element */
-			if(dec == NULL){
-				g_printerr ( "error cannot create element for: %s\n","dec");
-				return NULL;
-			}
-			gst_bin_add_many(GST_BIN (pipeline), rtp, parser, dec, NULL);
-			gst_element_link_many( input, rtp, parser, dec, NULL );
-			last = dec;
 		} 		/* For J2K video */		
 		else if ( strcmp( "JPEG2000",encoding) == 0 ){
 			rtp 	= gst_element_factory_make ("rtpj2kdepay", "rtpdepay");
@@ -313,15 +305,6 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 	GstBus *bus,
 				g_printerr ( "error cannot create element for: %s\n","rtpdepay");
 				return NULL;
 			}
-			dec = gst_element_factory_make ("openjpegdec", "dec");
-			/* save last pipeline element */
-			if(dec == NULL){
-				g_printerr ( "error cannot create element for: %s\n","dec");
-				return NULL;
-			}
-			gst_bin_add_many(GST_BIN (pipeline), rtp, dec, NULL);
-			gst_element_link_many( input, rtp, dec, NULL );
-			last = dec;
 		}
 		else {
 			g_printerr("unknow type of video stream\n");
@@ -331,7 +314,11 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 	GstBus *bus,
 		g_printerr("ERROR: encoding format not found\n");
 		return NULL;
 	}
-	
+
+	gst_bin_add(GST_BIN (pipeline), rtp);
+	gst_element_link_many( input, rtp, NULL );
+	last = rtp;
+
 	/* Finally return*/
 	return last;
 }
