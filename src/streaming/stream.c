@@ -350,7 +350,6 @@ int init_stream_SU( gpointer main_loop,GstCaps *caps, struct channelTable_entry 
 
 	gst_element_set_state (data->pipeline, GST_STATE_PAUSED);
 	channel_entry->stream_datas = data;
-	printf("1\n");
     return EXIT_SUCCESS;
 }
 

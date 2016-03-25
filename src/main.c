@@ -77,8 +77,7 @@ static gboolean stop_program ( gpointer data ){
 
 
 static void default_startUp_mode(gpointer loop){
-		
-	for (int i=1; i<channelNumber._value.int_val; i++){
+	for (int i=1; i<=channelNumber._value.int_val; i++){
 		struct channelTable_entry * entry 	= channelTable_getEntry(i);
 		entry->channelStatus 				= start;
 		if ( entry->channelDefaultReceiveIpAddress ) 
