@@ -303,52 +303,28 @@ static void init_mib_global_parameter(){
 	
 }
 
-/**
- * \brief this function is used to get the information to place in the VIVOE MIB
- * from the configuration file associated to it: "vivoe-mib.conf". It will
- * get the values of the different parameters of the MIB, check their validity
- * \return error messages for the parameters that are not Valid, and initialize the other
- */
-int init_mib_content(){
- 
-	/* Define the error pointer we will be using to check for errors in the configuration file */
-    GError* error = NULL;
-    /* Declaration of an array of gstring (gchar**) that will contain the name of the different groups
-     * declared in the configuration file
-     */
-    gchar** groups;
+static gboolean vivoe_redirect(gchar *cmdline){
+
+	gboolean redirect = FALSE;
 	
-	/* a location to store the path of the openned configuration file */
-	gchar* gkf_path = NULL;
+	if ( cmdline == NULL )
+		return redirect;
 
-	/* Declaration of a pointer that will contain our configuration file*/
-    GKeyFile* gkf = open_mib_configuration_file(error, &gkf_path);
-	
-	/* check if the MIB groups are present if so we know that GROUP_NAME_DEVICEINFO and FROUP_NAME_CHANNELCONTROL are indeed present*/
-	groups = check_mib_group(gkf, error);
-	if ( groups == NULL)
-		return EXIT_FAILURE;
+	gchar **splitted;
 
-	/* Defined what separator will be used in the list when the parameter can have several values (for a table for example)*/
-    g_key_file_set_list_separator (gkf, (gchar) ';');
- 
-	if (!init_deviceInfo(gkf, GROUP_NAME_DEVICEINFO , error))
-		return EXIT_FAILURE;
-	if ( init_channelNumber_param(gkf, groups , error))
-		return EXIT_FAILURE;
-	if ( init_videoFormatNumber_param(gkf, groups, error) )
-		return EXIT_FAILURE;
+	/* parse entirely the command line */
+	splitted = g_strsplit ( cmdline , " ", -1);
 
-	/* free the memory allocated for the array of strings groups */
-	 g_strfreev(groups);
+	/* get the encoding parameter */
+	if (g_strv_contains ((const gchar * const *) splitted,VIVOE_REDIRECT_NAME )){
+		redirect = TRUE;
+	}
+	/* free splitted */
+	g_strfreev(splitted);
 
-	 /* initialize global parameter of the mib that value cannot be found inside conguration file */
-	init_mib_global_parameter();
-
-	close_mib_configuration_file(gkf);
-
-	return EXIT_SUCCESS;
+	return redirect;
 }
+
 
 
 /**
@@ -361,11 +337,14 @@ int init_mib_content(){
  * \return gchar* the value of the found key or NULL is the key has not been found
  */
 static gchar *get_key_value(GKeyFile* gkf, const gchar* const* groups ,char *group_name, const gchar *key_name, GError* error){
-	gchar *key_value;
+
+	gchar *key_value; /* a variable to store the key value */
+
 	if( !(g_strv_contains(groups, group_name )) ){
 		fprintf (stderr, "Group %s not found in configuration file\nIt should be written in the form [%s]\n", group_name ,group_name);
 		return NULL;
 	}
+
 	if(g_key_file_has_key(gkf,group_name,key_name, &error)){
 		key_value = (char*) g_key_file_get_string(gkf,group_name , key_name , &error);
 		if(error != NULL)
@@ -415,6 +394,38 @@ gboolean set_key_value(GKeyFile* gkf, const gchar* const* groups ,char *group_na
 
 }
 
+
+gchar *get_source_cmdline(GKeyFile 	*gkf, int index){
+
+	/* Define the error pointer we will be using to check for errors in the configuration file */
+    GError 		*error 	= NULL;
+
+	/* Declaration of an array of gstring (gchar**) that will contain the name of the different groups
+	 * declared in the configuration file
+	 */
+	gchar 		**groups;
+
+	/*
+	 * the command line string retreive from the configuration file
+	 */
+	gchar 		*cmdline;
+
+	/*first we load the different Groups of the configuration file
+	 * second parameter "gchar* length" is optional*/
+	groups = g_key_file_get_groups(gkf, NULL);
+
+	char *source_prefix = "source_";
+	char *source_name = (char*) malloc( strlen(source_prefix)+2 * sizeof(char));
+	/* Build the name that the group should have */
+	sprintf(source_name, "%s%d", source_prefix, index);
+
+	cmdline = get_key_value(gkf,(const gchar* const*) groups , source_name ,GST_SOURCE_CMDLINE , error);
+
+	free(source_name);
+	return cmdline;
+
+}
+
 /**
  * \brief get the command line entered by the user in configuration file to get the video source
  * \param index the index of the initiated stream
@@ -452,6 +463,36 @@ gchar *init_sources_from_conf(int index){
 
 	free(source_name);
 	close_mib_configuration_file(gkf);
+	return cmdline;
+}
+
+gchar *get_sink_cmdline(GKeyFile 	*gkf, int index){
+
+	/* Define the error pointer we will be using to check for errors in the configuration file */
+    GError 		*error 	= NULL;
+
+	/* Declaration of an array of gstring (gchar**) that will contain the name of the different groups
+	 * declared in the configuration file
+	 */
+	gchar 		**groups;
+
+	/*
+	 * the command line string retreive from the configuration file
+	 */
+	gchar 		*cmdline;
+
+	/*first we load the different Groups of the configuration file
+	 * second parameter "gchar* length" is optional*/
+	groups = g_key_file_get_groups(gkf, NULL);
+
+	char *receiver_prefix = "receiver_";
+	char *receiver_name = (char*) malloc( strlen(receiver_prefix)+2 * sizeof(char));
+	/* Build the name that the group should have */
+	sprintf(receiver_name, "%s%d", receiver_prefix, index);
+
+	cmdline = get_key_value(gkf,(const gchar* const*) groups , receiver_name ,GST_SINK_CMDLINE , error);
+
+	free(receiver_name);
 	return cmdline;
 }
 
@@ -645,4 +686,97 @@ void set_default_IP_from_conf(int index, const char* new_default_ip){
 
 	free(receiver_name);
 	close_mib_configuration_file(gkf);
+}
+
+redirect_data *redirect_channels[] = {NULL};
+/**
+ * \brief create the mapping to link redirection between service provider and service user
+ */
+static gboolean init_redirection_data(GKeyFile* gkf ){
+	
+	gchar *cmdline;
+	int index, j;
+	
+	int i = 0;	
+	/* get redirection data for service provider */
+	for ( index = 1 ; index <=  videoFormatNumber._value.int_val ; index++){
+		cmdline = get_source_cmdline(gkf, index );
+
+		if(vivoe_redirect(cmdline) ){	
+			redirect_data *data = malloc(sizeof(redirect_data));
+			data->video_SP_index = index;
+			redirect_channels[i] = data;
+			i++;
+		}
+	}
+	
+	j = 0;
+	/* get redirection data for service user */
+	for ( index = 1 ; index <= channelNumber._value.int_val ; index ++){
+		cmdline = get_sink_cmdline(gkf, index );
+		if(vivoe_redirect(cmdline) ){	
+			redirect_data *data = malloc(sizeof(redirect_data));
+			data->video_SP_index = redirect_channels[j]->video_SP_index;
+			data->channel_SU_index = index;
+			redirect_channels[j] = data;
+			j++;
+		}
+	}
+
+	/* check if there are as many receiver in "redirected" mode as sources */
+	if ( i != j ){
+		g_printerr("ERROR: there should be as many sources in \"redirect\" mode as receiver\n");
+		return FALSE;
+	}
+	
+	return TRUE;
+}
+
+/**
+ * \brief this function is used to get the information to place in the VIVOE MIB
+ * from the configuration file associated to it: "vivoe-mib.conf". It will
+ * get the values of the different parameters of the MIB, check their validity
+ * \return error messages for the parameters that are not Valid, and initialize the other
+ */
+int init_mib_content(){
+ 
+	/* Define the error pointer we will be using to check for errors in the configuration file */
+    GError* error = NULL;
+    /* Declaration of an array of gstring (gchar**) that will contain the name of the different groups
+     * declared in the configuration file
+     */
+    gchar** groups;
+	
+	/* a location to store the path of the openned configuration file */
+	gchar* gkf_path = NULL;
+
+	/* Declaration of a pointer that will contain our configuration file*/
+    GKeyFile* gkf = open_mib_configuration_file(error, &gkf_path);
+	
+	/* check if the MIB groups are present if so we know that GROUP_NAME_DEVICEINFO and FROUP_NAME_CHANNELCONTROL are indeed present*/
+	groups = check_mib_group(gkf, error);
+	if ( groups == NULL)
+		return EXIT_FAILURE;
+
+	/* Defined what separator will be used in the list when the parameter can have several values (for a table for example)*/
+    g_key_file_set_list_separator (gkf, (gchar) ';');
+ 
+	if (!init_deviceInfo(gkf, GROUP_NAME_DEVICEINFO , error))
+		return EXIT_FAILURE;
+	if ( init_channelNumber_param(gkf, groups , error))
+		return EXIT_FAILURE;
+	if ( init_videoFormatNumber_param(gkf, groups, error) )
+		return EXIT_FAILURE;
+
+	/* free the memory allocated for the array of strings groups */
+	 g_strfreev(groups);
+
+	 /* initialize global parameter of the mib that value cannot be found inside conguration file */
+	init_mib_global_parameter();
+
+	init_redirection_data( gkf );
+
+	close_mib_configuration_file(gkf);
+
+	return EXIT_SUCCESS;
 }
