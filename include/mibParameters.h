@@ -143,7 +143,7 @@ extern parameter videoFormatNumber; /*initialize in viodeFormatNumber.c*/
 
 
 /**
- * \brief a structure to registeer the information to send the UDP datagram
+ * \brief a structure to registeer the information to send the udp datagram
  */
 typedef struct {
 	char 	*udp_payload;
@@ -155,7 +155,18 @@ extern parameter channelNumber;
 
 /* --------------------------------- end Group channelControl ----------------------------- */
 
+/**
+ * \brief a structure to register the information relative to redirection 
+ */
+typedef struct {
+	long 	channel_SU_index;
+	long 	video_SP_index;
+}redirect_data;
 
+/**
+ * \brief a NULL terminated array that contains all the redirection_data of the current program
+ */
+extern redirect_data *redirect_channels[];
 
 /** 
  * \brief The main loop of the program, because to be able to acces it everywhere in the program */
