@@ -160,25 +160,84 @@ static GstElement* source_creation(GstElement* pipeline, char* format, int width
 #endif
 
 /**
+ * \brief specify if a SP is a redirection (check if it is in the redirection_channel array
+ * \param videoFormatIndex the index of the videoFormat to check 
+ * \return TRUE if it is a redirection, FALSE otherwise
+ */
+static gboolean SP_is_redirection(long videoFormatIndex){
+
+	int i = 0;
+	while ( redirect_channels[i] != NULL ){
+		if ( redirect_channels[i]->video_SP_index == videoFormatIndex ) /* if found, then returns */
+			return TRUE;
+		i++;
+	}
+
+	return FALSE; /* if not found, returns FALSE */
+
+}
+
+/** 
+ * \brief create emtpy entries in VFT and CT for the redirection entries for a SP
+ * \param steam_data the stream data to associate to the entry 
+ * \param videoFormatnIndex the index of the VF to create
+ */ 
+static void init_redirection( gpointer stream_datas, long videoFormatIndex ){
+	
+	stream_data *data 			= stream_datas;
+
+	/* create an empty entry for the redirection */
+	videoFormatTable_createEntry( 	videoFormatIndex, 	videoChannel,
+									disable, 			"",
+									"", 				0,
+									0,				 	"",
+									0, 					0,
+									0, 					0,
+									0, 					0,
+									0, 					0,
+									0,					0,
+									0, 					0,
+									data);
+
+	channelTable_create_empty_entry(channelNumber._value.int_val+1, videoFormatIndex, videoChannel, 0, data);
+
+}
+
+/**
  * \brief get the command line to use to get the source from configuration file
  * \param pipeline the pipeline to wich adding the bin made from the cmd line description 
  * return GstElement* the last element added in the pipeline: the bin made
  */
-static GstElement *get_source( GstElement* pipeline, long videoFormartIndex){
+static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 	GError 		*error 		= NULL; /* an Object to save errors when they occurs */
 	GstElement 	*bin 		= NULL; /* to return last element of pipeline */
-	gchar 		*cmdline 	= init_sources_from_conf( videoFormartIndex );
+	gchar 		*cmdline 	= init_sources_from_conf( videoFormatIndex );
 
 	/* check if everything went ok */	
 	if (cmdline == NULL)
 		return NULL;
-	bin  = gst_parse_bin_from_description (cmdline,
-											TRUE,
-											&error);
+
+	/* check if it is a redirection */
+ 
+	if( SP_is_redirection( videoFormatIndex ) ){
+		/* if so build the appropriate source */
+		bin = gst_element_factory_make( "intervideosrc", "src-redirection");
+		if ( !bin ){
+			g_printerr("Failed to parse: %s\n",error->message);
+	   		return NULL;
+		}
+	}
+	else
+		bin  = gst_parse_bin_from_description ( cmdline,
+												TRUE,
+												&error);	
+
 	if ( error != NULL){
 		g_printerr("Failed to parse: %s\n",error->message);
 	   	return NULL;	
 	}
+
+	/* add bin in pipeline */
 	gst_bin_add (GST_BIN(pipeline), bin);
 	free(cmdline);
 	return bin;
@@ -188,6 +247,7 @@ static GstElement *get_source( GstElement* pipeline, long videoFormartIndex){
  * \brief intialize the stream: create the pipeline and filters out non vivoe format
  * \param loop the main loop
  * \param stream_datas a structure in which we will save the pipeline and the bus elements
+ * \param videoFormatIndex the videoFormatIndex for which the pipeline will be built
  * \return EXIT_SUCCESS or EXIT_FAILURE
  */
 static int init_stream_SP( gpointer main_loop, gpointer stream_datas, long videoFormatIndex)
@@ -196,31 +256,22 @@ static int init_stream_SP( gpointer main_loop, gpointer stream_datas, long video
 	GstElement 	*pipeline 		= data->pipeline;
     GstElement 	*last;	
 
-	last = get_source(pipeline, videoFormatIndex);
-	if (last == NULL ){
-		g_printerr ( "Failed to create videosource\n");
-		return EXIT_FAILURE;
-	}
-	
-	/* Create pipeline  - save videoFormatIndex into stream_data data*/
-	last = create_pipeline_videoChannel( stream_datas, 	main_loop, last, videoFormatIndex );
-
-	/* Check if everything went ok*/
-	if (last == NULL){
-		g_printerr ( "Failed to create pipeline\n");
-		return EXIT_FAILURE;
-	}
-	/* set pipeline to PAUSED state will open /dev/video0, so it will not be done in start_streaming */
-	gst_element_set_state (data->pipeline, GST_STATE_PAUSED);
-
     return EXIT_SUCCESS;
 }
 
+
+/**
+ * \brief initiate a pipeline for a SP
+ * \param main_loop the main loop
+ * \param videoFormatIndex the videoFormatIndex for which the pipeline will be built
+ * \return EXIT_SUCCESS or EXIT_FAILURE
+ */
 int stream_SP( gpointer main_loop, int videoFormatIndex){
 
 	/* Initialization of elements needed */
 	GMainLoop 	*loop 			= main_loop;
     GstElement 	*pipeline;
+    GstElement 	*last;	
     GstBus 		*bus;
     guint 		bus_watch_id;
 	
@@ -248,42 +299,53 @@ int stream_SP( gpointer main_loop, int videoFormatIndex){
 	data->bus 			= bus;
 	data->bus_watch_id 	= bus_watch_id;
 
+#if 0
 	/* build pipeline */
 	if (init_stream_SP( main_loop, data, videoFormatIndex))
 		return EXIT_FAILURE;
+#endif  //if 0
+	last = get_source(pipeline, videoFormatIndex);
+	if (last == NULL ){
+		g_printerr ( "Failed to create videosource\n");
+		return EXIT_FAILURE;
+	}
+	
+	gboolean redirection = FALSE; 
+	/* if this is a redirection */
+	if ( !strcmp(GST_ELEMENT_NAME(last), "src-redirection") ){ 
+		init_redirection( data/*stream_datas*/, videoFormatIndex );
+		redirection = TRUE;
+	}
+	else
+		last = create_pipeline_videoChannel( data /* stream_datas*/, 	main_loop, last, videoFormatIndex ); /* Create pipeline  - save videoFormatIndex into stream_data data*/
 
-	/* if we are in the defaultStartUp Mode, launch the last VF register in the table */
-	if ( deviceInfo.parameters[num_DeviceMode]._value.int_val == defaultStartUp){
-		struct channelTable_entry *entry 	= channelTable_get_from_VF_index(videoFormatNumber._value.int_val);
-		entry->channelStatus 				= start;
- 		if ( channelSatus_requests_handler( entry ))
-			return EXIT_SUCCESS;
-		
-		else
-			return EXIT_FAILURE;
+	/* Check if everything went ok*/
+	if (last == NULL){
+		g_printerr ( "Failed to create pipeline\n");
+		return EXIT_FAILURE;
+	}
+	/* set pipeline to PAUSED state will open /dev/video0, so it will not be done in start_streaming */
+	gst_element_set_state (data->pipeline, GST_STATE_PAUSED);
+
+	if ( ! redirection ){	
+		/* if we are in the defaultStartUp Mode, launch the last VF register in the table */
+		if ( deviceInfo.parameters[num_DeviceMode]._value.int_val == defaultStartUp){
+			struct channelTable_entry *entry 	= channelTable_get_from_VF_index(videoFormatIndex);
+			if (entry == NULL ){
+				g_printerr("ERROR: try to start a source that has no channel associated\n");
+				return EXIT_FAILURE;
+			}
+			entry->channelStatus 				= start;
+			if ( channelSatus_requests_handler( entry ))
+				return EXIT_SUCCESS;
+
+			else
+				return EXIT_FAILURE;
+		}
 	}
 
 	return EXIT_SUCCESS;
 
-}
-
-#define VIVOE_REDIRECT_NAME 	"vivoe-redirect"
-static gboolean vivoe_redirect(gchar *cmdline){
-
-	gboolean redirect = FALSE;
-	gchar **splitted;
-
-	/* parse entirely the command line */
-	splitted = g_strsplit ( cmdline , " ", -1);
-
-	/* get the encoding parameter */
-	if (g_strv_contains ((const gchar * const *) splitted,VIVOE_REDIRECT_NAME )){
-		redirect =TRUE;
-	}
-	/* free splitted */
-	g_strfreev(splitted);
-
-	return redirect;
 }
 
 /**

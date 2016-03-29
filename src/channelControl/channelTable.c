@@ -80,7 +80,7 @@ initialize_table_channelTable(void)
 			ip = get_default_IP_from_conf(i+1);
 			if (ip)
 				default_receive_IP 	= inet_addr(get_default_IP_from_conf(i+1));	
-			channelTable_create_SU_entry(i+1, default_receive_IP );
+			channelTable_create_empty_entry(i+1 , 0 ,serviceUser, default_receive_IP,  NULL ); /* create a channel with "0" as videoFormatIndex */
 		}
 	}
 }
@@ -196,42 +196,42 @@ struct channelTable_entry *
 }
 
 /**
- * \brief Create an empty entry, ServiceUser must have an available entry in order to receive the Start message from the manager
+ * \brief Create an empty entry a SU entry or a SP entry
  */
-struct channelTable_entry *	channelTable_create_SU_entry(int index, long default_IP_address){
-    struct channelTable_entry *ServiceUser_entry = 
-		channelTable_createEntry(
-    	        				index, /* Appen one channel to the list, its index is just the number of channel incremented by one */
-								serviceUser,
-						    	"",
-    							stop,
-							    0,
-							    "",
-							    "",
-							    0,
-							    0,
-							    "",
-							    0,
-							    0,
-							    0,
-    							0,
-    							0,
-							    0,
-							    0,
-								0,
-							   	0,
-							   	0,
-							   	0,
-							   	0,
-							   	default_SAP_interval,
-							   	0,
-							   	default_IP_address,
-							 	NULL
-                			);
+struct channelTable_entry *	channelTable_create_empty_entry(int index, long videoFormatNumber , long channel_type, long default_IP_address, gpointer stream_datas ){
+
+	struct channelTable_entry *ServiceUser_entry = 
+			channelTable_createEntry(
+    	      				index, /* Appen one channel to the list, its index is just the number of channel incremented by one */
+							channel_type,
+					    	"",
+    						stop,
+						    videoFormatNumber,
+						    "",
+						    "",
+						    0,
+						    0,
+						    "",
+						    0,
+						    0,
+						    0,
+    						0,
+    						0,
+						    0,
+						    0,
+							0,
+						   	0,
+						   	0,
+						   	0,
+						   	0,
+						   	default_SAP_interval,
+						   	0,
+						   	default_IP_address,
+						 	NULL
+               			);
+
 	return ServiceUser_entry;
 }
-
-
 
 /**
  * \brief fill an entry in the ChannelTable 
