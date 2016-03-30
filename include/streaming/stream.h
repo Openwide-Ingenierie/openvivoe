@@ -18,7 +18,8 @@ typedef struct{
 	rtp_data 		*rtp_datas;
 }stream_data;
 
-int stream_SP( gpointer main_loop, int videoFormatIndex);
+int handle_SP_default_StartUp_mode( long videoFormatIndex );
+int init_stream_SP( gpointer main_loop, int videoFormatIndex);
 int init_stream_SU( gpointer main_loop,GstCaps *caps, struct channelTable_entry *channel_entry);
 gboolean start_streaming (gpointer stream_datas, long channelVideoFormatIndex );
 int stop_streaming( gpointer stream_datas, long channelVideoFormatIndex  );
