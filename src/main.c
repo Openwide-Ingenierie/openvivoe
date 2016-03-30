@@ -75,14 +75,18 @@ static gboolean stop_program ( gpointer data ){
 	return TRUE;
 }
 
-
+/**
+ * \brief iterate throug the channel table, set to "start" all SU channels so they start to listen for SAP/SDP annoucnement
+ * \param loop the GMainLoop
+ */
 static void default_startUp_mode(gpointer loop){
 	for (int i=1; i<=channelNumber._value.int_val; i++){
 		struct channelTable_entry * entry 	= channelTable_getEntry(i);
-		entry->channelStatus 				= start;
-		if ( entry->channelDefaultReceiveIpAddress ) 
-			entry->channelReceiveIpAddress = entry->channelDefaultReceiveIpAddress;
-		channelSatus_requests_handler( entry );
+		if ( entry->channelType == serviceUser && entry->channelDefaultReceiveIpAddress ){
+			entry->channelStatus 			= start;
+			entry->channelReceiveIpAddress 	= entry->channelDefaultReceiveIpAddress;
+			channelSatus_requests_handler( entry );
+		}
 	}
 }
 

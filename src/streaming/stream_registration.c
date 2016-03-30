@@ -44,9 +44,9 @@ static gboolean compare_entries(struct videoFormatTable_entry* origin, struct vi
 /**
  * \brief a definition of all the potential values of the colorspace field of openjpegenc src pad template
  */
-#define colo_RGB 	"sRGB"
-#define colo_YUV 	"sYUV"
-#define colo_GRAY 	"GRAY"
+#define colo_RGB 		"sRGB"
+#define colo_YUV 		"sYUV"
+#define colo_GRAY 		"GRAY"
 
 /**
  * \brief the mapped values for videoFormatSampling field of viddeoFormatTable_entry 
@@ -146,6 +146,7 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
 		else
 			video_info->videoFormatMaxVertRes		= strtol ( (char* ) g_value_dup_string ( gst_structure_get_value(source_str_caps, "width")), NULL , 10 ); /* the string is converted into long int, basis 10 */
 	}
+
 	/*channelRTppt (saved in rtp_datas - payload type of the channel should be something like 96 or 127*/
 	if( gst_structure_has_field(source_str_caps, "payload")){
 		if (G_VALUE_HOLDS_INT(gst_structure_get_value(source_str_caps, "payload"))){
@@ -154,6 +155,7 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
 			video_info->videoFormatRtpPt 			= (long) g_value_get_int( gst_structure_get_value(source_str_caps, "payload"));
 		}
 	}
+
 	/* clock-rate */
 	if( gst_structure_has_field(source_str_caps, "clock-rate")){
 		if (G_VALUE_HOLDS_INT(gst_structure_get_value(source_str_caps, "clock-rate")))
@@ -201,13 +203,13 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 											0, 																			0,
 											data);
 			
-			char *channelUserDesc = get_desc_from_conf(videoFormatNumber._value.int_val);
+			char *channelUserDesc = get_desc_from_conf(video_info->videoFormatIndex);
 			if (channelUserDesc == NULL)
 				channelUserDesc="";
 			/* At the  same time we copy all of those parameters into video channel */
 			channelTable_createEntry( 	channelNumber._value.int_val+1, 												videoChannel,
 										channelUserDesc, 																stop,
-										video_info->videoFormatIndex, 																			video_info->videoFormatBase,
+										video_info->videoFormatIndex, 													video_info->videoFormatBase,
 										video_info->videoFormatSampling, 												video_info->videoFormatBitDepth,
 										video_info->videoFormatFps,				 										video_info->videoFormatColorimetry,
 										video_info->videoFormatInterlaced, 												video_info->videoFormatCompressionFactor,
@@ -256,8 +258,7 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 											0, 																				0,
 											data);
 			/* increase videoFormatNumber as we added an entry */
-//			videoFormatNumber._value.int_val++;
-			char *channelUserDesc = get_desc_from_conf(videoFormatNumber._value.int_val);
+			char *channelUserDesc = get_desc_from_conf(video_info->videoFormatIndex);
 			if (channelUserDesc == NULL)
 				channelUserDesc="";
 

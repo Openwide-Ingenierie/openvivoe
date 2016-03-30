@@ -26,26 +26,61 @@
 #include "../../include/streaming/pipeline.h"
 #include "../../include/streaming/stream.h"
 
+/**
+ * \brief caps of videos for redirection got the name: video/x-rtp, which causes problems to choose the RTP payloader, we want to transform it to video/x-raw,mpeg or image/j2c
+ * \param the structure contained in the video caps
+ * \return TRUE if we success to transpose the encoding name, FALSE otherwise
+ */
+static gboolean transpose_encoding_to_name(	GstStructure *video_caps ){
+
+	if ( gst_structure_has_field(video_caps, "encoding-name") ){
+
+		if ( ! strcmp("RAW", g_value_get_string(gst_structure_get_value(video_caps, "encoding-name")) ) )
+			gst_structure_set_name(video_caps, "video/x-raw");
+
+		else if ( ! strcmp("JPEG2000", g_value_get_string(gst_structure_get_value(video_caps, "encoding-name")) ) )
+			gst_structure_set_name(video_caps, "image/x-j2c");
+
+		else if ( ! strcmp("MP4V-ES", g_value_get_string(gst_structure_get_value(video_caps, "encoding-name")) ) )
+			gst_structure_set_name(video_caps, "video/mpeg");
+
+	}else{
+
+		g_printerr("Unkown encoding name, cannot redirect video\n");	
+		return FALSE;
+
+	}
+
+	return TRUE;
+
+}
 
 /*
  * This function add the RTP element to the pipeline
  */
-static GstElement* addRTP( 	GstElement *pipeline, 	GstBus *bus,
-							guint bus_watch_id, 	GMainLoop *loop,
-							GstElement* input, 		struct videoFormatTable_entry *video_info,
-							gpointer stream_datas){
+static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
+							guint bus_watch_id, 	GMainLoop 						*loop,
+							GstElement* input, 		struct videoFormatTable_entry 	*video_info,
+							gpointer stream_datas, 	GstCaps 						*caps){
 	/*Create element that will be add to the pipeline */
 	GstElement *rtp = NULL;
 	GstElement *parser;
-	GstStructure* video_caps;
+	GstStructure *video_caps;
 	
-	/* Media stream Type detection */
-	video_caps = type_detection(GST_BIN(pipeline), input, loop, NULL);
-	/* Fill the MIB a first Time */
-	fill_entry(video_caps, video_info, stream_datas);
+	if (caps == NULL){
+		/* Media stream Type detection */
+		video_caps = type_detection(GST_BIN(pipeline), input, loop, NULL);
+		/* Fill the MIB a first Time */
+		fill_entry(video_caps, video_info, stream_datas);
+ 	}else{
+		video_caps = gst_caps_get_structure ( caps, 0 );
+		transpose_encoding_to_name(	video_caps );
+		/* This is a redirection, fill the MIB once for all */
+		fill_entry(video_caps, video_info, stream_datas);
+	}
 	
  	/* in case RAW video type has been detected */
-	if ( gst_structure_has_name( video_caps, "video/x-raw")){
+	if ( gst_structure_has_name( video_caps, "video/x-raw") ){
 		/* For Raw video */
 		rtp 	= gst_element_factory_make ("rtpvrawpay", "rtppay");
 		/* Check if everything went ok */
@@ -90,20 +125,34 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus *bus,
 	}
 	/* add rtp to pipeline */
 	gst_bin_add(GST_BIN (pipeline), rtp);
-	/* Filters out non VIVOE videos, and link input to RTP if video has a valid format*/
-	if (!filter_VIVOE(type_detection(GST_BIN(pipeline), input, loop, NULL),input, rtp)){
-		return NULL;
+
+	if (caps == NULL ){
+		/* Filters out non VIVOE videos, and link input to RTP if video has a valid format*/
+		if (!filter_VIVOE(type_detection(GST_BIN(pipeline), input, loop, NULL),input, rtp)){
+			return NULL;
+		}
+
+		/* Now that wa have added the RTP payloader to the pipeline, we can get the new caps of the video stream*/
+		/* Media stream Type detection */
+		video_caps = type_detection(GST_BIN(pipeline), rtp, loop, NULL);
+		/*Fill the MIB a second time after creating payload*/
+		fill_entry(video_caps, video_info, stream_datas);
+	}else{
+		/* link input to rtp payloader */
+		if ( !gst_element_link(input, rtp)){
+			g_printerr("ERROR: failed link rtp payloader\n");
+		   return NULL;	
+		}
+		
+		/*Fill the MIB a second time after creating payload, this is needed to get rtp_data needed to build SDP files */
+		fill_entry(video_caps, video_info, stream_datas);
+
 	}
-	/* Now that wa have added the RTP payloader to the pipeline, we can get the new caps of the video stream*/
-	/* Media stream Type detection */
-	video_caps = type_detection(GST_BIN(pipeline), rtp, loop, NULL);
-	/*Fill the MIB a second time after creating payload*/
-	fill_entry(video_caps, video_info, stream_datas);
-	
+
 	/* Finally return*/
 	return rtp;
 }
-
+		
 void set_udpsink_param( GstElement *udpsink, long channel_entry_index){
 	/* compute IP */
 	long ip 			= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0], channel_entry_index);
@@ -189,7 +238,7 @@ GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
  	last = addRTP( 	pipeline, 	  bus,
 					bus_watch_id, loop,
 					input, 		  video_stream_info,
-					stream_datas);
+					stream_datas, NULL);
 	
 	if(last == NULL){
 		g_printerr("Failed to create pipeline\n");
@@ -202,7 +251,7 @@ GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
 	 */
 	long channel_entry_index = 0;
 	if( initialize_videoFormat(video_stream_info, stream_datas,  &channel_entry_index)){
-		g_printerr("Failed to add entry in the videoFormatTable or in channelEntry\n");
+		g_printerr("Failed to add entry in the videoFormatTable or in channelTable\n");
 		return NULL;
 	}
 
@@ -216,11 +265,69 @@ GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
 		g_printerr("Failed to create pipeline\n");
 		return NULL;
 	}
+
 	data->sink = last;
 	/* Before returning, free the entry created at the begging*/
 	free(video_stream_info);
 	return last;
 
+}
+
+/**
+ * \brief add elements to the redirection source's pipeline, now that we know the rtp payloader to add
+ * \param caps tha video caps of the stream received by the serviceUser to redirect
+ * \param channel_entry the service User that receives the stream we need to redirect
+ */
+GstElement *append_SP_pipeline_for_redirection( GstCaps *caps, long videoFormatIndex ){
+
+	GstElement 		*last;
+	
+	
+	/* get the entry in videoFormatTable that corresponds to the mapping */
+	struct videoFormatTable_entry* videoFormat_entry = videoFormatTable_getEntry(videoFormatIndex);
+	
+	stream_data 	*data 	=  videoFormat_entry->stream_datas;
+
+	if ( data == NULL ){
+		g_printerr("Failed to append pipeline for redirection\n");
+		return NULL;
+	}
+
+	/* Now build the corresponding pipeline according to the caps*/ 
+
+	last = addRTP(data->pipeline, data->bus, data->bus_watch_id, loop , data->sink  , videoFormat_entry , data , caps);
+
+	if(last == NULL){
+		g_printerr("Failed to append pipeline for redirection\n");
+		return NULL;
+	}
+
+	/* get the index of the channel corresponding to the videoFormatIndex */
+	struct channelTable_entry *channel_entry = channelTable_get_from_VF_index(videoFormatIndex);
+
+	/* fill the channel Table */	
+	channelTable_fill_entry ( channel_entry , videoFormat_entry );
+
+	/* Add UDP element */
+	last = addUDP(  data->pipeline, 	data->bus,
+					data->bus_watch_id, loop,
+					last, 	 			channel_entry->channelIndex
+				);
+
+	if (last == NULL){
+		g_printerr("Failed to create pipeline\n");
+		return NULL;
+	}
+
+	/* foe convenience sinl contained the source element "intervideosrc" but it is not it purposes */
+	data->sink = last;
+	
+	/* as nobody will  this can be modified */
+	gst_element_set_state (data->pipeline, GST_STATE_PLAYING);
+	channel_entry->stream_datas = data;
+	handle_SP_default_StartUp_mode( videoFormatIndex );
+
+	return last;
 }
 
 /**
@@ -275,6 +382,7 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 	GstBus *bus,
 								guint bus_watch_id, 	GMainLoop *loop,
 								GstElement* input, 		struct videoFormatTable_entry *video_info,
 								gpointer stream_datas, 	GstCaps *caps){
+
 	/*Create element that will be add to the pipeline */
 	GstElement 		*rtp = NULL;
 	GstElement 		*last = NULL;
@@ -323,6 +431,7 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 	GstBus *bus,
 
 	/* Finally return*/
 	return last;
+
 }
 
 /*
@@ -331,21 +440,26 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 	GstBus *bus,
 static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 								guint bus_watch_id, 	GMainLoop *loop,
 								GstElement *input, 		struct channelTable_entry * channel_entry,
-								gchar *cmdline
+								gchar *cmdline, 		gboolean 					redirect
 								){
 
 	GError 		*error 		= NULL; /* an Object to save errors when they occurs */
 	GstElement 	*sink 		= NULL; /* to return last element of pipeline */
-
-	sink  = gst_parse_bin_from_description (cmdline,
-											TRUE,
-											&error);
+	
+	if ( !redirect){
+		sink  = gst_parse_bin_from_description (cmdline,
+												TRUE,
+												&error);
+	}else{
+		sink = gst_element_factory_make("intervideosink", "redirect-sink");
+	}
 
 	/* Create the sink */
     if(sink == NULL){
        g_printerr ( "error cannot create element for: %s\n","sink");
 	   return NULL;
     }
+
 	/* add rtp to pipeline */
 	if ( !gst_bin_add(GST_BIN (pipeline), sink )){
 		g_printerr("Unable to add %s to pipeline", gst_element_get_name(sink));
@@ -412,9 +526,8 @@ GstElement* create_pipeline_serviceUser( gpointer 					stream_datas,
 						data, 			caps);
 
 	channelTable_fill_entry(channel_entry, video_stream_info);
-	
-	if ( !redirect )
-		last = addSink_SU( pipeline, bus, bus_watch_id, loop, last, channel_entry, cmdline);
+
+	last = addSink_SU( pipeline, bus, bus_watch_id, loop, last, channel_entry, cmdline, redirect);
 
 	return last;
 }

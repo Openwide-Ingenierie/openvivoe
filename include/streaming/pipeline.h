@@ -21,5 +21,9 @@ GstElement* create_pipeline_serviceUser( 	gpointer 					stream_datas,
 										 	struct channelTable_entry 	*channel_entry, 
 										 	gchar 						*cmdline, 
 											gboolean 					redirect);
+
+GstElement *append_SP_pipeline_for_redirection( GstCaps *caps, long videoFormatIndex);
+
+
 #endif /* PIPELINE_H */
 

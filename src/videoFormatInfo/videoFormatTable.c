@@ -148,7 +148,7 @@ initialize_table_videoFormatTable(void)
 	/* get all the source configuration for configuration file, init the corresponding streams */
 	if( deviceInfo.parameters[num_DeviceType]._value.int_val != device_SP ){
 		for(int i=1; i<=videoFormatNumber._value.int_val; i++)
-			stream_SP(loop, i);
+			init_stream_SP(loop, i);
 	}
 
 }
