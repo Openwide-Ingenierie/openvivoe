@@ -74,13 +74,14 @@ initialize_table_channelTable(void)
 	 */
 	long default_receive_IP = 0; /* a variable to retreive the default receive IP entered by the user in configuration file */
 	char *ip; /* the receive IP in a string form */
+
 	if( deviceInfo.parameters[num_DeviceType]._value.int_val != device_SP ){
 		for(int i=0; i<channelNumber._value.int_val; i++){
 			/* get the default IP address to use for defaultStartUp mode if it has been entered in the configuration file */
-			ip = get_default_IP_from_conf(i+1);
-			if (ip)
-				default_receive_IP 	= inet_addr(get_default_IP_from_conf(i+1));	
-			channelTable_create_empty_entry(i+1 , 0 ,serviceUser, default_receive_IP,  NULL ); /* create a channel with "0" as videoFormatIndex */
+			ip 				= get_default_IP_from_conf(i+1);
+			if ( ip )
+				default_receive_IP 	= inet_addr(get_default_IP_from_conf(i+1));
+			channelTable_create_empty_entry(i+1, serviceUser,"" ,0, default_receive_IP,  NULL ); /* create a channel with "0" as videoFormatIndex */
 		}
 	}
 }
@@ -198,13 +199,13 @@ struct channelTable_entry *
 /**
  * \brief Create an empty entry a SU entry or a SP entry
  */
-struct channelTable_entry *	channelTable_create_empty_entry(int index, long videoFormatNumber , long channel_type, long default_IP_address, gpointer stream_datas ){
+struct channelTable_entry *	channelTable_create_empty_entry(int index,long channel_type, char *channelUserDesc , long videoFormatNumber ,  long default_IP_address, gpointer stream_datas ){
 
 	struct channelTable_entry *ServiceUser_entry = 
 			channelTable_createEntry(
     	      				index, /* Appen one channel to the list, its index is just the number of channel incremented by one */
 							channel_type,
-					    	"",
+					    	channelUserDesc,
     						stop,
 						    videoFormatNumber,
 						    "",

@@ -160,7 +160,7 @@ static GstElement* source_creation(GstElement* pipeline, char* format, int width
 #endif
 
 /**
- * \brief specify if a SP is a redirection (check if it is in the redirection_channel array
+ * \brief specify if a SP is a redirection (check if it is in the redirection_channel array)
  * \param videoFormatIndex the index of the videoFormat to check 
  * \return TRUE if it is a redirection, FALSE otherwise
  */
@@ -198,8 +198,15 @@ static void init_redirection( gpointer stream_datas, long videoFormatIndex ){
 									0,					0,
 									0, 					0,
 									data);
+	
+	char *channelUserDesc = get_desc_from_conf(videoFormatIndex);
 
-	channelTable_create_empty_entry(channelNumber._value.int_val+1, videoFormatIndex, videoChannel, 0, data);
+	if ( !channelUserDesc )
+		channelUserDesc = "";
+
+	channelTable_create_empty_entry( channelNumber._value.int_val+1 , videoChannel , channelUserDesc , videoFormatIndex , 0 , data );
+	/* increase channelNumber as we added an entry */
+	channelNumber._value.int_val++;	
 
 }
 
