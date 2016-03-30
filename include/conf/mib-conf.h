@@ -43,6 +43,11 @@
  */
 #define GST_SINK_CMDLINE 			"gst_sink"
 
+/**
+ * \brief the value that should have a gst_source or gst_sink command line to be a redirection
+ */
+#define VIVOE_REDIRECT_NAME 		"vivoe-redirect"
+
 /*functions' definitions*/
 int 	init_mib_content(); /*check the groups, key and values of the MIB's parameters*/
 gchar 	*init_sources_from_conf(int index); /* get the command line used to initiate the streams */

@@ -177,6 +177,27 @@ static gboolean SP_is_redirection(long videoFormatIndex){
 
 }
 
+/**
+ * \brief specify if a SU is a redirection (check if it is in the redirection_channel array)
+ * \param channelIndex the index of the channel to check 
+ * \return TRUE if it is a redirection, FALSE otherwise
+ */
+static gboolean SU_is_redirection(long channelIndex, long *videoFormatIndex){
+
+	int i = 0;
+
+	while ( redirect_channels[i] != NULL ){
+		if ( redirect_channels[i]->channel_SU_index == channelIndex ){ /* if found, then returns */
+			*videoFormatIndex = redirect_channels[i]->video_SP_index;
+			return TRUE;
+		}
+		i++;
+	}
+
+	return FALSE; /* if not found, returns FALSE */
+
+}
+
 /** 
  * \brief create emtpy entries in VFT and CT for the redirection entries for a SP
  * \param steam_data the stream data to associate to the entry 
@@ -250,22 +271,19 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 	return bin;
 }
 
-/**
- * \brief intialize the stream: create the pipeline and filters out non vivoe format
- * \param loop the main loop
- * \param stream_datas a structure in which we will save the pipeline and the bus elements
- * \param videoFormatIndex the videoFormatIndex for which the pipeline will be built
- * \return EXIT_SUCCESS or EXIT_FAILURE
- */
-static int init_stream_SP( gpointer main_loop, gpointer stream_datas, long videoFormatIndex)
-{
-	stream_data *data 			= stream_datas;
-	GstElement 	*pipeline 		= data->pipeline;
-    GstElement 	*last;	
+int handle_SP_default_StartUp_mode(long videoFormatIndex ){
+	struct channelTable_entry *entry 	= channelTable_get_from_VF_index(videoFormatIndex);
+	if (entry == NULL ){
+		g_printerr("ERROR: try to start a source that has no channel associated\n");
+		return EXIT_FAILURE;
+	}
+	entry->channelStatus 				= start;
 
-    return EXIT_SUCCESS;
+	if ( channelSatus_requests_handler( entry ))
+		return EXIT_SUCCESS;
+	else
+		return EXIT_FAILURE;
 }
-
 
 /**
  * \brief initiate a pipeline for a SP
@@ -273,7 +291,7 @@ static int init_stream_SP( gpointer main_loop, gpointer stream_datas, long video
  * \param videoFormatIndex the videoFormatIndex for which the pipeline will be built
  * \return EXIT_SUCCESS or EXIT_FAILURE
  */
-int stream_SP( gpointer main_loop, int videoFormatIndex){
+int init_stream_SP( gpointer main_loop, int videoFormatIndex){
 
 	/* Initialization of elements needed */
 	GMainLoop 	*loop 			= main_loop;

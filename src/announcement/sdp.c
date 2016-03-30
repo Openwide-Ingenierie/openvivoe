@@ -226,7 +226,7 @@ gboolean create_SDP(GstSDPMessage 	*msg, struct channelTable_entry * channel_ent
 		return error_function();
 	if ( gst_sdp_media_set_proto ( media,transport_proto )!= GST_SDP_OK)
 		return error_function();
-
+	
 	if( gst_sdp_media_add_format(media, g_strdup_printf ("%ld", data->rtp_datas->rtp_type))!= GST_SDP_OK)
 		return error_function();
 
@@ -298,6 +298,6 @@ GstCaps* get_SDP(unsigned char *array, int sdp_msg_size, in_addr_t *multicast_ad
 	gst_caps_set_value ( caps,
                   		 "framerate",
                    		&res );
-
+	
 	return caps;
 }
