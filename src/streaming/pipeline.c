@@ -64,6 +64,7 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
 							gpointer stream_datas, 	GstCaps 						*caps){
 	/*Create element that will be add to the pipeline */
 	GstElement *rtp = NULL;
+	GstElement *capsfilter;
 	GstElement *parser;
 	GstStructure *video_caps;
 	
@@ -82,13 +83,14 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
  	/* in case RAW video type has been detected */
 	if ( gst_structure_has_name( video_caps, "video/x-raw") ){
 		/* For Raw video */
-		rtp 	= gst_element_factory_make ("rtpvrawpay", "rtppay");
+		rtp 	= gst_element_factory_make ("rtpvrawpay", "rtpvrawpay");
 		/* Check if everything went ok */
 		if( rtp == NULL){
-			g_printerr ( "error cannot create element for: %s\n","rtppay");
+			g_printerr ( "error cannot create element for: %s\n","rtpvrawpay");
 			return NULL;
 		}
 	}
+
 	/* in case MPEG4 video type has been detected */
 	else if  (gst_structure_has_name( video_caps, "video/mpeg")){
 		/* For MPEG-4 video */
@@ -97,23 +99,24 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
 			g_printerr ( "error cannot create element for: %s\n","parser");
 			return NULL;
 		}
-		rtp 	= gst_element_factory_make ("rtpmp4vpay", "rtppay");
+		rtp 	= gst_element_factory_make ("rtpmp4vpay", "rtpmp4vpay");
 		/* Check if everything went ok */
 		if( rtp == NULL){
-			g_printerr ( "error cannot create element for: %s\n","rtppay");
+			g_printerr ( "error cannot create element for: %s\n","rtpmp4vpay");
 			return NULL;
 		}
 		gst_bin_add(GST_BIN(pipeline),parser);
 		gst_element_link(input, parser);
 		input = parser;
-	} 
+	}
+
 	/* in case J2K video type has been detected */
 	else if  (gst_structure_has_name( video_caps, "image/x-j2c")){
 		/* For J2K video */
-		rtp 	= gst_element_factory_make ("rtpj2kpay", "rtppay");
+		rtp 	= gst_element_factory_make ("rtpj2kpay", "rtpj2kpay");
 		/* Check if everything went ok */
 		if( rtp == NULL){
-			g_printerr ( "error cannot create element for: %s\n","rtppay");
+			g_printerr ( "error cannot create element for: %s\n","rtpj2kpay");
 			return NULL;
 		}
 	}
@@ -138,8 +141,20 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
 		/*Fill the MIB a second time after creating payload*/
 		fill_entry(video_caps, video_info, stream_datas);
 	}else{
+
+		capsfilter = gst_element_factory_make("capsfilter", "capsfilter");
+		g_object_set(capsfilter, "caps",gst_caps_new_full (gst_structure_new( 	"video/x-raw" 	,
+															"format" 		, G_TYPE_STRING ,"I420" ,
+															"width" 		, G_TYPE_INT 	, 1920,
+															"height" 		, G_TYPE_INT 	, 1080,
+															"interlace-mode", G_TYPE_STRING , "progressive",
+															"framerate" 	, GST_TYPE_FRACTION, 30, 1,
+															NULL) , NULL)  , NULL);
+
+		gst_bin_add(GST_BIN(pipeline),capsfilter);
+
 		/* link input to rtp payloader */
-		if ( !gst_element_link(input, rtp)){
+		if ( !gst_element_link_many(input,   capsfilter, rtp, NULL)){
 			g_printerr("ERROR: failed link rtp payloader\n");
 		   return NULL;	
 		}
@@ -293,10 +308,11 @@ GstElement *append_SP_pipeline_for_redirection( GstCaps *caps, long videoFormatI
 		return NULL;
 	}
 
+	g_object_set(data->sink, "socket-path" , "/tmp/testvivoe" , NULL);
+
 	/* Now build the corresponding pipeline according to the caps*/ 
 
-	last = addRTP(data->pipeline, data->bus, data->bus_watch_id, loop , data->sink  , videoFormat_entry , data , caps);
-
+	last = addRTP(data->pipeline , data->bus , data->bus_watch_id , loop , data->sink  , videoFormat_entry , data , caps);
 	if(last == NULL){
 		g_printerr("Failed to append pipeline for redirection\n");
 		return NULL;
@@ -321,12 +337,7 @@ GstElement *append_SP_pipeline_for_redirection( GstCaps *caps, long videoFormatI
 
 	/* foe convenience sinl contained the source element "intervideosrc" but it is not it purposes */
 	data->sink = last;
-	
-	/* as nobody will  this can be modified */
-	gst_element_set_state (data->pipeline, GST_STATE_PLAYING);
 	channel_entry->stream_datas = data;
-	handle_SP_default_StartUp_mode( videoFormatIndex );
-
 	return last;
 }
 
@@ -451,7 +462,8 @@ static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 												TRUE,
 												&error);
 	}else{
-		sink = gst_element_factory_make("intervideosink", "redirect-sink");
+		sink = gst_element_factory_make("shmsink"/*"intervideosink"*/, "redirect-sink");
+		g_object_set(sink, "socket-path" , "/tmp/testvivoe" ,"shm-size" , 100000000 , "wait-for-connection" , 1, "sync", FALSE , NULL);
 	}
 
 	/* Create the sink */
@@ -492,6 +504,7 @@ GstElement* create_pipeline_serviceUser( gpointer 					stream_datas,
 										 struct channelTable_entry 	*channel_entry,
 										 gchar 						*cmdline,
 										 gboolean 					redirect){
+
 	stream_data 	*data 	=  stream_datas;
 	/* create the empty videoFormatTable_entry structure to intiate the MIB */
 	struct videoFormatTable_entry * video_stream_info;

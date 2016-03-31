@@ -249,9 +249,9 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
  
 	if( SP_is_redirection( videoFormatIndex ) ){
 		/* if so build the appropriate source */
-		bin = gst_element_factory_make( "intervideosrc", "src-redirection");
+		bin = gst_element_factory_make( "shmsrc"/* "intervideosrc"*/, "src-redirection");
 		if ( !bin ){
-			g_printerr("Failed to parse: %s\n",error->message);
+			g_printerr("Failed to create redirection: %s\n", "intervideosrc");
 	   		return NULL;
 		}
 	}
@@ -334,23 +334,25 @@ int init_stream_SP( gpointer main_loop, int videoFormatIndex){
 	gboolean redirection = FALSE; 
 	/* if this is a redirection */
 	if ( !strcmp(GST_ELEMENT_NAME(last), "src-redirection") ){ 
-		init_redirection( data/*stream_datas*/, videoFormatIndex );
+		init_redirection( data, videoFormatIndex );
 		/* for convenience we store the last element added in pipeline here, even if it is not it purpose , this will be used to retrieve the  last element of the pipeline later */
 		data->sink = last ; 
 		redirection = TRUE;
 	}
 	else
-		last = create_pipeline_videoChannel( data /* stream_datas*/, 	main_loop, last, videoFormatIndex ); /* Create pipeline  - save videoFormatIndex into stream_data data*/
+		last = create_pipeline_videoChannel( data ,	main_loop, last, videoFormatIndex ); /* Create pipeline  - save videoFormatIndex into stream_data data*/
 
 	/* Check if everything went ok*/
 	if (last == NULL){
 		g_printerr ( "Failed to create pipeline\n");
 		return EXIT_FAILURE;
 	}
-	/* set pipeline to PAUSED state will open /dev/video0, so it will not be done in start_streaming */
-	gst_element_set_state (data->pipeline, GST_STATE_PAUSED);
+	
 
 	if ( ! redirection ){	
+		/* set pipeline to PAUSED state will open /dev/video0, so it will not be done in start_streaming */
+		gst_element_set_state (data->pipeline, GST_STATE_PAUSED);
+
 		/* if we are in the defaultStartUp Mode, launch the last VF register in the table */
 		if ( deviceInfo.parameters[num_DeviceMode]._value.int_val == defaultStartUp){
 			return handle_SP_default_StartUp_mode(videoFormatIndex);
@@ -438,13 +440,16 @@ int init_stream_SU( gpointer main_loop,GstCaps *caps, struct channelTable_entry 
 		return EXIT_FAILURE;
 	}
 	
-	if ( redirect ){
-		append_SP_pipeline_for_redirection( caps,  videoFormatIndex);
-	}
-
 	gst_element_set_state (data->pipeline, GST_STATE_PAUSED);
 	channel_entry->stream_datas = data;
-    return EXIT_SUCCESS;
+
+	if ( redirect ){
+		append_SP_pipeline_for_redirection( caps,  videoFormatIndex);
+		handle_SP_default_StartUp_mode( videoFormatIndex ) ;
+	}
+	
+   	return EXIT_SUCCESS;
+
 }
 
 /**

@@ -129,7 +129,7 @@ int main (int   argc,  char *argv[]){
 	  	 || deviceInfo.parameters[num_DeviceType]._value.int_val == device_both)
 		g_timeout_add(1000, receive_announcement, NULL);
 
-    /* Iterate */
+	/* Iterate */
 	g_main_loop_run (loop);
 
 	return EXIT_SUCCESS;
