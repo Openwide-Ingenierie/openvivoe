@@ -141,7 +141,7 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
 		/*Fill the MIB a second time after creating payload*/
 		fill_entry(video_caps, video_info, stream_datas);
 	}else{
-
+	
 		capsfilter = gst_element_factory_make("capsfilter", "capsfilter");
 		g_object_set(capsfilter, "caps",gst_caps_new_full (gst_structure_new( 	"video/x-raw" 	,
 															"format" 		, G_TYPE_STRING ,"I420" ,
@@ -154,7 +154,7 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
 		gst_bin_add(GST_BIN(pipeline),capsfilter);
 
 		/* link input to rtp payloader */
-		if ( !gst_element_link_many(input,   capsfilter, rtp, NULL)){
+		if ( !gst_element_link_many(input, capsfilter, rtp, NULL)){
 			g_printerr("ERROR: failed link rtp payloader\n");
 		   return NULL;	
 		}
@@ -308,7 +308,6 @@ GstElement *append_SP_pipeline_for_redirection( GstCaps *caps, long videoFormatI
 		return NULL;
 	}
 
-	g_object_set(data->sink, "socket-path" , "/tmp/testvivoe" , NULL);
 
 	/* Now build the corresponding pipeline according to the caps*/ 
 

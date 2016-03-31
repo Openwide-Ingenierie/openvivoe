@@ -254,6 +254,10 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 			g_printerr("Failed to create redirection: %s\n", "intervideosrc");
 	   		return NULL;
 		}
+		
+		/* set the paramaters of shmsrc element */
+		g_object_set(bin, "socket-path" , "/tmp/testvivoe" , NULL);
+
 	}
 	else
 		bin  = gst_parse_bin_from_description ( cmdline,
@@ -509,5 +513,9 @@ int delete_steaming_data(gpointer channel_entry){
 		free(data);
 		entry->stream_datas = NULL;
 	}
+
+	/* check if their is socket open in /tmp/openvivoe (in case their is a redirection) */
+
+
 	return 0;
 }
