@@ -423,16 +423,13 @@ int init_stream_SU( gpointer main_loop,GstCaps *caps, struct channelTable_entry 
 	 * check if this is a redirection, if so the mapping of the videoFormatIndex of the source to which redirect the stream will be 
 	 * stored in videoFormatIndex
 	 */
-	if( SU_is_redirection( channel_entry->channelIndex, &videoFormatIndex ) ){
-	 	redirect = TRUE;
-	}
+
+	redirect =  SU_is_redirection( channel_entry->channelIndex, &videoFormatIndex ); 
 
 	/* check is the mapping have been done succesfully */
-	if ( redirect ){
-		if ( videoFormatIndex == -1 ){
+	if ( redirect && videoFormatIndex == -1 ){
 			g_printerr("ERROR: no source was found to redirect the stream of service Users's channel: %ld\n", channel_entry->channelIndex);
 			return EXIT_FAILURE;
-		}
 	}
 
 	/* Create pipeline  - save videoFormatIndex into stream_data data*/
@@ -447,6 +444,14 @@ int init_stream_SU( gpointer main_loop,GstCaps *caps, struct channelTable_entry 
 	gst_element_set_state (data->pipeline, GST_STATE_PAUSED);
 	channel_entry->stream_datas = data;
 
+	/* 
+	 * If this is a redirection, now that we know the video caps of the stream,
+	 * we need to add the rtp depayloader to the pipeline of the source that will 
+	 * redirect the steam: this is done in append_SP_pipeline_for_redirection() 
+	 * of pipeline.c.
+	 * Also, we need to call handle_SP_default_StartUp_mode() to handle the default start up 
+	 * on this source after is pipeline has been completed.
+	 */
 	if ( redirect ){
 		append_SP_pipeline_for_redirection( caps,  videoFormatIndex);
 		handle_SP_default_StartUp_mode( videoFormatIndex ) ;
