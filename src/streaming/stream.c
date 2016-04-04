@@ -18,6 +18,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "../../include/mibParameters.h"
 #include "../../include/conf/mib-conf.h"
+#include "../../include/log.h"
 #include "../../include/videoFormatInfo/videoFormatTable.h"
 #include "../../include/channelControl/channelTable.h"
 #include "../../include/streaming/pipeline.h"
@@ -249,18 +250,15 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 	redirect_data *redirection_data = SP_is_redirection( videoFormatIndex ); 
 	if( redirection_data ){
 		/* if so build the appropriate source */
-		bin = gst_element_factory_make( "appsrc", "src-redirection");
-		if ( !bin ){
-			g_printerr("Failed to create redirection: %s\n", GST_ELEMENT_NAME(bin));
+		bin = gst_element_factory_make_log( "appsrc", "src-redirection");
+		if ( !bin )
 	   		return NULL;
-		}
 		
 		/* save the pipeline value in the redirection data */
 		redirection_data->pipeline_SP = pipeline;
 
 		/* configure for time-based format */
 		g_object_set (bin, "format", GST_FORMAT_TIME, NULL);
-
 
 	}
 	else

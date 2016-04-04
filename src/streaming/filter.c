@@ -15,6 +15,7 @@
 #include "../../include/conf/stream-conf.h"
 #include "../../include/streaming/detect.h"
 #include "../../include/streaming/filter.h"
+#include "../../include/log.h"
 
 /*
  * return TRUE if all encoding are used 
@@ -468,7 +469,8 @@ gboolean filter_VIVOE(GstStructure* input_caps_str, GstElement* input, GstElemen
 	GstCaps *input_caps = gst_caps_new_full(gst_structure_copy(input_caps_str), NULL);
 
 	if(	gst_caps_can_intersect(input_caps, vivoe_filter)){
-		gst_element_link (input, output );
+		if ( !gst_element_link_log (input, output ))
+			return FALSE;
 		return TRUE;
 	}else{
 		g_print ("WARNING: Video source input has been filtered out: not a VIVOE format!\n");

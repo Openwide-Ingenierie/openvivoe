@@ -23,6 +23,7 @@
 #include <arpa/inet.h>
 
 #include "../../include/mibParameters.h"
+#include "../../include/log.h"
 #include "../../include/videoFormatInfo/videoFormatTable.h"
 #include "../../include/channelControl/channelTable.h"
 #include "../../include/streaming/stream_registration.h"
@@ -33,37 +34,8 @@
 #include "../../include/streaming/pipeline.h"
 #include "../../include/streaming/stream.h"
 
-
-#if 0
 /**
- * \brief link element, and display error message if it fails
- * \param GstElement the first element
- * \param GstElement the second element
- * \param TRUE on success, FALSE on failure
- */
-static gboolean gst_element_link_log(	GstElment *element1 ,  GstElment *element2 ){
-
-	/* link element1 to element2 payloader */
-	if ( !gst_element_link(element1, capsfilter)){
-		g_printerr("ERROR: failed to link %s to %s\n", GST_ELEMENT_NAME(element1), GST_ELEMENT_NAME(element2));
-		return FALSE;
-	}
-	return TRUE;
-}
-
-/**
- * \brief link element, and display error message if it fails
- * \param GstElement the first element
- * \param GstElement the second element
- * \param TRUE on success, FALSE on failure
- */
-static gboolean gst_element_factory_make_log( const gchar *element,  const gchar *name ){
-
-}
-#endif //if 0
-
-/**
- * \brief handle the redirection of the video: change caps' structure name from video/x-rtp to video/x-raw,mpeg or image/j2c and add to the pipeline an element that depends on the value
+ * \brief handle the redirection of the video: change caps' structure name from video/x-rtp to video/x-raw,mpeg or image/j2c
  * \param caps the video caps
  * \param GstElement input the input element of the pipeline (should normaly be the shmsrc 
  * \return GstElement* the last element added in pipeline
@@ -90,93 +62,6 @@ static gboolean handle_redirection(GstElement *pipeline, GstElement* input, GstS
 
 }
 
-
-#if 0 
-/**
- * \brief handle the redirection of the video: change caps' structure name from video/x-rtp to video/x-raw,mpeg or image/j2c and add to the pipeline an element that depends on the value
- * \param caps the video caps
- * \param GstElement input the input element of the pipeline (should normaly be the shmsrc 
- * \return GstElement* the last element added in pipeline
- */
-static GstElement* handle_redirection(GstElement *pipeline, GstElement* input, GstStructure *video_caps){
-
-	if ( gst_structure_has_field(video_caps, "encoding-name") ){
-
-		if ( ! strcmp("RAW", g_value_get_string(gst_structure_get_value(video_caps, "encoding-name")) ) ){
-			gst_structure_set_name(video_caps, "video/x-raw");
-
-			GstElement *videoparse = gst_element_factory_make ("videoparse", "videoparse-redirection-raw");
-
-			int height = strtol (g_value_get_string( gst_structure_get_value(video_caps, "height")), NULL, 10);
-			int width = strtol(g_value_get_string( gst_structure_get_value(video_caps, "width")), NULL, 10);
-
-			/* Put the source in the pipeline */
-			g_object_set (videoparse, "height", height, "width", width, NULL);
-
-			gst_bin_add_many (GST_BIN(pipeline), videoparse, NULL);
-			/* link input to rtp payloader */
-			if ( !gst_element_link(input, videoparse)){
-				g_printerr("ERROR: failed to link %s to %s\n", GST_ELEMENT_NAME(input), GST_ELEMENT_NAME(videoparse));
-			   return NULL;	
-			}
-			
-			return videoparse;
-
-		}
-
-		else if ( ! strcmp("JPEG2000", g_value_get_string(gst_structure_get_value(video_caps, "encoding-name")) ) ){
-			gst_structure_set_name(video_caps, "image/x-j2c");
-
-			GstElement *capsfilter = gst_element_factory_make ("capsfilter", "capsfilter-redirection-j2k");
-
-			/* replace sampling parameter with colorspace parameter */
-			gchar *colorspace = map_sampling_to_colorimetry_j2k(
-									g_value_get_string(
-										gst_structure_get_value(video_caps, "sampling")));
-
-			if ( !colorspace){
-				g_printerr("ERROR: Failed to set colorspace value for JPEG2000 video in redirection\n");
-				return NULL;
-			}
-			gst_structure_set (	video_caps, "colorspace",G_TYPE_STRING, colorspace, NULL );
-			gst_structure_remove_fields (video_caps, "payload", "sampling", "media", "clock-rate", "encoding-name", "null", NULL );
-			/* set capsfilter values */
-			GstCaps *caps = gst_caps_new_full( gst_structure_copy(video_caps) , NULL);
-
-			/* Put the source in the pipeline */
-			g_object_set (capsfilter, "caps", caps, NULL);
-
-			printf("%s\n", gst_caps_to_string(caps));
-			gst_bin_add_many (GST_BIN(pipeline), capsfilter, NULL);
-			/* link input to rtp payloader */
-			if ( !gst_element_link(input, capsfilter)){
-				g_printerr("ERROR: failed to link %s to %s\n", GST_ELEMENT_NAME(input), GST_ELEMENT_NAME(capsfilter));
-				return NULL;
-			}
-			
-			return capsfilter;
-
-		}
-
-		else if ( ! strcmp("MP4V-ES", g_value_get_string(gst_structure_get_value(video_caps, "encoding-name")) ) ){
-			gst_structure_set_name(video_caps, "video/mpeg");
-			return input;
-		}
-
-		else {
-		g_printerr("Unkown encoding name, cannot redirect video\n");	
-		return NULL;
-		}
-	}else
-	{
-		g_printerr("ERROR: no encoding, imppossible to redirect stream\n");
-		return NULL;
-	}
-
-}
-
-#endif 
-
 /*
  * This function add the RTP element to the pipeline
  */
@@ -188,7 +73,7 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
 	GstElement *rtp = NULL;
 	GstElement *parser;
 	GstStructure *video_caps;
-
+	
 	if (caps == NULL){
 		/* Media stream Type detection */
 		video_caps = type_detection(GST_BIN(pipeline), input, loop, NULL);
@@ -206,47 +91,36 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
  	/* in case RAW video type has been detected */
 	if ( gst_structure_has_name( video_caps, "video/x-raw") ){
 		/* For Raw video */
-		rtp 	= gst_element_factory_make ("rtpvrawpay", "rtpvrawpay");
-		/* Check if everything went ok */
-		if( rtp == NULL){
-			g_printerr ( "error cannot create element for: %s\n","rtpvrawpay");
+		rtp 	= gst_element_factory_make_log ("rtpvrawpay", "rtpvrawpay");
+		if ( !rtp )
 			return NULL;
-		}
 	}
-
 	/* in case MPEG4 video type has been detected */
 	else if  (gst_structure_has_name( video_caps, "video/mpeg")){
+
 		/* For MPEG-4 video */
-		parser 	= gst_element_factory_make ("mpeg4videoparse", "parser");
-		if( parser == NULL){
-			g_printerr ( "error cannot create element for: %s\n","parser");
+		parser 	= gst_element_factory_make_log ("mpeg4videoparse", "parser");
+		if ( !parser )
 			return NULL;
-		}
-		rtp 	= gst_element_factory_make ("rtpmp4vpay", "rtpmp4vpay");
-		/* Check if everything went ok */
-		if( rtp == NULL){
-			g_printerr ( "error cannot create element for: %s\n","rtpmp4vpay");
+
+		rtp 	= gst_element_factory_make_log ("rtpmp4vpay", "rtpmp4vpay");
+		if ( !rtp )
 			return NULL;
-		}
+
 		gst_bin_add(GST_BIN(pipeline),parser);
-		gst_element_link(input, parser);
+
+		if ( !gst_element_link_log(input, parser))
+			return NULL;
+
 		input = parser;
 	}
 
 	/* in case J2K video type has been detected */
 	else if  (gst_structure_has_name( video_caps, "image/x-j2c")){
 		/* For J2K video */
-		rtp 	= gst_element_factory_make ("rtpj2kpay", "rtpj2kpay");
-		/* Check if everything went ok */
-		if( rtp == NULL){
-			g_printerr ( "error cannot create element for: %s\n","rtpj2kpay");
+		rtp 	= gst_element_factory_make_log ("rtpj2kpay", "rtpj2kpay");
+		if ( !rtp )
 			return NULL;
-		}
-
-		/* in case of a redirection, will need to change the "sampling" parameter with it's corresponding "colorspace" parameter */
-		if ( caps == NULL ){
-
-		}
 	}
  	/* in case the video type detected is unknown */	
 	else
@@ -260,9 +134,8 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
 
 	if (caps == NULL ){
 		/* Filters out non VIVOE videos, and link input to RTP if video has a valid format*/
-		if (!filter_VIVOE(type_detection(GST_BIN(pipeline), input, loop, NULL),input, rtp)){
+		if (!filter_VIVOE(type_detection(GST_BIN(pipeline), input, loop, NULL),input, rtp))
 			return NULL;
-		}
 
 		/* Now that wa have added the RTP payloader to the pipeline, we can get the new caps of the video stream*/
 		/* Media stream Type detection */
@@ -272,10 +145,8 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
 	}else{
 
 		/* link input to rtp payloader */
-		if ( !gst_element_link(input, rtp)){
-			g_printerr("ERROR: failed to link %s to %s\n", GST_ELEMENT_NAME(input), GST_ELEMENT_NAME(rtp));
+		if ( !gst_element_link_log(input, rtp))
 		   return NULL;	
-		}
 		
 		/*Fill the MIB a second time after creating payload, this is needed to get rtp_data needed to build SDP files */
 		fill_entry(video_caps, video_info, stream_datas);
@@ -314,11 +185,11 @@ static GstElement* addUDP( 	GstElement *pipeline, 	GstBus *bus,
 	GstElement *udpsink;
 		
 	/* Create the UDP sink */
-    udpsink = gst_element_factory_make ("udpsink", "udpsink");
-    if(udpsink == NULL){
-       g_printerr ( "error cannot create element for: %s\n","udpsink");
-	   return NULL;
-    }
+    udpsink = gst_element_factory_make_log ("udpsink", "udpsink");
+
+	if ( !udpsink )
+		return NULL;
+
 
 	set_udpsink_param(udpsink, channel_entry_index);
 
@@ -330,10 +201,9 @@ static GstElement* addUDP( 	GstElement *pipeline, 	GstBus *bus,
 	}
 
 	/* we link the elements together */
-	if ( !gst_element_link_many (input, udpsink, NULL)){
-		g_print ("Failed to build UDP sink!\n");
+	if ( !gst_element_link_log (input, udpsink))
 	    return NULL;
-	}
+
 	return udpsink;
 }
 
@@ -469,12 +339,11 @@ static GstElement* addUDP_SU( 	GstElement *pipeline, 	GstBus *bus,
 	GstElement *udpsrc;
 		
 	/* Create the UDP sink */
-    udpsrc = gst_element_factory_make ("udpsrc", "udpsrc");
-    if(udpsrc == NULL){
-       g_printerr ( "error cannot create element for: %s\n","udpsrc");
-	   return NULL;
-    }
-	
+    udpsrc = gst_element_factory_make_log ("udpsrc", "udpsrc");
+
+	if ( !udpsrc )
+		return NULL;
+
 	/* get the multicast IP */
 	struct in_addr multicast_group;
 	multicast_group.s_addr = channel_entry->channelReceiveIpAddress;
@@ -521,28 +390,26 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 	GstBus *bus,
 	if ( gst_structure_has_field( video_caps, "encoding-name")){
 		/* For Raw video */		
 		if ( strcmp( "RAW",encoding) == 0 ){
-			rtp 	= gst_element_factory_make ("rtpvrawdepay", "rtpdepay");
+			rtp 	= gst_element_factory_make_log ("rtpvrawdepay", "rtpdepay");
 			/* Check if everything went ok */
-			if( rtp == NULL){
-				g_printerr ( "error cannot create element for: %s\n","rtpdepay");
+			if( rtp == NULL)
 				return NULL;
-			}
+
 		}else if  ( strcmp( "MP4V-ES",encoding) == 0 ){
 			/* For MPEG-4 video */
-			rtp 	= gst_element_factory_make ("rtpmp4vdepay", "rtpdepay");
+			rtp 	= gst_element_factory_make_log ("rtpmp4vdepay", "rtpdepay");
 			/* Checek if everything went ok */
-			if( rtp == NULL){
-				g_printerr ( "error cannot create element for: %s\n","rtpdepay");
+			if( rtp == NULL)
 				return NULL;
-			}
-		} 		/* For J2K video */		
+
+		} 	
+		/* For J2K video */		
 		else if ( strcmp( "JPEG2000",encoding) == 0 ){
-			rtp 	= gst_element_factory_make ("rtpj2kdepay", "rtpdepay");
+			rtp 	= gst_element_factory_make_log ("rtpj2kdepay", "rtpdepay");
 			/* Check if everything went ok */
-			if( rtp == NULL){
-				g_printerr ( "error cannot create element for: %s\n","rtpdepay");
+			if( rtp == NULL)
 				return NULL;
-			}
+
 		}
 		else {
 			g_printerr("unknow type of video stream\n");
@@ -554,7 +421,8 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 	GstBus *bus,
 	}
 
 	gst_bin_add(GST_BIN (pipeline), rtp);
-	gst_element_link_many( input, rtp, NULL );
+	if ( ! gst_element_link_log ( input, rtp ))
+		return NULL;
 	last = rtp;
 
 	/* Finally return*/
@@ -565,10 +433,9 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 	GstBus *bus,
 /* 
  * \brief called when the appsink notifies us that there is a new buffer ready for processing in case of a redirection
  * \param GstElement elt the appsink element from SU pipeline
- * \param GstElement pipelien the pipeline from which we should retrieve appsrc ( SP's pipeline )
+ * \param GstElement pipeline the pipeline from which we should retrieve appsrc ( SP's pipeline )
  * \return GstFlowReturn
  * */
-
 static GstFlowReturn
 	on_new_sample_from_sink (GstElement * appsink, GstElement *pipeline_SP )
 {
@@ -607,7 +474,10 @@ static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 												TRUE,
 												&error);
 	}else{
-		sink = gst_element_factory_make("appsink", "redirect-sink");
+		sink = gst_element_factory_make_log("appsink", "redirect-sink");
+		
+		if ( !sink)
+			return NULL;
 
 		g_object_set(sink,   "name", "testsink", NULL);
 		g_object_set (G_OBJECT (sink), "emit-signals", TRUE, "sync", FALSE, NULL);
@@ -629,10 +499,8 @@ static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 	}
 
 	/* we link the elements together */
-	if ( !gst_element_link_many (input, sink, NULL)){
-		g_print ("Failed to build sink!\n");
+	if ( !gst_element_link_log (input, sink))
 	    return NULL;
-	}
 
 	return sink;
 }

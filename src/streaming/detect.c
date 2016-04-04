@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "../../include/streaming/detect.h"
+#include "../../include/log.h"
 
 /*
  * This is a strcuture we need to define in order to get the media type of input source video
@@ -60,11 +61,9 @@ static GstStructure* type_detection_with_sink(GstBin *pipeline, GstElement *inpu
 	data_type_detection data;
 	data.loop 	= loop;
 	/* Create typefind element */
-	typefind = gst_element_factory_make ("typefind", "typefinder");	
-	if(typefind == NULL){
-		g_printerr ("Fail to detect Media Stream type\n");
+	typefind = gst_element_factory_make_log ("typefind", "typefinder");	
+	if(typefind == NULL)
 		return NULL;		
-	}
 	
 	/* Connect typefind element to handler */
 	g_signal_connect (typefind, "have-type", G_CALLBACK (cb_typefound), &data);
@@ -105,11 +104,9 @@ GstStructure* type_detection(GstBin *pipeline, GstElement *input_video, GMainLoo
 	GstStructure *str_detected;
 	if (sink == NULL){
 		GstElement  *fakesink;
-		fakesink = gst_element_factory_make ("fakesink", "sink");
-		if(fakesink == NULL){
-			g_printerr ("Fail to detect Media Stream type\n");
+		fakesink = gst_element_factory_make_log ("fakesink", "sink");
+		if(fakesink == NULL)
 			return NULL;
-		}
 
 		str_detected = type_detection_with_sink(pipeline, input_video, loop, fakesink);
 		gst_bin_remove(GST_BIN(pipeline), fakesink);
