@@ -6,15 +6,22 @@
  */
 
 #include <glib-2.0/glib.h>
+
 #include <gstreamer-1.0/gst/gst.h>
 #include <gst/video/video.h>
+#include <gstreamer-1.0/gst/app/gstappsrc.h>
+#include <gstreamer-1.0/gst/app/gstappsink.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+
 #include <arpa/inet.h>
+
 #include "../../include/mibParameters.h"
 #include "../../include/videoFormatInfo/videoFormatTable.h"
 #include "../../include/channelControl/channelTable.h"
@@ -26,34 +33,149 @@
 #include "../../include/streaming/pipeline.h"
 #include "../../include/streaming/stream.h"
 
+
+#if 0
 /**
- * \brief caps of videos for redirection got the name: video/x-rtp, which causes problems to choose the RTP payloader, we want to transform it to video/x-raw,mpeg or image/j2c
- * \param the structure contained in the video caps
- * \return TRUE if we success to transpose the encoding name, FALSE otherwise
+ * \brief link element, and display error message if it fails
+ * \param GstElement the first element
+ * \param GstElement the second element
+ * \param TRUE on success, FALSE on failure
  */
-static gboolean transpose_encoding_to_name(	GstStructure *video_caps ){
+static gboolean gst_element_link_log(	GstElment *element1 ,  GstElment *element2 ){
+
+	/* link element1 to element2 payloader */
+	if ( !gst_element_link(element1, capsfilter)){
+		g_printerr("ERROR: failed to link %s to %s\n", GST_ELEMENT_NAME(element1), GST_ELEMENT_NAME(element2));
+		return FALSE;
+	}
+	return TRUE;
+}
+
+/**
+ * \brief link element, and display error message if it fails
+ * \param GstElement the first element
+ * \param GstElement the second element
+ * \param TRUE on success, FALSE on failure
+ */
+static gboolean gst_element_factory_make_log( const gchar *element,  const gchar *name ){
+
+}
+#endif //if 0
+
+/**
+ * \brief handle the redirection of the video: change caps' structure name from video/x-rtp to video/x-raw,mpeg or image/j2c and add to the pipeline an element that depends on the value
+ * \param caps the video caps
+ * \param GstElement input the input element of the pipeline (should normaly be the shmsrc 
+ * \return GstElement* the last element added in pipeline
+ */
+static gboolean handle_redirection(GstElement *pipeline, GstElement* input, GstStructure *video_caps){
+	if ( gst_structure_has_field(video_caps, "encoding-name") ){
+		if ( ! strcmp("RAW", g_value_get_string(gst_structure_get_value(video_caps, "encoding-name")) ) )
+			gst_structure_set_name(video_caps, "video/x-raw");
+		else if ( ! strcmp("JPEG2000", g_value_get_string(gst_structure_get_value(video_caps, "encoding-name")) ) )
+			gst_structure_set_name(video_caps, "image/x-j2c");
+		else if ( ! strcmp("MP4V-ES", g_value_get_string(gst_structure_get_value(video_caps, "encoding-name")) ) )
+			gst_structure_set_name(video_caps, "video/mpeg");
+		else
+		{
+			g_printerr("Unkown encoding name, cannot redirect video\n");	
+			return FALSE;
+		}
+		return TRUE;
+	}else
+	{
+		g_printerr("ERROR: no encoding, imppossible to redirect stream\n");
+		return FALSE;
+	}
+
+}
+
+
+#if 0 
+/**
+ * \brief handle the redirection of the video: change caps' structure name from video/x-rtp to video/x-raw,mpeg or image/j2c and add to the pipeline an element that depends on the value
+ * \param caps the video caps
+ * \param GstElement input the input element of the pipeline (should normaly be the shmsrc 
+ * \return GstElement* the last element added in pipeline
+ */
+static GstElement* handle_redirection(GstElement *pipeline, GstElement* input, GstStructure *video_caps){
 
 	if ( gst_structure_has_field(video_caps, "encoding-name") ){
 
-		if ( ! strcmp("RAW", g_value_get_string(gst_structure_get_value(video_caps, "encoding-name")) ) )
+		if ( ! strcmp("RAW", g_value_get_string(gst_structure_get_value(video_caps, "encoding-name")) ) ){
 			gst_structure_set_name(video_caps, "video/x-raw");
 
-		else if ( ! strcmp("JPEG2000", g_value_get_string(gst_structure_get_value(video_caps, "encoding-name")) ) )
+			GstElement *videoparse = gst_element_factory_make ("videoparse", "videoparse-redirection-raw");
+
+			int height = strtol (g_value_get_string( gst_structure_get_value(video_caps, "height")), NULL, 10);
+			int width = strtol(g_value_get_string( gst_structure_get_value(video_caps, "width")), NULL, 10);
+
+			/* Put the source in the pipeline */
+			g_object_set (videoparse, "height", height, "width", width, NULL);
+
+			gst_bin_add_many (GST_BIN(pipeline), videoparse, NULL);
+			/* link input to rtp payloader */
+			if ( !gst_element_link(input, videoparse)){
+				g_printerr("ERROR: failed to link %s to %s\n", GST_ELEMENT_NAME(input), GST_ELEMENT_NAME(videoparse));
+			   return NULL;	
+			}
+			
+			return videoparse;
+
+		}
+
+		else if ( ! strcmp("JPEG2000", g_value_get_string(gst_structure_get_value(video_caps, "encoding-name")) ) ){
 			gst_structure_set_name(video_caps, "image/x-j2c");
 
-		else if ( ! strcmp("MP4V-ES", g_value_get_string(gst_structure_get_value(video_caps, "encoding-name")) ) )
+			GstElement *capsfilter = gst_element_factory_make ("capsfilter", "capsfilter-redirection-j2k");
+
+			/* replace sampling parameter with colorspace parameter */
+			gchar *colorspace = map_sampling_to_colorimetry_j2k(
+									g_value_get_string(
+										gst_structure_get_value(video_caps, "sampling")));
+
+			if ( !colorspace){
+				g_printerr("ERROR: Failed to set colorspace value for JPEG2000 video in redirection\n");
+				return NULL;
+			}
+			gst_structure_set (	video_caps, "colorspace",G_TYPE_STRING, colorspace, NULL );
+			gst_structure_remove_fields (video_caps, "payload", "sampling", "media", "clock-rate", "encoding-name", "null", NULL );
+			/* set capsfilter values */
+			GstCaps *caps = gst_caps_new_full( gst_structure_copy(video_caps) , NULL);
+
+			/* Put the source in the pipeline */
+			g_object_set (capsfilter, "caps", caps, NULL);
+
+			printf("%s\n", gst_caps_to_string(caps));
+			gst_bin_add_many (GST_BIN(pipeline), capsfilter, NULL);
+			/* link input to rtp payloader */
+			if ( !gst_element_link(input, capsfilter)){
+				g_printerr("ERROR: failed to link %s to %s\n", GST_ELEMENT_NAME(input), GST_ELEMENT_NAME(capsfilter));
+				return NULL;
+			}
+			
+			return capsfilter;
+
+		}
+
+		else if ( ! strcmp("MP4V-ES", g_value_get_string(gst_structure_get_value(video_caps, "encoding-name")) ) ){
 			gst_structure_set_name(video_caps, "video/mpeg");
+			return input;
+		}
 
-	}else{
-
+		else {
 		g_printerr("Unkown encoding name, cannot redirect video\n");	
-		return FALSE;
-
+		return NULL;
+		}
+	}else
+	{
+		g_printerr("ERROR: no encoding, imppossible to redirect stream\n");
+		return NULL;
 	}
 
-	return TRUE;
-
 }
+
+#endif 
 
 /*
  * This function add the RTP element to the pipeline
@@ -64,10 +186,9 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
 							gpointer stream_datas, 	GstCaps 						*caps){
 	/*Create element that will be add to the pipeline */
 	GstElement *rtp = NULL;
-	GstElement *capsfilter;
 	GstElement *parser;
 	GstStructure *video_caps;
-	
+
 	if (caps == NULL){
 		/* Media stream Type detection */
 		video_caps = type_detection(GST_BIN(pipeline), input, loop, NULL);
@@ -75,7 +196,9 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
 		fill_entry(video_caps, video_info, stream_datas);
  	}else{
 		video_caps = gst_caps_get_structure ( caps, 0 );
-		transpose_encoding_to_name(	video_caps );
+
+		handle_redirection(	pipeline, input, video_caps );
+
 		/* This is a redirection, fill the MIB once for all */
 		fill_entry(video_caps, video_info, stream_datas);
 	}
@@ -119,6 +242,11 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
 			g_printerr ( "error cannot create element for: %s\n","rtpj2kpay");
 			return NULL;
 		}
+
+		/* in case of a redirection, will need to change the "sampling" parameter with it's corresponding "colorspace" parameter */
+		if ( caps == NULL ){
+
+		}
 	}
  	/* in case the video type detected is unknown */	
 	else
@@ -126,6 +254,7 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
 		g_printerr("unknow type of video stream\n");
 		return NULL;
 	}
+
 	/* add rtp to pipeline */
 	gst_bin_add(GST_BIN (pipeline), rtp);
 
@@ -141,21 +270,10 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
 		/*Fill the MIB a second time after creating payload*/
 		fill_entry(video_caps, video_info, stream_datas);
 	}else{
-	
-		capsfilter = gst_element_factory_make("capsfilter", "capsfilter");
-		g_object_set(capsfilter, "caps",gst_caps_new_full (gst_structure_new( 	"video/x-raw" 	,
-															"format" 		, G_TYPE_STRING ,"I420" ,
-															"width" 		, G_TYPE_INT 	, 1920,
-															"height" 		, G_TYPE_INT 	, 1080,
-															"interlace-mode", G_TYPE_STRING , "progressive",
-															"framerate" 	, GST_TYPE_FRACTION, 30, 1,
-															NULL) , NULL)  , NULL);
-
-		gst_bin_add(GST_BIN(pipeline),capsfilter);
 
 		/* link input to rtp payloader */
-		if ( !gst_element_link_many(input, capsfilter, rtp, NULL)){
-			g_printerr("ERROR: failed link rtp payloader\n");
+		if ( !gst_element_link(input, rtp)){
+			g_printerr("ERROR: failed to link %s to %s\n", GST_ELEMENT_NAME(input), GST_ELEMENT_NAME(rtp));
 		   return NULL;	
 		}
 		
@@ -444,13 +562,41 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 	GstBus *bus,
 
 }
 
+/* 
+ * \brief called when the appsink notifies us that there is a new buffer ready for processing in case of a redirection
+ * \param GstElement elt the appsink element from SU pipeline
+ * \param GstElement pipelien the pipeline from which we should retrieve appsrc ( SP's pipeline )
+ * \return GstFlowReturn
+ * */
+
+static GstFlowReturn
+	on_new_sample_from_sink (GstElement * appsink, GstElement *pipeline_SP )
+{
+	GstSample *sample;
+	GstElement *appsource;
+	GstFlowReturn ret;
+
+	/* get the sample from appsink */
+	sample = gst_app_sink_pull_sample (GST_APP_SINK (appsink));
+
+	/* get appsource an push new sample */
+	appsource = gst_bin_get_by_name (GST_BIN (pipeline_SP), "src-redirection");
+	ret = gst_app_src_push_sample (GST_APP_SRC (appsource), sample); 
+	gst_object_unref (appsource);
+
+	/* we don't need the appsink sample anymore */
+	gst_sample_unref (sample);
+
+	return ret;
+}
+
 /*
  * This function add the UDP element to the pipeline / fort a ServiceUser channel
  */
 static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 								guint bus_watch_id, 	GMainLoop *loop,
-								GstElement *input, 		struct channelTable_entry * channel_entry,
-								gchar *cmdline, 		gboolean 					redirect
+								GstElement *input, 		struct channelTable_entry 	*channel_entry,
+								gchar *cmdline, 		redirect_data 			 	*redirect
 								){
 
 	GError 		*error 		= NULL; /* an Object to save errors when they occurs */
@@ -461,8 +607,13 @@ static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 												TRUE,
 												&error);
 	}else{
-		sink = gst_element_factory_make("shmsink"/*"intervideosink"*/, "redirect-sink");
-		g_object_set(sink, "socket-path" , "/tmp/testvivoe" ,"shm-size" , 100000000 , "wait-for-connection" , 1, "sync", FALSE , NULL);
+		sink = gst_element_factory_make("appsink", "redirect-sink");
+
+		g_object_set(sink,   "name", "testsink", NULL);
+		g_object_set (G_OBJECT (sink), "emit-signals", TRUE, "sync", FALSE, NULL);
+		g_signal_connect (sink, "new-sample",
+			G_CALLBACK (on_new_sample_from_sink), redirect->pipeline_SP);
+		
 	}
 
 	/* Create the sink */
@@ -502,7 +653,7 @@ GstElement* create_pipeline_serviceUser( gpointer 					stream_datas,
 										 GstCaps 					*caps,
 										 struct channelTable_entry 	*channel_entry,
 										 gchar 						*cmdline,
-										 gboolean 					redirect){
+										 redirect_data 				*redirect){
 
 	stream_data 	*data 	=  stream_datas;
 	/* create the empty videoFormatTable_entry structure to intiate the MIB */
@@ -530,7 +681,7 @@ GstElement* create_pipeline_serviceUser( gpointer 					stream_datas,
 
 	/* one element in pipeline: first is last, and last is first */
 	last = first;
-
+	
 	/* Add RTP depayloader element */
 	last = addRTP_SU( 	pipeline, 		bus,
 						bus_watch_id, 	loop,

@@ -94,17 +94,18 @@ static gboolean create_mpeg4_media(struct channelTable_entry * channel_entry, Gs
 static gboolean create_j2k_media(struct channelTable_entry * channel_entry, GstSDPMedia *media)
 {
 	stream_data *data = channel_entry->stream_datas;
-	gchar *fmtp =  g_strdup_printf ("%ld sampling=%s; width=%ld; height=%ld; %s",
+	gchar *fmtp =  g_strdup_printf ("%ld sampling=%s; width=%ld; height=%ld;",
 										data->rtp_datas->rtp_type,
 										channel_entry->channelVideoSampling,
 										channel_entry->channelVertRes,
-										channel_entry->channelHorzRes,
-										interlace_mode_to_string (channel_entry->channelInterlaced)
+										channel_entry->channelHorzRes/*,
+										interlace_mode_to_string (channel_entry->channelInterlaced)*/
 									);
 	if( gst_sdp_media_add_attribute (media, "fmtp", fmtp)!= GST_SDP_OK ){
 		g_printerr("ERROR: problem in media creation for SDP file\n");
 		return FALSE;
 	}
+
 	free(fmtp);
 	return TRUE;
 }
@@ -269,7 +270,6 @@ GstCaps* get_SDP(unsigned char *array, int sdp_msg_size, in_addr_t *multicast_ad
 		g_printerr("Failed to parse SDP message\n");
 		return NULL;
 	}
-	
 	/* get the multicast address of the incoming SDP message */
 	const GstSDPConnection *connection;
 	connection = gst_sdp_message_get_connection (msg);
@@ -289,7 +289,7 @@ GstCaps* get_SDP(unsigned char *array, int sdp_msg_size, in_addr_t *multicast_ad
 	/* get caps from the SDP's media field */
 	media 			= gst_sdp_message_get_media(msg , 0);
 	GstCaps *caps 	= gst_sdp_media_get_caps_from_media (media, 96);
-
+	
 	/* set framerate to caps */
 	GValue res = G_VALUE_INIT;
 	g_value_init (&res, GST_TYPE_FRACTION);

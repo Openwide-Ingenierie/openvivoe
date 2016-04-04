@@ -5,6 +5,8 @@
  *     - hoel <hvasseur@openwide.fr>
  */
 #include <glib-2.0/glib.h>
+#include <gstreamer-1.0/gst/gst.h>
+
 # ifndef MIBPARAMETERS_H
 # define MIBPARAMETERS_H
 
@@ -159,8 +161,10 @@ extern parameter channelNumber;
  * \brief a structure to register the information relative to redirection 
  */
 typedef struct {
-	long 	channel_SU_index;
-	long 	video_SP_index;
+	long 		channel_SU_index;
+	GstElement 	*pipeline_SU;
+	long 		video_SP_index;
+	GstElement 	*pipeline_SP;
 }redirect_data;
 
 /**

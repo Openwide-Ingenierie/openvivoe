@@ -41,26 +41,14 @@ static gboolean compare_entries(struct videoFormatTable_entry* origin, struct vi
 	   		);
 }
 
-/**
- * \brief a definition of all the potential values of the colorspace field of openjpegenc src pad template
- */
-#define colo_RGB 		"sRGB"
-#define colo_YUV 		"sYUV"
-#define colo_GRAY 		"GRAY"
+
 
 /**
- * \brief the mapped values for videoFormatSampling field of viddeoFormatTable_entry 
- */
-#define sampling_RGB 	"RGB"
-#define sampling_YUV 	"YCbCr-4:2:2"
-#define samping_GRAY 	"GRAYSCALE"
-
-/**
- * \brief J2K videos caps have a field names "colorspace" that can be map to a classic 
+ * \brief J2K videos caps have a field names "colorspace" that can be map to a classic slampling
  * \param colorimetru the colorimetry srting value in detected caps
  * \return gchar* the mapped value
  */
-static gchar* map_colorimetry_to_sampling_j2k(const gchar *colorspace){
+gchar* map_colorimetry_to_sampling_j2k(const gchar *colorspace){
 
 	/* compare values that can be in the colorimetry field to the actual value in caps */
 	/* the values that can takes the colorimetry field can be found by launching the following command
@@ -76,6 +64,26 @@ static gchar* map_colorimetry_to_sampling_j2k(const gchar *colorspace){
 		return "";
 }
 
+/**
+ * \brief J2K videos caps have a field names "sampling" that can be map to a classic colorspace
+ * \param sampling the sampling srting value in detected caps
+ * \return gchar* the mapped value
+ */
+gchar* map_sampling_to_colorimetry_j2k(const gchar *sampling){
+
+	/* compare values that can be in the colorimetry field to the actual value in caps */
+	/* the values that can takes the colorimetry field can be found by launching the following command
+	 * "gst-inspect-1.0 openjpegenc" 
+	 */
+	if ( !strcmp(sampling ,sampling_RGB ))
+		return colo_RGB;
+	else if ( !strcmp(sampling ,sampling_YUV ))
+		return colo_YUV;
+	else if ( !strcmp(sampling ,samping_GRAY ))
+		return colo_GRAY;
+	else 
+		return "";
+}
 
 /* 
  * This function tries to save a maximum of information (in the form of capabilities) 

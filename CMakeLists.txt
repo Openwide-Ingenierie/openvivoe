@@ -85,9 +85,15 @@ execute_process(COMMAND "pkg-config" "--libs" "gstreamer-rtp-1.0"
 	OUTPUT_VARIABLE GST_RTP_LIBS
 	OUTPUT_STRIP_TRAILING_WHITESPACE)
 
+#link for Gstreamer-app-1.0
+execute_process(COMMAND "pkg-config" "--libs" "gstreamer-app-1.0"
+	WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+	OUTPUT_VARIABLE GST_APP_LIBS
+	OUTPUT_STRIP_TRAILING_WHITESPACE)
+
 
 #link librairies
-target_link_libraries(openvivoe ${SNMP_LIBS} ${SNMPAGENT_LIBS} ${GLIB} ${GST_LIBS} ${GST_VIDEO_LIBS} ${GST_SDP_LIBS} ${GST_RTP_LIBS})
+target_link_libraries(openvivoe ${SNMP_LIBS} ${SNMPAGENT_LIBS} ${GLIB} ${GST_LIBS} ${GST_VIDEO_LIBS} ${GST_SDP_LIBS} ${GST_RTP_LIBS} ${GST_APP_LIBS})
 
 #set debug as default configuration, to buld release run "cmake -DCMAKE_BUILD_TYPE=Release" or simply the alias cmakerelease
 if( NOT CMAKE_BUILD_TYPE )
@@ -127,13 +133,19 @@ execute_process(COMMAND "pkg-config" "--cflags" "gstreamer-sdp-1.0"
 				OUTPUT_VARIABLE GST_SDP_FLAGS
 				OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-#Cflags for Gstreamer-srtp-1.0
+#Cflags for Gstreamer-app-1.0
 execute_process(COMMAND "pkg-config" "--cflags" "gstreamer-rtp-1.0"
 				WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 				OUTPUT_VARIABLE GST_RTP_FLAGS
 				OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-			set(CFLAGS "${CFLAGS} ${SNMP_FLAGS} ${GLIBC_FLAGS} ${GST_FLAGS} ${GST_VIDEO_FLAGS} ${GST_SDP_FLAGS} ${GST_RTP_FLAGS}")
+#Cflags for Gstreamer-app-1.0
+execute_process(COMMAND "pkg-config" "--cflags" "gstreamer-app-1.0"
+				WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+				OUTPUT_VARIABLE GST_APP_FLAGS
+				OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+			set(CFLAGS "${CFLAGS} ${SNMP_FLAGS} ${GLIBC_FLAGS} ${GST_FLAGS} ${GST_VIDEO_FLAGS} ${GST_SDP_FLAGS} ${GST_RTP_FLAGS} ${GST_APP_FLAGS}")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -I. ${CFLAGS}") #always
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -00 -v -da -Q") #for debugging
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -I.")#for release

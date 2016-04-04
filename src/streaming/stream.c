@@ -162,39 +162,39 @@ static GstElement* source_creation(GstElement* pipeline, char* format, int width
 /**
  * \brief specify if a SP is a redirection (check if it is in the redirection_channel array)
  * \param videoFormatIndex the index of the videoFormat to check 
- * \return TRUE if it is a redirection, FALSE otherwise
+ * \return the corresponding redirect_data found or NULL 
  */
-static gboolean SP_is_redirection(long videoFormatIndex){
+static redirect_data *SP_is_redirection(long videoFormatIndex){
 
 	int i = 0;
 	while ( redirect_channels[i] != NULL ){
 		if ( redirect_channels[i]->video_SP_index == videoFormatIndex ) /* if found, then returns */
-			return TRUE;
+			return redirect_channels[i];
 		i++;
 	}
 
-	return FALSE; /* if not found, returns FALSE */
+	return NULL; /* if not found, returns NULL */
 
 }
 
 /**
  * \brief specify if a SU is a redirection (check if it is in the redirection_channel array)
  * \param channelIndex the index of the channel to check 
- * \return TRUE if it is a redirection, FALSE otherwise
+ * \return the corresponding redirect_data found or NULL 
  */
-static gboolean SU_is_redirection(long channelIndex, long *videoFormatIndex){
+static redirect_data  *SU_is_redirection(long channelIndex, long *videoFormatIndex){
 
 	int i = 0;
 
 	while ( redirect_channels[i] != NULL ){
 		if ( redirect_channels[i]->channel_SU_index == channelIndex ){ /* if found, then returns */
 			*videoFormatIndex = redirect_channels[i]->video_SP_index;
-			return TRUE;
+			return redirect_channels[i];
 		}
 		i++;
 	}
 
-	return FALSE; /* if not found, returns FALSE */
+	return NULL; /* if not found, returns NULL */
 
 }
 
@@ -246,17 +246,21 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 		return NULL;
 
 	/* check if it is a redirection */
- 
-	if( SP_is_redirection( videoFormatIndex ) ){
+	redirect_data *redirection_data = SP_is_redirection( videoFormatIndex ); 
+	if( redirection_data ){
 		/* if so build the appropriate source */
-		bin = gst_element_factory_make( "shmsrc"/* "intervideosrc"*/, "src-redirection");
+		bin = gst_element_factory_make( "appsrc", "src-redirection");
 		if ( !bin ){
-			g_printerr("Failed to create redirection: %s\n", "intervideosrc");
+			g_printerr("Failed to create redirection: %s\n", GST_ELEMENT_NAME(bin));
 	   		return NULL;
 		}
 		
-		/* set the paramaters of shmsrc element */
-		g_object_set(bin, "socket-path" , "/tmp/testvivoe" , NULL);
+		/* save the pipeline value in the redirection data */
+		redirection_data->pipeline_SP = pipeline;
+
+		/* configure for time-based format */
+		g_object_set (bin, "format", GST_FORMAT_TIME, NULL);
+
 
 	}
 	else
@@ -334,7 +338,7 @@ int init_stream_SP( gpointer main_loop, int videoFormatIndex){
 		g_printerr ( "Failed to create videosource\n");
 		return EXIT_FAILURE;
 	}
-	
+
 	gboolean redirection = FALSE; 
 	/* if this is a redirection */
 	if ( !strcmp(GST_ELEMENT_NAME(last), "src-redirection") ){ 
@@ -351,12 +355,10 @@ int init_stream_SP( gpointer main_loop, int videoFormatIndex){
 		g_printerr ( "Failed to create pipeline\n");
 		return EXIT_FAILURE;
 	}
-	
 
 	if ( ! redirection ){	
 		/* set pipeline to PAUSED state will open /dev/video0, so it will not be done in start_streaming */
 		gst_element_set_state (data->pipeline, GST_STATE_PAUSED);
-
 		/* if we are in the defaultStartUp Mode, launch the last VF register in the table */
 		if ( deviceInfo.parameters[num_DeviceMode]._value.int_val == defaultStartUp){
 			return handle_SP_default_StartUp_mode(videoFormatIndex);
@@ -415,8 +417,8 @@ int init_stream_SU( gpointer main_loop,GstCaps *caps, struct channelTable_entry 
 	if (cmdline == NULL )
 		return EXIT_FAILURE;
 
-	/* declare the boolean used to check if this is a redirection */
-	gboolean redirect = FALSE;
+	/* declare a variable where we will store the corresponding potential entry of redirect_channels */
+	redirect_data *redirection_data;	
 	
 	long videoFormatIndex = -1 ;
 	/* 
@@ -424,16 +426,16 @@ int init_stream_SU( gpointer main_loop,GstCaps *caps, struct channelTable_entry 
 	 * stored in videoFormatIndex
 	 */
 
-	redirect =  SU_is_redirection( channel_entry->channelIndex, &videoFormatIndex ); 
+	 redirection_data = SU_is_redirection( channel_entry->channelIndex, &videoFormatIndex ); 
 
 	/* check is the mapping have been done succesfully */
-	if ( redirect && videoFormatIndex == -1 ){
+	if ( redirection_data  && videoFormatIndex == -1 ){
 			g_printerr("ERROR: no source was found to redirect the stream of service Users's channel: %ld\n", channel_entry->channelIndex);
 			return EXIT_FAILURE;
 	}
 
 	/* Create pipeline  - save videoFormatIndex into stream_data data*/
-	last = create_pipeline_serviceUser( data, main_loop, caps, channel_entry, cmdline, redirect );
+	last = create_pipeline_serviceUser( data, main_loop, caps, channel_entry, cmdline, redirection_data );
 	
 	/* Check if everything went ok*/
 	if (last == NULL){
@@ -452,7 +454,7 @@ int init_stream_SU( gpointer main_loop,GstCaps *caps, struct channelTable_entry 
 	 * Also, we need to call handle_SP_default_StartUp_mode() to handle the default start up 
 	 * on this source after is pipeline has been completed.
 	 */
-	if ( redirect ){
+	if ( redirection_data ){
 		if ( !append_SP_pipeline_for_redirection( caps,  videoFormatIndex) )
 			return EXIT_FAILURE;
 		handle_SP_default_StartUp_mode( videoFormatIndex ) ;
