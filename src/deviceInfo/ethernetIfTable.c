@@ -110,7 +110,7 @@ static void initialize_table_ethernetIfTable(void)
     netsnmp_register_table_iterator( reg, iinfo );
 
     /* Initialise the contents of the table here */
-   for(int i =0; i < deviceInfo.parameters[num_ethernetIFnumber]._value.int_val; i++)
+   for(int i = 0; i < deviceInfo.parameters[num_ethernetIFnumber]._value.int_val; i++)
 		init_ethernet(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i]);
 }
 

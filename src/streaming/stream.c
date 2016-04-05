@@ -168,10 +168,9 @@ static GstElement* source_creation(GstElement* pipeline, char* format, int width
 static redirect_data *SP_is_redirection(long videoFormatIndex){
 
 	int i = 0;
-	while ( redirect_channels[i] != NULL ){
-		if ( redirect_channels[i]->video_SP_index == videoFormatIndex ) /* if found, then returns */
-			return redirect_channels[i];
-		i++;
+	for ( i = 0;  i< redirection.size; i ++ ){	
+		if ( redirection.redirect_channels[i]->video_SP_index == videoFormatIndex ) /* if found, then returns */
+			return redirection.redirect_channels[i];
 	}
 
 	return NULL; /* if not found, returns NULL */
@@ -186,13 +185,11 @@ static redirect_data *SP_is_redirection(long videoFormatIndex){
 static redirect_data  *SU_is_redirection(long channelIndex, long *videoFormatIndex){
 
 	int i = 0;
-
-	while ( redirect_channels[i] != NULL ){
-		if ( redirect_channels[i]->channel_SU_index == channelIndex ){ /* if found, then returns */
-			*videoFormatIndex = redirect_channels[i]->video_SP_index;
-			return redirect_channels[i];
+	for ( i = 0; i < redirection.size; i ++ ){	
+		if (redirection.redirect_channels[i]->channel_SU_index == channelIndex ){ /* if found, then returns */
+			*videoFormatIndex = redirection.redirect_channels[i]->video_SP_index;
+			return redirection.redirect_channels[i];
 		}
-		i++;
 	}
 
 	return NULL; /* if not found, returns NULL */
@@ -336,7 +333,7 @@ int init_stream_SP( gpointer main_loop, int videoFormatIndex){
 		g_printerr ( "Failed to create videosource\n");
 		return EXIT_FAILURE;
 	}
-
+	
 	gboolean redirection = FALSE; 
 	/* if this is a redirection */
 	if ( !strcmp(GST_ELEMENT_NAME(last), "src-redirection") ){ 

@@ -45,6 +45,12 @@ const gchar* maintenance_group[MAINTENANCE_GROUP_SIZE]= { 	"deviceUserDesc", 			
 	return FALSE;
 }
 
+/**
+ * \brief open the vivoe-mib.conf configuration file 
+ * \param error the Gerror to store error when they happened
+ * \gkf_path a set of path into which search for the path
+ * \return the GKeyFile if it has been successfully openned, NULL otherwise 
+ */
 static GKeyFile * open_mib_configuration_file(GError* error, gchar** gkf_path){
 	GKeyFile* gkf;
 
@@ -65,6 +71,11 @@ static GKeyFile * open_mib_configuration_file(GError* error, gchar** gkf_path){
     }
 	return gkf;
 }
+
+/**
+ * \brief close the gkf configuration file
+ * \param gkf the GKeyFile openned
+ */
 void close_mib_configuration_file(GKeyFile *gkf){
 
     /* free the GKeyFile before leaving the function*/
@@ -151,7 +162,7 @@ static int init_deviceInfo(GKeyFile* gkf, gchar* group_name, GError* error){
     parameter deviceUserDesc                = {"deviceUserDesc",                STRING,     1};
     parameter deviceNatoStockNumber         = {"deviceNatoStockNumber",         STRING,     1};
     parameter deviceMode                    = {"deviceMode",                    INTEGER,    1};
-    parameter deviceReset                   = {"deviceReset",                   INTEGER,     0};
+    parameter deviceReset                   = {"deviceReset",                   INTEGER,    0};
     parameter ethernetInterface             = {"ethernetInterface",             T_STRING,   1};
     parameter ethernetIfNumber       	    = {"ethernetIfNumber",             	INTEGER,    1};
 
@@ -234,6 +245,7 @@ static int init_deviceInfo(GKeyFile* gkf, gchar* group_name, GError* error){
  * \breif intiatition of constant paramerters of channelNumber
  */
 parameter channelNumber = {"nb_screens", INTEGER, 0};
+
 /**
  * \brief intialize the globla variable paramer channelNumber 
  * \param gkf the GkeyFile configuration File vivoe_mib.conf
@@ -303,26 +315,39 @@ static void init_mib_global_parameter(){
 	
 }
 
-static gboolean vivoe_redirect(gchar *cmdline){
+/**
+ * \brief specify if the cmdline is a redirection, if so returns the "name" parameter
+ * \param the cmdline to analyze
+ * \return the "name" argument or NULL if no name argument or if cmdlie is not a redirection
+ */
+static gchar *vivoe_redirect(gchar *cmdline){
 
-	gboolean redirect = FALSE;
-	
 	if ( cmdline == NULL )
-		return redirect;
+		return NULL;
 
-	gchar **splitted;
+	gchar **splitted, **gst_elements;
+
+	gchar *name;
 
 	/* parse entirely the command line */
-	splitted = g_strsplit ( cmdline , " ", -1);
+	splitted = g_strsplit ( cmdline , "!", -1);
+	
+	for (int i = 0 ; i < g_strv_length(splitted); i++){
 
-	/* get the encoding parameter */
-	if (g_strv_contains ((const gchar * const *) splitted,VIVOE_REDIRECT_NAME )){
-		redirect = TRUE;
+		gst_elements = g_strsplit ( splitted[i] , " ", -1);
+		/* check if the gst element mention contains the redirection element */
+		if (g_strv_contains ((const gchar * const *) gst_elements,VIVOE_REDIRECT_NAME )){
+			/* if so splitted[i] should also contained a string with "name=..." where ... is the name given to the corresponding elements */
+			name = g_strdup( g_strrstr ( splitted[i] , "name=" ) );
+			
+			return name;
+		}
 	}
+
 	/* free splitted */
 	g_strfreev(splitted);
 
-	return redirect;
+	return NULL;
 }
 
 
@@ -362,7 +387,6 @@ static gchar *get_key_value(GKeyFile* gkf, const gchar* const* groups ,char *gro
 
 	return key_value;
 }
-
 
 /**
  * \brief check if the group contains the given key, set the corresponding value or display appropriate error to the user, save the new version of conf file
@@ -664,7 +688,7 @@ void set_default_IP_from_conf(int index, const char* new_default_ip){
     GError 		*error 	= NULL;
 
 	/* a location to store the path of the openned configuration file */
-	gchar* gkf_path = NULL;
+	gchar 		*gkf_path = NULL;
 
 	 /* Declaration of a pointer that will contain our configuration file*/
 	GKeyFile 	*gkf 	= open_mib_configuration_file(error, &gkf_path);
@@ -688,47 +712,56 @@ void set_default_IP_from_conf(int index, const char* new_default_ip){
 	close_mib_configuration_file(gkf);
 }
 
-redirect_data *redirect_channels[] = {NULL};
+//redirect_data *redirect_channels[] = {NULL} ;
+redirection_str redirection;
+
 /**
  * \brief create the mapping to link redirection between service provider and service user
+ * \param gkf a openned GKeyFile
+ * \return TRUE on success, FALSE on FAILURE
  */
 static gboolean init_redirection_data(GKeyFile* gkf ){
 	
-	gchar *cmdline;
-	int index, j;
+	gchar *cmdline, *name_source, *name_receiver;
+	int index_source, index_receiver; 
 	
-	int i = 0;	
+	int i = 0 ;
+	int i_old = i ;
+
+	redirection.redirect_channels = (redirect_data**) malloc ( sizeof ( redirect_data* ));
+
 	/* get redirection data for service provider */
-	for ( index = 1 ; index <=  videoFormatNumber._value.int_val ; index++){
-		cmdline = get_source_cmdline(gkf, index );
-
-		if(vivoe_redirect(cmdline) ){	
-			redirect_data *data = malloc(sizeof(redirect_data));
-			data->video_SP_index = index;
-			redirect_channels[i] = data;
-			i++;
+	for ( index_source = 1 ; index_source <=  videoFormatNumber._value.int_val ; index_source++){
+		cmdline = get_source_cmdline(gkf, index_source );
+		name_source = vivoe_redirect(cmdline);
+		if( name_source != NULL ){
+			/* check if there is a corresponding receiver's channel with same redirection name */
+			for (  index_receiver = 1 ; index_receiver <= channelNumber._value.int_val ; index_receiver ++){
+				cmdline = get_sink_cmdline(gkf, index_receiver );
+				name_receiver = vivoe_redirect(cmdline);
+				if( name_receiver != NULL && strcmp(name_receiver,  name_source)==0) {
+					redirection.size = i+1 ;
+					redirection.redirect_channels[i] =(redirect_data*) malloc ( sizeof (redirect_data)) ;
+					redirection.redirect_channels[i]->channel_SU_index = index_receiver;
+					redirection.redirect_channels[i]->video_SP_index = index_source;
+					i++;
+					break;
+				}
+			}
+			/* 
+			 * if redirect_channels[i] is still NULL, we do not have found a corresponding channel:
+			 * --> exit with an error 
+			 */
+			if ( &redirection.redirect_channels[i_old] == NULL ){
+				g_printerr("redirection of source_%d with name \"%s\" does not have corresponding redirection's receiver\n", index_source, name_source);
+				return FALSE;
+			}
+			i_old = i ;
 		}
 	}
-	
-	j = 0;
-	/* get redirection data for service user */
-	for ( index = 1 ; index <= channelNumber._value.int_val ; index ++){
-		cmdline = get_sink_cmdline(gkf, index );
-		if(vivoe_redirect(cmdline) ){	
-			redirect_data *data = malloc(sizeof(redirect_data));
-			data->video_SP_index = redirect_channels[j]->video_SP_index;
-			data->channel_SU_index = index;
-			redirect_channels[j] = data;
-			j++;
-		}
-	}
 
-	/* check if there are as many receiver in "redirected" mode as sources */
-	if ( i != j ){
-		g_printerr("ERROR: there should be as many sources in \"redirect\" mode as receiver\n");
-		return FALSE;
-	}
-	
+//	redirection.size = i ;
+
 	return TRUE;
 }
 
@@ -776,7 +809,7 @@ int init_mib_content(){
 
 	init_redirection_data( gkf );
 
-	close_mib_configuration_file(gkf);
+	close_mib_configuration_file( gkf );
 
 	return EXIT_SUCCESS;
 }

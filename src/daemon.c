@@ -91,7 +91,7 @@ int open_vivoe_daemon (char* deamon_name) {
      */
     if ( init_mib_content() )
         return EXIT_FAILURE;
-    
+
     /* initialize the agent library */
     init_agent(basename(deamon_name));
 
