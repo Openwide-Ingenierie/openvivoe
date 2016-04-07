@@ -189,15 +189,15 @@
             <h2 class="title text-center">Get Started</h2>            
             <div class="block">
                 <h3 class="sub-title text-center">Project's installation</h3>
-                <p>To install and use OpenVivoe on Debian based distributions follow this steps:
+                <p>To install and use OpenVivoe on Debian based distributions we first need to make a few verifications. We need to install glib2.0 2.46.2 gstreamer1.0 1.6.3 and net-snmp 5.7.3. This packages are only available from the jessie Debian release. So please, first make sure that you will downloading the package for jessie Debian. Then follows these follow this steps:
 				</p>
                 <div class="code-block">
                     <!--//Use Prismjs - http://prismjs.com/index.html#basic-usage -->
                     <pre><code class="language-markup">
 	~$ sudo apt-get install cmake
-	~$ sudo apt-get install gstreamer gst-libav gst-plugins-base gst-plugins-base-libs gst-plugins-good gst-plugins-ugly
-	~$ sudo apt-get install glib2
-	~$ sudo apt-get install net-snmp
+	~$ sudo apt-get install gstreamer gst-libav gst-plugins-base gst-plugins-base-libs gst-plugins-good gst-plugins-ugly libgstreamer-plugins-base1.0-dev
+	~$ sudo apt-get install glib2.0
+	~$ sudo apt-get install snmp snmpd libsnmp-base libsnmp-dev
                      </code></pre>
                 </div><!--//code-block-->
             </div><!--//block-->
