@@ -247,7 +247,7 @@ static int init_deviceInfo(GKeyFile* gkf, gchar* group_name, GError* error){
 parameter channelNumber = {"nb_screens", INTEGER, 0};
 
 /**
- * \brief intialize the globla variable paramer channelNumber 
+ * \brief intialize the global variable paramer channelNumber 
  * \param gkf the GkeyFile configuration File vivoe_mib.conf
  * \param group_name the name of the group in which the value of channelNumber should be found
  * \param error a object to store errors when they occurs
@@ -270,7 +270,7 @@ static gboolean init_channelNumber_param(GKeyFile* gkf, gchar **groups, GError* 
 	}
 
 	channelNumber._value.int_val = i -1 ;
-	if( channelNumber._value.int_val )
+	if( channelNumber._value.int_val < 0 )
 		return FALSE;
 	else
 		return TRUE;
@@ -280,7 +280,13 @@ static gboolean init_channelNumber_param(GKeyFile* gkf, gchar **groups, GError* 
 parameter videoFormatNumber = {"videoFormatNumber", INTEGER, 0, {0} };
 parameter channelReset 		= {"channelReset", 		INTEGER, 0, {0} };
 
-
+/**
+ * \brief intialize the global variable paramer videoFormatNumber 
+ * \param gkf the GkeyFile configuration File vivoe_mib.conf
+ * \param group_name the name of the group in which the value of videoFormatNumber should be found
+ * \param error a object to store errors when they occurs
+ * \return TRUE on success, FALSE on FAILURE
+ */
 static gboolean init_videoFormatNumber_param(GKeyFile *gkf, gchar **groups, GError *error){
 
 	/* set maintenance flag for videoForamatNumber */
@@ -297,7 +303,8 @@ static gboolean init_videoFormatNumber_param(GKeyFile *gkf, gchar **groups, GErr
 	}
 
 	videoFormatNumber._value.int_val = i -1 ;
-	if( videoFormatNumber._value.int_val )
+
+	if ( videoFormatNumber._value.int_val < 0 )
 		return FALSE;
 	else
 		return TRUE;
@@ -712,7 +719,6 @@ void set_default_IP_from_conf(int index, const char* new_default_ip){
 	close_mib_configuration_file(gkf);
 }
 
-//redirect_data *redirect_channels[] = {NULL} ;
 redirection_str redirection;
 
 /**
@@ -760,8 +766,6 @@ static gboolean init_redirection_data(GKeyFile* gkf ){
 		}
 	}
 
-//	redirection.size = i ;
-
 	return TRUE;
 }
 
@@ -788,17 +792,18 @@ int init_mib_content(){
 	
 	/* check if the MIB groups are present if so we know that GROUP_NAME_DEVICEINFO and FROUP_NAME_CHANNELCONTROL are indeed present*/
 	groups = check_mib_group(gkf, error);
+	
 	if ( groups == NULL)
 		return EXIT_FAILURE;
 
 	/* Defined what separator will be used in the list when the parameter can have several values (for a table for example)*/
     g_key_file_set_list_separator (gkf, (gchar) ';');
  
-	if (!init_deviceInfo(gkf, GROUP_NAME_DEVICEINFO , error))
+	if ( !init_deviceInfo(gkf, GROUP_NAME_DEVICEINFO , error))
 		return EXIT_FAILURE;
-	if ( init_channelNumber_param(gkf, groups , error))
+	if ( !init_channelNumber_param(gkf, groups , error))
 		return EXIT_FAILURE;
-	if ( init_videoFormatNumber_param(gkf, groups, error) )
+	if ( !init_videoFormatNumber_param(gkf, groups, error) )
 		return EXIT_FAILURE;
 
 	/* free the memory allocated for the array of strings groups */

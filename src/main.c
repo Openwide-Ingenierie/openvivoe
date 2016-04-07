@@ -97,7 +97,7 @@ static void default_startUp_mode(gpointer loop){
 int main (int   argc,  char *argv[]){
 	/* create the GMainLoop*/
 	loop = g_main_loop_new (NULL, FALSE);
-
+	
 	/* data associated to stream */
 	stop_program_data 		stop_data;
 	stop_data.deamon_name 	= argv[0];
@@ -105,8 +105,7 @@ int main (int   argc,  char *argv[]){
 
 	/* Exit the program nicely when kill signals are received */
 	g_unix_signal_add (SIGINT, 	stop_program, &stop_data);
-	g_unix_signal_add (SIGTERM, stop_program, &stop_data);
-
+	g_unix_signal_add (SIGTERM, stop_program, &stop_data);	
 
 	/* In case of an service Provider */
 	/* Initialize GStreamer */
@@ -114,7 +113,7 @@ int main (int   argc,  char *argv[]){
 
 	/* init SubAgent Deamon */
 	if ( open_vivoe_daemon (argv[0]) )
-		return EXIT_FAILURE;
+		return EXIT_FAILURE;	
 
 	/* add the idle function that handle SNMP request every 100ms */
 	g_timeout_add (100, handle_snmp_request, NULL);
@@ -122,15 +121,15 @@ int main (int   argc,  char *argv[]){
 	/* checking for start up mode */
 	if ( deviceInfo.parameters[num_DeviceMode]._value.int_val == defaultStartUp)
 		default_startUp_mode(loop);	
-	
+
 	/* listen to SAP/SDP announcement */
 	if ( 	deviceInfo.parameters[num_DeviceType]._value.int_val == device_SU
 	  	 || deviceInfo.parameters[num_DeviceType]._value.int_val == device_both)
 		g_timeout_add(1000, receive_announcement, NULL);
 
-	/* Iterate */
+		/* Iterate */
 	g_main_loop_run (loop);
-
+	
 	return EXIT_SUCCESS;
 }
 

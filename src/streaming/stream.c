@@ -245,6 +245,7 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 
 	/* check if it is a redirection */
 	redirect_data *redirection_data = SP_is_redirection( videoFormatIndex ); 
+
 	if( redirection_data ){
 		/* if so build the appropriate source */
 		bin = gst_element_factory_make_log( "appsrc", "src-redirection");
