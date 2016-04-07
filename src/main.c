@@ -89,6 +89,11 @@ static void default_startUp_mode(gpointer loop){
 	}
 }
 
+/*
+ * initialize the boolean "internal_error" to false before running the main loop
+ */
+gboolean internal_error = FALSE;
+
 /**
  * \brief the data needed to pass to functions used to exit the program nicely
  * \param data the data we need to know to exit the program nicely see stop_program_dat
@@ -128,8 +133,11 @@ int main (int   argc,  char *argv[]){
 		g_timeout_add(1000, receive_announcement, NULL);
 
 		/* Iterate */
-	g_main_loop_run (loop);
-	
+	if ( !internal_error)
+		g_main_loop_run (loop);
+	else
+		g_printerr("An Gstreamer's error occur before we start the main loop\n");
+
 	return EXIT_SUCCESS;
 }
 

@@ -182,7 +182,12 @@ extern redirection_str redirection;
 
 
 /** 
- * \brief The main loop of the program, because to be able to acces it everywhere in the program */
+ * \brief The main loop of the program, because to be able to acces it everywhere in the program
+ */
 GMainLoop 	*loop;
 
+/** 
+ * \brief a boolean to save the fact that a Gstreamer occured before starting runnig the Main Loop (for example: v4l2src, no such device )
+ */
+extern gboolean 	internal_error;
 #endif /* MIBPARAMETERS_H */

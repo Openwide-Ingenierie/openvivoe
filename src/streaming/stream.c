@@ -56,9 +56,10 @@ static gboolean bus_call (  GstBus     *bus,
 
 								   g_printerr ("Error: %s\n", error->message);
 								   g_error_free (error);
+								   internal_error = TRUE;
 								   g_main_loop_quit (loop);
-							   }
 			break;
+		}
 
 		case GST_MESSAGE_WARNING:{
 								   gchar  *debug;
@@ -68,9 +69,10 @@ static gboolean bus_call (  GstBus     *bus,
 
 								   g_printerr ("Error: %s\n", error->message);
 								   g_error_free (error);
+								   internal_error = TRUE;
 								   g_main_loop_quit (loop);
-							   }
 			break;
+		}
 
 		default:
 			break;

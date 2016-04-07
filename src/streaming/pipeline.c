@@ -77,8 +77,13 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
 	if (caps == NULL){
 		/* Media stream Type detection */
 		video_caps = type_detection(GST_BIN(pipeline), input, loop, NULL);
+
+		if ( video_caps == NULL )
+			return NULL;
+
 		/* Fill the MIB a first Time */
 		fill_entry(video_caps, video_info, stream_datas);
+
  	}else{
 		video_caps = gst_caps_get_structure ( caps, 0 );
 
@@ -140,6 +145,10 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
 		/* Now that wa have added the RTP payloader to the pipeline, we can get the new caps of the video stream*/
 		/* Media stream Type detection */
 		video_caps = type_detection(GST_BIN(pipeline), rtp, loop, NULL);
+
+		if ( video_caps == NULL) 
+			return NULL; 
+
 		/*Fill the MIB a second time after creating payload*/
 		fill_entry(video_caps, video_info, stream_datas);
 	}else{

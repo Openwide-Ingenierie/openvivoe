@@ -11,6 +11,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "../../include/mibParameters.h"
 #include "../../include/streaming/detect.h"
 #include "../../include/log.h"
 
@@ -78,6 +79,9 @@ static GstStructure* type_detection_with_sink(GstBin *pipeline, GstElement *inpu
 
 	/* run the main loop so the typefind can be performed */
 	g_main_loop_run (loop);
+	
+	if( internal_error )
+		return NULL;
 
 	/* Video type found */	
   	gst_element_set_state (GST_ELEMENT (pipeline), GST_STATE_NULL);
@@ -99,6 +103,7 @@ static GstStructure* type_detection_with_sink(GstBin *pipeline, GstElement *inpu
  * \param pipeline the pipeline used by the stream
  * \param input_video the video stream we want to know the caps from
  * \param loop the GMainLoop the run
+ * \return a pointer to the detected structure, NULL otherwise
  */
 GstStructure* type_detection(GstBin *pipeline, GstElement *input_video, GMainLoop *loop, GstElement *sink){
 	GstStructure *str_detected;
