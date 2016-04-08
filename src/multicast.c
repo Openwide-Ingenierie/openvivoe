@@ -74,20 +74,28 @@ long define_vivoe_multicast(const char* multicast_iface, const short int multica
 	short 	device_id;
 	struct 	ifreq ifr;
 	/* constant values needed to build multicast address */
-	long multicast_pref = ntohl(inet_addr("239.192.0.0"));
-	long channel 		= (long) (multicast_channel << 8);
-	long result = -1; /* the multicast_addr in a binary form */
+	unsigned long multicast_pref = ntohl(inet_addr("239.192.0.0"));
+	unsigned long channel 		= (long) (multicast_channel << 8);
+	unsigned long result = -1; /* the multicast_addr in a binary form */
 		
 	if( get_ip(multicast_iface, &ifr)){
+
 		device_ip = inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr);
 		device_id = get_device_id(device_ip);
 		result = multicast_pref + channel + device_id;
+
 	} else{
+
 		g_printerr("ERROR: Failed to retrieve IP on %s\n", multicast_iface);
+
 	}
+
 	if(result < 0){
+
 		g_printerr("Failed to generate multicast IP for udpsink, using default address: %s\n", DEFAULT_MULTICAST_ADDR );
 		return ntohl(inet_addr( DEFAULT_MULTICAST_ADDR ));
+
 	}
+
 	return ntohl(result);
 }
