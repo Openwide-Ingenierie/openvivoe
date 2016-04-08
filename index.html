@@ -189,15 +189,15 @@
             <h2 class="title text-center">Get Started</h2>            
             <div class="block">
                 <h3 class="sub-title text-center">Project's installation</h3>
-                <p>To install and use OpenVivoe on Debian based distributions we first need to make a few verifications. We need to install glib2.0 2.46.2 gstreamer1.0 1.6.3 and net-snmp 5.7.3. This packages are only available from the jessie Debian release. So please, first make sure that you will downloading the package for jessie Debian. Then follows these follow this steps:
+                <p>To install and use OpenVivoe on Debian based distributions we first need to make a few verifications. We need to install glib2.0 2.46.2 gstreamer1.0 1.6.3 and net-snmp 5.7.3. This packages are only available from the testing Debian release. So please, first make sure that you will downloading the package for testing Debian. Then follows these steps:
 				</p>
                 <div class="code-block">
                     <!--//Use Prismjs - http://prismjs.com/index.html#basic-usage -->
                     <pre><code class="language-markup">
 	~$ sudo apt-get install cmake
-	~$ sudo apt-get install gstreamer gst-libav gst-plugins-base gst-plugins-base-libs gst-plugins-good gst-plugins-ugly libgstreamer-plugins-base1.0-dev
+	~$ sudo apt-get install gstreamer gst-libav libgstreamer-plugins-base1.0 libgstreamer-plugins-base-libs libgstreamer-plugins-good libgstreamer-plugins-ugly1.0 libgstreamer-plugins-base1.0-dev
 	~$ sudo apt-get install glib2.0
-	~$ sudo apt-get install snmp snmpd libsnmp-base libsnmp-dev
+	~$ sudo apt-get install snmp snmpd libsnmp-base libsnmp-dev snmp-mibs-downloader
                      </code></pre>
                 </div><!--//code-block-->
             </div><!--//block-->
@@ -239,36 +239,19 @@
 				<p>First, you need to configure net-snmp for OpenVivoe. Net-SNMP is the library used by VIVOE to implement SNMP, the protocol used to control  the streams.<a href="https://fr.wikipedia.org/wiki/Simple_Network_Management_Protocol" target="_blank"> SNMPv2 protcol</a> works with a Management Information Base "MIB", which acts as a data base. VIVOE implements its own. Furthermore, Net-SNMP cames with several configuration files. To simplify the configuration we already have wrote all those files. First, create a directory <strong>".snmp"</strong> in your home folder and copy the content of the <strong>"conf"</strong> directory in there.</p>
 				<div class="code-block">
 					<pre><code class="language-markup">
-	~$ make $HOME/.snmp
+	~$ mkdir $HOME/.snmp
 	~$ cp -r conf/mibs conf/s* $HOME/.snmp 
 					</code></pre>
 				</div><!--//code-block-->
 				<p>Congratulations, your openvivoe is fully configured. However, you can take a look to configuration files, especially to vivoe-mib.conf, that you can use to fill some of your MIB's parameters.</p>
 			</div><!--//block--> 
 			<div class="block">
-			<h4 class="sub-title text-center">Launch OpenVivoe and Start Streaming</h4>
-				<p>Now you can try OpenVivoe. To do so, you first launch the biary file. This binary is located in openvivoe/bin/Debug or in openvivoe/bin/Release depending the OpenVivoe's version you built. In the following example debug's version is used, as it is the default selected version when building. <strong>First, connect a webcam to your computer</strong>. In this example we assume that you only have one device available for testing. To test openvivoe you will stream from your computer to ... your computer! Now, you can start the program.</p>
-				<div class="code-block">
-					<pre><code class="language-markup">
-	~$ cd bin/Debug && ./openvivoe
-					</code></pre>
-				</div><!--//code-block-->
-				</div><!--//block-->
-				<p>The program should be started, and the streams should have started. If your terminal looks to something like this, then openvivoe has been successfully started! Congratulations!</p>
-				<div class="code-block">
-					<pre><code class="language-markup">
-	~$ ./openvivoe
-	NET-SNMP version 5.7.3 AgentX subagent connected
-	openvivoe is up and running
-	Now playing
-					</code></pre>
-				</div><!--//code-block-->
-            <div class="block">
                 <h3 class="sub-title text-center">Full Documentation</h3>
-                <p>For more detail information go and visit our wiki!</p>
+                <p>For more detail information go and visit our wiki! </p>
                 <p class="text-center">
                     <a class="btn btn-cta-primary" href="https://github.com/Openwide-Ingenierie/openvivoe/wiki" target="_blank">More on GitHub</a>
                 </p>
+				<p> You will find information about <a href="https://github.com/Openwide-Ingenierie/openvivoe/wiki/vivoe-mibs.conf-configuration-file" target="_blank">how to configure OpenVivoe</a>, <a href="https://github.com/Openwide-Ingenierie/openvivoe/wiki/Control-stream-using-SNMP" target="_blank">how to use SNMP</a> to control your steam. You will also find helpful information about a brand new feature that OpenVIVoe implements: <a href="https://github.com/Openwide-Ingenierie/openvivoe/wiki/The-redirection" target="_blank">the redirection</a>!</p>
             </div><!--//block-->
             
             </div><!--//docs-inner-->         
