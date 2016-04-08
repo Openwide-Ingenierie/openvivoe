@@ -92,6 +92,11 @@ struct videoFormatTable_entry * videoFormatTable_createEntry( 	long  videoFormat
  */
 struct videoFormatTable_entry * videoFormatTable_getEntry(int index){
 	struct videoFormatTable_entry *iterator = videoFormatTable_head;
+	
+	/* check if the VF table is empty */
+	if ( iterator == NULL )
+		return NULL;
+
 	while(iterator->videoFormatIndex != index){
 		if(iterator->next != NULL)
 			iterator = iterator->next;
