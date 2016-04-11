@@ -244,6 +244,7 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 	/* check if everything went ok */	
 	if (cmdline == NULL)
 		return NULL;
+
 	/* check if it is a redirection */
 	redirect_data *redirection_data = SP_is_redirection( videoFormatIndex ); 
 
