@@ -479,10 +479,14 @@ static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 	GstElement 	*sink 		= NULL; /* to return last element of pipeline */
 	
 	if ( !redirect){
+
 		sink  = gst_parse_bin_from_description (cmdline,
 												TRUE,
 												&error);
+		g_object_set(sink, "name", "gst_sink", NULL);		
+
 	}else{
+
 		sink = gst_element_factory_make_log("appsink", "redirect-sink");
 		
 		if ( !sink)

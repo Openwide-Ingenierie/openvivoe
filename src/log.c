@@ -18,9 +18,11 @@ gboolean gst_element_link_log(	GstElement *element1 ,  GstElement *element2 ){
 	
 	/* link element1 to element2 payloader */
 	if ( !gst_element_link(element1,element2 )){
-		g_error("failed to link %s to %s\n", GST_ELEMENT_NAME(element1), GST_ELEMENT_NAME(element2));
+
+		g_printerr("failed to link %s to %s\n", GST_ELEMENT_NAME(element1), GST_ELEMENT_NAME(element2));
 		return FALSE;
 	}
+
 	return TRUE;
 }
 /**
