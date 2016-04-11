@@ -240,7 +240,8 @@
 				<div class="code-block">
 					<pre><code class="language-markup">
 	~$ mkdir $HOME/.snmp
-	~$ cp -r conf/mibs conf/s* $HOME/.snmp 
+	~$ cp -r conf/mibs conf/snmp.conf $HOME/.snmp
+	~$ sudo cp conf/snmpd.conf /etc/snmp/snmpd.conf
 					</code></pre>
 				</div><!--//code-block-->
 				<p>However you probable not done yet. Indeed, you do not have any MIBs installed on your computer. You need to download them:</p>
@@ -249,7 +250,12 @@
 	~$ sudo download-mibs
 					</code></pre>
 				</div><!--//code-block-->
-
+				<p>One last thing you will need to do before OpenVivoe can work on your computer is to restart the snmp deamon using your service manager. This example shows how to do it using <strong>systemctl</strong>:</p>
+		<div class="code-block">
+					<pre><code class="language-markup">
+	~$ sudo systemctl restart snmp.service
+					</code></pre>
+				</div><!--//code-block-->
 				<p>Congratulations, your openvivoe is fully configured. However, you can take a look to configuration files, especially to vivoe-mib.conf, that you can use to fill some of your MIB's parameters.</p>
 			</div><!--//block--> 
 			<div class="block">
