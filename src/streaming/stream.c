@@ -237,9 +237,11 @@ static void init_redirection( gpointer stream_datas, long videoFormatIndex ){
  * return GstElement* the last element added in the pipeline: the bin made
  */
 static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
-	GError 		*error 		= NULL; /* an Object to save errors when they occurs */
-	GstElement 	*bin 		= NULL; /* to return last element of pipeline */
-	gchar 		*cmdline 	= init_sources_from_conf( videoFormatIndex );
+	GError 		*error 				= NULL; /* an Object to save errors when they occurs */
+	GstElement 	*bin 				= NULL; /* to return last element of pipeline */
+	GstElement 	*bin2				= NULL; /* to return last element of pipeline */
+	gchar 		*cmdline 			= init_sources_from_conf( videoFormatIndex );
+	char 		*remaining_pipeline = NULL;
 
 	/* check if everything went ok */	
 	if (cmdline == NULL)
@@ -249,11 +251,21 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 	redirect_data *redirection_data = SP_is_redirection( videoFormatIndex ); 
 
 	if( redirection_data ){
+	
+		remaining_pipeline = strchr(cmdline, '!');	
+
 		/* if so build the appropriate source */
 		bin = gst_element_factory_make_log( "appsrc", "src-redirection");
 		if ( !bin )
 	   		return NULL;
-		
+
+		if ( remaining_pipeline ){
+			printf("%s\n", remaining_pipeline);
+			bin2 = gst_parse_bin_from_description ( remaining_pipeline + 1,
+													TRUE,
+													&error);
+		}
+
 		/* save the pipeline value in the redirection data */
 		redirection_data->pipeline_SP = pipeline;
 
@@ -271,9 +283,27 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 	   	return NULL;	
 	}
 
+	/* free ressources */
+	free(cmdline);
+
 	/* add bin in pipeline */
 	gst_bin_add (GST_BIN(pipeline), bin);
-	free(cmdline);
+
+	/* if their is a remaining piece of pipeline, parse it, add it to pipeline*/
+	if ( remaining_pipeline ){
+
+		if ( !bin2 )
+			return NULL;
+
+		/* if no errors, add it and link it */
+		gst_bin_add (GST_BIN(pipeline), bin2);
+		if ( !gst_element_link_log(bin, bin2) )
+			return NULL;
+		else 
+			return bin2;
+
+	}
+
 	return bin;
 }
 
