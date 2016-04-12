@@ -475,9 +475,15 @@ static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 								gchar *cmdline, 		redirect_data 			 	*redirect
 								){
 
-	GError 		*error 		= NULL; /* an Object to save errors when they occurs */
-	GstElement 	*sink 		= NULL; /* to return last element of pipeline */
-	
+	GError 		*error 				= NULL; /* an Object to save errors when they occurs */
+	GstElement 	*sink 				= NULL; /* to return last element of pipeline */
+	GstElement 	*previous 			= NULL;
+	gchar 		*previous_pipeline 	= NULL;
+
+
+	/*
+	 * Classic case
+	 */
 	if ( !redirect){
 
 		sink  = gst_parse_bin_from_description (cmdline,
@@ -485,8 +491,11 @@ static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 												&error);
 		g_object_set(sink, "name", "gst_sink", NULL);		
 
-	}else{
+	}
+	else /* redirection case */
+	{
 
+		/* add app sink */
 		sink = gst_element_factory_make_log("appsink", "redirect-sink");
 		
 		if ( !sink)
@@ -496,6 +505,31 @@ static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 		g_object_set (G_OBJECT (sink), "emit-signals", TRUE, "sync", FALSE, NULL);
 		g_signal_connect (sink, "new-sample",
 			G_CALLBACK (on_new_sample_from_sink), redirect->pipeline_SP);
+	
+		previous_pipeline = g_strrstr(cmdline, "!");
+
+		/* check if there is another pipeline associated */
+		if ( previous_pipeline ){
+			gchar *to_parse = g_strndup (cmdline, strlen(cmdline) - strlen(previous_pipeline));
+
+			previous = gst_parse_bin_from_description ( to_parse,
+														TRUE,
+														&error);
+			free(to_parse); 
+
+			/* add rtp to pipeline */
+			if ( !gst_bin_add(GST_BIN (pipeline), previous )){
+				g_printerr("Unable to add %s to pipeline", gst_element_get_name(sink));
+				return NULL;
+			}
+
+			/* we link the elements together */
+			if ( !gst_element_link_log (input, previous))
+			    return NULL;
+
+			input = previous;
+
+		}
 		
 	}
 
