@@ -338,15 +338,21 @@ static gchar *vivoe_redirect(gchar *cmdline){
 
 	/* parse entirely the command line */
 	splitted = g_strsplit ( cmdline , "!", -1);
-	
+
 	for (int i = 0 ; i < g_strv_length(splitted); i++){
 
 		gst_elements = g_strsplit ( splitted[i] , " ", -1);
+
 		/* check if the gst element mention contains the redirection element */
 		if (g_strv_contains ((const gchar * const *) gst_elements,VIVOE_REDIRECT_NAME )){
 			/* if so splitted[i] should also contained a string with "name=..." where ... is the name given to the corresponding elements */
-			name = g_strdup( g_strrstr ( splitted[i] , "name=" ) );
-			
+
+			name = g_strdup( g_strrstr ( splitted[i] , "name=" ) );		
+			g_strstrip( name );
+
+			/* free splitted */
+			g_strfreev(splitted);
+
 			return name;
 		}
 	}
@@ -738,13 +744,18 @@ static gboolean init_redirection_data(GKeyFile* gkf ){
 
 	/* get redirection data for service provider */
 	for ( index_source = 1 ; index_source <=  videoFormatNumber._value.int_val ; index_source++){
+
 		cmdline = get_source_cmdline(gkf, index_source );
 		name_source = vivoe_redirect(cmdline);
+
 		if( name_source != NULL ){
+
 			/* check if there is a corresponding receiver's channel with same redirection name */
 			for (  index_receiver = 1 ; index_receiver <= channelNumber._value.int_val ; index_receiver ++){
+
 				cmdline = get_sink_cmdline(gkf, index_receiver );
 				name_receiver = vivoe_redirect(cmdline);
+
 				if( name_receiver != NULL && strcmp(name_receiver,  name_source)==0) {
 					redirection.size = i+1 ;
 					redirection.redirect_channels[i] =(redirect_data*) malloc ( sizeof (redirect_data)) ;
@@ -753,6 +764,7 @@ static gboolean init_redirection_data(GKeyFile* gkf ){
 					i++;
 					break;
 				}
+
 			}
 			/* 
 			 * if redirect_channels[i] is still NULL, we do not have found a corresponding channel:
