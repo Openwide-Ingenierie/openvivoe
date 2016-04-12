@@ -41,6 +41,7 @@
  * \return GstElement* the last element added in pipeline
  */
 static gboolean handle_redirection(GstElement *pipeline, GstElement* input, GstStructure *video_caps){
+
 	if ( gst_structure_has_field(video_caps, "encoding-name") ){
 		if ( ! strcmp("RAW", g_value_get_string(gst_structure_get_value(video_caps, "encoding-name")) ) )
 			gst_structure_set_name(video_caps, "video/x-raw");
@@ -290,7 +291,7 @@ GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
  * \param caps tha video caps of the stream received by the serviceUser to redirect
  * \param channel_entry the service User that receives the stream we need to redirect
  */
-GstElement *append_SP_pipeline_for_redirection( GstCaps *caps, long videoFormatIndex ){
+GstElement *append_SP_pipeline_for_redirection(GMainLoop *loop, GstCaps *caps, long videoFormatIndex ){
 
 	GstElement 		*last;
 	
@@ -501,7 +502,6 @@ static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 		if ( !sink)
 			return NULL;
 
-		g_object_set(sink,   "name", "testsink", NULL);
 		g_object_set (G_OBJECT (sink), "emit-signals", TRUE, "sync", FALSE, NULL);
 		g_signal_connect (sink, "new-sample",
 			G_CALLBACK (on_new_sample_from_sink), redirect->pipeline_SP);

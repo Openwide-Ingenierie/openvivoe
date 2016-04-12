@@ -101,12 +101,12 @@ gboolean internal_error = FALSE;
  */
 int main (int   argc,  char *argv[]){
 	/* create the GMainLoop*/
-	loop = g_main_loop_new (NULL, FALSE);
+	main_loop = g_main_loop_new (NULL, FALSE);
 	
 	/* data associated to stream */
 	stop_program_data 		stop_data;
 	stop_data.deamon_name 	= argv[0];
-	stop_data.loop 			= loop;
+	stop_data.loop 			= main_loop;
 
 	/* Exit the program nicely when kill signals are received */
 	g_unix_signal_add (SIGINT, 	stop_program, &stop_data);
@@ -125,7 +125,7 @@ int main (int   argc,  char *argv[]){
 
 	/* checking for start up mode */
 	if ( deviceInfo.parameters[num_DeviceMode]._value.int_val == defaultStartUp)
-		default_startUp_mode(loop);	
+		default_startUp_mode(main_loop);	
 
 	/* listen to SAP/SDP announcement */
 	if ( 	deviceInfo.parameters[num_DeviceType]._value.int_val == device_SU
@@ -134,7 +134,7 @@ int main (int   argc,  char *argv[]){
 
 		/* Iterate */
 	if ( !internal_error)
-		g_main_loop_run (loop);
+		g_main_loop_run (main_loop);
 	else
 		g_printerr("An Gstreamer's error occur before we start the main loop\n");
 

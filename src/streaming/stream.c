@@ -483,7 +483,7 @@ int init_stream_SU( gpointer main_loop,GstCaps *caps, struct channelTable_entry 
 	 * on this source after is pipeline has been completed.
 	 */
 	if ( redirection_data ){
-		if ( !append_SP_pipeline_for_redirection( caps,  videoFormatIndex) )
+		if ( !append_SP_pipeline_for_redirection(loop, caps,  videoFormatIndex) )
 			return EXIT_FAILURE;
 		handle_SP_default_StartUp_mode( videoFormatIndex ) ;
 	}

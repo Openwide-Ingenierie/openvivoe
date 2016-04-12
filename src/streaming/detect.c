@@ -71,7 +71,7 @@ static GstStructure* type_detection_with_sink(GstBin *pipeline, GstElement *inpu
 	gst_bin_add_many (GST_BIN (pipeline), typefind, sink, NULL);
 	gst_element_link_many (input_video, typefind, sink, NULL);
 	gst_element_set_state (GST_ELEMENT (pipeline), GST_STATE_PLAYING);
-	
+
 	/* run the main loop until type is found so we execute callback function */
 	if( g_main_loop_is_running (loop) ){
   		g_main_loop_quit (loop);
