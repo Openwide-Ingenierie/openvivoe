@@ -22,7 +22,7 @@ GstElement* create_pipeline_serviceUser( 	gpointer 					stream_datas,
 										 	gchar 						*cmdline, 
 											redirect_data 				*redirect);
 
-GstElement *append_SP_pipeline_for_redirection( GstCaps *caps, long videoFormatIndex);
+GstElement *append_SP_pipeline_for_redirection(GMainLoop *loop, GstCaps *caps, long videoFormatIndex);
 
 
 #endif /* PIPELINE_H */
