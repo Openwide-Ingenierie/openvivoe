@@ -34,6 +34,11 @@
 #include "../../include/streaming/pipeline.h"
 #include "../../include/streaming/stream.h"
 
+
+#define JPEG_FORMAT_NUMBER_SUPORTED 	3
+const gchar* const J2K_STR_NAMES[JPEG_FORMAT_NUMBER_SUPORTED] = {"image/x-j2c", "image/x-jpc", "image/jp2"};
+	
+
 /**
  * \brief handle the redirection of the video: change caps' structure name from video/x-rtp to video/x-raw,mpeg or image/j2c
  * \param caps the video caps
@@ -122,7 +127,7 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
 	}
 
 	/* in case J2K video type has been detected */
-	else if  (gst_structure_has_name( video_caps, "image/x-j2c")){
+	else if  ( g_strv_contains ( J2K_STR_NAMES, gst_structure_get_name(video_caps))){
 		/* For J2K video */
 		rtp 	= gst_element_factory_make_log ("rtpj2kpay", "rtpj2kpay");
 		if ( !rtp )
