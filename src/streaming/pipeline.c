@@ -51,7 +51,7 @@ static gboolean handle_redirection(GstElement *pipeline, GstElement* input, GstS
 		if ( ! strcmp("RAW", g_value_get_string(gst_structure_get_value(video_caps, "encoding-name")) ) )
 			gst_structure_set_name(video_caps, "video/x-raw");
 		else if ( ! strcmp("JPEG2000", g_value_get_string(gst_structure_get_value(video_caps, "encoding-name")) ) )
-			gst_structure_set_name(video_caps, "image/x-j2c");
+			gst_structure_set_name(video_caps, "image/x-jpc");
 		else if ( ! strcmp("MP4V-ES", g_value_get_string(gst_structure_get_value(video_caps, "encoding-name")) ) )
 			gst_structure_set_name(video_caps, "video/mpeg");
 		else
