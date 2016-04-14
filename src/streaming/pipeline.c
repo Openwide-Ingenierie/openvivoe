@@ -128,6 +128,23 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
 
 	/* in case J2K video type has been detected */
 	else if  ( g_strv_contains ( J2K_STR_NAMES, gst_structure_get_name(video_caps))){
+
+		GstElement *capsfilter = gst_element_factory_make_log("capsfilter", "capsfilter-image/x-jpc");
+
+		GstCaps *caps_jpeg2000 = gst_caps_new_empty_simple("image/x-jpc");
+	
+		/* Put the source in the pipeline */
+		g_object_set (capsfilter, "caps",caps_jpeg2000 , NULL);
+
+		gst_bin_add(GST_BIN(pipeline),capsfilter);
+
+		if ( !gst_element_link_log(input,capsfilter )){
+			g_printerr("JPEG2000 format can only be x-jpc\n");
+			return NULL;
+		}
+
+		input = capsfilter;
+
 		/* For J2K video */
 		rtp 	= gst_element_factory_make_log ("rtpj2kpay", "rtpj2kpay");
 		if ( !rtp )

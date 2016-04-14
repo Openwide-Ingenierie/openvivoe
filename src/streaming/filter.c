@@ -340,7 +340,7 @@ static GstStructure* build_MPEG4_filter(GKeyFile* gkf){
  */
 static GstStructure* build_J2K_filter(GKeyFile* gkf){
 	const gchar * const * 		resolution 	= (const gchar * const *)	get_j2k_res(gkf);
-	GstStructure* 				j2k_filter = gst_structure_new_from_string ("image/x-j2c");
+	GstStructure* 				j2k_filter = gst_structure_new_from_string ("image/x-jpc");
 	int width_small[length_width_576] 	= {544, 576, 720, 768};
 	int heigth_small[length_height_576] = {576, 704};
 	int* width 							= (int*) malloc(length_width * sizeof(int));
