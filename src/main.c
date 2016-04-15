@@ -71,6 +71,10 @@ static gboolean stop_program ( gpointer data ){
 	/* unref and quit main loop */
 	g_main_loop_quit (loop);
 	g_main_loop_unref (loop);
+
+	/* to exit the program we need to reset was_running variable */
+	was_running = FALSE;
+
 	return TRUE;
 }
 
@@ -93,6 +97,11 @@ static void default_startUp_mode(gpointer loop){
  * initialize the boolean "internal_error" to false before running the main loop
  */
 gboolean internal_error = FALSE;
+
+/*
+ * initialize the boolean "was_runnig" to false before running the main loop
+ */
+gboolean was_running = FALSE;
 
 /**
  * \brief the data needed to pass to functions used to exit the program nicely
@@ -132,11 +141,18 @@ int main (int   argc,  char *argv[]){
 	  	 || deviceInfo.parameters[num_DeviceType]._value.int_val == device_both)
 		g_timeout_add(1000, receive_announcement, NULL);
 
+	do {
 		/* Iterate */
-	if ( !internal_error)
-		g_main_loop_run (main_loop);
-	else
-		g_printerr("An Gstreamer's error occur before we start the main loop\n");
+		if ( !internal_error){
+			was_running = TRUE;
+			g_main_loop_run (main_loop);
+		}
+		else{
+			g_printerr("An Gstreamer's error occur before we start the main loop\n");
+			return EXIT_FAILURE;
+		}
+
+	}while(was_running);
 
 	return EXIT_SUCCESS;
 }

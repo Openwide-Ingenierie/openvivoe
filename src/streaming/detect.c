@@ -75,6 +75,7 @@ static GstStructure* type_detection_with_sink(GstBin *pipeline, GstElement *inpu
 	/* run the main loop until type is found so we execute callback function */
 	if( g_main_loop_is_running (loop) ){
   		g_main_loop_quit (loop);
+		was_running = TRUE; /* save the fact that we have quit the main loop */
 	}
 
 	/* run the main loop so the typefind can be performed */

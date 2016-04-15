@@ -190,4 +190,9 @@ GMainLoop 	*main_loop;
  * \brief a boolean to save the fact that a Gstreamer occured before starting runnig the Main Loop (for example: v4l2src, no such device )
  */
 extern gboolean 	internal_error;
+
+/** 
+ * \brief a boolean to save the fact the main loop was runnig: this is mostly to be able to perform typefind even when the MainLoop is already started
+ */
+extern gboolean 	was_running;
 #endif /* MIBPARAMETERS_H */
