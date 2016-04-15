@@ -17,6 +17,27 @@
 #include "../../include/streaming/filter.h"
 #include "../../include/log.h"
 
+
+#define KEY_NO_FILTER_VALUE 	"no-filter"
+
+/*
+ * \brief tells if key "encoding" is set to no-filter
+ * \param ecoding the list of key value from configuration file
+ * \return TRUE if key "encoding" is set to no-filter or FALSE
+ */
+static gboolean no_filter_encoding(const gchar * const * encoding){
+	return (g_strv_contains(encoding, KEY_NO_FILTER_VALUE )); 
+}
+
+/*
+ * \brief tells if key "resolution" is set to no-filter
+ * \param resolution the list of key value from configuration file
+ * \return TRUE if key "encoding" is set to no-filter or FALSE
+ */
+static gboolean no_filter_resolution(const gchar * const * resolution){
+	return (g_strv_contains(resolution, KEY_NO_FILTER_VALUE )); 
+}
+
 /*
  * return TRUE if all encoding are used 
  */
@@ -65,7 +86,7 @@ static GValue build_list(int* int_array, gchar** char_array, int length_array ){
 		}
 	}
 	else{
-		g_printerr("probleme while building list\n");
+		g_printerr("problem while building list\n");
 	}
 	return resolution;
 }
@@ -116,9 +137,9 @@ static void copy(char* array1[], int length1, int offset, char* array2[], int le
 #define num_inter_mode 		2
 
 /**
- * \brief Build the MPEG-4 filter caps
+ * \brief Build the RAW filter caps
  * \param gkf a pointer to the opened configuration file
- * \return GstStructure* a caps structure built from the incformation found in configuration file under RAW group name
+ * \return GstStructure* a caps structure built from the incormation found in configuration file under RAW group name
  */
 static GstStructure* build_RAW_filter(GKeyFile* gkf){
 	const gchar * const * 		encoding 	= (const gchar * const *)	get_raw_encoding(gkf);
@@ -132,32 +153,38 @@ static GstStructure* build_RAW_filter(GKeyFile* gkf){
 	int length 								= length_RGB + length_YUV + length_Mono;
 	int offset 								= 0;
 	char* formats[length];
-	/* Add encoding part */ 
-	if( all_encodings(encoding) ){
-		/* Build array of full formats */
-		copy(formats, length, 0, 						RGB, 		length_RGB);
-		copy(formats, length, length_RGB, 				YUV, 		length_YUV );
-		copy(formats, length, length_RGB+length_YUV, 	Monochrome, length_Mono );
-		set_filter_field(raw_filter, "format", NULL, formats , length);
-	}else{
-		length = 0 ;
-		if( g_strv_contains(encoding, "RGB") ){
-			length += 	length_RGB;			
-			copy(formats, length, offset, RGB, length_RGB);
-			offset += 	length_RGB;
+	
+	if ( !no_filter_encoding(encoding)){
+
+		/* Add encoding part */ 
+		if( all_encodings(encoding) ){
+			/* Build array of full formats */
+			copy(formats, length, 0, 						RGB, 		length_RGB);
+			copy(formats, length, length_RGB, 				YUV, 		length_YUV );
+			copy(formats, length, length_RGB+length_YUV, 	Monochrome, length_Mono );
+			set_filter_field(raw_filter, "format", NULL, formats , length);
+		}else{
+			length = 0 ;
+			if( g_strv_contains(encoding, "RGB") ){
+				length += 	length_RGB;			
+				copy(formats, length, offset, RGB, length_RGB);
+				offset += 	length_RGB;
+			}
+			if( g_strv_contains(encoding, "YUV") ){
+				length += length_YUV;						
+				copy(formats, length, offset, YUV, length_YUV );
+				offset += length_YUV;						
+			}
+			if( g_strv_contains(encoding, "Monochrome") ){
+				length += length_Mono;
+				copy(formats, length, offset, Monochrome, length_Mono );
+				offset += length_Mono;
+			}
+			set_filter_field(raw_filter, "format",NULL, formats, length);
 		}
-		if( g_strv_contains(encoding, "YUV") ){
-			length += length_YUV;						
-			copy(formats, length, offset, YUV, length_YUV );
-			offset += length_YUV;						
-		}
-		if( g_strv_contains(encoding, "Monochrome") ){
-			length += length_Mono;
-			copy(formats, length, offset, Monochrome, length_Mono );
-			offset += length_Mono;
-		}
-		set_filter_field(raw_filter, "format",NULL, formats, length);
+
 	}
+
 	int width_small[length_width_576] 	= {544,576,720,768};
 	int heigth_small[length_height_576] = {576,704};
 	int* width 							= (int*) malloc(length_width * sizeof(int));
@@ -168,72 +195,77 @@ static GstStructure* build_RAW_filter(GKeyFile* gkf){
 	int offset_width					= 0;
 	int offset_height					= 0;
 	int offset_im 						= 0;
-	/* Add resolution part */
-	if( all_resolutions( resolution ) )
-	{
-		/* witdht */
-		memcpy(width, width_small, length_width_576 * sizeof(int));
-		offset_width += length_width_576;
-		*(width + offset_width) = 1280;
-		offset_width ++;
-		*(width + offset_width) = 1920;
-		offset_width ++;
-		set_filter_field(raw_filter, "width", 	width, 	NULL, length_width);
-		/* height */
-		memcpy(height, heigth_small, length_height_576 * sizeof(int));
-		offset_height += length_height_576;
-		*(height + offset_height) = 720;
-		offset_height ++;
-		*(height + offset_height) = 1080;
-		offset_height ++;
-		set_filter_field(raw_filter, "height", 	height, NULL, length_height);
-		/* interlaced-mode */
-		copy(interlace_mode, num_inter_mode, 0, interlaced, 1 );
-		offset_im++;
-		copy(interlace_mode, num_inter_mode, offset_im, progressive, 1 );
-		set_filter_field(raw_filter,"interlace-mode",NULL, interlace_mode, num_inter_mode);		
-	}else{
-		if( g_strv_contains(resolution,"576i") ){
+
+	if ( !no_filter_resolution(resolution)){
+
+		/* Add resolution part */
+		if( all_resolutions( resolution ) )
+		{
+			/* witdht */
 			memcpy(width, width_small, length_width_576 * sizeof(int));
 			offset_width += length_width_576;
-			memcpy(height, heigth_small, length_height_576 * sizeof(int));
-			offset_height += length_height_576;
-			copy(interlace_mode, num_inter_mode,offset_im , interlaced, 1 );
-			offset_im++;
-		}
-		if( g_strv_contains(resolution, "720p") ){
 			*(width + offset_width) = 1280;
 			offset_width ++;
-			*(height + offset_height) = 720;
-			offset_height ++;
-			copy(interlace_mode, num_inter_mode,offset_im , progressive, 1 );
-			offset_im++;
-		}
-		if( g_strv_contains(resolution, "1080p" ) ){
 			*(width + offset_width) = 1920;
 			offset_width ++;
+			set_filter_field(raw_filter, "width", 	width, 	NULL, length_width);
+			/* height */
+			memcpy(height, heigth_small, length_height_576 * sizeof(int));
+			offset_height += length_height_576;
+			*(height + offset_height) = 720;
+			offset_height ++;
 			*(height + offset_height) = 1080;
 			offset_height ++;
-			copy(interlace_mode, num_inter_mode,offset_im , progressive, 1 );
+			set_filter_field(raw_filter, "height", 	height, NULL, length_height);
+			/* interlaced-mode */
+			copy(interlace_mode, num_inter_mode, 0, interlaced, 1 );
 			offset_im++;
-		}
-		else if( g_strv_contains(resolution, "1080i") ){
+			copy(interlace_mode, num_inter_mode, offset_im, progressive, 1 );
+			set_filter_field(raw_filter,"interlace-mode",NULL, interlace_mode, num_inter_mode);		
+		}else{
+			if( g_strv_contains(resolution,"576i") ){
+				memcpy(width, width_small, length_width_576 * sizeof(int));
+				offset_width += length_width_576;
+				memcpy(height, heigth_small, length_height_576 * sizeof(int));
+				offset_height += length_height_576;
+				copy(interlace_mode, num_inter_mode,offset_im , interlaced, 1 );
+				offset_im++;
+			}
+			if( g_strv_contains(resolution, "720p") ){
+				*(width + offset_width) = 1280;
+				offset_width ++;
+				*(height + offset_height) = 720;
+				offset_height ++;
+				copy(interlace_mode, num_inter_mode,offset_im , progressive, 1 );
+				offset_im++;
+			}
 			if( g_strv_contains(resolution, "1080p" ) ){
-			copy(interlace_mode, num_inter_mode,offset_im , interlaced, 1 );
-			offset_im++;
-			}else{
 				*(width + offset_width) = 1920;
 				offset_width ++;
 				*(height + offset_height) = 1080;
 				offset_height ++;
-				copy(interlace_mode, num_inter_mode,offset_im , interlaced, 1 );
+				copy(interlace_mode, num_inter_mode,offset_im , progressive, 1 );
 				offset_im++;
 			}
+			else if( g_strv_contains(resolution, "1080i") ){
+				if( g_strv_contains(resolution, "1080p" ) ){
+					copy(interlace_mode, num_inter_mode,offset_im , interlaced, 1 );
+					offset_im++;
+				}else{
+					*(width + offset_width) = 1920;
+					offset_width ++;
+					*(height + offset_height) = 1080;
+					offset_height ++;
+					copy(interlace_mode, num_inter_mode,offset_im , interlaced, 1 );
+					offset_im++;
+				}
+			}
+			set_filter_field(raw_filter, "width", 			width, 	NULL, offset_width);
+			set_filter_field(raw_filter, "height", 			height, NULL, offset_height);
+			set_filter_field(raw_filter,"interlace-mode",NULL, interlace_mode, MIN(num_inter_mode,offset_im));
 		}
-		set_filter_field(raw_filter, "width", 			width, 	NULL, offset_width);
-		set_filter_field(raw_filter, "height", 			height, NULL, offset_height);
-		set_filter_field(raw_filter,"interlace-mode",NULL, interlace_mode, MIN(num_inter_mode,offset_im));
 	}
+
 //	set_filter_field(raw_filter, "framerate", GST_VIDEO_FPS_RANGE);
 //	printf("%s\n", gst_structure_to_string (raw_filter) );	
 	free(width);
@@ -259,72 +291,77 @@ static GstStructure* build_MPEG4_filter(GKeyFile* gkf){
 	int offset_width					= 0;
 	int offset_height					= 0;
 	int offset_im 						= 0;
-	/* Add resolution part */
-	if( all_resolutions( resolution ) )
-	{
-		/* witdth */
-		memcpy(width, width_small, length_width_576 * sizeof(int));
-		offset_width += length_width_576;
-		*(width + offset_width) = 1280;
-		offset_width ++;
-		*(width + offset_width) = 1920;
-		offset_width ++;
-		set_filter_field(mpeg_filter, "width", 	width, 	NULL, length_width);
-		/* height */
-		memcpy(height, heigth_small, length_height_576 * sizeof(int));
-		offset_height += length_height_576;
-		*(height + offset_height) = 720;
-		offset_height ++;
-		*(height + offset_height) = 1080;
-		offset_height ++;
-		set_filter_field(mpeg_filter, "height", 	height, NULL, length_height);
-		/* interlaced-mode */
-		copy(interlace_mode, num_inter_mode, 0, interlaced, 1 );
-		offset_im++;
-		copy(interlace_mode, num_inter_mode, offset_im, progressive, 1 );
-		set_filter_field(mpeg_filter,"interlace-mode",NULL, interlace_mode, num_inter_mode);		
-	}else{
-		if( g_strv_contains(resolution,"576i") ){
+
+	if ( !no_filter_resolution(resolution)){
+
+		/* Add resolution part */
+		if( all_resolutions( resolution ) )
+		{
+			/* witdth */
 			memcpy(width, width_small, length_width_576 * sizeof(int));
 			offset_width += length_width_576;
-			memcpy(height, heigth_small, length_height_576 * sizeof(int));
-			offset_height += length_height_576;
-			copy(interlace_mode, num_inter_mode,offset_im , interlaced, 1 );
-			offset_im++;
-		}
-		if( g_strv_contains(resolution, "720p") ){
 			*(width + offset_width) = 1280;
 			offset_width ++;
-			*(height + offset_height) = 720;
-			offset_height ++;
-			copy(interlace_mode, num_inter_mode,offset_im , progressive, 1 );
-			offset_im++;
-		}
-		if( g_strv_contains(resolution, "1080p" ) ){
 			*(width + offset_width) = 1920;
 			offset_width ++;
+			set_filter_field(mpeg_filter, "width", 	width, 	NULL, length_width);
+			/* height */
+			memcpy(height, heigth_small, length_height_576 * sizeof(int));
+			offset_height += length_height_576;
+			*(height + offset_height) = 720;
+			offset_height ++;
 			*(height + offset_height) = 1080;
 			offset_height ++;
-			copy(interlace_mode, num_inter_mode,offset_im , progressive, 1 );
+			set_filter_field(mpeg_filter, "height", 	height, NULL, length_height);
+			/* interlaced-mode */
+			copy(interlace_mode, num_inter_mode, 0, interlaced, 1 );
 			offset_im++;
-		}
-		else if( g_strv_contains(resolution, "1080i") ){
-			if( g_strv_contains(resolution, "1080p" ) ){
+			copy(interlace_mode, num_inter_mode, offset_im, progressive, 1 );
+			set_filter_field(mpeg_filter,"interlace-mode",NULL, interlace_mode, num_inter_mode);		
+		}else{
+			if( g_strv_contains(resolution,"576i") ){
+				memcpy(width, width_small, length_width_576 * sizeof(int));
+				offset_width += length_width_576;
+				memcpy(height, heigth_small, length_height_576 * sizeof(int));
+				offset_height += length_height_576;
 				copy(interlace_mode, num_inter_mode,offset_im , interlaced, 1 );
 				offset_im++;
-			}else{
+			}
+			if( g_strv_contains(resolution, "720p") ){
+				*(width + offset_width) = 1280;
+				offset_width ++;
+				*(height + offset_height) = 720;
+				offset_height ++;
+				copy(interlace_mode, num_inter_mode,offset_im , progressive, 1 );
+				offset_im++;
+			}
+			if( g_strv_contains(resolution, "1080p" ) ){
 				*(width + offset_width) = 1920;
 				offset_width ++;
 				*(height + offset_height) = 1080;
 				offset_height ++;
-				copy(interlace_mode, num_inter_mode,offset_im , interlaced, 1 );
+				copy(interlace_mode, num_inter_mode,offset_im , progressive, 1 );
 				offset_im++;
 			}
+			else if( g_strv_contains(resolution, "1080i") ){
+				if( g_strv_contains(resolution, "1080p" ) ){
+					copy(interlace_mode, num_inter_mode,offset_im , interlaced, 1 );
+					offset_im++;
+				}else{
+					*(width + offset_width) = 1920;
+					offset_width ++;
+					*(height + offset_height) = 1080;
+					offset_height ++;
+					copy(interlace_mode, num_inter_mode,offset_im , interlaced, 1 );
+					offset_im++;
+				}
+			}
+			set_filter_field(mpeg_filter, "width", 			width, 	NULL, 			offset_width);
+			set_filter_field(mpeg_filter, "height", 		height, NULL, 			offset_height);
+			set_filter_field(mpeg_filter,"interlace-mode", 	NULL, 	interlace_mode, MIN(num_inter_mode,offset_im));
 		}
-		set_filter_field(mpeg_filter, "width", 			width, 	NULL, 			offset_width);
-		set_filter_field(mpeg_filter, "height", 		height, NULL, 			offset_height);
-		set_filter_field(mpeg_filter,"interlace-mode", 	NULL, 	interlace_mode, MIN(num_inter_mode,offset_im));
 	}
+
 	//	set_filter_field(raw_filter, "framerate", GST_VIDEO_FPS_RANGE);
 //	printf("%s\n", gst_structure_to_string (mpeg_filter) );
 	free(width);
@@ -351,72 +388,77 @@ static GstStructure* build_J2K_filter(GKeyFile* gkf){
 	int offset_width					= 0;
 	int offset_height					= 0;
 	int offset_im 						= 0;
-	/* Add resolution part */
-	if( all_resolutions( resolution ) )
-	{
-		/* witdth */
-		memcpy(width, width_small, length_width_576 * sizeof(int));
-		offset_width += length_width_576;
-		*(width + offset_width) = 1280;
-		offset_width ++;
-		*(width + offset_width) = 1920;
-		offset_width ++;
-		set_filter_field(j2k_filter, "width", 	width, 	NULL, length_width);
-		/* height */
-		memcpy(height, heigth_small, length_height_576 * sizeof(int));
-		offset_height += length_height_576;
-		*(height + offset_height) = 720;
-		offset_height ++;
-		*(height + offset_height) = 1080;
-		offset_height ++;
-		set_filter_field(j2k_filter, "height", 	height, NULL, length_height);
-		/* interlaced-mode */
-		copy(interlace_mode, num_inter_mode, 0, interlaced, 1 );
-		offset_im++;
-		copy(interlace_mode, num_inter_mode, offset_im, progressive, 1 );
-		set_filter_field(j2k_filter,"interlace-mode",NULL, interlace_mode, num_inter_mode);		
-	}else{
-		if( g_strv_contains(resolution,"576i") ){
+
+	if ( !no_filter_resolution(resolution)){
+
+		/* Add resolution part */
+		if( all_resolutions( resolution ) )
+		{
+			/* witdth */
 			memcpy(width, width_small, length_width_576 * sizeof(int));
 			offset_width += length_width_576;
-			memcpy(height, heigth_small, length_height_576 * sizeof(int));
-			offset_height += length_height_576;
-			copy(interlace_mode, num_inter_mode,offset_im , interlaced, 1 );
-			offset_im++;
-		}
-		if( g_strv_contains(resolution, "720p") ){
 			*(width + offset_width) = 1280;
 			offset_width ++;
-			*(height + offset_height) = 720;
-			offset_height ++;
-			copy(interlace_mode, num_inter_mode,offset_im , progressive, 1 );
-			offset_im++;
-		}
-		if( g_strv_contains(resolution, "1080p" ) ){
 			*(width + offset_width) = 1920;
 			offset_width ++;
+			set_filter_field(j2k_filter, "width", 	width, 	NULL, length_width);
+			/* height */
+			memcpy(height, heigth_small, length_height_576 * sizeof(int));
+			offset_height += length_height_576;
+			*(height + offset_height) = 720;
+			offset_height ++;
 			*(height + offset_height) = 1080;
 			offset_height ++;
-			copy(interlace_mode, num_inter_mode,offset_im , progressive, 1 );
+			set_filter_field(j2k_filter, "height", 	height, NULL, length_height);
+			/* interlaced-mode */
+			copy(interlace_mode, num_inter_mode, 0, interlaced, 1 );
 			offset_im++;
-		}
-		else if( g_strv_contains(resolution, "1080i") ){
-			if( g_strv_contains(resolution, "1080p" ) ){
+			copy(interlace_mode, num_inter_mode, offset_im, progressive, 1 );
+			set_filter_field(j2k_filter,"interlace-mode",NULL, interlace_mode, num_inter_mode);		
+		}else{
+			if( g_strv_contains(resolution,"576i") ){
+				memcpy(width, width_small, length_width_576 * sizeof(int));
+				offset_width += length_width_576;
+				memcpy(height, heigth_small, length_height_576 * sizeof(int));
+				offset_height += length_height_576;
 				copy(interlace_mode, num_inter_mode,offset_im , interlaced, 1 );
 				offset_im++;
-			}else{
+			}
+			if( g_strv_contains(resolution, "720p") ){
+				*(width + offset_width) = 1280;
+				offset_width ++;
+				*(height + offset_height) = 720;
+				offset_height ++;
+				copy(interlace_mode, num_inter_mode,offset_im , progressive, 1 );
+				offset_im++;
+			}
+			if( g_strv_contains(resolution, "1080p" ) ){
 				*(width + offset_width) = 1920;
 				offset_width ++;
 				*(height + offset_height) = 1080;
 				offset_height ++;
-				copy(interlace_mode, num_inter_mode,offset_im , interlaced, 1 );
+				copy(interlace_mode, num_inter_mode,offset_im , progressive, 1 );
 				offset_im++;
 			}
+			else if( g_strv_contains(resolution, "1080i") ){
+				if( g_strv_contains(resolution, "1080p" ) ){
+					copy(interlace_mode, num_inter_mode,offset_im , interlaced, 1 );
+					offset_im++;
+				}else{
+					*(width + offset_width) = 1920;
+					offset_width ++;
+					*(height + offset_height) = 1080;
+					offset_height ++;
+					copy(interlace_mode, num_inter_mode,offset_im , interlaced, 1 );
+					offset_im++;
+				}
+			}
+			set_filter_field(j2k_filter, "width", 			width, 	NULL, 			offset_width);
+			set_filter_field(j2k_filter, "height", 		height, NULL, 			offset_height);
+			set_filter_field(j2k_filter,"interlace-mode", 	NULL, 	interlace_mode, MIN(num_inter_mode,offset_im));
 		}
-		set_filter_field(j2k_filter, "width", 			width, 	NULL, 			offset_width);
-		set_filter_field(j2k_filter, "height", 		height, NULL, 			offset_height);
-		set_filter_field(j2k_filter,"interlace-mode", 	NULL, 	interlace_mode, MIN(num_inter_mode,offset_im));
 	}
+
 	//	set_filter_field(raw_filter, "framerate", GST_VIDEO_FPS_RANGE);
 //	printf("%s\n", gst_structure_to_string (j2k_filter) );
 	free(width);
@@ -425,18 +467,17 @@ static GstStructure* build_J2K_filter(GKeyFile* gkf){
 }
 
 /**
- * \brief filter out input videos which do not 
- * belong to the set of VIVOE's videos by creating a filter
+ * \brief filter out input videos which do not belong to the set of VIVOE's videos by creating a filter
  * froms the caps defined by the user into the configuration file
  * \param input the input video source to be filter
  * \param output the element to which connect filtered the input video
  * \return TRUE if the video is filter out, false otherwise
  */
 gboolean filter_VIVOE(GstStructure* input_caps_str, GstElement* input, GstElement* output){
-	GstStructure *raw_filter 	= NULL;
-	GstStructure *mpeg_filter 	= NULL;
- 	GstStructure* j2k_filter 	= NULL; 
-	GstCaps *vivoe_filter 		= NULL; /* the final filter to use to filters out non stream video */
+	GstStructure 	*raw_filter 	= NULL;
+	GstStructure 	*mpeg_filter 	= NULL;
+ 	GstStructure 	*j2k_filter 	= NULL; 
+	GstCaps 		*vivoe_filter 	= NULL; /* the final filter to use to filters out non stream video */
 	
 	/* this function does the following: 
 	 * _ open configuration file
