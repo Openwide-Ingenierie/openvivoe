@@ -58,15 +58,32 @@ void close_configuration_file(	GKeyFile* gkf){
 }
 
 static gchar** get_list_value(	GKeyFile* gkf, const gchar* key_name, const char* group_name){
+	
+	gchar **list_returned;
+
 	/*Declaration of a  gsize variable, that will be used to get the size of the list associated to some keys*/
 	gsize length;
 	/* Define the error pointer we will be using to check for errors in the configuration file */
 	GError* error = NULL;
 	/* return variable */
 	if(g_key_file_has_key(gkf, group_name, key_name, &error)){
-		return g_key_file_get_string_list( gkf, group_name, key_name, &length, &error);
+		list_returned = g_key_file_get_string_list( gkf, group_name, key_name, &length, &error);
 	}else
 		return NULL;
+
+	/* 
+	 * Now we remove all whitspace from the list: indeed a user could have left a space at the end pf the line
+	 * or separate each delimiter of the list with spaces
+	 */
+	int k = 0; 
+	for ( int i = 0 ; i < length; i ++ ){
+		for ( int j = 0 ; j < strlen(list_returned[i]) + 1; j++){
+			if (list_returned[i][j] != ' ')  
+				list_returned[i][k++] = list_returned[i][j];  
+		}
+	}
+
+	return list_returned;
 
 }
 
