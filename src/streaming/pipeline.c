@@ -91,7 +91,10 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
 		fill_entry(video_caps, video_info, stream_datas);
 
  	}else{
+
 		video_caps = gst_caps_get_structure ( caps, 0 );
+
+
 
 		handle_redirection(	pipeline, input, video_caps );
 
@@ -524,10 +527,11 @@ static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 		if ( !sink)
 			return NULL;
 
-		g_object_set (G_OBJECT (sink), "emit-signals", TRUE, "sync", FALSE, NULL);
+		/* connect a callback on each sample received */
+		g_object_set (G_OBJECT (sink), "emit-signals", TRUE, "sync", TRUE, NULL);
 		g_signal_connect (sink, "new-sample",
 			G_CALLBACK (on_new_sample_from_sink), redirect->pipeline_SP);
-	
+
 		previous_pipeline = g_strrstr(cmdline, "!");
 
 		/* check if there is another pipeline associated */
@@ -548,7 +552,8 @@ static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 			/* we link the elements together */
 			if ( !gst_element_link_log (input, previous))
 			    return NULL;
-
+			
+			
 			input = previous;
 
 		}
@@ -561,15 +566,24 @@ static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 	   return NULL;
     }
 
+	GstStructure *video_caps;
+	video_caps = type_detection(GST_BIN(pipeline), input, loop, NULL);
+	printf("%s\n", gst_structure_to_string(video_caps));
+
 	/* add rtp to pipeline */
 	if ( !gst_bin_add(GST_BIN (pipeline), sink )){
 		g_printerr("Unable to add %s to pipeline", gst_element_get_name(sink));
 		return NULL;
 	}
 
+	
 	/* we link the elements together */
 	if ( !gst_element_link_log (input, sink))
 	    return NULL;
+
+	video_caps = type_detection(GST_BIN(pipeline), input, loop, NULL);
+	printf("%s\n", gst_structure_to_string(video_caps));
+
 
 	return sink;
 }

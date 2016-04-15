@@ -271,6 +271,8 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 
 		/* configure for time-based format */
 		g_object_set (bin, "format", GST_FORMAT_TIME, NULL);
+		/* configure appsrc to act like a live source: place a timestamp in each buffer it delivers */
+		g_object_set (bin, "is-live", TRUE, NULL);
 
 	}
 	else
