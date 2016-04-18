@@ -259,12 +259,10 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 		if ( !bin )
 	   		return NULL;
 
-		if ( remaining_pipeline ){
-			printf("%s\n", remaining_pipeline);
+		if ( remaining_pipeline )
 			bin2 = gst_parse_bin_from_description ( remaining_pipeline + 1,
 													TRUE,
 													&error);
-		}
 
 		/* save the pipeline value in the redirection data */
 		redirection_data->pipeline_SP = pipeline;

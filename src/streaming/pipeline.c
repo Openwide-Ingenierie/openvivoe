@@ -92,9 +92,20 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
 
  	}else{
 
-		video_caps = gst_caps_get_structure ( caps, 0 );
-
-		handle_redirection(	pipeline, input, video_caps );
+#if 0
+		GstElement *filesink= gst_element_factory_make_log("filesink", "filesink");
+		gst_bin_add(GST_BIN(pipeline), filesink);
+		g_object_set(G_OBJECT(filesink), "location", "foo", NULL);
+		gst_element_link(input, filesink);
+		input = filesink; 
+		gst_element_set_state (pipeline, GST_STATE_PLAYING);
+		g_main_loop_run(main_loop);
+#endif 		
+		GstElement *appsrc = gst_bin_get_by_name( GST_BIN ( pipeline ) , "src-redirection" ) ;
+		g_object_set ( appsrc , "caps" ,  caps , NULL) ;
+		video_caps = type_detection(GST_BIN(pipeline), input, loop, NULL);
+		printf("%s\n", gst_structure_to_string(video_caps));
+//		handle_redirection(	pipeline, input, video_caps );
 
 		/* This is a redirection, fill the MIB once for all */
 		fill_entry(video_caps, video_info, stream_datas);
@@ -106,6 +117,7 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
 		rtp 	= gst_element_factory_make_log ("rtpvrawpay", "rtpvrawpay");
 		if ( !rtp )
 			return NULL;
+		printf("adding rtp payloader raw\n");
 	}
 	/* in case MPEG4 video type has been detected */
 	else if  (gst_structure_has_name( video_caps, "video/mpeg")){
@@ -177,10 +189,14 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
 		/*Fill the MIB a second time after creating payload*/
 		fill_entry(video_caps, video_info, stream_datas);
 	}else{
-
 		/* link input to rtp payloader */
 		if ( !gst_element_link_log(input, rtp))
 		   return NULL;	
+		
+		printf("11111111\n");
+		video_caps = type_detection(GST_BIN(pipeline), rtp,  loop, NULL);
+		printf("%s\n", gst_structure_to_string(video_caps));
+
 		
 		/*Fill the MIB a second time after creating payload, this is needed to get rtp_data needed to build SDP files */
 		fill_entry(video_caps, video_info, stream_datas);
@@ -497,7 +513,8 @@ static GstFlowReturn
 static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 								guint bus_watch_id, 	GMainLoop *loop,
 								GstElement *input, 		struct channelTable_entry 	*channel_entry,
-								gchar *cmdline, 		redirect_data 			 	*redirect
+								gchar *cmdline, 		redirect_data 			 	*redirect, 
+								GstCaps 					*caps
 								){
 
 	GError 		*error 				= NULL; /* an Object to save errors when they occurs */
@@ -552,7 +569,6 @@ static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 			if ( !gst_element_link_log (input, previous))
 			    return NULL;
 			
-			
 			input = previous;
 
 		}
@@ -565,7 +581,24 @@ static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 	   return NULL;
     }
 
+	GstStructure *video_caps;
+	video_caps = type_detection(GST_BIN(pipeline), input, loop, NULL);
+	gst_caps_append_structure( caps , gst_structure_copy ( video_caps ) );
+	gst_caps_remove_structure ( caps, 0 ) ;
+	printf("%s\n\n", gst_caps_to_string ( caps));
 #if 0
+
+	/* add a fake rtp payloader */ 
+	GstElement *rtp 	= gst_element_factory_make_log ("rtpvrawpay", "rtpvrawpay");
+	gst_bin_add(GST_BIN(pipeline), rtp);
+	gst_element_link(input, rtp);
+	input = rtp;
+
+	video_caps = type_detection(GST_BIN(pipeline), input, loop, NULL);
+	printf("%s\n", gst_structure_to_string(video_caps));
+
+
+
 	GstStructure *video_caps;
 	video_caps = type_detection(GST_BIN(pipeline), input, loop, NULL);
 	printf("%s\n", gst_structure_to_string(video_caps));
@@ -597,9 +630,16 @@ static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 
 	video_caps = type_detection(GST_BIN(pipeline), input , loop, NULL);
 	printf("%s\n", gst_structure_to_string(video_caps));
-#endif //if 0 
 
-	/* add rtp to pipeline */
+	/* For J2K video */
+	GstElement *fakesink 	= gst_element_factory_make_log ("fakesink", "fakesink");
+	gst_bin_add(GST_BIN(pipeline), fakesink);
+	gst_element_link(input, fakesink);	
+	gst_element_set_state (pipeline, GST_STATE_PLAYING);
+	g_main_loop_run(main_loop);
+#endif //if 0
+
+	/* add sink to pipeline */
 	if ( !gst_bin_add(GST_BIN (pipeline), sink )){
 		g_printerr("Unable to add %s to pipeline", gst_element_get_name(sink));
 		return NULL;
@@ -609,9 +649,6 @@ static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 	/* we link the elements together */
 	if ( !gst_element_link_log (input, sink))
 	    return NULL;
-
-
-
 
 	return sink;
 }
@@ -669,7 +706,7 @@ GstElement* create_pipeline_serviceUser( gpointer 					stream_datas,
 
 	channelTable_fill_entry(channel_entry, video_stream_info);
 
-	last = addSink_SU( pipeline, bus, bus_watch_id, loop, last, channel_entry, cmdline, redirect);
+	last = addSink_SU( pipeline, bus, bus_watch_id, loop, last, channel_entry, cmdline, redirect , caps );
 
 	return last;
 }

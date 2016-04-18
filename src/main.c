@@ -148,7 +148,7 @@ int main (int   argc,  char *argv[]){
 			g_main_loop_run (main_loop);
 		}
 		else{
-			g_printerr("An Gstreamer's error occur before we start the main loop\n");
+			g_error("An Gstreamer's error occur\n");
 			return EXIT_FAILURE;
 		}
 

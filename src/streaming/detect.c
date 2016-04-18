@@ -62,9 +62,10 @@ static GstStructure* type_detection_with_sink(GstBin *pipeline, GstElement *inpu
 	data_type_detection data;
 	data.loop 	= loop;
 	/* Create typefind element */
-	typefind = gst_element_factory_make_log ("typefind", "typefinder");	
+	typefind = gst_element_factory_make_log ("typefind", NULL);	
+
 	if(typefind == NULL)
-		return NULL;		
+		return NULL;
 	
 	/* Connect typefind element to handler */
 	g_signal_connect (typefind, "have-type", G_CALLBACK (cb_typefound), &data);
@@ -77,7 +78,7 @@ static GstStructure* type_detection_with_sink(GstBin *pipeline, GstElement *inpu
   		g_main_loop_quit (loop);
 		was_running = TRUE; /* save the fact that we have quit the main loop */
 	}
-
+	printf("running...\n");
 	/* run the main loop so the typefind can be performed */
 	g_main_loop_run (loop);
 	
@@ -116,6 +117,7 @@ GstStructure* type_detection(GstBin *pipeline, GstElement *input_video, GMainLoo
 
 		str_detected = type_detection_with_sink(pipeline, input_video, loop, fakesink);
 		gst_bin_remove(GST_BIN(pipeline), fakesink);
+
 	}else{
 		str_detected = type_detection_with_sink( pipeline, input_video, loop, sink);
 	}
