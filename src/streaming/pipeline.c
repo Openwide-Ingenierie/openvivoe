@@ -478,8 +478,62 @@ static GstFlowReturn
 	return ret;
 }
 
+static GstElement *handle_redirection_SU_pipeline ( GstElement *pipeline, GstCaps *caps, GstElement *input){
+	GstStructure *video_caps = gst_caps_get_structure( caps , 0 );
+	
+		/* in case MPEG4 video type has been detected */
+	if  (gst_structure_has_name( video_caps, "video/mpeg")){
+
+		/* Add the MPEG-4 parser in SU pipeline */
+		GstElement *parser 	= gst_element_factory_make_log ("mpeg4videoparse", "parser");
+		if ( !parser )
+			return NULL;
+
+		gst_bin_add(GST_BIN(pipeline),parser);
+
+		if ( !gst_element_link_log(input, parser))
+			return NULL;
+
+		input = parser;
+
+	}
+
+	/* in case J2K video type has been detected */
+	else if  ( g_strv_contains ( J2K_STR_NAMES, gst_structure_get_name(video_caps))){
+
+		GstElement *capsfilter = gst_element_factory_make_log("capsfilter", "capsfilter-image/x-jpc");
+
+		GstCaps *caps_jpeg2000 = gst_caps_new_empty_simple("image/x-jpc");
+	
+		/* Put the source in the pipeline */
+		g_object_set (capsfilter, "caps",caps_jpeg2000 , NULL);
+
+		gst_bin_add(GST_BIN(pipeline),capsfilter);
+
+		if ( !gst_element_link_log(input,capsfilter )){
+			g_printerr("JPEG2000 format can only be x-jpc\n");
+			return NULL;
+		}
+
+		input = capsfilter;
+	}
+
+	/* 
+	 * Run a new typefind to update caps in order to succeed to run a last typefind in the pipeline of the SP of the 
+	 * redirection. Update caps in consequence
+	 */
+	video_caps = type_detection(GST_BIN(pipeline), input, main_loop, NULL);
+	gst_caps_append_structure( caps , gst_structure_copy ( video_caps ) );
+	gst_caps_remove_structure ( caps, 0 ) ;
+	printf("%s\n\n", gst_caps_to_string ( caps));
+	
+	return input;
+
+}
+
+
 /*
- * This function add the UDP element to the pipeline / fort a ServiceUser channel
+ *\brief  This function add the UDP element to the pipeline / for a ServiceUser channel
  */
 static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 								guint bus_watch_id, 	GMainLoop *loop,
