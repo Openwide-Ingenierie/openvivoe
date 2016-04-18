@@ -94,8 +94,6 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
 
 		video_caps = gst_caps_get_structure ( caps, 0 );
 
-
-
 		handle_redirection(	pipeline, input, video_caps );
 
 		/* This is a redirection, fill the MIB once for all */
@@ -164,6 +162,7 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
 	gst_bin_add(GST_BIN (pipeline), rtp);
 
 	if (caps == NULL ){
+		
 		/* Filters out non VIVOE videos, and link input to RTP if video has a valid format*/
 		if (!filter_VIVOE(type_detection(GST_BIN(pipeline), input, loop, NULL),input, rtp))
 			return NULL;
@@ -566,9 +565,39 @@ static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 	   return NULL;
     }
 
+#if 0
 	GstStructure *video_caps;
 	video_caps = type_detection(GST_BIN(pipeline), input, loop, NULL);
 	printf("%s\n", gst_structure_to_string(video_caps));
+
+	GstElement *queue= gst_element_factory_make_log("queue", "queue");
+	gst_bin_add(GST_BIN(pipeline), queue);
+	gst_element_link(input, queue);
+	input = queue; 
+
+	GstElement *openjpegdec= gst_element_factory_make_log("openjpegdec", "testdec");
+	gst_bin_add(GST_BIN(pipeline), openjpegdec);
+	gst_element_link(input, openjpegdec);
+	printf("add and link openjpegdec\n");
+	
+	input = openjpegdec;
+	video_caps = type_detection(GST_BIN(pipeline), input , loop, NULL);
+	printf("%s\n", gst_structure_to_string(video_caps));
+
+	GstElement *queue2= gst_element_factory_make_log("queue2", "queue2");
+	gst_bin_add(GST_BIN(pipeline), queue2);
+	gst_element_link(input, queue2);
+	input = queue2;
+
+	/* For J2K video */
+	GstElement *rtp 	= gst_element_factory_make_log ("rtpvrawpay", "rtpvrawpay");
+	gst_bin_add(GST_BIN(pipeline), rtp);
+	gst_element_link(input, rtp);
+	input = rtp;
+
+	video_caps = type_detection(GST_BIN(pipeline), input , loop, NULL);
+	printf("%s\n", gst_structure_to_string(video_caps));
+#endif //if 0 
 
 	/* add rtp to pipeline */
 	if ( !gst_bin_add(GST_BIN (pipeline), sink )){
@@ -581,8 +610,7 @@ static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 	if ( !gst_element_link_log (input, sink))
 	    return NULL;
 
-	video_caps = type_detection(GST_BIN(pipeline), input, loop, NULL);
-	printf("%s\n", gst_structure_to_string(video_caps));
+
 
 
 	return sink;
@@ -608,7 +636,7 @@ GstElement* create_pipeline_serviceUser( gpointer 					stream_datas,
 
 	stream_data 	*data 	=  stream_datas;
 	/* create the empty videoFormatTable_entry structure to intiate the MIB */
-	struct videoFormatTable_entry * video_stream_info;
+	struct videoFormatTable_entry *video_stream_info;
 	video_stream_info = SNMP_MALLOC_TYPEDEF(struct videoFormatTable_entry);
 	if( !video_stream_info){
 		g_printerr("Failed to create temporary empty entry for the table\n");
