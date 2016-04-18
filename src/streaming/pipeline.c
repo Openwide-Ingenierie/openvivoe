@@ -38,9 +38,8 @@
 #define JPEG_FORMAT_NUMBER_SUPORTED 	3
 const gchar* const J2K_STR_NAMES[JPEG_FORMAT_NUMBER_SUPORTED] = {"image/x-j2c", "image/x-jpc", "image/jp2"};
 	
-
 /*
- * This function add the RTP element to the pipeline
+ * \briref This function add the RTP element to the pipeline for service provider 
  */
 static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
 							guint bus_watch_id, 	GMainLoop 						*loop,
@@ -63,51 +62,50 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
 
  	}else{
 
-#if 0
-		GstElement *filesink= gst_element_factory_make_log("filesink", "filesink");
-		gst_bin_add(GST_BIN(pipeline), filesink);
-		g_object_set(G_OBJECT(filesink), "location", "foo", NULL);
-		gst_element_link(input, filesink);
-		input = filesink; 
-		gst_element_set_state (pipeline, GST_STATE_PLAYING);
-		g_main_loop_run(main_loop);
-#endif 		
 		GstElement *appsrc = gst_bin_get_by_name( GST_BIN ( pipeline ) , "src-redirection" ) ;
 		g_object_set ( appsrc , "caps" ,  caps , NULL) ;
-		video_caps = type_detection(GST_BIN(pipeline), input, loop, NULL);
-		printf("%s\n", gst_structure_to_string(video_caps));
-//		handle_redirection(	pipeline, input, video_caps );
-
+		video_caps = gst_caps_get_structure( caps, 0 );
 		/* This is a redirection, fill the MIB once for all */
 		fill_entry(video_caps, video_info, stream_datas);
+
 	}
 	
  	/* in case RAW video type has been detected */
 	if ( gst_structure_has_name( video_caps, "video/x-raw") ){
+
 		/* For Raw video */
 		rtp 	= gst_element_factory_make_log ("rtpvrawpay", "rtpvrawpay");
 		if ( !rtp )
 			return NULL;
-		printf("adding rtp payloader raw\n");
+
 	}
 	/* in case MPEG4 video type has been detected */
 	else if  (gst_structure_has_name( video_caps, "video/mpeg")){
 
-		/* For MPEG-4 video */
-		parser 	= gst_element_factory_make_log ("mpeg4videoparse", "parser");
-		if ( !parser )
-			return NULL;
+		/* 
+		 * For MPEG-a videos we need to add a parser before the RTP payloader. However, if caps are NULL i.e. if this pipeline is a Service Provider's pipeline
+		 * used for a redirection, we cannot add the mpeg4 parser here because the parser need to be in the same pipeline as the MPEG-4 encoder, otherwise the typefind
+		 * cannot be performed. So if caps are NULL then it means that the parser has already been added in the SU's pipeline of the Service Users's part of teh redirection. 
+		 * We do not have to add it again 
+		 */
+		if ( caps == NULL ){
+			parser 	= gst_element_factory_make_log ("mpeg4videoparse", "parser");
+			if ( !parser )
+				return NULL;
+
+			gst_bin_add(GST_BIN(pipeline),parser);
+
+			if ( !gst_element_link_log(input, parser))
+				return NULL;
+
+			input = parser;
+
+		}
 
 		rtp 	= gst_element_factory_make_log ("rtpmp4vpay", "rtpmp4vpay");
 		if ( !rtp )
 			return NULL;
 
-		gst_bin_add(GST_BIN(pipeline),parser);
-
-		if ( !gst_element_link_log(input, parser))
-			return NULL;
-
-		input = parser;
 	}
 
 	/* in case J2K video type has been detected */
@@ -160,15 +158,15 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
 		/*Fill the MIB a second time after creating payload*/
 		fill_entry(video_caps, video_info, stream_datas);
 	}else{
+		
 		/* link input to rtp payloader */
 		if ( !gst_element_link_log(input, rtp))
 		   return NULL;	
-		
-		printf("11111111\n");
-		video_caps = type_detection(GST_BIN(pipeline), rtp,  loop, NULL);
-		printf("%s\n", gst_structure_to_string(video_caps));
 
+		input = rtp ;
 		
+		video_caps = type_detection(GST_BIN(pipeline), input , loop, NULL);
+
 		/*Fill the MIB a second time after creating payload, this is needed to get rtp_data needed to build SDP files */
 		fill_entry(video_caps, video_info, stream_datas);
 
@@ -319,6 +317,10 @@ GstElement *append_SP_pipeline_for_redirection(GMainLoop *loop, GstCaps *caps, l
 
 
 	/* Now build the corresponding pipeline according to the caps*/ 
+	/*
+	 * As it was convenient, the last element added in a redirection's service provider's pipeline has been stored in
+	 * data->sink, so the input element to pass to the addRTP function is the last element added in pipeline ( the bin made from the 
+	 * gst_source commmand line given by the user in vivoe-mib.conf configuration file */
 
 	last = addRTP(data->pipeline , data->bus , data->bus_watch_id , loop , data->sink  , videoFormat_entry , data , caps);
 	if(last == NULL){
@@ -525,7 +527,6 @@ static GstElement *handle_redirection_SU_pipeline ( GstElement *pipeline, GstCap
 	video_caps = type_detection(GST_BIN(pipeline), input, main_loop, NULL);
 	gst_caps_append_structure( caps , gst_structure_copy ( video_caps ) );
 	gst_caps_remove_structure ( caps, 0 ) ;
-	printf("%s\n\n", gst_caps_to_string ( caps));
 	
 	return input;
 
@@ -600,17 +601,23 @@ static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 		
 	}
 
+	/* detect the caps of the video after the gstreamer pipeline given by the user in gst_sink command line in vivoe-mib.conf */
+	GstStructure *video_caps;
+	video_caps = type_detection(GST_BIN(pipeline), input, loop, NULL);
+	gst_caps_append_structure( caps , gst_structure_copy ( video_caps ) );
+	gst_caps_remove_structure ( caps, 0 ) ;
+
+	GstElement *last = handle_redirection_SU_pipeline(pipeline, caps, input);
+	/* update input element to link to appsink */
+	input = last ;
+
 	/* Create the sink */
     if(sink == NULL){
        g_printerr ( "error cannot create element for: %s\n","sink");
 	   return NULL;
     }
 
-	GstStructure *video_caps;
-	video_caps = type_detection(GST_BIN(pipeline), input, loop, NULL);
-	gst_caps_append_structure( caps , gst_structure_copy ( video_caps ) );
-	gst_caps_remove_structure ( caps, 0 ) ;
-	printf("%s\n\n", gst_caps_to_string ( caps));
+
 #if 0
 
 	/* add a fake rtp payloader */ 

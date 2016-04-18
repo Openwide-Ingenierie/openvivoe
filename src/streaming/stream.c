@@ -259,7 +259,7 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 		if ( !bin )
 	   		return NULL;
 
-		if ( remaining_pipeline )
+		if ( remaining_pipeline ) 
 			bin2 = gst_parse_bin_from_description ( remaining_pipeline + 1,
 													TRUE,
 													&error);
@@ -371,7 +371,8 @@ int init_stream_SP( gpointer main_loop, int videoFormatIndex){
 	/* if this is a redirection */
 	if ( !strcmp(GST_ELEMENT_NAME(last), "src-redirection") ){ 
 		init_redirection( data, videoFormatIndex );
-		/* for convenience we store the last element added in pipeline here, even if it is not it purpose , this will be used to retrieve the  last element of the pipeline later */
+		/* for convenience we store the last element added in pipeline here, even if it is not it purpose , this will be used to retrieve the last element of the pipeline later
+		 * in append_SP_pipeline_for_redirection */
 		data->sink = last ; 
 		redirection = TRUE;
 	}
