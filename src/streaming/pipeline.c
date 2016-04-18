@@ -39,35 +39,6 @@
 const gchar* const J2K_STR_NAMES[JPEG_FORMAT_NUMBER_SUPORTED] = {"image/x-j2c", "image/x-jpc", "image/jp2"};
 	
 
-/**
- * \brief handle the redirection of the video: change caps' structure name from video/x-rtp to video/x-raw,mpeg or image/j2c
- * \param caps the video caps
- * \param GstElement input the input element of the pipeline (should normaly be the shmsrc 
- * \return GstElement* the last element added in pipeline
- */
-static gboolean handle_redirection(GstElement *pipeline, GstElement* input, GstStructure *video_caps){
-
-	if ( gst_structure_has_field(video_caps, "encoding-name") ){
-		if ( ! strcmp("RAW", g_value_get_string(gst_structure_get_value(video_caps, "encoding-name")) ) )
-			gst_structure_set_name(video_caps, "video/x-raw");
-		else if ( ! strcmp("JPEG2000", g_value_get_string(gst_structure_get_value(video_caps, "encoding-name")) ) )
-			gst_structure_set_name(video_caps, "image/x-jpc");
-		else if ( ! strcmp("MP4V-ES", g_value_get_string(gst_structure_get_value(video_caps, "encoding-name")) ) )
-			gst_structure_set_name(video_caps, "video/mpeg");
-		else
-		{
-			g_printerr("Unkown encoding name, cannot redirect video\n");	
-			return FALSE;
-		}
-		return TRUE;
-	}else
-	{
-		g_printerr("ERROR: no encoding, imppossible to redirect stream\n");
-		return FALSE;
-	}
-
-}
-
 /*
  * This function add the RTP element to the pipeline
  */
