@@ -163,8 +163,10 @@ extern parameter channelNumber;
 typedef struct {
 	long 		channel_SU_index;
 	GstElement 	*pipeline_SU;
+	gchar 		*gst_sink;
 	long 		video_SP_index;
 	GstElement 	*pipeline_SP;
+	gchar 		*gst_source;
 }redirect_data;
 
 /**
