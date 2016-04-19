@@ -35,8 +35,8 @@
 #include "../../include/streaming/stream.h"
 
 
-#define JPEG_FORMAT_NUMBER_SUPORTED 	3
-const gchar* const J2K_STR_NAMES[JPEG_FORMAT_NUMBER_SUPORTED] = {"image/x-j2c", "image/x-jpc", "image/jp2"};
+#define JPEG_FORMAT_NUMBER_SUPPORTED 	3
+static const gchar* J2K_STR_NAMES[JPEG_FORMAT_NUMBER_SUPPORTED] = {"image/x-j2c", "image/x-jpc", "image/jp2"};
 	
 /*
  * \briref This function add the RTP element to the pipeline for service provider 
@@ -49,7 +49,7 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
 	GstElement *rtp = NULL;
 	GstElement *parser;
 	GstStructure *video_caps;
-	
+
 	if (caps == NULL){
 		/* Media stream Type detection */
 		video_caps = type_detection(GST_BIN(pipeline), input, loop, NULL);
@@ -481,9 +481,10 @@ static GstFlowReturn
 }
 
 static GstElement *handle_redirection_SU_pipeline ( GstElement *pipeline, GstCaps *caps, GstElement *input){
+
 	GstStructure *video_caps = gst_caps_get_structure( caps , 0 );
-	
-		/* in case MPEG4 video type has been detected */
+
+	/* in case MPEG4 video type has been detected */
 	if  (gst_structure_has_name( video_caps, "video/mpeg")){
 
 		/* Add the MPEG-4 parser in SU pipeline */
@@ -499,7 +500,6 @@ static GstElement *handle_redirection_SU_pipeline ( GstElement *pipeline, GstCap
 		input = parser;
 
 	}
-
 	/* in case J2K video type has been detected */
 	else if  ( g_strv_contains ( J2K_STR_NAMES, gst_structure_get_name(video_caps))){
 
