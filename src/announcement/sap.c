@@ -316,7 +316,6 @@ gboolean send_announcement(gpointer entry){
 
 /**
  * \brief Joins multicast group and receives UDP datagram on the UDP socket 224.2.127.254:9875, payload contains SAP/SDP message (announcement or deletion)
- * \param gpointer entry the entry in the channelTable associated to the socket
  * \return gboolean TRUE on succed, FALSE on failure
  */
 gboolean receive_announcement(){

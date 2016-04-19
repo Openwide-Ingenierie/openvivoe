@@ -44,6 +44,7 @@ static const char* interlace_mode_to_string(int interlaced_mode_val){
  * \brief create Media for in RAW video style
  * \param channel_entry an entry in the channelTable to retrieve relevant inforlation
  * \param media the media to modify: where to store the new information
+ * \return TRUE on success FALSE otherwise
  */
 static gboolean create_raw_media(struct channelTable_entry * channel_entry, GstSDPMedia *media)
 {
@@ -69,6 +70,7 @@ static gboolean create_raw_media(struct channelTable_entry * channel_entry, GstS
  * \brief create Media for in MPEG-4 video style
  * \param channel_entry an entry in the channelTable to retrieve relevant inforlation
  * \param media the media to modify: where to store the new information
+ * \return TRUE on success, FALSE on FAILURE
  */
 static gboolean create_mpeg4_media(struct channelTable_entry * channel_entry, GstSDPMedia *media)
 {
@@ -90,6 +92,7 @@ static gboolean create_mpeg4_media(struct channelTable_entry * channel_entry, Gs
  * \brief create Media for in J2K video style
  * \param channel_entry an entry in the channelTable to retrieve relevant inforlation
  * \param media the media to modify: where to store the new information
+ * \return TRUE on success, FALSE on failure
  */
 static gboolean create_j2k_media(struct channelTable_entry * channel_entry, GstSDPMedia *media)
 {
@@ -124,6 +127,7 @@ static gboolean error_function(){
  * \brief create Media for in RAW video style
  * \param channel_entry an entry in the channelTable to retrieve relevant inforlation
  * \param media the media to modify: where to store the new information
+ * \return TRUE on success, FALSE on failure
  */
 static gboolean create_fmtp_media(struct channelTable_entry * channel_entry, GstSDPMedia *media)
 {
@@ -144,7 +148,8 @@ static gboolean create_fmtp_media(struct channelTable_entry * channel_entry, Gst
 
 /**
  * \brief Create the SDP message corresponding to the stream
- * \pramam entry an entry to the correspondante channel
+ * \param entry an entry to the correspondante channel
+ * \return TRUE on success, FALSE on failure
  */
 gboolean create_SDP(GstSDPMessage 	*msg, struct channelTable_entry * channel_entry){
 
@@ -255,6 +260,7 @@ gboolean create_SDP(GstSDPMessage 	*msg, struct channelTable_entry * channel_ent
  * \brief Builds a SDP Message structure from a string representation, creates an associated pipeline, starts it
  * \param array: the SDP message obtained from SAP/SDP datagram
  * \param sdp_msg_size: the size of the byte array got from SAP/SDP message
+ * \return the caps built from the SDP file extracted from SAP byte array
  */
 GstCaps* get_SDP(unsigned char *array, int sdp_msg_size, in_addr_t *multicast_addr, char *channel_desc){
 
