@@ -34,12 +34,23 @@
 #include "../../include/streaming/pipeline.h"
 #include "../../include/streaming/stream.h"
 
-
+/**
+ * \brief the J2K's media type we could have after a J2K encoder (onlu x-jpc can be linked to rtp payloader however)
+ */
 #define JPEG_FORMAT_NUMBER_SUPPORTED 	3
 static const gchar* J2K_STR_NAMES[JPEG_FORMAT_NUMBER_SUPPORTED] = {"image/x-j2c", "image/x-jpc", "image/jp2"};
 	
-/*
- * \briref This function add the RTP element to the pipeline for service provider 
+/**
+ * \brief This function add the RTP element to the pipeline for service provider * \param pipeline the pipeline associated to this SP
+ * \param bus the bus the channel
+ * \param bus_watch_id an id watch on the bus
+ * \param loop the GMainLoop
+ * \param input last element added in pipeline to which we should link elements added
+ * \param video_info a "fake" entry to VFT into which we will save all element we can retrieve from the video caps of the stream (via fill_entry() )
+ * \param stream_data the data associated to this SP's pipeline
+ * \param caps the caps of the input stream if this is a redirection, NULL otherwise
+ * \param channel_entry_index the channel's index of this SP: to build the multicast address
+ * \return the last element added in pipeline (rtp payloader if everything goes ok)
  */
 static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
 							guint bus_watch_id, 	GMainLoop 						*loop,
@@ -111,6 +122,13 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
 	/* in case J2K video type has been detected */
 	else if  ( g_strv_contains ( J2K_STR_NAMES, gst_structure_get_name(video_caps))){
 
+		/*
+		 * For J2K video our RTP payloader can only accept image/x-jpc input video media type. However, not all encoders have this caos on their src pads.
+		 * So we first link the output of the encoder to a capsfilter with image/x-jpc media type. If the encoder and the capfsilter cannot negociate caps, then the encoder
+		 * cannot be link to the RTP payloader, so we stop there. As an example: avenc_jpeg2000 only has image/x-j2c as a media type. But openjpegenc has image/x-j2c, image/-xjpc
+		 * and image-j2p
+		 */
+
 		GstElement *capsfilter = gst_element_factory_make_log("capsfilter", "capsfilter-image/x-jpc");
 
 		GstCaps *caps_jpeg2000 = gst_caps_new_empty_simple("image/x-jpc");
@@ -175,7 +193,12 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
 	/* Finally return*/
 	return rtp;
 }
-		
+
+/**
+ * \brief set the paramemetrs to the element udpsink added in SP's pipeline
+ * \param udpsink the udpsink element of which we need to modify the parameters
+ * \param channel_entry_index the channel's index of this SP
+ */
 void set_udpsink_param( GstElement *udpsink, long channel_entry_index){
 	/* compute IP */
 	long ip 			= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0], channel_entry_index);
@@ -193,8 +216,15 @@ void set_udpsink_param( GstElement *udpsink, long channel_entry_index){
 
 }
 
-/*
- * This function add the UDP element to the pipeline
+/**
+ * \brief This function add the UDP element (udpsink) to the Service Provider's pipeline * \param pipeline the associated pipeline of the channel
+ * \param pipeline the pipeline associated to this SP
+ * \param bus the bus the channel
+ * \param bus_watch_id an id watch on the bus
+ * \param loop the GMainLoop
+ * \param input last element added in pipeline to which we should link elements added
+ * \param channel_entry_index the channel's index of this SP: to build the multicast address
+ * \return last element added in pipeline, so udpsink if everything goes well
  */
 static GstElement* addUDP( 	GstElement *pipeline, 	GstBus *bus,
 							guint bus_watch_id, 	GMainLoop *loop,
@@ -227,14 +257,11 @@ static GstElement* addUDP( 	GstElement *pipeline, 	GstBus *bus,
 }
 
 /**
- * \brief Create the pipeline, add information to MIB at the same time
- * \param pipeline the pipepline of the stream
- * \param bus the bus associated to the pipeline
- * \param bust_watch_id the watch associated to the bus
+ * \brief Create the pipeline for an SP (fill the MIB at the same time)
+ * \param stream_data the stream_data associated to the pipeline of this SP
  * \param loop the GMainLoop
- * \param input the las element of the pipeline, (avenc_mp4 or capsfilter) as we built our own source
- * \param ip the ip to which send the stream on
- * \port the port to use
+ * \param input last element added in pipeline to which we should link elements added
+ * \param videoChannelIndex the index of the channel associated to this SP
  * \return GstElement* the last element added to the pipeline (should be udpsink if everything went ok)
  */
 GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
@@ -297,8 +324,9 @@ GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
 
 /**
  * \brief add elements to the redirection source's pipeline, now that we know the rtp payloader to add
- * \param caps tha video caps of the stream received by the serviceUser to redirect
- * \param channel_entry the service User that receives the stream we need to redirect
+ * \param caps tha video caps of the stream received by the serviceUser to redirect, ( the caps detected before the appsink)
+ * \param videoFormatIndex the VF of the redirection's SP
+ * \return last element added in pipeline, so udpsink if everything goes well
  */
 GstElement *append_SP_pipeline_for_redirection(GMainLoop *loop, GstCaps *caps, long videoFormatIndex ){
 
@@ -352,7 +380,14 @@ GstElement *append_SP_pipeline_for_redirection(GMainLoop *loop, GstCaps *caps, l
 }
 
 /**
- * \brief This function add the UDP element to the pipeline / fort a ServiceUser channel
+ * \brief This function add the UDP element (udpsrc) to the pipeline / fort a ServiceUser channel
+ * \param pipeline the associated pipeline of the channel
+ * \param bus the bus the channel
+ * \param bus_watch_id an id watch on the bus
+ * \param loop the GMainLoop
+ * \param caps the input video caps built from SDP file, and to give to upsrc
+ * \param channel_entry the channel of the SU in the device's channel Table
+ * \return last element added in pipeline (should be udpsrc normally)
  */
 static GstElement* addUDP_SU( 	GstElement *pipeline, 	GstBus *bus,
 								guint bus_watch_id, 	GMainLoop *loop,
@@ -480,6 +515,13 @@ static GstFlowReturn
 	return ret;
 }
 
+/*
+ * \brief Build the sink of SU's pipeline, if this is a reidrection, modify the caps to pass it to the SP pipeline
+ * \param pipeline the pipepline of the stream
+ * \param input the las element of the pipeline, (avenc_mp4 or capsfilter) as we built our own source
+ * \param caps the caps built from the SDP to replace if you have MPEG-4 or J2K video
+ * \return GstElement* the last element added to the pipeline (RAW: return input, MPEG: mpeg4videoparse, J2k:capsfilter)
+ */
 static GstElement *handle_redirection_SU_pipeline ( GstElement *pipeline, GstCaps *caps, GstElement *input){
 
 	GstStructure *video_caps = gst_caps_get_structure( caps , 0 );
@@ -534,7 +576,17 @@ static GstElement *handle_redirection_SU_pipeline ( GstElement *pipeline, GstCap
 
 
 /*
- *\brief  This function add the UDP element to the pipeline / for a ServiceUser channel
+ * \brief Build the sink of SU's pipeline, if this is a reidrection, modify the caps to pass it to the SP pipeline
+ * \param pipeline the pipepline of the stream
+ * \param bus the bus associated to the pipeline
+ * \param bust_watch_id the watch associated to the bus
+ * \param loop the GMainLoop
+ * \param input the las element of the pipeline, (avenc_mp4 or capsfilter) as we built our own source
+ * \param channel_entry the channel of the SU in the device's channel Table
+ * \param cmdline teh gst_sink from the configuration vivoe-mib.conf
+ * \param redirect the redirection data (mapping SU's channel Index --> SP's videoFormatIndex)
+ * \param caps the caps built from the SDP, may be replace if this is a redirection
+ * \return GstElement* the last element added to the pipeline (appsink or a displayer like x(v)imagesink)
  */
 static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 								guint bus_watch_id, 	GMainLoop *loop,
@@ -640,7 +692,7 @@ static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
  * \param input the las element of the pipeline, (avenc_mp4 or capsfilter) as we built our own source
  * \param ip the ip to which send the stream on
  * \port the port to use
- * \return GstElement* the last element added to the pipeline (should be udpsink if everything went ok)
+ * \return GstElement* the last element added to the pipeline
  */
 GstElement* create_pipeline_serviceUser( gpointer 					stream_datas,
 									 	 GMainLoop 					*loop,
@@ -687,4 +739,5 @@ GstElement* create_pipeline_serviceUser( gpointer 					stream_datas,
 	last = addSink_SU( pipeline, bus, bus_watch_id, loop, last, channel_entry, cmdline, redirect , caps );
 
 	return last;
+
 }
