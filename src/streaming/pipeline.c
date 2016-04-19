@@ -617,60 +617,6 @@ static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 	   return NULL;
     }
 
-
-#if 0
-
-	/* add a fake rtp payloader */ 
-	GstElement *rtp 	= gst_element_factory_make_log ("rtpvrawpay", "rtpvrawpay");
-	gst_bin_add(GST_BIN(pipeline), rtp);
-	gst_element_link(input, rtp);
-	input = rtp;
-
-	video_caps = type_detection(GST_BIN(pipeline), input, loop, NULL);
-	printf("%s\n", gst_structure_to_string(video_caps));
-
-
-
-	GstStructure *video_caps;
-	video_caps = type_detection(GST_BIN(pipeline), input, loop, NULL);
-	printf("%s\n", gst_structure_to_string(video_caps));
-
-	GstElement *queue= gst_element_factory_make_log("queue", "queue");
-	gst_bin_add(GST_BIN(pipeline), queue);
-	gst_element_link(input, queue);
-	input = queue; 
-
-	GstElement *openjpegdec= gst_element_factory_make_log("openjpegdec", "testdec");
-	gst_bin_add(GST_BIN(pipeline), openjpegdec);
-	gst_element_link(input, openjpegdec);
-	printf("add and link openjpegdec\n");
-	
-	input = openjpegdec;
-	video_caps = type_detection(GST_BIN(pipeline), input , loop, NULL);
-	printf("%s\n", gst_structure_to_string(video_caps));
-
-	GstElement *queue2= gst_element_factory_make_log("queue2", "queue2");
-	gst_bin_add(GST_BIN(pipeline), queue2);
-	gst_element_link(input, queue2);
-	input = queue2;
-
-	/* For J2K video */
-	GstElement *rtp 	= gst_element_factory_make_log ("rtpvrawpay", "rtpvrawpay");
-	gst_bin_add(GST_BIN(pipeline), rtp);
-	gst_element_link(input, rtp);
-	input = rtp;
-
-	video_caps = type_detection(GST_BIN(pipeline), input , loop, NULL);
-	printf("%s\n", gst_structure_to_string(video_caps));
-
-	/* For J2K video */
-	GstElement *fakesink 	= gst_element_factory_make_log ("fakesink", "fakesink");
-	gst_bin_add(GST_BIN(pipeline), fakesink);
-	gst_element_link(input, fakesink);	
-	gst_element_set_state (pipeline, GST_STATE_PLAYING);
-	g_main_loop_run(main_loop);
-#endif //if 0
-
 	/* add sink to pipeline */
 	if ( !gst_bin_add(GST_BIN (pipeline), sink )){
 		g_printerr("Unable to add %s to pipeline", gst_element_get_name(sink));
