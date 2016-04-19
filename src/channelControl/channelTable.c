@@ -26,7 +26,9 @@
 
 
 
-/** Initializes the channelTable module */
+/**
+ * \brief Initializes the channelTable module
+ */
 void
 init_channelTable(void)
 {
@@ -38,7 +40,6 @@ init_channelTable(void)
 /** 
  * \brief Initialize the channelTable table by defining its contents and how it's structured 
  */
-
 void
 initialize_table_channelTable(void)
 {
@@ -117,7 +118,12 @@ static void pop_from_channel_SU( struct channelTable_entry *table_entry){
 }
 
 
-/* create a new row in the (unsorted) table */
+/**
+ * \brief create a new row in the (unsorted) table
+ * \param all teh parameters' values we need to initiate the channelTable_entry
+ * \param stream_datas the stream_data (pipeline/bus) associated to this channel entry
+ * \return the newly created entry that has been added in the channelTable
+ */
 struct channelTable_entry *
 	channelTable_createEntry(
     	        				long 		channelIndex,
@@ -367,7 +373,9 @@ channelTable_free( netsnmp_cache *cache, void *vmagic ) {
     channelTable_head = NULL;
 }
 
-/* Example iterator hook routines - using 'get_next' to do most of the work */
+/**
+ * \brief get the first data in tabel
+ */
 netsnmp_variable_list *
 channelTable_get_first_data_point(void **my_loop_context,
                           void **my_data_context,
@@ -379,6 +387,9 @@ channelTable_get_first_data_point(void **my_loop_context,
                                     put_index_data,  mydata );
 }
 
+/**
+ * \brief get the next data in table
+ */
 netsnmp_variable_list *
 channelTable_get_next_data_point(void **my_loop_context,
                           void **my_data_context,
@@ -443,6 +454,11 @@ gboolean channelSatus_requests_handler( struct channelTable_entry * table_entry 
 
 /**
  * \brief handles requests for the channelTable table
+ * \param handler the specific handler for this item
+ * \param reqinfo the SNMP request
+ * \param reuests the resuest information
+ * \param mib_parameter the parameter of the MIB
+ * \return SNMP_ERR_NOERROR or approriate code error
  */
 int
 channelTable_handler(

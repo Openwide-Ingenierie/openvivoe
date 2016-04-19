@@ -14,7 +14,9 @@
 #include "../../include/handler.h"
 
 
-/** Initializes the deviceDesc module */
+/** 
+ * \brief Initializes the deviceDesc module
+ */
 void init_deviceDesc(void)
 {
     const oid deviceDesc_oid[] = { 1,3,6,1,4,1,35990,3,1,1,1 };
@@ -27,6 +29,14 @@ void init_deviceDesc(void)
                     HANDLER_CAN_RONLY));
 }
 
+/** 
+ * \brief calls appropriate handler for this parameter
+ * \param handler the specific handler for this item
+ * \param reqinfo the SNMP request
+ * \param reuests the resuest information
+ * \param mib_parameter the parameter of the MIB
+ * \return SNMP_ERR_NOERROR or approriate code error
+ */
 int handle_deviceDesc(  netsnmp_mib_handler *handler,
                         netsnmp_handler_registration *reginfo,
                         netsnmp_agent_request_info   *reqinfo,

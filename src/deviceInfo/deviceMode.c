@@ -10,7 +10,9 @@
 #include "../../include/mibParameters.h"
 #include "../../include/handler.h"
 
-/* Initializes the deviceMode module */
+/**
+ * \brief Initializes the deviceMode module
+ */
 void init_deviceMode(void){
     const oid deviceMode_oid[] = { 1,3,6,1,4,1,35990,3,1,1,14 };
 
@@ -23,6 +25,14 @@ void init_deviceMode(void){
         ));
 }
 
+/** 
+ * \brief calls appropriate handler for this parameter
+ * \param handler the specific handler for this item
+ * \param reqinfo the SNMP request
+ * \param reuests the resuest information
+ * \param mib_parameter the parameter of the MIB
+ * \return SNMP_ERR_NOERROR or approriate code error
+ */
 int handle_deviceMode( 	netsnmp_mib_handler *handler,
                         netsnmp_handler_registration *reginfo,
                         netsnmp_agent_request_info   *reqinfo,

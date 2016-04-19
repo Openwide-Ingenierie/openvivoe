@@ -17,7 +17,9 @@
 #include "../../include/streaming/pipeline.h"
 #include "../../include/streaming/stream.h"
 
-/** Initializes the videoFormatTable module */
+/**
+ * \brief Initializes the videoFormatTable module
+ */
 void
 init_videoFormatTable(void)
 {
@@ -27,12 +29,15 @@ init_videoFormatTable(void)
 
 
 /**
- * Create a new row in the (unsorted) table.
- * This create an entry and add it into the table
- * Howeber we need a function which is juste used to intitiate the entry's members
- * without adding in into the table: intiation a member but do not set the "next"
- * parameter.
- * */
+ * \brief 	Create a new row in the (unsorted) table.
+ * 			This create an entry and add it into the table
+ * 			However we need a function which is juste used to intitiate the entry's members
+ * 			without adding in into the table: intiation a member but do not set the "next"
+ * 			parameter.
+ * \param all the parameters's value to set to the new entry
+ * \param stream_datas the stream_data (pipeline/bus) associated to this entry
+ * \return the new entry created and added in table
+ */
 struct videoFormatTable_entry * videoFormatTable_createEntry( 	long  videoFormatIndex, 			long videoFormatType,
 																long videoFormatStatus,				char* videoFormatBase,
 																char* videoFormatSampling, 			long videoFormatBitDepth,
@@ -118,7 +123,9 @@ void videoFormatTable_delete(){
 		free(temp);
 	}
 }
-/* Initialize the videoFormatTable table by defining its contents and how it's structured */
+/**
+ * \brief initialize the videoFormatTable table by defining its contents and how it's structured
+ */
 void
 initialize_table_videoFormatTable(void)
 {

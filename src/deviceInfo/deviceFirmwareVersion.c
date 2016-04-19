@@ -10,7 +10,9 @@
 #include "../../include/mibParameters.h"
 #include "../../include/handler.h"
 
-/* Initializes the deviceFirmwareVersion module */
+/**
+ * \brief Initializes the deviceFirmwareVersion module
+ */
 void init_deviceFirmwareVersion(void){
  
     const oid deviceFirmwareVersion_oid[] = { 1,3,6,1,4,1,35990,3,1,1,7 };
@@ -23,7 +25,14 @@ void init_deviceFirmwareVersion(void){
                                HANDLER_CAN_RONLY
         ));
 }
-
+/** 
+ * \brief calls appropriate handler for this parameter
+ * \param handler the specific handler for this item
+ * \param reqinfo the SNMP request
+ * \param reuests the resuest information
+ * \param mib_parameter the parameter of the MIB
+ * \return SNMP_ERR_NOERROR or approriate code error
+ */
 int
 handle_deviceFirmwareVersion(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,

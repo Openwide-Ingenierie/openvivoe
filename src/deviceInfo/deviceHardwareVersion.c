@@ -11,7 +11,9 @@
 #include "../../include/handler.h"
 
 
-/** Initializes the deviceHardwareVersion module */
+/**
+ * \brief Initializes the deviceHardwareVersion module
+ */
 void
 init_deviceHardwareVersion(void)
 {
@@ -26,6 +28,14 @@ init_deviceHardwareVersion(void)
         ));
 }
 
+/** 
+ * \brief calls appropriate handler for this parameter
+ * \param handler the specific handler for this item
+ * \param reqinfo the SNMP request
+ * \param reuests the resuest information
+ * \param mib_parameter the parameter of the MIB
+ * \return SNMP_ERR_NOERROR or approriate code error
+ */
 int
 handle_deviceHardwareVersion(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,

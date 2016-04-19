@@ -26,7 +26,14 @@ static struct ethernetIfTableEntry * ethernetIfTable_getLast(){
 }
 
 /**
- *  \brief create a new row in the (unsorted) table
+ * \brief create a new row in the (unsorted) table
+ * \param ethernetIfIndex the index of the entry
+ * \param ethernetIfSpeed the speed of the entry
+ * \param ethernetIfMacAddress the entry's MAC address
+ * \param ethernetIfIpAddress the entry's IP address
+ * \param ethernetIfSubnetMask the entry's subnet Mask
+ * \param ethernetIfIpAddressConflict a variable to save the confilcting IP
+ * \return the ethernetIfTableEntry added in the table
  */
 struct ethernetIfTableEntry * ethernetIfTableEntry_create(  long  ethernetIfIndex,
                                                             long ethernetIfSpeed,
@@ -43,7 +50,7 @@ struct ethernetIfTableEntry * ethernetIfTableEntry_create(  long  ethernetIfInde
         return NULL;
 
     entry->ethernetIfIndex = ethernetIfIndex;
-  //  entry->next = ethernetIfTable_head;
+
     entry->ethernetIfSpeed = ethernetIfSpeed;
 
     memcpy(entry->ethernetIfMacAddress, ethernetIfMacAddress,ethernetIfMacAddress_len );
@@ -60,13 +67,14 @@ struct ethernetIfTableEntry * ethernetIfTableEntry_create(  long  ethernetIfInde
 		ethernetIfTable_head = entry;
 	else{
 		struct ethernetIfTableEntry *last = ethernetIfTable_getLast();
-   // ethernetIfTable_head = entry;
 		last->next = entry;
 		entry->next = NULL;
 	}
     return entry;
 }
-
+/** 
+ * \brief  delete an entry in ethernetIfTable
+ */
 void ethernetIfTableEntry_delete(){
 	struct ethernetIfTableEntry *iterator = ethernetIfTable_head;
 	struct ethernetIfTableEntry  *temp;
@@ -78,7 +86,9 @@ void ethernetIfTableEntry_delete(){
 }
 
 
-/** Initialize the ethernetIfTable table by defining its contents and how it's structured */
+/** 
+ * \brief Initialize the ethernetIfTable table by defining its contents and how it's structured
+ */
 static void initialize_table_ethernetIfTable(void)
 {
     const oid ethernetIfTable_oid[] = {1,3,6,1,IPV4_SIZE,1,35990,3,1,1,12};
@@ -114,7 +124,9 @@ static void initialize_table_ethernetIfTable(void)
 		init_ethernet(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i]);
 }
 
-/** Initializes the ethernetIfTable module */
+/** 
+ * \brief Initializes the ethernetIfTable module
+ */
 void
 init_ethernetIfTable(void)
 {
@@ -127,7 +139,6 @@ init_ethernetIfTable(void)
  * to remove a row from the table.
  * the functionnality exits, but should not be implemented for now
  */
-
 #if ALLOW_REMOVING_ROW
 void ethernetIfTable_removeEntry( struct ethernetIfTableEntry *entry ) {
     struct ethernetIfTableEntry *ptr, *prev;
@@ -173,7 +184,8 @@ ethernetIfTable_get_next_data_point(void **my_loop_context,
     }
 }
 
-/* Example iterator hook routines - using 'get_next' to do most of the work */
+/* \brief Example iterator hook routines - using 'get_next' to do most of the work
+ */
 netsnmp_variable_list *
 ethernetIfTable_get_first_data_point(void **my_loop_context,
                           void **my_data_context,
@@ -185,10 +197,14 @@ ethernetIfTable_get_first_data_point(void **my_loop_context,
                                     put_index_data,  mydata );
 }
 
-
-
-
-/** handles requests for the ethernetIfTable table */
+/** 
+ * \brief calls appropriate handler for this parameter
+ * \param handler the specific handler for this item
+ * \param reqinfo the SNMP request
+ * \param reuests the resuest information
+ * \param mib_parameter the parameter of the MIB
+ * \return SNMP_ERR_NOERROR or approriate code error
+ */
 int
 ethernetIfTable_handler(
     netsnmp_mib_handler 			*handler,
