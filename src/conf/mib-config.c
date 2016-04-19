@@ -24,6 +24,7 @@
  * \return TRUE if the param is in the maintenance group, FALSE otherwise
  */
 static gboolean set_maintenencef_flag(parameter *param){
+
 	 /* maintenance group */
 const gchar* maintenance_group[MAINTENANCE_GROUP_SIZE]= { 	"deviceUserDesc", 				"ethernetIfIpAddress",
 															"ethernetIfSubnetMask", 		"ethernetIfIpAddressConflict",
@@ -43,6 +44,7 @@ const gchar* maintenance_group[MAINTENANCE_GROUP_SIZE]= { 	"deviceUserDesc", 			
 		}
 	}
 	return FALSE;
+
 }
 
 /**
@@ -406,7 +408,7 @@ static gchar *get_key_value(GKeyFile* gkf, const gchar* const* groups ,char *gro
  * \param gkf the GKeyFile openned
  * \param groups the names of groups present in configuration file
  * \param group_name the group's name in which we are interested 
- * \param key_name the name of the key we are loooking for
+ * \param key_name the name of the key we are looking for
  * \param error a variable to store errors 
  * \return gchar* the value of the found key or NULL is the key has not been found
  */
@@ -431,7 +433,12 @@ gboolean set_key_value(GKeyFile* gkf, const gchar* const* groups ,char *group_na
 
 }
 
-
+/**
+ * \brief check if the group contains the given key, set the corresponding value or display appropriate error to the user, save the new version of conf file
+ * \param gkf the GKeyFile openned
+ * \param index the index of the SP or SU to which belong the gst_src or gst_sink command line
+ * \return gchar* the value of the found key, it should be a gstreamer command line
+ */
 gchar *get_source_cmdline(GKeyFile 	*gkf, int index){
 
 	/* Define the error pointer we will be using to check for errors in the configuration file */
@@ -466,7 +473,7 @@ gchar *get_source_cmdline(GKeyFile 	*gkf, int index){
 /**
  * \brief get the command line entered by the user in configuration file to get the video source
  * \param index the index of the initiated stream
- * \return gchar* the command line found in a string form or NULL if no ones has been found
+ * \return gchar* the gst_source command line found in a string form or NULL if no ones has been found
  */
 gchar *init_sources_from_conf(int index){
 	/* Define the error pointer we will be using to check for errors in the configuration file */
@@ -503,6 +510,11 @@ gchar *init_sources_from_conf(int index){
 	return cmdline;
 }
 
+/**
+ * \brief get the command line entered by the user in configuration file to use as a sink for the received stream 
+ * \param index the index of the initiated stream
+ * \return gchar* the gst_sink command line found in a string form or NULL if no ones has been found
+ */
 gchar *get_sink_cmdline(GKeyFile 	*gkf, int index){
 
 	/* Define the error pointer we will be using to check for errors in the configuration file */
@@ -725,6 +737,9 @@ void set_default_IP_from_conf(int index, const char* new_default_ip){
 	close_mib_configuration_file(gkf);
 }
 
+/**
+ * \brief definition of the redirection structure that will contains the redirection data
+ */
 redirection_str redirection;
 
 /**

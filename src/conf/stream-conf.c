@@ -13,12 +13,14 @@
 #include "../../include/mibParameters.h"
 #include "../../include/conf/stream-conf.h"
 
-
+/**
+ * \brief the number of video formats supported in VIVOE ( for now 3: RAW, MPEG-4, JPEG2000)
+ */
 #define NUM_KEYS 	3
+
 /*
- * This function is used to generates filter for the RTP module
- * In case the user does not want to use all video formats supported 
- * by the VIVOE norm
+ * \brief open the configuration GKeyfile
+ * \return A pointer to the openned GKeyfile
  */  
 GKeyFile* open_configuration_file(){
 
@@ -52,12 +54,23 @@ GKeyFile* open_configuration_file(){
 	return gkf;
 }
 
+/*
+ * \brief close the configuration GKeyfile
+ * \param A pointer to the openned GKeyfile
+ */
 void close_configuration_file(	GKeyFile* gkf){
 	/* free the GKeyFile before leaving the function*/
 	g_key_file_free (gkf);
 }
 
-static gchar** get_list_value(	GKeyFile* gkf, const gchar* key_name, const char* group_name){
+/**
+ * \brief get the expected list of values of a Key
+ * \param a pointer to the openned GKeyfile
+ * \param key_name the name of the key
+ * \param group_name the group to which the key belong
+ * \return the list as an array of strings values, each element is a value
+ */
+static gchar** get_list_value(	GKeyFile* gkf, const gchar* key_name, const char* group_name ){
 	
 	gchar **list_returned;
 
@@ -87,8 +100,11 @@ static gchar** get_list_value(	GKeyFile* gkf, const gchar* key_name, const char*
 
 }
 
-/*
- * Specify if group name is present in configuration file
+/**
+ * \brief specify if group name is present in configuration file
+ * \param gkf the GKeyfile openned
+ * \param group_name the name of the group to check for its presence
+ * \return TRUE if the group is found, FALSE otherwise
  */
 gboolean vivoe_use_format(GKeyFile* gkf, const char* group_name){
 	if(	!g_key_file_has_group (gkf, group_name )){
@@ -99,19 +115,38 @@ gboolean vivoe_use_format(GKeyFile* gkf, const char* group_name){
 		return TRUE;
 }
 
+/**
+ * \brief get the list  of encodings to use for RAW video
+ * \param gkf the GKeyfile openned
+ * \return the encodings to use in a string array
+ */
 gchar** get_raw_encoding(GKeyFile* gkf){
 	return get_list_value(gkf, "encoding", "RAW");
 }
 
+/**
+ * \brief get the list  of resolutions to use for RAW video
+ * \param gkf the GKeyfile openned
+ * \return the resolutions to use in a string array
+ */
 gchar** get_raw_res(GKeyFile* gkf){
 	return get_list_value(gkf, "resolution", "RAW");	
 }
 
-
+/**
+ * \brief get the list  of resolutions to use for MPEG-4 video
+ * \param gkf the GKeyfile openned
+ * \return the resolutions to use in a string array
+ */
 gchar** get_mp4_res(GKeyFile* gkf){
 	return get_list_value(gkf, "resolution", "MPEG-4");	
 }
 
+/**
+ * \brief get the list  of resolutions to use for JPEG2000 video
+ * \param gkf the GKeyfile openned
+ * \return the resolutions to use in a string array
+ */
 gchar** get_j2k_res(GKeyFile* gkf){
 	return get_list_value(gkf, "resolution", "JPEG2000");	
 }
