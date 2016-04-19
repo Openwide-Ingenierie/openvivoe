@@ -61,7 +61,14 @@ gboolean index_out_of_range( 	netsnmp_handler_registration 	*reginfo,
 
 /*--------------------------------INTEGER--------------------------------*/
 
-/*this is the handler for all RO integer in the MIB*/
+/**
+ * \brief handler for all RO integer items in the MIB
+ * \param handler the specific handler for this item
+ * \param reqinfo the SNMP request
+ * \param reuests the resuest information
+ * \param mib_parameter the parameter of the MIB
+ * \return SNMP_ERR_NOERROR if everything went ok, a specific code error otherwise
+ */
 int handle_ROinteger(netsnmp_mib_handler *handler,
                      netsnmp_handler_registration *reginfo,
                      netsnmp_agent_request_info *reqinfo,
@@ -89,7 +96,14 @@ int handle_ROinteger(netsnmp_mib_handler *handler,
 }
 
 int old_integer = -1;
-/*this is the handler for all RW integer in the MIB*/
+/**
+ * \brief handler for all RW integer items in the MIB
+ * \param handler the specific handler for this item
+ * \param reqinfo the SNMP request
+ * \param reuests the resuest information
+ * \param mib_parameter the parameter of the MIB
+ * \return SNMP_ERR_NOERROR if everything went ok, a specific code error otherwise
+ */
 int handle_RWinteger(netsnmp_mib_handler *handler,
                      netsnmp_handler_registration *reginfo,
                      netsnmp_agent_request_info   *reqinfo,
@@ -168,7 +182,14 @@ int handle_RWinteger(netsnmp_mib_handler *handler,
 
 /*--------------------------------STRING--------------------------------*/
 
-/*this is the handler for all RO strings in the program*/
+/**
+ * \brief handler for all RO string items in the MIB
+ * \param handler the specific handler for this item
+ * \param reqinfo the SNMP request
+ * \param reuests the resuest information
+ * \param mib_parameter the parameter of the MIB
+ * \return SNMP_ERR_NOERROR if everything went ok, a specific code error otherwise
+ */
 static int handle_ROstring( netsnmp_mib_handler *handler,
        			            netsnmp_handler_registration *reginfo,
                     		netsnmp_agent_request_info   *reqinfo,
@@ -201,7 +222,14 @@ static int handle_ROstring( netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }
 
-/*this is the handler for all 16 bytes RO strings in the program*/
+/**
+ * \brief handler for all all 16 bytes RO strings in the MIB
+ * \param handler the specific handler for this item
+ * \param reqinfo the SNMP request
+ * \param reuests the resuest information
+ * \param mib_parameter the parameter of the MIB
+ * \return SNMP_ERR_NOERROR if everything went ok, a specific code error otherwise
+ */
 int handle_ROstring16(netsnmp_mib_handler *handler,
                     netsnmp_handler_registration *reginfo,
                     netsnmp_agent_request_info   *reqinfo,
@@ -211,7 +239,14 @@ int handle_ROstring16(netsnmp_mib_handler *handler,
     return  handle_ROstring(handler, reginfo, reqinfo, requests, mib_param, DislayString16);
 }
 
-/*this is the handler for all 32 bytes RO strings in the program*/
+/**
+ * \brief handler for all all 32 bytes RO strings in the MIB
+ * \param handler the specific handler for this item
+ * \param reqinfo the SNMP request
+ * \param reuests the resuest information
+ * \param mib_parameter the parameter of the MIB
+ * \return SNMP_ERR_NOERROR if everything went ok, a specific code error otherwise
+ */
 int handle_ROstring32(netsnmp_mib_handler *handler,
                     netsnmp_handler_registration *reginfo,
                     netsnmp_agent_request_info   *reqinfo,
@@ -222,8 +257,14 @@ int handle_ROstring32(netsnmp_mib_handler *handler,
     return  handle_ROstring(handler, reginfo, reqinfo, requests,mib_param , DislayString32);
 }
 
-
-/*this is the handler for all 64 bytes RO strings in the program*/
+/**
+ * \brief handler for all all 64 bytes RO strings in the MIB
+ * \param handler the specific handler for this item
+ * \param reqinfo the SNMP request
+ * \param reuests the resuest information
+ * \param mib_parameter the parameter of the MIB
+ * \return SNMP_ERR_NOERROR if everything went ok, a specific code error otherwise
+ */
 int handle_ROstring64(netsnmp_mib_handler *handler,
                     netsnmp_handler_registration *reginfo,
                     netsnmp_agent_request_info   *reqinfo,
@@ -239,6 +280,14 @@ int handle_ROstring64(netsnmp_mib_handler *handler,
  */
 char old_string[64];
 
+/**
+ * \brief handler for all all RW strings in the MIB
+ * \param handler the specific handler for this item
+ * \param reqinfo the SNMP request
+ * \param reuests the resuest information
+ * \param mib_parameter the parameter of the MIB
+ * \return SNMP_ERR_NOERROR if everything went ok, a specific code error otherwise
+ */
 int
 handle_RWstring(netsnmp_mib_handler *handler,
                 netsnmp_handler_registration *reginfo,
@@ -321,7 +370,14 @@ handle_RWstring(netsnmp_mib_handler *handler,
 }
 
 
-/*this is the handler for all 16 bytes RW strings in the program*/
+/**
+ * \brief handler for all all 16 bytes RW strings in the MIB
+ * \param handler the specific handler for this item
+ * \param reqinfo the SNMP request
+ * \param reuests the resuest information
+ * \param mib_parameter the parameter of the MIB
+ * \return SNMP_ERR_NOERROR if everything went ok, a specific code error otherwise
+ */
 int handle_RWstring16(netsnmp_mib_handler *handler,
                     netsnmp_handler_registration *reginfo,
                     netsnmp_agent_request_info   *reqinfo,
@@ -332,7 +388,14 @@ int handle_RWstring16(netsnmp_mib_handler *handler,
     return  handle_RWstring(handler, reginfo, reqinfo, requests, mib_param, DislayString16);
 }
 
-/*this is the handler for all 32 bytes RW strings in the program*/
+/**
+ * \brief handler for all all 32 bytes RW strings in the MIB
+ * \param handler the specific handler for this item
+ * \param reqinfo the SNMP request
+ * \param reuests the resuest information
+ * \param mib_parameter the parameter of the MIB
+ * \return SNMP_ERR_NOERROR if everything went ok, a specific code error otherwise
+ */
 int handle_RWstring32(netsnmp_mib_handler *handler,
                     netsnmp_handler_registration *reginfo,
                     netsnmp_agent_request_info   *reqinfo,
@@ -343,8 +406,14 @@ int handle_RWstring32(netsnmp_mib_handler *handler,
     return  handle_RWstring(handler, reginfo, reqinfo, requests,mib_param , DislayString32);
 }
 
-
-/*this is the handler for all 64 bytes RW strings in the program*/
+/**
+ * \brief handler for all all 64 bytes RW strings in the MIB
+ * \param handler the specific handler for this item
+ * \param reqinfo the SNMP request
+ * \param reuests the resuest information
+ * \param mib_parameter the parameter of the MIB
+ * \return SNMP_ERR_NOERROR if everything went ok, a specific code error otherwise
+ */
 int handle_RWstring64(netsnmp_mib_handler *handler,
                     netsnmp_handler_registration *reginfo,
                     netsnmp_agent_request_info   *reqinfo,

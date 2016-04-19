@@ -30,10 +30,10 @@
 #include "../include/deviceInfo/ethernetIfTable.h"
 
 /** \brief Retrieve parameters of a specific interface used in VIVOE MIB
- *  @param iface The name of  network interface to use to retrieve the IP
- *  @param ifr a structure to store the interface information
- *  @param param The int parameter that we want to retireve. It corespond to the number to pass to ioctl
- *  @return TRUE if we succeed to get interface info on param, FALSE otherwise
+ *  \param iface The name of  network interface to use to retrieve the IP
+ *  \param ifr a structure to store the interface information
+ *  \param param The int parameter that we want to retireve. It corespond to the number to pass to ioctl
+ *  \return TRUE if we succeed to get interface info on param, FALSE otherwise
  */
 static gboolean get_interface_info(const char* iface, struct ifreq* ifr, int param){
 	int fd;
@@ -54,9 +54,9 @@ static gboolean get_interface_info(const char* iface, struct ifreq* ifr, int par
 }
 
 /** \brief List all network interface using IPv4
- *  @param if_names the array of string to store the result
- *  @param if_num The number of compatibles interface found
- *  @return TRUE if we succeed to list IPv4 interface FALSE otherwise
+ *  \param if_names the array of string to store the result
+ *  \param if_num The number of compatibles interface found
+ *  \return TRUE if we succeed to list IPv4 interface FALSE otherwise
  */
 static gboolean list_interfaces(char*** if_names, int* if_num){
 		/* Get all interfaces */
@@ -97,8 +97,8 @@ static gboolean list_interfaces(char*** if_names, int* if_num){
 }
 
 /** \brief Ask the user which interface he wants VIVOE to use
- *  @param if_used the names of the interfaces that the user chooses to use for VIVOE
- *  @return TRUE if we succeed to list IPv4 interface FALSE otherwise
+ *  \param if_used the names of the interfaces that the user chooses to use for VIVOE
+ *  \return TRUE if we succeed to list IPv4 interface FALSE otherwise
  */
 gboolean select_interfaces(char*** if_used){
 	char** if_names = NULL; /* the buffer in which interface names will be stored*/
@@ -139,8 +139,10 @@ gboolean select_interfaces(char*** if_used){
 
 /* define the number of ioctl calls to make */ 
 #define calls_num 		5		
-/** \brief Retrieve parameters of ethernet interface and initiate the MIB with it
+/** 
+ * \brief Retrieve parameters of ethernet interface and initiate the MIB with it
  * \param iface the interface name from which retirev
+ * \return TRUE if entry could be created, FALSE otherwise
  */
 gboolean init_ethernet(const char* iface){
 

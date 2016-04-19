@@ -94,18 +94,19 @@ static void default_startUp_mode(gpointer loop){
 }
 
 /*
- * initialize the boolean "internal_error" to false before running the main loop
+ * \brief initialize the boolean "internal_error" to false before running the main loop
  */
 gboolean internal_error = FALSE;
 
 /*
- * initialize the boolean "was_runnig" to false before running the main loop
+ * \brief initialize the boolean "was_runnig" to false before running the main loop
  */
 gboolean was_running = FALSE;
 
 /**
  * \brief the data needed to pass to functions used to exit the program nicely
- * \param data the data we need to know to exit the program nicely see stop_program_dat
+ * \param argc the number of argument
+ * \param argv argument given to the program
  * \return 0 as it's our main function
  */
 int main (int   argc,  char *argv[]){

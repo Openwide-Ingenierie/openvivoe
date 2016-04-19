@@ -74,8 +74,11 @@
  */
 #include "../include/daemon.h"
 
-/* deamon for the MIB subAgent */
-
+/**
+ * \brief start deamon for the MIB subAgent
+ * \param deamon_name the name of the deamon (openvivoe)
+ * \return EXIT_FAILURE or EXIt_SUCCESS
+ */
 int open_vivoe_daemon (char* deamon_name) {
     int syslog = 0; /* change this if you want to use syslog */
     /* print log errors to syslog or stderr */

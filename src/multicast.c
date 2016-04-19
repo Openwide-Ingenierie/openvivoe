@@ -27,9 +27,10 @@
 #include "../include/mibParameters.h"
 
 
-/** \brief Retrieve system IP address on a specific interface
- *  \param iface The network interface to use to retrieve the IP
- *  \param ifr a structure to store the interface information
+/** 
+ * \brief Retrieve system IP address on a specific interface
+ * \param iface The network interface to use to retrieve the IP
+ * \param ifr a structure to store the interface information
  */
 static gboolean get_ip(const char* iface, struct ifreq* ifr){
 	int fd;
@@ -51,7 +52,8 @@ static gboolean get_ip(const char* iface, struct ifreq* ifr){
 	return TRUE;
 }
 
-/** \brief Retrieve the device IP associated to the address addr
+/**
+ * \brief Retrieve the device IP associated to the address addr
  * \param addr The addresse to use
  * \return the deviceID associated (last byte of IP address)
  */
@@ -62,7 +64,8 @@ static uint8_t get_device_id(char* addr){
 	return (int_addr&mask);
 }
 
-/** \brief Build Multicast address for streaming in VIVOE protocol
+/** 
+ * \brief Build Multicast address for streaming in VIVOE protocol
  * \param multicast_addr the string to store the computed multicast address
  * \param multicast_iface the interface from which retirevinf the IP address
  * \param multicast_channel the multicast channel we wanna use
