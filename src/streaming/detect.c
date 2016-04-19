@@ -57,6 +57,13 @@ static void cb_typefound ( 	GstElement  			*typefind,
 	g_idle_add (idle_exit_loop, loop);
 }
 
+/**
+ * \brief detect caps of stream using typedind module and the given sink 
+ * \param pipeline the pipeline used by the stream
+ * \param input_video the video stream we want to know the caps from
+ * \param loop the GMainLoop the run
+ * \return a pointer to the detected structure, NULL otherwise
+ */
 static GstStructure* type_detection_with_sink(GstBin *pipeline, GstElement *input_video, GMainLoop *loop, GstElement *sink ){
 	GstElement *typefind;
 	data_type_detection data;
@@ -78,7 +85,7 @@ static GstStructure* type_detection_with_sink(GstBin *pipeline, GstElement *inpu
   		g_main_loop_quit (loop);
 		was_running = TRUE; /* save the fact that we have quit the main loop */
 	}
-	printf("running...\n");
+
 	/* run the main loop so the typefind can be performed */
 	g_main_loop_run (loop);
 	

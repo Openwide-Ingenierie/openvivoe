@@ -363,7 +363,7 @@ static GstStructure* build_MPEG4_filter(GKeyFile* gkf){
 	}
 
 	//	set_filter_field(raw_filter, "framerate", GST_VIDEO_FPS_RANGE);
-//	printf("%s\n", gst_structure_to_string (mpeg_filter) );
+	//	printf("%s\n", gst_structure_to_string (mpeg_filter) );
 	free(width);
 	free(height);
 	return mpeg_filter;

@@ -23,10 +23,11 @@
 #include "../../include/announcement/sap.h"
 
 /* 
- * This function compares two entries in the videoFormatTable
- * if those entries are equal: return TRUE, otherwise return FALSE
+ * \brief This function compares two entries in the videoFormatTable if those entries are equal: return TRUE, otherwise return FALSE
+ * \param origin first entry to compare
+ * \param new second entry to compare
+ * \return TRUE if they are the same, FALSE otherwise
  */
- 
 static gboolean compare_entries(struct videoFormatTable_entry* origin, struct videoFormatTable_entry* new){
 	 return(( !strcmp( origin->videoFormatBase 		, 	new->videoFormatBase 				)) 	&&
 			( !strcmp(origin->videoFormatSampling 	, 	new->videoFormatSampling 			)) 	&&
