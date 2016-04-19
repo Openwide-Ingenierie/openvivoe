@@ -573,15 +573,59 @@ static GstElement *handle_redirection_SU_pipeline ( GstElement *pipeline, GstCap
 	return input;
 
 }
+/**
+ * \brief For redirection: build a gstreamer's bin from the pipeline in SU's gst_sink cmd line and SP's gst_source cmd line
+ * \param pipeline the pipeline associated to this redirection
+ * \param redirect the redirection data associated to this redirection
+ * \param input the last element of the pipeline, (avenc_mp4 or capsfilter) as we built our own source
+ * \return the last element added in pipeline, should be the created bin or input
+ */
+static GstElement *parse_conf_for_redirection( GstElement *pipeline, GstElement *input, redirect_data *redirect){
 
+	gchar *sink_remaning_pipeline 		= g_strndup (redirect->gst_sink , strlen(redirect->gst_sink) - strlen(g_strrstr(redirect->gst_sink, "!")));
+	gchar *source_remaining_pipeline 	= strchr(redirect->gst_source, '!');
+	GstElement *bin;
+	GError *error;
 
-/*
+	/* 
+	 * Concatenate gst_sink to gst_source to simulate a gstreamer pipeline (add + 1 to source_remaining_pipeline to delete the remaining '!'
+	 */
+	gchar *full_pipeline = g_strdup ( g_strconcat(sink_remaning_pipeline, source_remaining_pipeline + 1, NULL) ); 
+
+	if ( !full_pipeline  ) {
+		bin = gst_parse_bin_from_description ( full_pipeline,
+				TRUE,
+				&error);
+
+		if ( error != NULL){
+			g_printerr("Failed to parse: %s\n",error->message);
+			return NULL;	
+		}
+
+	}else
+		return input;
+
+	if ( !bin )
+		return input;
+	else{
+		/* if no errors, add it and link it */
+		gst_bin_add (GST_BIN(pipeline), bin);
+		if ( !gst_element_link_log(input, bin) )
+			return NULL;
+		else 
+			return bin;
+
+	}
+
+}
+
+/**
  * \brief Build the sink of SU's pipeline, if this is a reidrection, modify the caps to pass it to the SP pipeline
  * \param pipeline the pipepline of the stream
  * \param bus the bus associated to the pipeline
  * \param bust_watch_id the watch associated to the bus
  * \param loop the GMainLoop
- * \param input the las element of the pipeline, (avenc_mp4 or capsfilter) as we built our own source
+ * \param input the last element of the pipeline, (avenc_mp4 or capsfilter) as we built our own source
  * \param channel_entry the channel of the SU in the device's channel Table
  * \param cmdline teh gst_sink from the configuration vivoe-mib.conf
  * \param redirect the redirection data (mapping SU's channel Index --> SP's videoFormatIndex)
@@ -604,7 +648,7 @@ static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 	/*
 	 * Classic case
 	 */
-	if ( !redirect){
+	if ( !redirect ){
 
 		sink  = gst_parse_bin_from_description (cmdline,
 												TRUE,
