@@ -36,22 +36,22 @@
 /**
  * \brief the names of the keys that could be found in the configuration file under group [source_x] 
  */
-#define VIVOE_REDIRECT_NAME 		"ROI_origin"
+#define ROI_ORIGIN_TOP 				"ROI_top_default"
 
 /**
  * \brief the names of the keys that could be found in the configuration file under group [source_x] 
  */
-#define VIVOE_REDIRECT_NAME 		"ROI_left"
+#define ROI_ORIGIN_RIGHT 			"ROI_left_default"
 
 /**
  * \brief the names of the keys that could be found in the configuration file under group [source_x] 
  */
-#define VIVOE_REDIRECT_NAME 		"ROI_extentright"
+#define ROI_EXTENT_RIGHT 			"ROI_extentright_default"
 
 /**
  * \brief the names of the keys that could be found in the configuration file under group [source_x] 
  */
-#define VIVOE_REDIRECT_NAME 		"ROI_extentbottom"
+#define  ROI_EXTENT_BOTTOM			"ROI_extentbottom_default"
 
 
 /**
