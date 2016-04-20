@@ -170,18 +170,18 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 	redirect_data *redirection_data = SP_is_redirection( videoFormatIndex ); 
 
 	if( redirection_data ){
-	
-		remaining_pipeline = strchr(cmdline, '!');	
+
+	//	remaining_pipeline = strchr(cmdline, '!');
 
 		/* if so build the appropriate source */
 		bin = gst_element_factory_make_log( "appsrc", "src-redirection");
 		if ( !bin )
 	   		return NULL;
-
-		if ( remaining_pipeline ) 
-			bin2 = gst_parse_bin_from_description ( remaining_pipeline + 1,
-													TRUE,
-													&error);
+		
+	//	if ( remaining_pipeline ) 
+	//		bin2 = gst_parse_bin_from_description ( remaining_pipeline + 1,
+	//												TRUE,
+	//												&error);
 
 		/* save the pipeline value in the redirection data */
 		redirection_data->pipeline_SP = pipeline;
@@ -208,6 +208,7 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 	/* add bin in pipeline */
 	gst_bin_add (GST_BIN(pipeline), bin);
 
+#if 0
 	/* if their is a remaining piece of pipeline, parse it, add it to pipeline*/
 	if ( remaining_pipeline ){
 
@@ -222,7 +223,7 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 			return bin2;
 
 	}
-
+#endif 
 	return bin;
 }
 

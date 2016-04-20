@@ -581,18 +581,36 @@ static GstElement *handle_redirection_SU_pipeline ( GstElement *pipeline, GstCap
  * \return the last element added in pipeline, should be the created bin or input
  */
 static GstElement *parse_conf_for_redirection( GstElement *pipeline, GstElement *input, redirect_data *redirect){
+	
+	gchar *full_pipeline = NULL;
+	gchar *sink_suffix = g_strrstr(redirect->gst_sink, "!");
+	gchar *sink_remaning_pipeline = NULL;
 
-	gchar *sink_remaning_pipeline 		= g_strndup (redirect->gst_sink , strlen(redirect->gst_sink) - strlen(g_strrstr(redirect->gst_sink, "!")));
+	if ( sink_suffix ) 
+		sink_remaning_pipeline 	= g_strndup (redirect->gst_sink , strlen(redirect->gst_sink) - strlen(g_strrstr(redirect->gst_sink, "!")));
+
 	gchar *source_remaining_pipeline 	= strchr(redirect->gst_source, '!');
 	GstElement *bin;
-	GError *error;
+	GError *error = NULL;
 
 	/* 
 	 * Concatenate gst_sink to gst_source to simulate a gstreamer pipeline (add + 1 to source_remaining_pipeline to delete the remaining '!'
 	 */
-	gchar *full_pipeline = g_strdup ( g_strconcat(sink_remaning_pipeline, source_remaining_pipeline + 1, NULL) ); 
+	/* if there is no remaining pipeline neither for source and sink */
+	if ( !sink_remaning_pipeline && !source_remaining_pipeline)
+		return input;
+	/*  if there is no remaining pipeline for sink but there is one for source*/
+	else if ( !sink_remaning_pipeline )
+		full_pipeline = source_remaining_pipeline + 1; /* to delete the ! remaining at the begining of the string */
+	/* if there is no remaining pipeline for source but there is one for sink */
+	else if ( !source_remaining_pipeline ){
+		full_pipeline = sink_remaning_pipeline;
+	}
+	/* if there are remaining pipelines for both */	
+	else
+		full_pipeline =  g_strconcat(sink_remaning_pipeline, source_remaining_pipeline , NULL) ; 
 
-	if ( !full_pipeline  ) {
+	if ( full_pipeline != NULL  ) {
 		bin = gst_parse_bin_from_description ( full_pipeline,
 				TRUE,
 				&error);
@@ -608,12 +626,18 @@ static GstElement *parse_conf_for_redirection( GstElement *pipeline, GstElement 
 	if ( !bin )
 		return input;
 	else{
-		/* if no errors, add it and link it */
-		gst_bin_add (GST_BIN(pipeline), bin);
-		if ( !gst_element_link_log(input, bin) )
+		/* add rtp to pipeline */
+		if ( !gst_bin_add(GST_BIN (pipeline), bin )){
+			g_printerr("Unable to add %s to pipeline", gst_element_get_name(bin));
 			return NULL;
-		else 
-			return bin;
+		}
+		/* we link the elements together */
+		if ( !gst_element_link_log (input, bin)){
+			gst_bin_remove( GST_BIN (pipeline), bin);
+		    return NULL;
+		}
+
+		return bin;
 
 	}
 
@@ -641,9 +665,6 @@ static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 
 	GError 		*error 				= NULL; /* an Object to save errors when they occurs */
 	GstElement 	*sink 				= NULL; /* to return last element of pipeline */
-	GstElement 	*previous 			= NULL;
-	gchar 		*previous_pipeline 	= NULL;
-
 
 	/*
 	 * Classic case
@@ -670,30 +691,35 @@ static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 		g_signal_connect (sink, "new-sample",
 			G_CALLBACK (on_new_sample_from_sink), redirect->pipeline_SP);
 
-		previous_pipeline = g_strrstr(cmdline, "!");
+		input = parse_conf_for_redirection( pipeline, input, redirect);
+
+		if ( !input )
+			return NULL;
+
+//		previous_pipeline = g_strrstr(cmdline, "!");
 
 		/* check if there is another pipeline associated */
-		if ( previous_pipeline ){
-			gchar *to_parse = g_strndup (cmdline, strlen(cmdline) - strlen(previous_pipeline));
-
-			previous = gst_parse_bin_from_description ( to_parse,
-														TRUE,
-														&error);
-			free(to_parse); 
+//		if ( previous_pipeline ){
+//			gchar *to_parse = g_strndup (cmdline, strlen(cmdline) - strlen(previous_pipeline));
+//
+//			previous = gst_parse_bin_from_description ( to_parse,
+//														TRUE,
+//														&error);
+//			free(to_parse); 
 
 			/* add rtp to pipeline */
-			if ( !gst_bin_add(GST_BIN (pipeline), previous )){
-				g_printerr("Unable to add %s to pipeline", gst_element_get_name(sink));
-				return NULL;
-			}
+//			if ( !gst_bin_add(GST_BIN (pipeline), previous )){
+//				g_printerr("Unable to add %s to pipeline", gst_element_get_name(sink));
+//				return NULL;
+//			}
+//
+//			/* we link the elements together */
+//			if ( !gst_element_link_log (input, previous))
+//			    return NULL;
+//			
+//			input = previous;
 
-			/* we link the elements together */
-			if ( !gst_element_link_log (input, previous))
-			    return NULL;
-			
-			input = previous;
-
-		}
+//		}
 		
 	}
 
