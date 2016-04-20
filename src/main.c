@@ -122,7 +122,7 @@ int main (int   argc,  char *argv[]){
 
 	/* Exit the program nicely when kill signals are received */
 	g_unix_signal_add (SIGINT, 	stop_program, &stop_data);
-	g_unix_signal_add (SIGTERM, stop_program, &stop_data);	
+	g_unix_signal_add (SIGTERM, stop_program, &stop_data);
 
 	/* In case of an service Provider */
 	/* Initialize GStreamer */

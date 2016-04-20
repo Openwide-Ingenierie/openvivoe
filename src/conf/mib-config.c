@@ -775,7 +775,7 @@ static gboolean init_redirection_data(GKeyFile* gkf ){
 					redirection.size = i+1 ;
 					redirection.redirect_channels[i] =(redirect_data*) malloc ( sizeof (redirect_data)) ;
 					redirection.redirect_channels[i]->channel_SU_index 	= index_receiver;
-					redirection.redirect_channels[i]->gst_source 		= init_sink_from_conf( index_receiver );
+					redirection.redirect_channels[i]->gst_sink 		= init_sink_from_conf( index_receiver );
 					redirection.redirect_channels[i]->video_SP_index 	= index_source;
 					redirection.redirect_channels[i]->gst_source 		= init_sources_from_conf( index_source );
 					i++;

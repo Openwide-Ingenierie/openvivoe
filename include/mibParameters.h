@@ -172,8 +172,6 @@ typedef struct {
 /**
  * \brief a NULL terminated array that contains all the redirection_data of the current program
  */
-//extern redirect_data *redirect_channels[];
-
 typedef struct {
 	int 			size;
 	redirect_data 	*(*redirect_channels);

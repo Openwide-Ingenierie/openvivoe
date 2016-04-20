@@ -222,10 +222,9 @@ int handle_SP_default_StartUp_mode(long videoFormatIndex ){
  * \param videoFormatIndex the videoFormatIndex for which the pipeline will be built
  * \return EXIT_SUCCESS or EXIT_FAILURE
  */
-int init_stream_SP( gpointer main_loop, int videoFormatIndex){
+int init_stream_SP( int videoFormatIndex ){
 
 	/* Initialization of elements needed */
-	GMainLoop 	*loop 			= main_loop;
     GstElement 	*pipeline;
     GstElement 	*last;	
     GstBus 		*bus;
@@ -249,7 +248,7 @@ int init_stream_SP( gpointer main_loop, int videoFormatIndex){
 	data->pipeline 		= pipeline;	
 	/* we add a message handler */
 	bus = gst_pipeline_get_bus ( GST_PIPELINE(pipeline));
-    bus_watch_id = gst_bus_add_watch (bus, bus_call, loop);
+    bus_watch_id = gst_bus_add_watch (bus, bus_call, main_loop);
     gst_object_unref (bus);
 
 	data->bus 			= bus;
@@ -272,7 +271,7 @@ int init_stream_SP( gpointer main_loop, int videoFormatIndex){
 		redirection = TRUE;
 	}
 	else
-		last = create_pipeline_videoChannel( data ,	main_loop, last, videoFormatIndex ); /* Create pipeline  - save videoFormatIndex into stream_data data*/
+		last = create_pipeline_videoChannel( data ,	last, videoFormatIndex ); /* Create pipeline  - save videoFormatIndex into stream_data data*/
 
 	/* Check if everything went ok*/
 	if (last == NULL){
@@ -295,17 +294,15 @@ int init_stream_SP( gpointer main_loop, int videoFormatIndex){
 
 /**
  * \brief initiate a pipeline to display received stream
- * \param main_loop the main loop
  * \param stream_datas a structure in which we will save the pipeline and the bus elements
  * \param caps the GstCaps made from the SDP file received with the stream
  * \param channel_entry the serviceUser corresponding channel 
  * \return EXIT_SUCCESS or EXIT_FAILURE
  */
-int init_stream_SU( gpointer main_loop,GstCaps *caps, struct channelTable_entry *channel_entry)
+int init_stream_SU( GstCaps *caps, struct channelTable_entry *channel_entry)
 {
     
   /* Initialization of elements needed */
-	GMainLoop 	*loop 			= main_loop;
     GstElement 	*pipeline;
     GstBus 		*bus;
     guint 		bus_watch_id;
@@ -329,7 +326,7 @@ int init_stream_SU( gpointer main_loop,GstCaps *caps, struct channelTable_entry 
 	data->pipeline 		= pipeline;	
 	/* we add a message handler */
 	bus = gst_pipeline_get_bus ( GST_PIPELINE(pipeline));
-    bus_watch_id = gst_bus_add_watch (bus, bus_call, loop);
+    bus_watch_id = gst_bus_add_watch (bus, bus_call, main_loop);
     gst_object_unref (bus);
 
 	data->bus 			= bus;
@@ -359,7 +356,7 @@ int init_stream_SU( gpointer main_loop,GstCaps *caps, struct channelTable_entry 
 	}
 
 	/* Create pipeline  - save videoFormatIndex into stream_data data*/
-	last = create_pipeline_serviceUser( data, main_loop, caps, channel_entry, cmdline, redirection_data );
+	last = create_pipeline_serviceUser( data, caps, channel_entry, cmdline, redirection_data );
 	
 	/* Check if everything went ok*/
 	if (last == NULL){
@@ -379,7 +376,7 @@ int init_stream_SU( gpointer main_loop,GstCaps *caps, struct channelTable_entry 
 	 * on this source after is pipeline has been completed.
 	 */
 	if ( redirection_data ){
-		if ( !append_SP_pipeline_for_redirection(loop, caps,  videoFormatIndex) )
+		if ( !append_SP_pipeline_for_redirection( caps,  videoFormatIndex) )
 			return EXIT_FAILURE;
 		handle_SP_default_StartUp_mode( videoFormatIndex ) ;
 	}

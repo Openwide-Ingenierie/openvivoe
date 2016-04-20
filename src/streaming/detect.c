@@ -15,14 +15,6 @@
 #include "../../include/streaming/detect.h"
 #include "../../include/log.h"
 
-/*
- * This is a strcuture we need to define in order to get the media type of input source video
- * */
-typedef struct{
-	GMainLoop 	*loop; /* the GMainLoop to use in the media type detection function */
-	GstCaps 	*caps; /* the media type that will be detected */
-}data_type_detection;
-
 /**
  * \brief This is needed to exit the video type detection function
  * \param data the data for the function (the main loop)
@@ -40,21 +32,20 @@ idle_exit_loop (gpointer data)
  * \brief callback function to execute when caps have been found: stop running mainLoop, save the caps into a string 
  * \param typefind a gstreamer element which lets us find the video caps
  * \param caps the caps found 
- * \param data the data needed (loop to qui, and a string to save the caps found 
+ * \param data the data needed (loop to quit, and a string to save the caps found 
  */
 static void cb_typefound ( 	GstElement  			*typefind,
 						    guint       			probability,
 							GstCaps    				*caps,
-					    	gpointer				data 
+					    	gpointer				found_caps 
 							)
 {
-	data_type_detection *data_type 	= data;
-	GMainLoop *loop 				= data_type->loop;
-	data_type->caps 				= gst_caps_copy(caps);
+	GstCaps **found_caps_var = found_caps;
+	*found_caps_var			= gst_caps_copy(caps);
 	/* since we connect to a signal in the pipeline thread context, we need
 	 * to set an idle handler to exit the main loop in the mainloop context.
 	 * Normally, your app should not need to worry about such things. */
-	g_idle_add (idle_exit_loop, loop);
+	g_idle_add (idle_exit_loop, main_loop);
 }
 
 /**
@@ -64,10 +55,11 @@ static void cb_typefound ( 	GstElement  			*typefind,
  * \param loop the GMainLoop the run
  * \return a pointer to the detected structure, NULL otherwise
  */
-static GstStructure* type_detection_with_sink(GstBin *pipeline, GstElement *input_video, GMainLoop *loop, GstElement *sink ){
+static GstStructure* type_detection_with_sink(GstBin *pipeline, GstElement *input_video,GstElement *sink ){
+
 	GstElement *typefind;
-	data_type_detection data;
-	data.loop 	= loop;
+	GstCaps *found_caps;
+
 	/* Create typefind element */
 	typefind = gst_element_factory_make_log ("typefind", NULL);	
 
@@ -75,19 +67,19 @@ static GstStructure* type_detection_with_sink(GstBin *pipeline, GstElement *inpu
 		return NULL;
 	
 	/* Connect typefind element to handler */
-	g_signal_connect (typefind, "have-type", G_CALLBACK (cb_typefound), &data);
+	g_signal_connect (typefind, "have-type", G_CALLBACK (cb_typefound), &found_caps);
 	gst_bin_add_many (GST_BIN (pipeline), typefind, sink, NULL);
 	gst_element_link_many (input_video, typefind, sink, NULL);
 	gst_element_set_state (GST_ELEMENT (pipeline), GST_STATE_PLAYING);
 
 	/* run the main loop until type is found so we execute callback function */
-	if( g_main_loop_is_running (loop) ){
-  		g_main_loop_quit (loop);
+	if( g_main_loop_is_running (main_loop) ){
+  		g_main_loop_quit (main_loop);
 		was_running = TRUE; /* save the fact that we have quit the main loop */
 	}
 
 	/* run the main loop so the typefind can be performed */
-	g_main_loop_run (loop);
+	g_main_loop_run (main_loop);
 	
 	if( internal_error )
 		return NULL;
@@ -100,7 +92,7 @@ static GstStructure* type_detection_with_sink(GstBin *pipeline, GstElement *inpu
 	gst_bin_remove(GST_BIN(pipeline), typefind);
 
 	/* Get video Caps */
-	GstCaps 		*detected 		= data.caps;
+	GstCaps 		*detected 		= found_caps;
 	//printf("%s\n", gst_caps_to_string(detected));
 	GstStructure 	*str_detected 	= gst_caps_get_structure(detected, 0);
 
@@ -111,10 +103,9 @@ static GstStructure* type_detection_with_sink(GstBin *pipeline, GstElement *inpu
  * \brief Media Stream Capabilities detection - detect caps of stream
  * \param pipeline the pipeline used by the stream
  * \param input_video the video stream we want to know the caps from
- * \param loop the GMainLoop the run
  * \return a pointer to the detected structure, NULL otherwise
  */
-GstStructure* type_detection(GstBin *pipeline, GstElement *input_video, GMainLoop *loop, GstElement *sink){
+GstStructure* type_detection(GstBin *pipeline, GstElement *input_video,GstElement *sink){
 	GstStructure *str_detected;
 	if (sink == NULL){
 		GstElement  *fakesink;
@@ -122,11 +113,11 @@ GstStructure* type_detection(GstBin *pipeline, GstElement *input_video, GMainLoo
 		if(fakesink == NULL)
 			return NULL;
 
-		str_detected = type_detection_with_sink(pipeline, input_video, loop, fakesink);
+		str_detected = type_detection_with_sink(pipeline, input_video, fakesink);
 		gst_bin_remove(GST_BIN(pipeline), fakesink);
 
 	}else{
-		str_detected = type_detection_with_sink( pipeline, input_video, loop, sink);
+		str_detected = type_detection_with_sink( pipeline, input_video, sink);
 	}
 	return str_detected;
 }

@@ -44,7 +44,6 @@ static const gchar* J2K_STR_NAMES[JPEG_FORMAT_NUMBER_SUPPORTED] = {"image/x-j2c"
  * \brief This function add the RTP element to the pipeline for service provider * \param pipeline the pipeline associated to this SP
  * \param bus the bus the channel
  * \param bus_watch_id an id watch on the bus
- * \param loop the GMainLoop
  * \param input last element added in pipeline to which we should link elements added
  * \param video_info a "fake" entry to VFT into which we will save all element we can retrieve from the video caps of the stream (via fill_entry() )
  * \param stream_data the data associated to this SP's pipeline
@@ -52,10 +51,10 @@ static const gchar* J2K_STR_NAMES[JPEG_FORMAT_NUMBER_SUPPORTED] = {"image/x-j2c"
  * \param channel_entry_index the channel's index of this SP: to build the multicast address
  * \return the last element added in pipeline (rtp payloader if everything goes ok)
  */
-static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
-							guint bus_watch_id, 	GMainLoop 						*loop,
-							GstElement* input, 		struct videoFormatTable_entry 	*video_info,
-							gpointer stream_datas, 	GstCaps 						*caps){
+static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
+							guint 							bus_watch_id, 	GstElement* input,
+							struct videoFormatTable_entry 	*video_info,	gpointer stream_datas, 	
+							GstCaps 						*caps){
 	/*Create element that will be add to the pipeline */
 	GstElement *rtp = NULL;
 	GstElement *parser;
@@ -63,7 +62,7 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
 
 	if (caps == NULL){
 		/* Media stream Type detection */
-		video_caps = type_detection(GST_BIN(pipeline), input, loop, NULL);
+		video_caps = type_detection(GST_BIN(pipeline), input, NULL);
 
 		if ( video_caps == NULL )
 			return NULL;
@@ -163,12 +162,12 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
 	if (caps == NULL ){
 		
 		/* Filters out non VIVOE videos, and link input to RTP if video has a valid format*/
-		if (!filter_VIVOE(type_detection(GST_BIN(pipeline), input, loop, NULL),input, rtp))
+		if (!filter_VIVOE(type_detection(GST_BIN(pipeline), input,NULL),input, rtp))
 			return NULL;
 
 		/* Now that wa have added the RTP payloader to the pipeline, we can get the new caps of the video stream*/
 		/* Media stream Type detection */
-		video_caps = type_detection(GST_BIN(pipeline), rtp, loop, NULL);
+		video_caps = type_detection(GST_BIN(pipeline), rtp, NULL);
 
 		if ( video_caps == NULL) 
 			return NULL; 
@@ -183,7 +182,7 @@ static GstElement* addRTP( 	GstElement *pipeline, 	GstBus 							*bus,
 
 		input = rtp ;
 		
-		video_caps = type_detection(GST_BIN(pipeline), input , loop, NULL);
+		video_caps = type_detection(GST_BIN(pipeline), input ,NULL);
 
 		/*Fill the MIB a second time after creating payload, this is needed to get rtp_data needed to build SDP files */
 		fill_entry(video_caps, video_info, stream_datas);
@@ -221,14 +220,13 @@ void set_udpsink_param( GstElement *udpsink, long channel_entry_index){
  * \param pipeline the pipeline associated to this SP
  * \param bus the bus the channel
  * \param bus_watch_id an id watch on the bus
- * \param loop the GMainLoop
  * \param input last element added in pipeline to which we should link elements added
  * \param channel_entry_index the channel's index of this SP: to build the multicast address
  * \return last element added in pipeline, so udpsink if everything goes well
  */
 static GstElement* addUDP( 	GstElement *pipeline, 	GstBus *bus,
-							guint bus_watch_id, 	GMainLoop *loop,
-							GstElement *input, 		long channel_entry_index){
+							guint bus_watch_id, 	GstElement *input, 		
+							long channel_entry_index){
 
 	/*Create element that will be add to the pipeline */
 	GstElement *udpsink;
@@ -259,13 +257,11 @@ static GstElement* addUDP( 	GstElement *pipeline, 	GstBus *bus,
 /**
  * \brief Create the pipeline for an SP (fill the MIB at the same time)
  * \param stream_data the stream_data associated to the pipeline of this SP
- * \param loop the GMainLoop
  * \param input last element added in pipeline to which we should link elements added
  * \param videoChannelIndex the index of the channel associated to this SP
  * \return GstElement* the last element added to the pipeline (should be udpsink if everything went ok)
  */
 GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
-										 	GMainLoop *loop,
 											GstElement* input,
 											long videoChannelIndex){
 	GstElement 		*last;
@@ -284,10 +280,10 @@ GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
     guint 		bus_watch_id 	= data->bus_watch_id;
 
    	/* Add RTP element */
- 	last = addRTP( 	pipeline, 	  bus,
-					bus_watch_id, loop,
-					input, 		  video_stream_info,
-					stream_datas, NULL);
+ 	last = addRTP( 	pipeline, 	  		bus,
+					bus_watch_id, 		input,
+		  			video_stream_info, 	stream_datas, 
+					NULL);
 	
 	if(last == NULL){
 		g_printerr("Failed to create pipeline\n");
@@ -306,8 +302,8 @@ GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
 
 	/* Add UDP element */
 	last = addUDP( 	pipeline, 	  		bus,
-					bus_watch_id, 		loop,
-					last, 	 			channel_entry_index
+					bus_watch_id, 		last, 
+					channel_entry_index
 				);
 
 	if (last == NULL){
@@ -328,7 +324,7 @@ GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
  * \param videoFormatIndex the VF of the redirection's SP
  * \return last element added in pipeline, so udpsink if everything goes well
  */
-GstElement *append_SP_pipeline_for_redirection(GMainLoop *loop, GstCaps *caps, long videoFormatIndex ){
+GstElement *append_SP_pipeline_for_redirection(GstCaps *caps, long videoFormatIndex ){
 
 	GstElement 		*last;
 	
@@ -350,7 +346,7 @@ GstElement *append_SP_pipeline_for_redirection(GMainLoop *loop, GstCaps *caps, l
 	 * data->sink, so the input element to pass to the addRTP function is the last element added in pipeline ( the bin made from the 
 	 * gst_source commmand line given by the user in vivoe-mib.conf configuration file */
 
-	last = addRTP(data->pipeline , data->bus , data->bus_watch_id , loop , data->sink  , videoFormat_entry , data , caps);
+	last = addRTP(data->pipeline , data->bus , data->bus_watch_id , data->sink  , videoFormat_entry , data , caps);
 	if(last == NULL){
 		g_printerr("Failed to append pipeline for redirection\n");
 		return NULL;
@@ -364,8 +360,8 @@ GstElement *append_SP_pipeline_for_redirection(GMainLoop *loop, GstCaps *caps, l
 
 	/* Add UDP element */
 	last = addUDP(  data->pipeline, 	data->bus,
-					data->bus_watch_id, loop,
-					last, 	 			channel_entry->channelIndex
+					data->bus_watch_id, last, 	 		
+					channel_entry->channelIndex
 				);
 
 	if (last == NULL){
@@ -384,14 +380,13 @@ GstElement *append_SP_pipeline_for_redirection(GMainLoop *loop, GstCaps *caps, l
  * \param pipeline the associated pipeline of the channel
  * \param bus the bus the channel
  * \param bus_watch_id an id watch on the bus
- * \param loop the GMainLoop
  * \param caps the input video caps built from SDP file, and to give to upsrc
  * \param channel_entry the channel of the SU in the device's channel Table
  * \return last element added in pipeline (should be udpsrc normally)
  */
 static GstElement* addUDP_SU( 	GstElement *pipeline, 	GstBus *bus,
-								guint bus_watch_id, 	GMainLoop *loop,
-								GstCaps* caps, 			struct channelTable_entry * channel_entry){
+								guint bus_watch_id, 	GstCaps* caps,
+								struct channelTable_entry * channel_entry){
 
 	/*Create element that will be add to the pipeline */
 	GstElement *udpsrc;
@@ -426,17 +421,16 @@ static GstElement* addUDP_SU( 	GstElement *pipeline, 	GstBus *bus,
  * \param pipeline the associated pipeline of the channel
  * \param bus the bus the channel
  * \param bus_watch_id an id watch on the bus
- * \param loop the GMainLoop
  * \param input the gstelement to link in input
  * \param video_info a videoFormatTable_entry to store detected caps 
  * \param stream_data the stream_data associated to the pipeline
  * \param caps the input video caps
  * \return GstElement the last element added in pipeline 
  */
-static GstElement* addRTP_SU( 	GstElement *pipeline, 	GstBus *bus,
-								guint bus_watch_id, 	GMainLoop *loop,
-								GstElement* input, 		struct videoFormatTable_entry *video_info,
-								gpointer stream_datas, 	GstCaps *caps){
+static GstElement* addRTP_SU( 	GstElement *pipeline, 						GstBus *bus,
+								guint bus_watch_id,							GstElement* input,
+								struct videoFormatTable_entry *video_info, 	gpointer stream_datas,
+								GstCaps *caps){
 
 	/*Create element that will be add to the pipeline */
 	GstElement 		*rtp = NULL;
@@ -566,7 +560,7 @@ static GstElement *handle_redirection_SU_pipeline ( GstElement *pipeline, GstCap
 	 * Run a new typefind to update caps in order to succeed to run a last typefind in the pipeline of the SP of the 
 	 * redirection. Update caps in consequence
 	 */
-	video_caps = type_detection(GST_BIN(pipeline), input, main_loop, NULL);
+	video_caps = type_detection(GST_BIN(pipeline), input, NULL);
 	gst_caps_append_structure( caps , gst_structure_copy ( video_caps ) );
 	gst_caps_remove_structure ( caps, 0 ) ;
 	
@@ -656,11 +650,10 @@ static GstElement *parse_conf_for_redirection( GstElement *pipeline, GstElement 
  * \param caps the caps built from the SDP, may be replace if this is a redirection
  * \return GstElement* the last element added to the pipeline (appsink or a displayer like x(v)imagesink)
  */
-static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
-								guint bus_watch_id, 	GMainLoop *loop,
-								GstElement *input, 		struct channelTable_entry 	*channel_entry,
-								gchar *cmdline, 		redirect_data 			 	*redirect, 
-								GstCaps 					*caps
+static GstElement* addSink_SU( 	GstElement *pipeline, 						GstBus *bus,
+								guint bus_watch_id, 						GstElement *input, 	
+								struct channelTable_entry 	*channel_entry, gchar 	*cmdline, 
+								redirect_data *redirect, 					GstCaps *caps
 								){
 
 	GError 		*error 				= NULL; /* an Object to save errors when they occurs */
@@ -700,7 +693,7 @@ static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 
 	/* detect the caps of the video after the gstreamer pipeline given by the user in gst_sink command line in vivoe-mib.conf */
 	GstStructure *video_caps;
-	video_caps = type_detection(GST_BIN(pipeline), input, loop, NULL);
+	video_caps = type_detection(GST_BIN(pipeline), input, NULL);
 	gst_caps_append_structure( caps , gst_structure_copy ( video_caps ) );
 	gst_caps_remove_structure ( caps, 0 ) ;
 
@@ -733,14 +726,12 @@ static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
  * \param pipeline the pipepline of the stream
  * \param bus the bus associated to the pipeline
  * \param bust_watch_id the watch associated to the bus
- * \param loop the GMainLoop
  * \param input the las element of the pipeline, (avenc_mp4 or capsfilter) as we built our own source
  * \param ip the ip to which send the stream on
  * \port the port to use
  * \return GstElement* the last element added to the pipeline
  */
 GstElement* create_pipeline_serviceUser( gpointer 					stream_datas,
-									 	 GMainLoop 					*loop,
 										 GstCaps 					*caps,
 										 struct channelTable_entry 	*channel_entry,
 										 gchar 						*cmdline,
@@ -763,8 +754,8 @@ GstElement* create_pipeline_serviceUser( gpointer 					stream_datas,
 	GstElement *first, *last;
 
 	first =  addUDP_SU( pipeline, 		bus,
-						bus_watch_id, 	loop,
-						caps, 			channel_entry);
+						bus_watch_id, 	caps, 
+						channel_entry);
 
 	/* check if everything went ok */
 	if ( first == NULL )
@@ -774,14 +765,14 @@ GstElement* create_pipeline_serviceUser( gpointer 					stream_datas,
 	last = first;
 	
 	/* Add RTP depayloader element */
-	last = addRTP_SU( 	pipeline, 		bus,
-						bus_watch_id, 	loop,
-						first, 			video_stream_info,
-						data, 			caps);
+	last = addRTP_SU( 	pipeline, 			bus,
+						bus_watch_id,  		first,
+						video_stream_info,	data, 	
+						caps);
 
 	channelTable_fill_entry(channel_entry, video_stream_info);
 
-	last = addSink_SU( pipeline, bus, bus_watch_id, loop, last, channel_entry, cmdline, redirect , caps );
+	last = addSink_SU( pipeline, bus, bus_watch_id, last, channel_entry, cmdline, redirect , caps );
 
 	return last;
 

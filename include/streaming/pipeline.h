@@ -10,19 +10,18 @@
 void set_udpsink_param( GstElement *udpsink, long channel_entry_index);
 
 GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
-										 	GMainLoop *loop,
 											GstElement* input,
 											long videoChannelIndex);
 
 
 GstElement* create_pipeline_serviceUser( 	gpointer 					stream_datas,
-									 	 	GMainLoop 					*loop,
 										 	GstCaps 					*caps,
 										 	struct channelTable_entry 	*channel_entry, 
 										 	gchar 						*cmdline, 
 											redirect_data 				*redirect);
 
-GstElement *append_SP_pipeline_for_redirection(GMainLoop *loop, GstCaps *caps, long videoFormatIndex);
+GstElement *append_SP_pipeline_for_redirection( GstCaps *caps, 
+												long videoFormatIndex);
 
 
 #endif /* PIPELINE_H */
