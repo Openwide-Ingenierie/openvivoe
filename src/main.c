@@ -38,7 +38,6 @@
 typedef struct{
 	GMainLoop 			*loop; 				/* the main Loop to quit and unref */
 	char 				*deamon_name; 		/* the deamon's nam to stop */
-	gboolean 			stop_program_bool; 	/* a boolean to specify if we went through stop_program function */
 }stop_program_data;
 
 /**
@@ -74,8 +73,9 @@ static gboolean stop_program ( gpointer data ){
 	g_main_loop_unref (loop);
 
 	/* to exit the program we need to reset was_running variable */
-	stop_data->stop_program_bool = TRUE;
+	exit(EXIT_SUCCESS);
 
+	/* this is for the prototype, we should not get there */
 	return TRUE;
 }
 
@@ -112,8 +112,6 @@ gboolean was_running = FALSE;
  */
 int main (int   argc,  char *argv[]){
 
-	gboolean stop_program_bool = FALSE;
-
 	/* create the GMainLoop*/
 	main_loop = g_main_loop_new (NULL, FALSE);
 	
@@ -121,7 +119,6 @@ int main (int   argc,  char *argv[]){
 	stop_program_data 			stop_data;
 	stop_data.deamon_name 		= argv[0];
 	stop_data.loop 				= main_loop;
-	stop_data.stop_program_bool = stop_program_bool;
 
 	/* Exit the program nicely when kill signals are received */
 	g_unix_signal_add (SIGINT, 	stop_program, &stop_data);
@@ -158,7 +155,7 @@ int main (int   argc,  char *argv[]){
 			return EXIT_FAILURE;
 		}
 
-	}while(was_running || !stop_data.stop_program_bool);
+	}while(was_running);
 
 	return EXIT_SUCCESS;
 }
