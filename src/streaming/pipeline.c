@@ -696,31 +696,6 @@ static GstElement* addSink_SU( 	GstElement *pipeline, 	GstBus *bus,
 		if ( !input )
 			return NULL;
 
-//		previous_pipeline = g_strrstr(cmdline, "!");
-
-		/* check if there is another pipeline associated */
-//		if ( previous_pipeline ){
-//			gchar *to_parse = g_strndup (cmdline, strlen(cmdline) - strlen(previous_pipeline));
-//
-//			previous = gst_parse_bin_from_description ( to_parse,
-//														TRUE,
-//														&error);
-//			free(to_parse); 
-
-			/* add rtp to pipeline */
-//			if ( !gst_bin_add(GST_BIN (pipeline), previous )){
-//				g_printerr("Unable to add %s to pipeline", gst_element_get_name(sink));
-//				return NULL;
-//			}
-//
-//			/* we link the elements together */
-//			if ( !gst_element_link_log (input, previous))
-//			    return NULL;
-//			
-//			input = previous;
-
-//		}
-		
 	}
 
 	/* detect the caps of the video after the gstreamer pipeline given by the user in gst_sink command line in vivoe-mib.conf */

@@ -208,22 +208,6 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 	/* add bin in pipeline */
 	gst_bin_add (GST_BIN(pipeline), bin);
 
-#if 0
-	/* if their is a remaining piece of pipeline, parse it, add it to pipeline*/
-	if ( remaining_pipeline ){
-
-		if ( !bin2 )
-			return NULL;
-
-		/* if no errors, add it and link it */
-		gst_bin_add (GST_BIN(pipeline), bin2);
-		if ( !gst_element_link_log(bin, bin2) )
-			return NULL;
-		else 
-			return bin2;
-
-	}
-#endif 
 	return bin;
 }
 
