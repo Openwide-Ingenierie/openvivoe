@@ -34,6 +34,27 @@
 #define KEY_NAME_DEFAULT_IP			"defaultReceiveIP"
 
 /**
+ * \brief the names of the keys that could be found in the configuration file under group [source_x] 
+ */
+#define VIVOE_REDIRECT_NAME 		"ROI_origin"
+
+/**
+ * \brief the names of the keys that could be found in the configuration file under group [source_x] 
+ */
+#define VIVOE_REDIRECT_NAME 		"ROI_left"
+
+/**
+ * \brief the names of the keys that could be found in the configuration file under group [source_x] 
+ */
+#define VIVOE_REDIRECT_NAME 		"ROI_extentright"
+
+/**
+ * \brief the names of the keys that could be found in the configuration file under group [source_x] 
+ */
+#define VIVOE_REDIRECT_NAME 		"ROI_extentbottom"
+
+
+/**
  * \brief the name of the Gstreamer command line used by the user to give the input video to vivoe
  */
 #define GST_SOURCE_CMDLINE 			"gst_source"
@@ -47,7 +68,6 @@
  * \brief the value that should have a gst_source or gst_sink command line to be a redirection
  */
 #define VIVOE_REDIRECT_NAME 		"vivoe-redirect"
-
 /*functions' definitions*/
 int 	init_mib_content(); /*check the groups, key and values of the MIB's parameters*/
 gchar 	*init_sources_from_conf(int index); /* get the command line used to initiate the streams */
