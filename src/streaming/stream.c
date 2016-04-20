@@ -158,9 +158,7 @@ static void init_redirection( gpointer stream_datas, long videoFormatIndex ){
 static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 	GError 		*error 				= NULL; /* an Object to save errors when they occurs */
 	GstElement 	*bin 				= NULL; /* to return last element of pipeline */
-	GstElement 	*bin2				= NULL; /* to return last element of pipeline */
 	gchar 		*cmdline 			= init_sources_from_conf( videoFormatIndex );
-	char 		*remaining_pipeline = NULL;
 
 	/* check if everything went ok */	
 	if (cmdline == NULL)
@@ -171,18 +169,11 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 
 	if( redirection_data ){
 
-	//	remaining_pipeline = strchr(cmdline, '!');
-
 		/* if so build the appropriate source */
 		bin = gst_element_factory_make_log( "appsrc", "src-redirection");
 		if ( !bin )
 	   		return NULL;
 		
-	//	if ( remaining_pipeline ) 
-	//		bin2 = gst_parse_bin_from_description ( remaining_pipeline + 1,
-	//												TRUE,
-	//												&error);
-
 		/* save the pipeline value in the redirection data */
 		redirection_data->pipeline_SP = pipeline;
 
