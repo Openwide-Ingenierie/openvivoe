@@ -408,15 +408,16 @@ static gchar *get_key_value_char(GKeyFile* gkf, const gchar* const* groups ,char
  * \param group_name the group's name in which we are interested 
  * \param key_name the name of the key we are loooking for
  * \param error a variable to store errors 
- * \return gchar* the value of the found key or NULL is the key has not been found
+ * \param optional specify if the key is optional and should be present or optional
+ * \return the integer value or -1 if an error occurs
  */
-static int get_key_value_int(GKeyFile* gkf, const gchar* const* groups ,char *group_name, const gchar *key_name, GError* error){
+static int get_key_value_int(GKeyFile* gkf, const gchar* const* groups ,char *group_name, const gchar *key_name, GError* error, gboolean optional){
 
 	int key_value; /* a variable to store the key value */
 
 	if( !(g_strv_contains(groups, group_name )) ){
 		fprintf (stderr, "Group %s not found in configuration file\nIt should be written in the form [%s]\n", group_name ,group_name);
-		return NULL;
+		return -1;
 	}
 
 	if(g_key_file_has_key(gkf,group_name,key_name, &error)){
@@ -425,14 +426,16 @@ static int get_key_value_int(GKeyFile* gkf, const gchar* const* groups ,char *gr
 			g_printerr("Invalid format for key %s: %s\n", key_name , error->message);
 	}
 	else {
-		g_printerr("ERROR: key not found %s for group: %s\n", key_name ,group_name );
-		return NULL;
+		if ( !optional )
+			g_printerr("ERROR: key not found %s for group: %s\n", key_name ,group_name );
+		return -1;
 	}
 
-	if ( !strcmp( key_value, "") ){
+	if ( key_value < 0  ){
 		g_printerr("ERROR: invalid key value for %s in %s\n", key_name ,group_name );
-		return NULL;
+		return -1;
 	}
+
 
 	return key_value;
 }
