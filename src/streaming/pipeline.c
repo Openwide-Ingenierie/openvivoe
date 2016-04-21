@@ -31,6 +31,7 @@
 #include "../../include/mibParameters.h"
 #include "../../include/streaming/filter.h"
 #include "../../include/streaming/detect.h"
+#include "../../include/streaming/roi.h"
 #include "../../include/streaming/pipeline.h"
 #include "../../include/streaming/stream.h"
 
@@ -79,7 +80,11 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 		fill_entry(video_caps, video_info, stream_datas);
 
 	}
-	
+
+	input = handle_roi ( pipeline ,  input , video_info ,  video_caps ) ;
+	if ( !input )
+		return NULL;
+
  	/* in case RAW video type has been detected */
 	if ( gst_structure_has_name( video_caps, "video/x-raw") ){
 

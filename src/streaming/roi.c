@@ -40,6 +40,8 @@ static void set_roi_values_videoFormat_entry( struct videoFormatTable_entry *vid
 	video_stream_info->videoFormatRoiExtentBottom 	= roi_datas->roi_extent_bottom;
 	video_stream_info->videoFormatRoiExtentRight 	= roi_datas->roi_extent_right;
 
+	printf("width=%ld, height=%ld, top=%ld,left=%ld,extent_bottom=%ld, extent_right=%ld\n", roi_datas->roi_width, roi_datas->roi_height,roi_datas->roi_top , roi_datas->roi_left, roi_datas->roi_extent_bottom, roi_datas->roi_extent_right);
+
 }
 
 
@@ -87,9 +89,11 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline, GstElement *input
  */
 	GstElement *last 			= input; 
 
-	videoconvert = gst_element_factory_make_log ( "videoconvert ", "videoconvert" );
+	videoconvert = gst_element_factory_make_log ( "videoconvert", "videoconvert" );
 	if ( !videoconvert )
 		return NULL;
+
+	gst_bin_add ( GST_BIN(pipeline) , videoconvert);
 
 	if ( !gst_element_link_log (input, videoconvert)){
 		gst_bin_remove( GST_BIN (pipeline), videoconvert);
@@ -109,10 +113,10 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline, GstElement *input
 			return NULL;
 
 		g_object_set ( 	G_OBJECT ( videocrop ) , 
-						"top" 		, G_TYPE_INT, video_stream_info->videoFormatRoiOriginTop , 
-						"left" 		, G_TYPE_INT, video_stream_info->videoFormatRoiOriginLeft , 
-						"bottom" 	, G_TYPE_INT, video_stream_info->videoFormatMaxVertRes - ( video_stream_info->videoFormatRoiOriginTop 	+ video_stream_info->videoFormatRoiVertRes  ),
-						"right" 	, G_TYPE_INT, video_stream_info->videoFormatMaxHorzRes - ( video_stream_info->videoFormatRoiOriginLeft 	+ video_stream_info->videoFormatRoiHorzRes  ),
+						"top" 		,  video_stream_info->videoFormatRoiOriginTop , 
+						"left" 		,  video_stream_info->videoFormatRoiOriginLeft , 
+						"bottom" 	,  video_stream_info->videoFormatMaxVertRes - ( video_stream_info->videoFormatRoiOriginTop 	+ video_stream_info->videoFormatRoiVertRes  ),
+						"right" 	,  video_stream_info->videoFormatMaxHorzRes - ( video_stream_info->videoFormatRoiOriginLeft 	+ video_stream_info->videoFormatRoiHorzRes  ),
 						NULL
 					);
 		
@@ -136,8 +140,8 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline, GstElement *input
 
 		/* replace height and width value with the one computed from the ROI parameter */
 		g_object_set ( 	G_OBJECT ( caps_filter ) , 
-						"height" 	, G_TYPE_INT, video_stream_info->videoFormatRoiExtentBottom - video_stream_info->videoFormatRoiOriginTop ,
-						"width" 	, G_TYPE_INT, video_stream_info->videoFormatRoiExtentRight	- video_stream_info->videoFormatRoiOriginLeft,
+						"height" 	,  video_stream_info->videoFormatRoiExtentBottom - video_stream_info->videoFormatRoiOriginTop ,
+						"width" 	,  video_stream_info->videoFormatRoiExtentRight	- video_stream_info->videoFormatRoiOriginLeft,
 						NULL
 					);
 		

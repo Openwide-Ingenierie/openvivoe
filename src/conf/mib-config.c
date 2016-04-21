@@ -827,6 +827,8 @@ gboolean get_roi_parameters_for_sources ( int index, roi_data *roi_datas){
 	/* if No ROI_top AND No_ROI_left */
 	if ( roi_width == -1 && roi_height == -1 && roi_top == -1 && roi_left == -1 ){
 		if (  roi_extent_bottom == -1 && roi_extent_right == -1 ) {
+			roi_width 			= 0;
+			roi_height 			= 0;
 			roi_top 			= 0;
 			roi_left 			= 0;
 			roi_extent_bottom 	= 0;
@@ -866,6 +868,8 @@ gboolean get_roi_parameters_for_sources ( int index, roi_data *roi_datas){
 	 /*
 	  * save those values to roi_datas
 	 */
+	roi_datas->roi_width 			= roi_width;
+	roi_datas->roi_height 			= roi_height;
 	roi_datas->roi_top 				= roi_top;
 	roi_datas->roi_left 			= roi_left;
 	roi_datas->roi_extent_bottom 	= roi_extent_bottom;

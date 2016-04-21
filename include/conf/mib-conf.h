@@ -36,7 +36,7 @@
 /**
  * \brief the names of the keys that could be found in the configuration file under group [source_x] 
  */
-#define ROI_WIDTH 					"ROI_widht_default"
+#define ROI_WIDTH 					"ROI_width_default"
 
 /**
  * \brief the names of the keys that could be found in the configuration file under group [source_x] 
