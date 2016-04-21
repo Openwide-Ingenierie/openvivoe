@@ -799,10 +799,12 @@ gboolean get_roi_parameters_for_sources ( int index, roi_data *roi_datas){
 	/*
 	 * the roi parameters retreive from the configuration file
 	 */
-	int roi_top;
-	int roi_left;
-	int roi_extent_bottom;
-	int roi_extent_right;
+	long roi_width;
+	long roi_height;
+	long roi_top;
+	long roi_left;
+	long roi_extent_bottom;
+	long roi_extent_right;
 
 	/*first we load the different Groups of the configuration file
 	 * second parameter "gchar* length" is optional*/
@@ -813,6 +815,8 @@ gboolean get_roi_parameters_for_sources ( int index, roi_data *roi_datas){
 	/* Build the name that the group should have */
 	sprintf(source_name, "%s%d", source_prefix, index);
 
+	roi_width 			= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_WIDTH, 		error, TRUE );
+	roi_height 			= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_HEIGHT, 		error, TRUE );
 	roi_top 			= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_ORIGIN_TOP , 	error, TRUE );
 	roi_left 			= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_ORIGIN_LEFT, 	error, TRUE );
 	roi_extent_bottom 	= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_EXTENT_BOTTOM, error, TRUE );
@@ -821,7 +825,7 @@ gboolean get_roi_parameters_for_sources ( int index, roi_data *roi_datas){
 	/* if the value were not found, set the ROI parameters to 0 */
 
 	/* if No ROI_top AND No_ROI_left */
-	if ( roi_top == -1 && roi_left == -1 ){
+	if ( roi_width == -1 && roi_height == -1 && roi_top == -1 && roi_left == -1 ){
 		if (  roi_extent_bottom == -1 && roi_extent_right == -1 ) {
 			roi_top 			= 0;
 			roi_left 			= 0;
@@ -835,8 +839,8 @@ gboolean get_roi_parameters_for_sources ( int index, roi_data *roi_datas){
 	}
 
 	/* if only on ROI_top or ROI_left */
-	else if ( ( roi_top != -1 && roi_left == -1) ||  ( roi_top == -1 && roi_left != -1 ) ){
-		g_printerr("Keys %s and %s should be both in confiuguation file\n", ROI_ORIGIN_TOP, ROI_ORIGIN_LEFT);
+	else if ( ! ( roi_width != -1 && roi_height != -1 && roi_top != -1 && roi_left != -1 ) ){
+		g_printerr("Keys %s, %s, %s, %s should all be defined\n",ROI_WIDTH, ROI_HEIGHT, ROI_ORIGIN_TOP, ROI_ORIGIN_LEFT);
 		return FALSE;
 	}
 
