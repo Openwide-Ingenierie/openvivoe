@@ -183,6 +183,8 @@ extern redirection_str redirection;
  * \brief a structure to save the data related to ROI
  */
 typedef struct{
+	long 	roi_width;
+	long 	roi_height;
 	long 	roi_top;
 	long 	roi_left;
 	long 	roi_extent_bottom;
