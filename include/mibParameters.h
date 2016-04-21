@@ -179,7 +179,15 @@ typedef struct {
 
 extern redirection_str redirection;
 
-
+/**
+ * \brief a structure to save the data related to ROI
+ */
+typedef struct{
+	long 	roi_top;
+	long 	roi_left;
+	long 	roi_extent_bottom;
+	long 	roi_extent_right;
+}roi_data;
 
 /** 
  * \brief The main loop of the program, because to be able to acces it everywhere in the program

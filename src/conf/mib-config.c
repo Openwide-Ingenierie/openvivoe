@@ -421,7 +421,7 @@ static int get_key_value_int(GKeyFile* gkf, const gchar* const* groups ,char *gr
 	}
 
 	if(g_key_file_has_key(gkf,group_name,key_name, &error)){
-		key_value = (char*) g_key_file_get_integer(gkf,group_name , key_name , &error);
+		key_value = (int) g_key_file_get_integer(gkf,group_name , key_name , &error);
 		if(error != NULL)
 			g_printerr("Invalid format for key %s: %s\n", key_name , error->message);
 	}
@@ -774,6 +774,103 @@ void set_default_IP_from_conf(int index, const char* new_default_ip){
 
 	free(receiver_name);
 	close_mib_configuration_file(gkf);
+
+}
+
+/** 
+ * \brief
+ */
+gboolean get_roi_parameters_for_sources ( int index, roi_data *roi_datas){
+
+	/* Define the error pointer we will be using to check for errors in the configuration file */
+    GError 		*error 	= NULL;
+
+	/* a location to store the path of the openned configuration file */
+	gchar* gkf_path = NULL;
+
+	 /* Declaration of a pointer that will contain our configuration file*/
+	GKeyFile 	*gkf 	= open_mib_configuration_file(error, &gkf_path);
+
+	/* Declaration of an array of gstring (gchar**) that will contain the name of the different groups
+	 * declared in the configuration file
+	 */
+	gchar 		**groups;
+
+	/*
+	 * the roi parameters retreive from the configuration file
+	 */
+	int roi_top;
+	int roi_left;
+	int roi_extent_bottom;
+	int roi_extent_right;
+
+	/*first we load the different Groups of the configuration file
+	 * second parameter "gchar* length" is optional*/
+	groups = g_key_file_get_groups(gkf, NULL);
+
+	char *source_prefix = "source_";
+	char *source_name = (char*) malloc( strlen(source_prefix)+2 * sizeof(char));
+	/* Build the name that the group should have */
+	sprintf(source_name, "%s%d", source_prefix, index);
+
+	roi_top 			= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_ORIGIN_TOP , 	error, TRUE );
+	roi_left 			= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_ORIGIN_LEFT, 	error, TRUE );
+	roi_extent_bottom 	= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_EXTENT_BOTTOM, error, TRUE );
+	roi_extent_right 	= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_EXTENT_RIGHT, 	error, TRUE );
+
+	/* if the value were not found, set the ROI parameters to 0 */
+
+	/* if No ROI_top AND No_ROI_left */
+	if ( roi_top == -1 && roi_left == -1 ){
+		if (  roi_extent_bottom == -1 && roi_extent_right == -1 ) {
+			roi_top 			= 0;
+			roi_left 			= 0;
+			roi_extent_bottom 	= 0;
+			roi_extent_right 	= 0;
+		}
+		else if ( roi_extent_bottom != -1 || roi_extent_right != -1 ){
+			g_printerr("keys %s and/or %s cannot be set if %s and %s not present\n", ROI_EXTENT_BOTTOM, ROI_EXTENT_RIGHT, ROI_ORIGIN_TOP, ROI_ORIGIN_LEFT);
+			return FALSE;
+		}
+	}
+
+	/* if only on ROI_top or ROI_left */
+	else if ( ( roi_top != -1 && roi_left == -1) ||  ( roi_top == -1 && roi_left != -1 ) ){
+		g_printerr("Keys %s and %s should be both in confiuguation file\n", ROI_ORIGIN_TOP, ROI_ORIGIN_LEFT);
+		return FALSE;
+	}
+
+	/* if both ROI_top and ROI_left present */
+	else {
+		
+		/* if no roi_extent_bottom and no roi_extent right */
+		if (  roi_extent_bottom == -1 && roi_extent_right == -1 ) {
+			roi_extent_bottom 	= 0;
+			roi_extent_right 	= 0;
+		}
+		
+		/* if only one of extent parameter present */
+		else if ( ( roi_extent_bottom == -1 && roi_extent_right != -1 ) || ( roi_extent_bottom != -1 && roi_extent_right == -1 ) ){
+			g_printerr("Keys %s and %s should be both in confiuguation file\n", ROI_ORIGIN_TOP, ROI_ORIGIN_LEFT);
+			return FALSE;
+		}
+
+	}
+
+	/* there all roi parameters should be correctly set, or we should have already returned */
+
+	 /*
+	  * save those values to roi_datas
+	 */
+	roi_datas->roi_top 				= roi_top;
+	roi_datas->roi_left 			= roi_left;
+	roi_datas->roi_extent_bottom 	= roi_extent_bottom;
+	roi_datas->roi_extent_right 	= roi_extent_right;
+
+	free(source_name);
+	close_mib_configuration_file(gkf);
+	return TRUE;
+
 }
 
 /**

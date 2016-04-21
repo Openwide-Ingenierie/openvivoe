@@ -41,7 +41,7 @@
 /**
  * \brief the names of the keys that could be found in the configuration file under group [source_x] 
  */
-#define ROI_ORIGIN_RIGHT 			"ROI_left_default"
+#define ROI_ORIGIN_LEFT 			"ROI_left_default"
 
 /**
  * \brief the names of the keys that could be found in the configuration file under group [source_x] 
