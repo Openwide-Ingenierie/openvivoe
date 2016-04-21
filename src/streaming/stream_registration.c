@@ -204,10 +204,10 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 											video_info->videoFormatFps,				 									video_info->videoFormatColorimetry,
 											video_info->videoFormatInterlaced, 											video_info->videoFormatCompressionFactor,
 											video_info->videoFormatCompressionRate, 									video_info->videoFormatMaxHorzRes,
-											video_info->videoFormatMaxVertRes, 											0,
-											0, 																			0,
-											0,																			0,
-											0, 																			0,
+											video_info->videoFormatMaxVertRes, 											video_info->videoFormatRoiHorzRes,
+											video_info->videoFormatRoiVertRes, 											video_info->videoFormatRoiOriginTop,
+											video_info->videoFormatRoiOriginLeft,										video_info->videoFormatRoiExtentBottom,
+											video_info->videoFormatRoiExtentRight, 										data->rtp_datas->rtp_type,
 											data);
 			
 			char *channelUserDesc = get_desc_from_conf(video_info->videoFormatIndex);
@@ -260,11 +260,12 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 											video_info->videoFormatFps,				 										video_info->videoFormatColorimetry,
 											video_info->videoFormatInterlaced,												video_info->videoFormatCompressionFactor,
 											video_info->videoFormatCompressionRate, 										video_info->videoFormatMaxHorzRes,
-											video_info->videoFormatMaxVertRes, 												0,
-											0, 																				0,
-											0,																				0,
-											0, 																				0,
+											video_info->videoFormatMaxVertRes, 											video_info->videoFormatRoiHorzRes,
+											video_info->videoFormatRoiVertRes, 											video_info->videoFormatRoiOriginTop,
+											video_info->videoFormatRoiOriginLeft,										video_info->videoFormatRoiExtentBottom,
+											video_info->videoFormatRoiExtentRight, 										data->rtp_datas->rtp_type,
 											data);
+
 			/* increase videoFormatNumber as we added an entry */
 			char *channelUserDesc = get_desc_from_conf(video_info->videoFormatIndex);
 			if (channelUserDesc == NULL)

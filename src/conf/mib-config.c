@@ -857,7 +857,7 @@ gboolean get_roi_parameters_for_sources ( int index, roi_data *roi_datas){
 		
 		/* if only one of extent parameter present */
 		else if ( ( roi_extent_bottom == -1 && roi_extent_right != -1 ) || ( roi_extent_bottom != -1 && roi_extent_right == -1 ) ){
-			g_printerr("Keys %s and %s should be both in confiuguation file\n", ROI_ORIGIN_TOP, ROI_ORIGIN_LEFT);
+			g_printerr("Keys %s and %s should be both in configuration file\n", ROI_ORIGIN_TOP, ROI_ORIGIN_LEFT);
 			return FALSE;
 		}
 
