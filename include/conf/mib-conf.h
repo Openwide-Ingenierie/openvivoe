@@ -36,6 +36,16 @@
 /**
  * \brief the names of the keys that could be found in the configuration file under group [source_x] 
  */
+#define ROI_WIDTH 					"ROI_widht_default"
+
+/**
+ * \brief the names of the keys that could be found in the configuration file under group [source_x] 
+ */
+#define ROI_HEIGHT 					"ROI_height_default"
+
+/**
+ * \brief the names of the keys that could be found in the configuration file under group [source_x] 
+ */
 #define ROI_ORIGIN_TOP 				"ROI_top_default"
 
 /**
@@ -76,5 +86,7 @@ gchar 	*get_desc_from_conf(int index); /* get the channelUserDesc associated to 
 void 	set_desc_to_conf(int index, const char* new_desc); /* save the new channelUserDesc in configuration file */
 gchar 	*get_default_IP_from_conf(int index); /* get the defaultReceiveIP for the defaultStartUp mode for Service User */
 void 	set_default_IP_from_conf(int index, const char* new_default_ip); /* set the defaultReceiveIP for the defaultStartUp mode for Service User */
+gboolean get_roi_parameters_for_sources ( int index, roi_data *roi_datas); /* get the ROI parameters for sources */
+
 #endif /* MIB_CONF_H */
 

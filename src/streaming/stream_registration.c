@@ -42,8 +42,6 @@ static gboolean compare_entries(struct videoFormatTable_entry* origin, struct vi
 	   		);
 }
 
-
-
 /**
  * \brief J2K videos caps have a field names "colorspace" that can be map to a classic slampling
  * \param colorimetru the colorimetry srting value in detected caps
@@ -215,6 +213,7 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 			char *channelUserDesc = get_desc_from_conf(video_info->videoFormatIndex);
 			if (channelUserDesc == NULL)
 				channelUserDesc="";
+
 			/* At the  same time we copy all of those parameters into video channel */
 			channelTable_createEntry( 	channelNumber._value.int_val+1, 												videoChannel,
 										channelUserDesc, 																stop,
