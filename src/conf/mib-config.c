@@ -365,10 +365,8 @@ static gchar *vivoe_redirect(gchar *cmdline){
 	return NULL;
 }
 
-
-
 /**
- * \brief check if the group contains the given key, get the corresponding value or display appropriate error to the user
+ * \brief check if the group contains the given key, get the corresponding char value or display appropriate error to the user
  * \param gkf the GKeyFile openned
  * \param groups the names of groups present in configuration file
  * \param group_name the group's name in which we are interested 
@@ -376,7 +374,7 @@ static gchar *vivoe_redirect(gchar *cmdline){
  * \param error a variable to store errors 
  * \return gchar* the value of the found key or NULL is the key has not been found
  */
-static gchar *get_key_value(GKeyFile* gkf, const gchar* const* groups ,char *group_name, const gchar *key_name, GError* error){
+static gchar *get_key_value_char(GKeyFile* gkf, const gchar* const* groups ,char *group_name, const gchar *key_name, GError* error){
 
 	gchar *key_value; /* a variable to store the key value */
 
@@ -402,6 +400,43 @@ static gchar *get_key_value(GKeyFile* gkf, const gchar* const* groups ,char *gro
 
 	return key_value;
 }
+
+/**
+ * \brief check if the group contains the given key, get the corresponding integer value or display appropriate error to the user
+ * \param gkf the GKeyFile openned
+ * \param groups the names of groups present in configuration file
+ * \param group_name the group's name in which we are interested 
+ * \param key_name the name of the key we are loooking for
+ * \param error a variable to store errors 
+ * \return gchar* the value of the found key or NULL is the key has not been found
+ */
+static int get_key_value_int(GKeyFile* gkf, const gchar* const* groups ,char *group_name, const gchar *key_name, GError* error){
+
+	int key_value; /* a variable to store the key value */
+
+	if( !(g_strv_contains(groups, group_name )) ){
+		fprintf (stderr, "Group %s not found in configuration file\nIt should be written in the form [%s]\n", group_name ,group_name);
+		return NULL;
+	}
+
+	if(g_key_file_has_key(gkf,group_name,key_name, &error)){
+		key_value = (char*) g_key_file_get_integer(gkf,group_name , key_name , &error);
+		if(error != NULL)
+			g_printerr("Invalid format for key %s: %s\n", key_name , error->message);
+	}
+	else {
+		g_printerr("ERROR: key not found %s for group: %s\n", key_name ,group_name );
+		return NULL;
+	}
+
+	if ( !strcmp( key_value, "") ){
+		g_printerr("ERROR: invalid key value for %s in %s\n", key_name ,group_name );
+		return NULL;
+	}
+
+	return key_value;
+}
+
 
 /**
  * \brief check if the group contains the given key, set the corresponding value or display appropriate error to the user, save the new version of conf file
@@ -463,7 +498,7 @@ gchar *get_source_cmdline(GKeyFile 	*gkf, int index){
 	/* Build the name that the group should have */
 	sprintf(source_name, "%s%d", source_prefix, index);
 
-	cmdline = get_key_value(gkf,(const gchar* const*) groups , source_name ,GST_SOURCE_CMDLINE , error);
+	cmdline = get_key_value_char(gkf,(const gchar* const*) groups , source_name ,GST_SOURCE_CMDLINE , error);
 
 	free(source_name);
 	return cmdline;
@@ -503,7 +538,7 @@ gchar *init_sources_from_conf(int index){
 	/* Build the name that the group should have */
 	sprintf(source_name, "%s%d", source_prefix, index);
 
-	cmdline = get_key_value(gkf,(const gchar* const*) groups , source_name ,GST_SOURCE_CMDLINE , error);
+	cmdline = get_key_value_char(gkf,(const gchar* const*) groups , source_name ,GST_SOURCE_CMDLINE , error);
 
 	free(source_name);
 	close_mib_configuration_file(gkf);
@@ -539,7 +574,7 @@ gchar *get_sink_cmdline(GKeyFile 	*gkf, int index){
 	/* Build the name that the group should have */
 	sprintf(receiver_name, "%s%d", receiver_prefix, index);
 
-	cmdline = get_key_value(gkf,(const gchar* const*) groups , receiver_name ,GST_SINK_CMDLINE , error);
+	cmdline = get_key_value_char(gkf,(const gchar* const*) groups , receiver_name ,GST_SINK_CMDLINE , error);
 
 	free(receiver_name);
 	return cmdline;
@@ -579,7 +614,7 @@ gchar *init_sink_from_conf(int index){
 	/* Build the name that the group should have */
 	sprintf(receiver_name, "%s%d", receiver_prefix, index);
 
-	cmdline = get_key_value(gkf,(const gchar* const*) groups , receiver_name ,GST_SINK_CMDLINE , error);
+	cmdline = get_key_value_char(gkf,(const gchar* const*) groups , receiver_name ,GST_SINK_CMDLINE , error);
 
 	free(receiver_name);
 	close_mib_configuration_file(gkf);
@@ -620,7 +655,7 @@ gchar* get_desc_from_conf(int index){
 	/* Build the name that the group should have */
 	sprintf(source_name, "%s%d", source_prefix, index);
 
-	channelUserDesc = get_key_value(gkf,(const gchar* const*) groups , source_name ,KEY_NAME_CHANNEL_DESC , error);
+	channelUserDesc = get_key_value_char(gkf,(const gchar* const*) groups , source_name ,KEY_NAME_CHANNEL_DESC , error);
 
 	free(source_name);
 	close_mib_configuration_file(gkf);
@@ -666,6 +701,7 @@ void set_desc_to_conf(int index, const char* new_desc){
 /** 
  * \brief returned the DefaultIPaddress enter by the user to use for SU in defaultStartUPMode 
  * \param the corresponding number of the source to refer it in the configuration file
+ * \return the value of the defaultReceiveIp key or NULL if not found
  */
 gchar *get_default_IP_from_conf(int index){
 	/* Define the error pointer we will be using to check for errors in the configuration file */
@@ -696,7 +732,7 @@ gchar *get_default_IP_from_conf(int index){
 	/* Build the name that the group should have */
 	sprintf(receiver_name, "%s%d", receiver_prefix, index);
 
-	default_receive_ip = get_key_value(gkf,(const gchar* const*) groups ,receiver_name, KEY_NAME_DEFAULT_IP , error);
+	default_receive_ip = get_key_value_char(gkf,(const gchar* const*) groups ,receiver_name, KEY_NAME_DEFAULT_IP , error);
 
 	free(receiver_name);
 	close_mib_configuration_file(gkf);
@@ -775,7 +811,7 @@ static gboolean init_redirection_data(GKeyFile* gkf ){
 					redirection.size = i+1 ;
 					redirection.redirect_channels[i] =(redirect_data*) malloc ( sizeof (redirect_data)) ;
 					redirection.redirect_channels[i]->channel_SU_index 	= index_receiver;
-					redirection.redirect_channels[i]->gst_sink 		= init_sink_from_conf( index_receiver );
+					redirection.redirect_channels[i]->gst_sink 			= init_sink_from_conf( index_receiver );
 					redirection.redirect_channels[i]->video_SP_index 	= index_source;
 					redirection.redirect_channels[i]->gst_source 		= init_sources_from_conf( index_source );
 					i++;
@@ -796,6 +832,7 @@ static gboolean init_redirection_data(GKeyFile* gkf ){
 	}
 
 	return TRUE;
+
 }
 
 /**
