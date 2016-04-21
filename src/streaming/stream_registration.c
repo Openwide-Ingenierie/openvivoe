@@ -204,41 +204,58 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 
 
 	if(videoFormatTable_head == NULL){
-			/* Then we are sure that we can create a new entry */
-			videoFormatTable_createEntry( 	video_info->videoFormatIndex, 												videoFormatType,
-											disable, 																	video_info->videoFormatBase,
-											video_info->videoFormatSampling, 											video_info->videoFormatBitDepth,
-											video_info->videoFormatFps,				 									video_info->videoFormatColorimetry,
-											video_info->videoFormatInterlaced, 											video_info->videoFormatCompressionFactor,
-											video_info->videoFormatCompressionRate, 									video_info->videoFormatMaxHorzRes,
-											video_info->videoFormatMaxVertRes, 											video_info->videoFormatRoiHorzRes,
-											video_info->videoFormatRoiVertRes, 											video_info->videoFormatRoiOriginTop,
-											video_info->videoFormatRoiOriginLeft,										video_info->videoFormatRoiExtentBottom,
-											video_info->videoFormatRoiExtentRight, 										data->rtp_datas->rtp_type,
-											data);
-			
-			char *channelUserDesc = get_desc_from_conf(video_info->videoFormatIndex);
-			if (channelUserDesc == NULL)
-				channelUserDesc="";
 
-			/* At the  same time we copy all of those parameters into video channel */
-			channelTable_createEntry( 	channelNumber._value.int_val+1, 												videoFormatType,
-										channelUserDesc, 																stop,
-										video_info->videoFormatIndex, 													video_info->videoFormatBase,
-										video_info->videoFormatSampling, 												video_info->videoFormatBitDepth,
-										video_info->videoFormatFps,				 										video_info->videoFormatColorimetry,
-										video_info->videoFormatInterlaced, 												video_info->videoFormatCompressionFactor,
-										video_info->videoFormatCompressionRate, 										video_info->videoFormatMaxHorzRes,
-										video_info->videoFormatMaxVertRes, 												0,
-										0, 																				0,
-										0,																				data->rtp_datas->rtp_type,
-										0/*IP*/, 																		0 /* packet delay*/,
- 										default_SAP_interval,															video_info->videoFormatIndex, /*defaultVideoFormatIndex*/
-										0/*default receive IP*/, 														data);
+		/* Then we are sure that we can create a new entry */
+		videoFormatTable_createEntry( 	video_info->videoFormatIndex, 						videoFormatType,
+				disable, 																	video_info->videoFormatBase,
+				video_info->videoFormatSampling, 											video_info->videoFormatBitDepth,
+				video_info->videoFormatFps,				 									video_info->videoFormatColorimetry,
+				video_info->videoFormatInterlaced, 											video_info->videoFormatCompressionFactor,
+				video_info->videoFormatCompressionRate, 									video_info->videoFormatMaxHorzRes,
+				video_info->videoFormatMaxVertRes, 											video_info->videoFormatRoiHorzRes,
+				video_info->videoFormatRoiVertRes, 											video_info->videoFormatRoiOriginTop,
+				video_info->videoFormatRoiOriginLeft,										video_info->videoFormatRoiExtentBottom,
+				video_info->videoFormatRoiExtentRight, 										data->rtp_datas->rtp_type,
+				data);
 
-			*channel_entry_index = channelNumber._value.int_val+1;
-			/* increase channelNumber as we added an entry */
-			channelNumber._value.int_val++;	
+		char *channelUserDesc = get_desc_from_conf(video_info->videoFormatIndex);
+		if (channelUserDesc == NULL)
+			channelUserDesc="";
+
+		/* initialize channel resolution to roi resolution if this is a roi or to video resoltion if there is no ROI */
+		int channelHorzRes;
+		int channelVertRes;
+		if ( video_info->videoFormatRoiHorzRes && video_info->videoFormatRoiVertRes ){
+
+			channelHorzRes = video_info->videoFormatRoiHorzRes;
+			channelVertRes = video_info->videoFormatRoiVertRes;
+
+		}else{
+
+			channelHorzRes = video_info->videoFormatMaxHorzRes;
+			channelVertRes = video_info->videoFormatMaxVertRes;
+
+		}
+
+		/* At the  same time we copy all of those parameters into video channel */
+		channelTable_createEntry( 	channelNumber._value.int_val+1, 							videoFormatType,
+				channelUserDesc, 																stop,
+				video_info->videoFormatIndex, 													video_info->videoFormatBase,
+				video_info->videoFormatSampling, 												video_info->videoFormatBitDepth,
+				video_info->videoFormatFps,				 										video_info->videoFormatColorimetry,
+				video_info->videoFormatInterlaced, 												video_info->videoFormatCompressionFactor,
+				video_info->videoFormatCompressionRate, 										channelHorzRes,
+				channelVertRes, 																0,
+				0, 																				0,
+				0,																				data->rtp_datas->rtp_type,
+				0/*IP*/, 																		0 /* packet delay*/,
+				default_SAP_interval,															video_info->videoFormatIndex, /*defaultVideoFormatIndex*/
+				0/*default receive IP*/, 														data);
+
+		*channel_entry_index = channelNumber._value.int_val+1;
+		/* increase channelNumber as we added an entry */
+		channelNumber._value.int_val++;	
+
 	}else{
 		/* if the table of video format is not empty for this device, check if this format is already in the table
 		 * for that, iterate the table
@@ -267,16 +284,31 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 											video_info->videoFormatFps,				 										video_info->videoFormatColorimetry,
 											video_info->videoFormatInterlaced,												video_info->videoFormatCompressionFactor,
 											video_info->videoFormatCompressionRate, 										video_info->videoFormatMaxHorzRes,
-											video_info->videoFormatMaxVertRes, 											video_info->videoFormatRoiHorzRes,
-											video_info->videoFormatRoiVertRes, 											video_info->videoFormatRoiOriginTop,
-											video_info->videoFormatRoiOriginLeft,										video_info->videoFormatRoiExtentBottom,
-											video_info->videoFormatRoiExtentRight, 										data->rtp_datas->rtp_type,
+											video_info->videoFormatMaxVertRes, 												video_info->videoFormatRoiHorzRes,
+											video_info->videoFormatRoiVertRes, 												video_info->videoFormatRoiOriginTop,
+											video_info->videoFormatRoiOriginLeft,											video_info->videoFormatRoiExtentBottom,
+											video_info->videoFormatRoiExtentRight, 											data->rtp_datas->rtp_type,
 											data);
 
 			/* increase videoFormatNumber as we added an entry */
 			char *channelUserDesc = get_desc_from_conf(video_info->videoFormatIndex);
 			if (channelUserDesc == NULL)
 				channelUserDesc="";
+
+		/* initialize channel resolution to roi resolution if this is a roi or to video resoltion if there is no ROI */
+		int channelHorzRes;
+		int channelVertRes;
+		if ( video_info->videoFormatRoiHorzRes && video_info->videoFormatRoiVertRes ){
+
+			channelHorzRes = video_info->videoFormatRoiHorzRes;
+			channelVertRes = video_info->videoFormatRoiVertRes;
+
+		}else{
+		
+			channelHorzRes = video_info->videoFormatMaxHorzRes;
+			channelVertRes = video_info->videoFormatMaxVertRes;
+
+		}
 
 			/* At the  same time we copy all of those parameters into video channel */
 			channelTable_createEntry( 	channelNumber._value.int_val+1, 													videoChannel,
@@ -285,8 +317,8 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 										video_info->videoFormatSampling, 													video_info->videoFormatBitDepth,
 										video_info->videoFormatFps,				 											video_info->videoFormatColorimetry,
 										video_info->videoFormatInterlaced, 													video_info->videoFormatCompressionFactor,
-										video_info->videoFormatCompressionRate, 											video_info->videoFormatMaxHorzRes,
-										video_info->videoFormatMaxVertRes, 													0,
+										video_info->videoFormatCompressionRate, 											channelHorzRes,
+										channelVertRes, 				 													0,
 										0, 																					0,
 										0,																					data->rtp_datas->rtp_type,
 										0,/*receive Address*/ 																0 /* packet delay*/,

@@ -177,6 +177,14 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline, GstElement *input
 
 }
 
+#if 0
+GstElement *update_pipeline_SP_on_roi_changes( GstElement *pipeline, struct videoFormatTable_entry *video_stream_info){
+
+	/* first updates the videoFormatType */
+	gst_bin_get_by_name ( GST_bin ( pipeline ) , "source") ;
+}
+#endif 
+
 GstElement *handle_roi( GstElement *pipeline, GstElement *input, struct videoFormatTable_entry *video_stream_info , GstStructure *video_caps ) {
 
 	roi_data roi_datas;

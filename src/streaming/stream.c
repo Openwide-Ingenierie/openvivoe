@@ -183,10 +183,14 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 		g_object_set (bin, "is-live", TRUE, NULL);
 
 	}
-	else
+	else{
 		bin  = gst_parse_bin_from_description ( cmdline,
 												TRUE,
-												&error);	
+												&error);
+
+		gst_element_set_name ( bin ,  "source" );
+
+	}
 
 	if ( error != NULL){
 		g_printerr("Failed to parse: %s\n",error->message);
