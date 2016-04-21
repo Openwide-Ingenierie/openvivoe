@@ -7,7 +7,7 @@
 #ifndef ROI_H
 # define ROI_H
 
-
+GstElement *handle_roi( GstElement *pipeline, GstElement *input, struct videoFormatTable_entry *video_stream_info , GstStructure *video_caps );
 
 #endif /* ROI_H */
 

@@ -171,7 +171,7 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline, GstElement *input
 
 }
 
-GstElement *init_video_format_roi( GstElement *pipeline, GstElement *input, struct videoFormatTable_entry *video_stream_info , GstStructure *video_caps ) {
+GstElement *handle_roi( GstElement *pipeline, GstElement *input, struct videoFormatTable_entry *video_stream_info , GstStructure *video_caps ) {
 
 	roi_data roi_datas;
 	GstElement *last;
