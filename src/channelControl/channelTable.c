@@ -419,7 +419,8 @@ channelTable_get_next_data_point(void **my_loop_context,
 gboolean channelSatus_requests_handler( struct channelTable_entry * table_entry ){
 	/* the behaviour will be different wether the device is a ServiceProvider or a ServiceUser */
 	switch( table_entry->channelType ){
-		case videoChannel : /* case ServiceProvider */
+		case videoChannel: /* case ServiceProvider */
+		case roi:
 			if ( table_entry->channelStatus 		== start){
 				prepare_socket( table_entry );
 				g_timeout_add(table_entry->channelSapMessageInterval,send_announcement, table_entry );

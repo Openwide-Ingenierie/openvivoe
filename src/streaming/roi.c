@@ -83,30 +83,28 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline, GstElement *input
 	GstElement *videocrop 		= NULL;
 	GstElement *capsfilter 		= NULL;
 	GstElement *videoscale 		= NULL;
-/*
- * Save the value of input into last. This will allow us to return input if no RoI were specified in the configuration file, and
- * so if no element is added to the pipeline.
- */
-	GstElement *last 			= input; 
+	GstElement *last 			= NULL; 
 
-	videoconvert = gst_element_factory_make_log ( "videoconvert", "videoconvert" );
-	if ( !videoconvert )
-		return NULL;
+	if ( roi_exists ( video_stream_info ) ){
+		videoconvert = gst_element_factory_make_log ( "videoconvert", "videoconvert" );
+		if ( !videoconvert )
+			return NULL;
 
-	gst_bin_add ( GST_BIN(pipeline) , videoconvert);
+		gst_bin_add ( GST_BIN(pipeline) , videoconvert);
 
-	if ( !gst_element_link_log (input, videoconvert)){
-		gst_bin_remove( GST_BIN (pipeline), videoconvert);
-		return NULL;
-	}
-
-	/*
-	 * Upadte input value. That is not a problem because the input element has been saved into "last", and will be return such as if 
-	 * no element are added into pipeline
+		if ( !gst_element_link_log (input, videoconvert)){
+			gst_bin_remove( GST_BIN (pipeline), videoconvert);
+			return NULL;
+		}
+		/*
+	 * This will be helpfull for all kinds of ROI
 	 */
 	input = videoconvert;
 
-	if ( roi_is_non_scalable( video_stream_info ) ){
+	}else
+		return input;
+
+		if ( roi_is_non_scalable( video_stream_info ) ){
 
 		videocrop = gst_element_factory_make_log ( "videocrop", "videocrop" );
 		if ( !videocrop )
@@ -164,21 +162,25 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline, GstElement *input
 	
 	}
 
-	gst_bin_add ( GST_BIN(pipeline) , last );
+	if( last ){
+		gst_bin_add ( GST_BIN(pipeline) , last );
 
-	if ( !gst_element_link_log (input, last)){
-		gst_bin_remove( GST_BIN (pipeline), last);
-		return NULL;
+		if ( !gst_element_link_log (input, last)){
+			gst_bin_remove( GST_BIN (pipeline), last);
+			return NULL;
+		}
+
+		return last;
 	}
-
-	return last;
+	else
+		return input;
 
 }
 
 GstElement *handle_roi( GstElement *pipeline, GstElement *input, struct videoFormatTable_entry *video_stream_info , GstStructure *video_caps ) {
 
 	roi_data roi_datas;
-	GstElement *last;
+	GstElement *last = NULL;
 
 	/* retrieve default value from configuration */
 	if ( !get_roi_parameters_for_sources ( video_stream_info->videoFormatIndex , &roi_datas) )
