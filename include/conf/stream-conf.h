@@ -23,9 +23,9 @@
 #define CONFIG_FILE_3 	"/usr/share/vivoe/conf"
 #define CONFIG_FILE_4 	"$HOME/.vivoe/conf"
 
-#define RAW_GROUP_NAME 	"RAW"
-#define RAW_GROUP_NAME 	"MPEG-4"
-#define RAW_GROUP_NAME 	"JPEG2000"
+#define RAW_GROUP_NAME 		"RAW"
+#define MPEG4_GROUP_NAME 	"MPEG-4"
+#define J2K_GROUP_NAME 		"JPEG2000"
 
 GKeyFile* open_configuration_file();
 void close_configuration_file(	GKeyFile* gkf);

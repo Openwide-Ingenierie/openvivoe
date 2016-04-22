@@ -121,7 +121,7 @@ gboolean vivoe_use_format(GKeyFile* gkf, const char* group_name){
  * \return the encodings to use in a string array
  */
 gchar** get_raw_encoding(GKeyFile* gkf){
-	return get_list_value(gkf, "encoding", "RAW");
+	return get_list_value(gkf, "encoding",  RAW_GROUP_NAME ) ;
 }
 
 /**
@@ -130,7 +130,7 @@ gchar** get_raw_encoding(GKeyFile* gkf){
  * \return the resolutions to use in a string array
  */
 gchar** get_raw_res(GKeyFile* gkf){
-	return get_list_value(gkf, "resolution", "RAW");	
+	return get_list_value(gkf, "resolution", RAW_GROUP_NAME );
 }
 
 /**
@@ -139,7 +139,7 @@ gchar** get_raw_res(GKeyFile* gkf){
  * \return the resolutions to use in a string array
  */
 gchar** get_mp4_res(GKeyFile* gkf){
-	return get_list_value(gkf, "resolution", "MPEG-4");	
+	return get_list_value(gkf, "resolution", MPEG4_GROUP_NAME ); 
 }
 
 /**
@@ -148,6 +148,5 @@ gchar** get_mp4_res(GKeyFile* gkf){
  * \return the resolutions to use in a string array
  */
 gchar** get_j2k_res(GKeyFile* gkf){
-	return get_list_value(gkf, "resolution", "JPEG2000");	
+	return get_list_value(gkf, "resolution", J2K_GROUP_NAME);	
 }
-
