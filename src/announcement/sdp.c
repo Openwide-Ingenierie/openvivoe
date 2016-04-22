@@ -131,13 +131,13 @@ static gboolean error_function(){
  */
 static gboolean create_fmtp_media(struct channelTable_entry * channel_entry, GstSDPMedia *media)
 {
-	if ( !strcmp( channel_entry->channelVideoFormat, "RAW")){ // case RAW format
+	if ( !strcmp( channel_entry->channelVideoFormat, RAW_NAME )){ // case RAW format
 		if( !create_raw_media(channel_entry, media))
 			return error_function();
-	}else if ( !strcmp(channel_entry->channelVideoFormat , "MP4V-ES")){ // case MPEG-4 format
+	}else if ( !strcmp(channel_entry->channelVideoFormat , MPEG4_NAME )){ // case MPEG-6 format
 		if( !create_mpeg4_media(channel_entry, media))
 			return error_function();
-	}else if ( !strcmp( channel_entry->channelVideoFormat , "JPEG2000")){ // case J2000 format
+	}else if ( !strcmp( channel_entry->channelVideoFormat , J2K_NAME)){ // case J2000 format
 		if( !create_j2k_media(channel_entry, media))
 			return error_function();
 	}else{

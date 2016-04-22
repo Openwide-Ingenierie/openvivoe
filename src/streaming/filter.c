@@ -492,11 +492,11 @@ gboolean filter_VIVOE(GstStructure* input_caps_str, GstElement* input, GstElemen
 	if(gkf == NULL)
 		return FALSE; /* if not configuration file was found, return NULL, meaning that we will be using the defaults filter for VIVOE formats*/
 	/* Check if RAW fortmat is used bu the user */
-	if( vivoe_use_format(gkf, "RAW") )
+	if( vivoe_use_format(gkf, RAW_GROUP_NAME ))
 		raw_filter 	= build_RAW_filter(gkf);
-	if( vivoe_use_format(gkf, "MPEG-4") )
+	if( vivoe_use_format(gkf,  MPEG4_GROUP_NAME) )
 		mpeg_filter = build_MPEG4_filter(gkf);
-	if( vivoe_use_format(gkf, "JPEG2000") )
+	if( vivoe_use_format(gkf, J2K_GROUP_NAME ))
 		j2k_filter 	= build_J2K_filter(gkf);
 
 	/* close configuration file */

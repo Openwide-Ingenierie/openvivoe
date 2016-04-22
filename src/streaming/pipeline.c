@@ -447,13 +447,13 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 						GstBus *bus,
 	fill_entry(video_caps, video_info, stream_datas);
 	if ( gst_structure_has_field( video_caps, "encoding-name")){
 		/* For Raw video */		
-		if ( strcmp( "RAW",encoding) == 0 ){
+		if ( strcmp( RAW_NAME,encoding) == 0 ){
 			rtp 	= gst_element_factory_make_log ("rtpvrawdepay", "rtpvrawdepay");
 			/* Check if everything went ok */
 			if( rtp == NULL)
 				return NULL;
 
-		}else if  ( strcmp( "MP4V-ES",encoding) == 0 ){
+		}else if  ( strcmp( MPEG4_NAME , encoding) == 0 ){
 			/* For MPEG-4 video */
 			rtp 	= gst_element_factory_make_log ("rtpmp4vdepay", "rtpmp4vdepay");
 			/* Checek if everything went ok */
@@ -462,7 +462,7 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 						GstBus *bus,
 
 		} 	
 		/* For J2K video */		
-		else if ( strcmp( "JPEG2000",encoding) == 0 ){
+		else if ( strcmp( J2K_NAME , encoding) == 0 ){
 			rtp 	= gst_element_factory_make_log ("rtpj2kdepay", "rtpj2kdepay");
 			/* Check if everything went ok */
 			if( rtp == NULL)
