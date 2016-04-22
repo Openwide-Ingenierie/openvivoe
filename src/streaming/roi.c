@@ -108,12 +108,12 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline, GstElement *input
 		if ( !videocrop )
 			return NULL;
 
-		g_object_set ( 	g_object ( videocrop ) , 
-						"top" 		,  video_stream_info->videoformatroiorigintop , 
-						"left" 		,  video_stream_info->videoformatroioriginleft , 
-						"bottom" 	,  video_stream_info->videoformatmaxvertres - ( video_stream_info->videoformatroiorigintop 	+ video_stream_info->videoformatroivertres  ),
-						"right" 	,  video_stream_info->videoformatmaxhorzres - ( video_stream_info->videoformatroioriginleft 	+ video_stream_info->videoformatroihorzres  ),
-						null
+		g_object_set ( 	G_OBJECT ( videocrop ) , 
+						"top" 		,  video_stream_info->videoFormatRoiOriginTop , 
+						"left" 		,  video_stream_info->videoFormatRoiOriginLeft , 
+						"bottom" 	,  video_stream_info->videoFormatMaxVertRes - ( video_stream_info->videoFormatRoiOriginTop 	+ video_stream_info->videoFormatRoiVertRes  ),
+						"right" 	,  video_stream_info->videoFormatMaxHorzRes - ( video_stream_info->videoFormatRoiOriginLeft	+ video_stream_info->videoFormatRoiHorzRes  ),
+						NULL
 					);
 		
 		last = videocrop;
@@ -229,10 +229,10 @@ gboolean update_pipeline_SP_on_roi_changes( GstElement *pipeline, struct channel
 			/* we should found a crop element */
 			GstElement *videocrop = gst_bin_get_by_name ( GST_BIN ( pipeline ) , "vidocrop" ) ;
 			g_object_set ( 	G_OBJECT ( videocrop ) , 
-						"top" 		,  video_stream_info->videoFormatRoiOriginTop , 
-						"left" 		,  video_stream_info->videoFormatRoiOriginLeft , 
-						"bottom" 	,  video_stream_info->videoFormatMaxVertRes - ( video_stream_info->videoFormatRoiOriginTop 	+ video_stream_info->videoFormatRoiVertRes  ),
-						"right" 	,  video_stream_info->videoFormatMaxHorzRes - ( video_stream_info->videoFormatRoiOriginLeft	+ video_stream_info->videoFormatRoiHorzRes  ),
+						"top" 		,  videoFormat_entry->videoFormatRoiOriginTop , 
+						"left" 		,  videoFormat_entry->videoFormatRoiOriginLeft , 
+						"bottom" 	,  videoFormat_entry->videoFormatMaxVertRes - ( videoFormat_entry->videoFormatRoiOriginTop 	+ videoFormat_entry->videoFormatRoiVertRes  ),
+						"right" 	,  videoFormat_entry->videoFormatMaxHorzRes - ( videoFormat_entry->videoFormatRoiOriginLeft	+ videoFormat_entry->videoFormatRoiHorzRes  ),
 						NULL
 					);
 
@@ -251,19 +251,24 @@ gboolean update_pipeline_SP_on_roi_changes( GstElement *pipeline, struct channel
 	else{
 
 		/* first updates the videoFormatType */
-		source = gst_bin_get_by_name ( GST_bin ( pipeline ) , "source" ) ;
-		
+		source = gst_bin_get_by_name ( GST_BIN ( pipeline ) , "source" ) ;
+
+		/* build the crop element */
+		GstElement *videocrop = gst_element_factory_make_log ( "videocrop", "videocrop" );
+			if ( !videocrop )
+				return FALSE;
+
 		/* then get the payloader */
 		if ( strcmp ( channel_entry->channelVideoFormat , RAW_NAME ) ){
 			
 			/* next element after source should be rtp raw payloader */
-			next_elem = gst_bin_get_by_name ( GST_bin ( pipeline ) , "rtpvrawpay" ) ;
+			next_elem = gst_bin_get_by_name ( GST_BIN ( pipeline ) , "rtpvrawpay" ) ;
 			
 			/* now , pause the pipeline if it was running */
 			/* save the state of pipeline */
 			int state = GST_STATE( pipeline );
 			if ( state == GST_STATE_PLAYING )
-				gst_element_set_state (data->pipeline, GST_STATE_NULL);
+				gst_element_set_state (pipeline, GST_STATE_NULL);
 			
 			/* unlink source and next_elem */
 			gst_element_unlink ( source , next_elem ) ;
@@ -278,20 +283,20 @@ gboolean update_pipeline_SP_on_roi_changes( GstElement *pipeline, struct channel
 			/* of the pipeline was playing, restart it */
 
 			if ( state  == GST_STATE_PLAYING )
-				gst_element_set_state (data->pipeline, GST_STATE_PLAYING);
+				gst_element_set_state (pipeline, GST_STATE_PLAYING);
 
 			return TRUE;
 
 		}
 		else if ( strcmp ( channel_entry->channelVideoFormat , MPEG4_NAME ) ){
 			/* next element after source should be mpeg4 parser */
-			next_elem = gst_bin_get_by_name ( GST_bin ( pipeline ) , "mpeg4videoparse" ) ;
+			next_elem = gst_bin_get_by_name ( GST_BIN ( pipeline ) , "mpeg4videoparse" ) ;
 			
 			/* now , pause the pipeline if it was running */
 			/* save the state of pipeline */
 			int state = GST_STATE( pipeline );
 			if ( state == GST_STATE_PLAYING )
-				gst_element_set_state (data->pipeline, GST_STATE_NULL);
+				gst_element_set_state (pipeline, GST_STATE_NULL);
 			
 			/* unlink source and next_elem */
 			gst_element_unlink ( source , next_elem ) ;
@@ -309,7 +314,7 @@ gboolean update_pipeline_SP_on_roi_changes( GstElement *pipeline, struct channel
 				return FALSE;
 			
 			/* insert video crop into the pipeline */
-			gst_bin_add_many ( GST_BIN ( pipeline ) , mpeg4_decoder , videocrop , mpeg4_encoder );
+			gst_bin_add_many ( GST_BIN ( pipeline ) , mpeg4_decoder , videocrop , mpeg4_encoder, NULL );
 			if ( ! gst_element_link_many( source,mpeg4_decoder ,videocrop , mpeg4_encoder , next_elem , NULL )){
 				g_printerr ( "ERROR in gstreamer's pipeline\n");
 				return FALSE;
@@ -317,20 +322,20 @@ gboolean update_pipeline_SP_on_roi_changes( GstElement *pipeline, struct channel
 
 			/* of the pipeline was playing, restart it */
 			if ( state  == GST_STATE_PLAYING )
-				gst_element_set_state (data->pipeline, GST_STATE_PLAYING);
+				gst_element_set_state (pipeline, GST_STATE_PLAYING);
 
 			return TRUE;
 
 		}
 		else if ( strcmp ( channel_entry->channelVideoFormat , J2K_NAME ) ){
 			/* next element after source should be mpeg4 parser */
-			next_elem = gst_bin_get_by_name ( GST_bin ( pipeline ) , "capsfilter-image/x-jpc" ) ;
+			next_elem = gst_bin_get_by_name ( GST_BIN ( pipeline ) , "capsfilter-image/x-jpc" ) ;
 			
 			/* now , pause the pipeline if it was running */
 			/* save the state of pipeline */
 			int state = GST_STATE( pipeline );
 			if ( state == GST_STATE_PLAYING )
-				gst_element_set_state (data->pipeline, GST_STATE_NULL);
+				gst_element_set_state (pipeline, GST_STATE_NULL);
 			
 			/* unlink source and next_elem */
 			gst_element_unlink ( source , next_elem ) ;
@@ -340,15 +345,15 @@ gboolean update_pipeline_SP_on_roi_changes( GstElement *pipeline, struct channel
 			 * encode it again.
 			 */
 		 	GstElement *jpeg2000_decoder = gst_element_factory_make_log ( "openjpegenc", "jpeg2000-decoder-roi" );
-			if ( !mpeg4_decoder )
+			if ( !jpeg2000_decoder )
 				return FALSE;
 
 		 	GstElement *jpeg2000_encoder = gst_element_factory_make_log ( "openjpegenc", "jpeg2000-encoder-roi" );
-			if ( !mpeg4_encoder)
+			if ( !jpeg2000_encoder )
 				return FALSE;
 			
 			/* insert video crop into the pipeline */
-			gst_bin_add_many ( GST_BIN ( pipeline ) , jpeg2000_decoder , videocrop , jpeg2000_encoder );
+			gst_bin_add_many ( GST_BIN ( pipeline ) , jpeg2000_decoder , videocrop , jpeg2000_encoder, NULL );
 			if ( ! gst_element_link_many( source , jpeg2000_decoder , videocrop , jpeg2000_encoder , next_elem , NULL )){
 				g_printerr ( "ERROR in gstreamer's pipeline\n");
 				return FALSE;
@@ -356,7 +361,7 @@ gboolean update_pipeline_SP_on_roi_changes( GstElement *pipeline, struct channel
 
 			/* of the pipeline was playing, restart it */
 			if ( state  == GST_STATE_PLAYING )
-				gst_element_set_state (data->pipeline, GST_STATE_PLAYING);
+				gst_element_set_state (pipeline, GST_STATE_PLAYING);
 
 			return TRUE;
 
