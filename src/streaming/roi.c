@@ -40,8 +40,6 @@ static void set_roi_values_videoFormat_entry( struct videoFormatTable_entry *vid
 	video_stream_info->videoFormatRoiExtentBottom 	= roi_datas->roi_extent_bottom;
 	video_stream_info->videoFormatRoiExtentRight 	= roi_datas->roi_extent_right;
 
-	printf("width=%ld, height=%ld, top=%ld,left=%ld,extent_bottom=%ld, extent_right=%ld\n", roi_datas->roi_width, roi_datas->roi_height,roi_datas->roi_top , roi_datas->roi_left, roi_datas->roi_extent_bottom, roi_datas->roi_extent_right);
-
 }
 
 
@@ -110,12 +108,12 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline, GstElement *input
 		if ( !videocrop )
 			return NULL;
 
-		g_object_set ( 	G_OBJECT ( videocrop ) , 
-						"top" 		,  video_stream_info->videoFormatRoiOriginTop , 
-						"left" 		,  video_stream_info->videoFormatRoiOriginLeft , 
-						"bottom" 	,  video_stream_info->videoFormatMaxVertRes - ( video_stream_info->videoFormatRoiOriginTop 	+ video_stream_info->videoFormatRoiVertRes  ),
-						"right" 	,  video_stream_info->videoFormatMaxHorzRes - ( video_stream_info->videoFormatRoiOriginLeft 	+ video_stream_info->videoFormatRoiHorzRes  ),
-						NULL
+		g_object_set ( 	g_object ( videocrop ) , 
+						"top" 		,  video_stream_info->videoformatroiorigintop , 
+						"left" 		,  video_stream_info->videoformatroioriginleft , 
+						"bottom" 	,  video_stream_info->videoformatmaxvertres - ( video_stream_info->videoformatroiorigintop 	+ video_stream_info->videoformatroivertres  ),
+						"right" 	,  video_stream_info->videoformatmaxhorzres - ( video_stream_info->videoformatroioriginleft 	+ video_stream_info->videoformatroihorzres  ),
+						null
 					);
 		
 		last = videocrop;
@@ -138,8 +136,8 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline, GstElement *input
 
 		/* replace height and width value with the one computed from the ROI parameter */
 		g_object_set ( 	G_OBJECT ( caps_filter ) , 
-						"height" 	,  video_stream_info->videoFormatRoiExtentBottom - video_stream_info->videoFormatRoiOriginTop ,
-						"width" 	,  video_stream_info->videoFormatRoiExtentRight	- video_stream_info->videoFormatRoiOriginLeft,
+						"height" 	,  video_stream_info->videoFormatRoiExtentBottom 	- video_stream_info->videoFormatRoiOriginTop ,
+						"width" 	,  video_stream_info->videoFormatRoiExtentRight		- video_stream_info->videoFormatRoiOriginLeft,
 						NULL
 					);
 		
@@ -177,14 +175,6 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline, GstElement *input
 
 }
 
-#if 0
-GstElement *update_pipeline_SP_on_roi_changes( GstElement *pipeline, struct videoFormatTable_entry *video_stream_info){
-
-	/* first updates the videoFormatType */
-	gst_bin_get_by_name ( GST_bin ( pipeline ) , "source") ;
-}
-#endif 
-
 GstElement *handle_roi( GstElement *pipeline, GstElement *input, struct videoFormatTable_entry *video_stream_info , GstStructure *video_caps ) {
 
 	roi_data roi_datas;
@@ -207,4 +197,174 @@ GstElement *handle_roi( GstElement *pipeline, GstElement *input, struct videoFor
 
 	return last;
 		
+}
+
+gboolean update_pipeline_SP_on_roi_changes( GstElement *pipeline, struct channelTable_entry *channel_entry){
+	
+	GstElement *source;
+	GstElement *next_elem;
+	/* 
+	 * First checks if the channel was already an ROI.
+	 * Then we just need to update the element's parameter of the ROI
+	 */
+	if ( channel_entry->channelType == roi ){
+		/*
+		 * In that case it means that the videocrop or videoscale element are already in pipeline. 
+		 * the VIVOE standard also specifies that if a ROI is non-scalable it should remain as so for ever. 
+		 * So no need to remove videocrop to add a videoscale element.
+		 */
+		
+		/*
+		 * Get the corresponding videoFormat_Entry
+		 */
+		struct videoFormatTable_entry * videoFormat_entry = videoFormatTable_getEntry ( channel_entry->channelVideoFormatIndex ) ;
+
+		/* 
+		 * The values in the table should already been updated. Here we just handle the pipeline here.
+		 * We should not chceck the values entered by the user. As an example, this is not where we should 
+		 * check that the ROI want from non-scalable to scalable. 
+		 */
+		if ( roi_is_non_scalable (  videoFormat_entry ) ){
+
+			/* we should found a crop element */
+			GstElement *videocrop = gst_bin_get_by_name ( GST_BIN ( pipeline ) , "vidocrop" ) ;
+			g_object_set ( 	G_OBJECT ( videocrop ) , 
+						"top" 		,  video_stream_info->videoFormatRoiOriginTop , 
+						"left" 		,  video_stream_info->videoFormatRoiOriginLeft , 
+						"bottom" 	,  video_stream_info->videoFormatMaxVertRes - ( video_stream_info->videoFormatRoiOriginTop 	+ video_stream_info->videoFormatRoiVertRes  ),
+						"right" 	,  video_stream_info->videoFormatMaxHorzRes - ( video_stream_info->videoFormatRoiOriginLeft	+ video_stream_info->videoFormatRoiHorzRes  ),
+						NULL
+					);
+
+		}else{
+			return FALSE;
+		}
+		
+		return TRUE;	
+
+	}
+	/* 
+	 * Otherwise, the channel was not a ROI, this means that we need to insert a new element into the pipeline 
+	 * But in order to do so, we need to be sure that all four parameters have been set before. This shouls be check in 
+	 * channelTable.c
+	 */
+	else{
+
+		/* first updates the videoFormatType */
+		source = gst_bin_get_by_name ( GST_bin ( pipeline ) , "source" ) ;
+		
+		/* then get the payloader */
+		if ( strcmp ( channel_entry->channelVideoFormat , RAW_NAME ) ){
+			
+			/* next element after source should be rtp raw payloader */
+			next_elem = gst_bin_get_by_name ( GST_bin ( pipeline ) , "rtpvrawpay" ) ;
+			
+			/* now , pause the pipeline if it was running */
+			/* save the state of pipeline */
+			int state = GST_STATE( pipeline );
+			if ( state == GST_STATE_PLAYING )
+				gst_element_set_state (data->pipeline, GST_STATE_NULL);
+			
+			/* unlink source and next_elem */
+			gst_element_unlink ( source , next_elem ) ;
+
+			/* insert video crop into the pipeline */
+			gst_bin_add ( GST_BIN ( pipeline ) , videocrop );
+			if ( ! gst_element_link_many( source, videocrop, next_elem , NULL )){
+				g_printerr ( "ERROR in gstreamer's pipeline\n");
+				return FALSE;
+			}
+
+			/* of the pipeline was playing, restart it */
+
+			if ( state  == GST_STATE_PLAYING )
+				gst_element_set_state (data->pipeline, GST_STATE_PLAYING);
+
+			return TRUE;
+
+		}
+		else if ( strcmp ( channel_entry->channelVideoFormat , MPEG4_NAME ) ){
+			/* next element after source should be mpeg4 parser */
+			next_elem = gst_bin_get_by_name ( GST_bin ( pipeline ) , "mpeg4videoparse" ) ;
+			
+			/* now , pause the pipeline if it was running */
+			/* save the state of pipeline */
+			int state = GST_STATE( pipeline );
+			if ( state == GST_STATE_PLAYING )
+				gst_element_set_state (data->pipeline, GST_STATE_NULL);
+			
+			/* unlink source and next_elem */
+			gst_element_unlink ( source , next_elem ) ;
+
+			/* 
+			 * Cropping the video shouldbe perform with only RAW video. We need to decode the video, crop it, 
+			 * encode it again.
+			 */
+		 	GstElement *mpeg4_decoder = gst_element_factory_make_log ( "avdec_mpeg4", "mpeg4-decoder-roi" );
+			if ( !mpeg4_decoder )
+				return FALSE;
+
+		 	GstElement *mpeg4_encoder = gst_element_factory_make_log ( "avenc_mpeg4", "mpeg4-encoder-roi" );
+			if ( !mpeg4_encoder)
+				return FALSE;
+			
+			/* insert video crop into the pipeline */
+			gst_bin_add_many ( GST_BIN ( pipeline ) , mpeg4_decoder , videocrop , mpeg4_encoder );
+			if ( ! gst_element_link_many( source,mpeg4_decoder ,videocrop , mpeg4_encoder , next_elem , NULL )){
+				g_printerr ( "ERROR in gstreamer's pipeline\n");
+				return FALSE;
+			}
+
+			/* of the pipeline was playing, restart it */
+			if ( state  == GST_STATE_PLAYING )
+				gst_element_set_state (data->pipeline, GST_STATE_PLAYING);
+
+			return TRUE;
+
+		}
+		else if ( strcmp ( channel_entry->channelVideoFormat , J2K_NAME ) ){
+			/* next element after source should be mpeg4 parser */
+			next_elem = gst_bin_get_by_name ( GST_bin ( pipeline ) , "capsfilter-image/x-jpc" ) ;
+			
+			/* now , pause the pipeline if it was running */
+			/* save the state of pipeline */
+			int state = GST_STATE( pipeline );
+			if ( state == GST_STATE_PLAYING )
+				gst_element_set_state (data->pipeline, GST_STATE_NULL);
+			
+			/* unlink source and next_elem */
+			gst_element_unlink ( source , next_elem ) ;
+
+			/* 
+			 * Cropping the video shouldbe perform with only RAW video. We need to decode the video, crop it, 
+			 * encode it again.
+			 */
+		 	GstElement *jpeg2000_decoder = gst_element_factory_make_log ( "openjpegenc", "jpeg2000-decoder-roi" );
+			if ( !mpeg4_decoder )
+				return FALSE;
+
+		 	GstElement *jpeg2000_encoder = gst_element_factory_make_log ( "openjpegenc", "jpeg2000-encoder-roi" );
+			if ( !mpeg4_encoder)
+				return FALSE;
+			
+			/* insert video crop into the pipeline */
+			gst_bin_add_many ( GST_BIN ( pipeline ) , jpeg2000_decoder , videocrop , jpeg2000_encoder );
+			if ( ! gst_element_link_many( source , jpeg2000_decoder , videocrop , jpeg2000_encoder , next_elem , NULL )){
+				g_printerr ( "ERROR in gstreamer's pipeline\n");
+				return FALSE;
+			}
+
+			/* of the pipeline was playing, restart it */
+			if ( state  == GST_STATE_PLAYING )
+				gst_element_set_state (data->pipeline, GST_STATE_PLAYING);
+
+			return TRUE;
+
+		}
+		else {
+			g_printerr ( "ERROR: unknow video format\n" ) ;
+			return FALSE;
+		}
+	
+	}
 }
