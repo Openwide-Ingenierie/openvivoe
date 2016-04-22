@@ -69,6 +69,11 @@ typedef enum {vivoe_interlaced = 1, vivoe_progressive,  vivoe_none }interlaced_m
 #define sap_multi_addr 			"224.2.127.254"
 #define sap_port_num 			"9875"
 
+/* define string value for the videoFormat names */
+#define RAW_NAME 				"RAW"
+#define MPEG4_NAME 				"MP4V-ES"
+#define J2K_NAME 				"JPEG2000"
+
 /* removing row from table in this MIB */
 #define ALLOW_REMOVING_ROW 			0
 /*
