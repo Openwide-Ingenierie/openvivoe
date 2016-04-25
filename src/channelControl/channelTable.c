@@ -266,6 +266,27 @@ gboolean channelTable_fill_entry(struct channelTable_entry * entry, struct video
 }
 
 /**
+ * \brief replace the content of the videoFormat_entry with the content of the channelTable_entry
+ * \param entry the entry in channelTable to update
+ * \param  videoFormatIndex the VF that will be used to get the parameters 
+ * \return TRUE if we succeed to update the parameters
+ */
+gboolean update_videoFormat_entry_roi_from_channelTable_entry ( struct videoFormatTable_entry *videoFormat_entry , struct channelTable_entry *channel_entry ) 
+{
+	
+	/* only the ROI parameters of the videoFormat_entry can be modifies, otherwise nothing could */
+	videoFormat_entry->videoFormatRoiHorzRes 		= channel_entry->channelHorzRes ;
+	videoFormat_entry->videoFormatRoiVertRes 		= channel_entry->channelVertRes ;
+	videoFormat_entry->videoFormatRoiOriginTop 		= channel_entry->channelRoiOriginTop ;
+	videoFormat_entry->videoFormatRoiOriginLeft 	= channel_entry->channelRoiOriginLeft ;
+	videoFormat_entry->videoFormatRoiExtentBottom 	= channel_entry->channelRoiExtentBottom ;
+	videoFormat_entry->videoFormatRoiExtentRight 	= channel_entry->channelRoiExtentRight ;
+
+	/* return TRUE */
+	return TRUE;
+}
+
+/**
  * \brief update an entry in the ChannelTable when changing its videoFormat
  * \param entry the entry in channelTable to update
  * \param videoFormatIndex the new videoFormatIndex to use for this channel
@@ -450,6 +471,43 @@ gboolean channelSatus_requests_handler( struct channelTable_entry * table_entry 
 			break;
 	}
 	return FALSE;
+}
+
+/**
+ * \brief handles the call of function according 
+ * \param table_entry the table entry on which the request applies
+ * \return a SNMP error code or SNP_ERR_NO_ERROR
+ */
+int roi_requests_handler( struct channelTable_entry * table_entry ){
+
+	int return_value = SNMP_ERR_NOERROR;
+
+	if ( ( table_entry->channelRoiExtentBottom != 0 || table_entry->channelRoiExtentRight != 0 ) && ( table_entry->channelRoiOriginTop == 0 && table_entry->channelRoiOriginLeft == 0 ) ){
+		return_value = SNMP_ERR_WRONGVALUE;	
+
+		/* set extent parameters to 0 if top and left have been set to 0 */
+		if ( table_entry->channelRoiOriginTop == 0 && table_entry->channelRoiOriginLeft == 0 ){
+			table_entry->channelRoiExtentBottom = 0 ;
+			table_entry->channelRoiExtentRight 	= 0 ;
+		}
+
+		/* if there is a change in channel's resolution or channel's ROI parameters --> change channel type to ROI */
+		if ( 	( 	table_entry->channelHorzRes 		!= table_entry->old_channelHorzRes 			||
+					table_entry->channelVertRes 		!= table_entry->old_channelVertRes 			||
+					table_entry->channelRoiOriginTop 	!= table_entry->old_channelRoiOriginTop 	||
+					table_entry->channelRoiOriginLeft 	!= table_entry->old_channelRoiOriginLeft 	) &&
+				table_entry->channelType != roi 
+		   )
+			table_entry->channelType = 	roi ;
+
+		/* update a copy of the videoFormat associated videoFormat in consequences */
+		struct videoFormatTable_entry *vf_copy =  videoFormatTable_getEntry( table_entry->channelVideoFormatIndex ) ;
+
+		/* now update pipeline */
+
+		return return_value;	
+
+	}
 }
 
 

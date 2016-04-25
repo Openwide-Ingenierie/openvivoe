@@ -57,7 +57,6 @@
 #include "../include/channelControl/channelNumber.h"
 #include "../include/channelControl/channelReset.h"
 #include "../include/channelControl/channelTable.h"
-
 /*
  * Configuration - Initialization of the MIB header
  */
