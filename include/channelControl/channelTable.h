@@ -42,6 +42,7 @@ NetsnmpCacheFree channelTable_free;
        #define COLUMN_CHANNELSAPMESSAGEINTERVAL				23
        #define COLUMN_CHANNELDEFAULTVIDEOFORMATINDEX		24
        #define COLUMN_CHANNELDEFAULTRECEIVEIPADDRESS		25
+
     /* Typical data structure for a row entry */
 struct channelTable_entry {
     /* Index values */
@@ -141,11 +142,19 @@ struct channelTable_entry * channelTable_createEntry(
 					 							   	long 		channelDefaultVideoFormatIndex,
 						 						   	in_addr_t 	channelDefaultReceiveIpAddress,
 													gpointer 	stream_datas);
+
 gboolean channelTable_fill_entry(struct channelTable_entry * entry, struct videoFormatTable_entry *videoFormatentry);
+
 struct channelTable_entry *	channelTable_create_empty_entry(int index,long channel_type, char *channelUserDesc , long videoFormatNumber ,  long default_IP_address, gpointer stream_datas );
+
 struct channelTable_entry * channelTable_getEntry(int index);
+
 struct channelTable_entry * channelTable_get_from_VF_index(int index);
+
+gboolean update_videoFormat_entry_roi_from_channelTable_entry ( struct videoFormatTable_entry *videoFormat_entry , struct channelTable_entry *channel_entry ) ;
+
 void channelTable_delete();
+
 int channelSatus_requests_handler( struct channelTable_entry * table_entry );
 
 #endif /* CHANNELTABLE_H */

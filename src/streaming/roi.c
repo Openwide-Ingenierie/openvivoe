@@ -199,7 +199,7 @@ GstElement *handle_roi( GstElement *pipeline, GstElement *input, struct videoFor
 		
 }
 
-gboolean update_pipeline_SP_on_roi_changes( GstElement *pipeline, struct channelTable_entry *channel_entry){
+gboolean update_pipeline_SP_non_scalable_roi_changes( GstElement *pipeline, struct channelTable_entry *channel_entry){
 	
 	GstElement *source;
 	GstElement *next_elem;

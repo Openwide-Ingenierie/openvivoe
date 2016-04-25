@@ -504,6 +504,8 @@ int roi_requests_handler( struct channelTable_entry * table_entry ){
 		struct videoFormatTable_entry *vf_copy =  videoFormatTable_getEntry( table_entry->channelVideoFormatIndex ) ;
 
 		/* now update pipeline */
+	// update_pipeline_SP_non_scalable_roi_changes( GstElement *pipeline, struct channelTable_entry *channel_entry) ;
+
 
 		return return_value;	
 
