@@ -765,14 +765,14 @@ channelTable_handler(
                 }
                 break;
             case COLUMN_CHANNELHORZRES:
-                ret = netsnmp_check_vb_int_range( request->requestvb, 576, 1080 );
+                ret = netsnmp_check_vb_int( request->requestvb );
                 if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;
                 }
                 break;
             case COLUMN_CHANNELVERTRES:
-                ret = netsnmp_check_vb_int_range( request->requestvb, 576, 1920 );				
+                ret = netsnmp_check_vb_int( request->requestvb);				
                 if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;
@@ -780,14 +780,14 @@ channelTable_handler(
                 break;
             case COLUMN_CHANNELROIORIGINTOP:
                 /* or possibly 'netsnmp_check_vb_int_range' */
-                ret = netsnmp_check_vb_int_range( request->requestvb, 0, 1080 );
+                ret = netsnmp_check_vb_int( request->requestvb );
 				if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;
                 }
                 break;
             case COLUMN_CHANNELROIORIGINLEFT:
-                ret = netsnmp_check_vb_int_range( request->requestvb, 0, 1920 );				
+                ret = netsnmp_check_vb_int( request->requestvb );				
                 if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;
