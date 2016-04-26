@@ -243,12 +243,33 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , st
 				g_printerr("ERROR in pipeline's ROI elements\n");
 				return FALSE;
 			}
+			
+			printf("top: %ld\n",videoFormat_entry->videoFormatRoiOriginTop );
+			printf("left: %ld\n",videoFormat_entry->videoFormatRoiOriginLeft );
+			printf("bottom: %ld\n = maxvertres %ld - ( roitop %ld + roivertres %ld )\n", videoFormat_entry->videoFormatMaxVertRes - ( videoFormat_entry->videoFormatRoiOriginTop 	+ videoFormat_entry->videoFormatRoiVertRes  ) , videoFormat_entry->videoFormatMaxVertRes , videoFormat_entry->videoFormatRoiOriginTop, videoFormat_entry->videoFormatRoiVertRes  );
+			printf("right: %ld\n",videoFormat_entry->videoFormatMaxHorzRes - ( videoFormat_entry->videoFormatRoiOriginLeft	+ videoFormat_entry->videoFormatRoiHorzRes ));
+		
+			/* 
+			 * If values are negative (which could happen if a bad value is set to ROI resolution, and top, then set parameters to zero
+			 */
+			int top 	=  videoFormat_entry->videoFormatRoiOriginTop ;
+			if ( top < 0 )
+				top = 0 ;
+			int left 	=  videoFormat_entry->videoFormatRoiOriginLeft ;
+			if ( left < 0 )
+				left = 0 ;
+			int bottom 	= videoFormat_entry->videoFormatMaxVertRes - ( videoFormat_entry->videoFormatRoiOriginTop 	+ videoFormat_entry->videoFormatRoiVertRes  ) ;
+			if ( bottom < 0 )
+				bottom = 0 ;
+			int right 	= videoFormat_entry->videoFormatMaxHorzRes - ( videoFormat_entry->videoFormatRoiOriginLeft	+ videoFormat_entry->videoFormatRoiHorzRes  ) ;
+			if ( right < 0 )
+				right = 0 ;
 
 			g_object_set ( 	G_OBJECT ( videocrop ) , 
-						"top" 		,  videoFormat_entry->videoFormatRoiOriginTop , 
-						"left" 		,  videoFormat_entry->videoFormatRoiOriginLeft , 
-						"bottom" 	,  videoFormat_entry->videoFormatMaxVertRes - ( videoFormat_entry->videoFormatRoiOriginTop 	+ videoFormat_entry->videoFormatRoiVertRes  ),
-						"right" 	,  videoFormat_entry->videoFormatMaxHorzRes - ( videoFormat_entry->videoFormatRoiOriginLeft	+ videoFormat_entry->videoFormatRoiHorzRes  ),
+						"top" 		, top , 
+						"left" 		, left, 
+						"bottom" 	, bottom,
+						"right" 	, right,
 						NULL
 					);
 
