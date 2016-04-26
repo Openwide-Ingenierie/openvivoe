@@ -238,7 +238,12 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , st
 		if ( roi_is_non_scalable (  videoFormat_entry ) ){
 
 			/* we should found a crop element */
-			GstElement *videocrop = gst_bin_get_by_name ( GST_BIN ( pipeline ) , "vidocrop" ) ;
+			GstElement *videocrop = gst_bin_get_by_name ( GST_BIN ( pipeline ) , "videocrop" ) ;
+			if ( !videocrop ){
+				g_printerr("ERROR in pipeline's ROI elements\n");
+				return FALSE;
+			}
+
 			g_object_set ( 	G_OBJECT ( videocrop ) , 
 						"top" 		,  videoFormat_entry->videoFormatRoiOriginTop , 
 						"left" 		,  videoFormat_entry->videoFormatRoiOriginLeft , 

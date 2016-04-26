@@ -523,7 +523,7 @@ static gboolean roi_requests_handler( struct channelTable_entry * table_entry ){
 				table_entry->channelType != roi 
 		   )
 		table_entry->channelType = 	roi ;
-		channelSatus_requests_handler(  table_entry ) ;
+		return channelSatus_requests_handler(  table_entry ) ;
 	}
 
 	return TRUE;
@@ -1020,10 +1020,12 @@ channelTable_handler(
             case COLUMN_CHANNELVERTRES:
                 table_entry->old_channelVertRes 				= table_entry->channelVertRes;
                 table_entry->channelVertRes     				= *request->requestvb->val.integer;
+				roi_requests_handler( table_entry ); 				
                 break;
             case COLUMN_CHANNELROIORIGINTOP:
                 table_entry->old_channelRoiOriginTop 			= table_entry->channelRoiOriginTop;
                 table_entry->channelRoiOriginTop     			= *request->requestvb->val.integer;
+				roi_requests_handler( table_entry ); 				
                 break;
             case COLUMN_CHANNELROIORIGINLEFT:
                 table_entry->old_channelRoiOriginLeft 			= table_entry->channelRoiOriginLeft;
