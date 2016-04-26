@@ -382,6 +382,26 @@ GstElement *append_SP_pipeline_for_redirection(GstCaps *caps, long videoFormatIn
 }
 
 /**
+ * \brief set the paramemetrs to the element udpsink added in SP's pipeline
+ * \param udpsrc the udpsrc element of which we need to modify the parameters
+ * \param channel_entry_index the channel's index of this SP
+ */
+void set_udpsrc_param( GstElement *udpsrc, struct channelTable_entry * channel_entry, GstCaps* caps ){
+
+	/* get the multicast IP */
+	struct in_addr multicast_group;
+	multicast_group.s_addr = channel_entry->channelReceiveIpAddress;
+
+	/*Set UDP sink properties */
+    g_object_set(   G_OBJECT(udpsrc),
+                	"multicast-group", 	inet_ntoa( multicast_group ),
+                    "port", 			DEFAULT_MULTICAST_PORT,
+					"caps", 			caps, 
+                    NULL);
+
+}
+
+/**
  * \brief This function add the UDP element (udpsrc) to the pipeline / fort a ServiceUser channel
  * \param pipeline the associated pipeline of the channel
  * \param bus the bus the channel
@@ -403,15 +423,8 @@ static GstElement* addUDP_SU( 	GstElement *pipeline, 	GstBus *bus,
 	if ( !udpsrc )
 		return NULL;
 
-	/* get the multicast IP */
-	struct in_addr multicast_group;
-	multicast_group.s_addr = channel_entry->channelReceiveIpAddress;
-	/*Set UDP sink properties */
-    g_object_set(   G_OBJECT(udpsrc),
-                	"multicast-group", 	inet_ntoa( multicast_group ),
-                    "port", 			DEFAULT_MULTICAST_PORT,
-					"caps", 			caps, 
-                    NULL);
+	/* set the parameter of the udpsrc element */
+	set_udpsrc_param( udpsrc, channel_entry, caps ) ;
 
 	/* add rtp to pipeline */
 	if ( !gst_bin_add(GST_BIN (pipeline), udpsrc )){
