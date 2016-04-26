@@ -52,8 +52,8 @@ static gboolean create_raw_media(struct channelTable_entry * channel_entry, GstS
 	gchar *fmtp =  g_strdup_printf ("%ld sampling=%s; width=%ld; height=%ld; depth=%ld; colorimetry=%s; %s",
 										data->rtp_datas->rtp_type,
 										channel_entry->channelVideoSampling,
-										channel_entry->channelVertRes,
 										channel_entry->channelHorzRes,
+										channel_entry->channelVertRes,
 										channel_entry->channelVideoBitDepth,
 										channel_entry->channelColorimetry,
 										interlace_mode_to_string (channel_entry->channelInterlaced)
@@ -100,8 +100,8 @@ static gboolean create_j2k_media(struct channelTable_entry * channel_entry, GstS
 	gchar *fmtp =  g_strdup_printf ("%ld sampling=%s; width=%ld; height=%ld;",
 										data->rtp_datas->rtp_type,
 										channel_entry->channelVideoSampling,
-										channel_entry->channelVertRes,
-										channel_entry->channelHorzRes/*,
+										channel_entry->channelHorzRes,
+										channel_entry->channelVertRes/*,
 										interlace_mode_to_string (channel_entry->channelInterlaced)*/
 									);
 	if( gst_sdp_media_add_attribute (media, "fmtp", fmtp)!= GST_SDP_OK ){

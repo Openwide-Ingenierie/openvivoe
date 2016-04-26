@@ -139,19 +139,19 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
 		else
 			video_info->videoFormatInterlaced 		= vivoe_none;
 	}
-	/*videoFormatMaxHorzRes*/
+	/*videoFormatMaxVertRes*/
 	if( gst_structure_has_field(source_str_caps, "height")){
 		if (G_VALUE_HOLDS_INT(gst_structure_get_value(source_str_caps, "height")))
-			video_info->videoFormatMaxHorzRes		= (long) g_value_get_int( gst_structure_get_value(source_str_caps, "height"));
+			video_info->videoFormatMaxVertRes		= (long) g_value_get_int( gst_structure_get_value(source_str_caps, "height"));
 		else
-		 	video_info->videoFormatMaxHorzRes		= strtol ( (char* ) g_value_dup_string ( gst_structure_get_value(source_str_caps, "height")), NULL , 10 ); /* the string is converted into long int, basis 10 */
+		 	video_info->videoFormatMaxVertRes		= strtol ( (char* ) g_value_dup_string ( gst_structure_get_value(source_str_caps, "height")), NULL , 10 ); /* the string is converted into long int, basis 10 */
 	}	
-	/*videoFormatMaxVertRes*/
+	/*videoFormatMaxHorzRes*/
 	if( gst_structure_has_field(source_str_caps, "width")){
 		if (G_VALUE_HOLDS_INT(gst_structure_get_value(source_str_caps, "width")))
-			video_info->videoFormatMaxVertRes		= (long) g_value_get_int( gst_structure_get_value(source_str_caps, "width"));			
+			video_info->videoFormatMaxHorzRes		= (long) g_value_get_int( gst_structure_get_value(source_str_caps, "width"));			
 		else
-			video_info->videoFormatMaxVertRes		= strtol ( (char* ) g_value_dup_string ( gst_structure_get_value(source_str_caps, "width")), NULL , 10 ); /* the string is converted into long int, basis 10 */
+			video_info->videoFormatMaxHorzRes		= strtol ( (char* ) g_value_dup_string ( gst_structure_get_value(source_str_caps, "width")), NULL , 10 ); /* the string is converted into long int, basis 10 */
 	}
 
 	/*channelRTppt (saved in rtp_datas - payload type of the channel should be something like 96 or 127*/
