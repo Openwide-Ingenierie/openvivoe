@@ -205,7 +205,7 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , st
 
 	GstElement 	*source;
 	GstElement 	*next_elem;
-	stream_data *data 		=  stream_datas;
+	stream_data *data 		= stream_datas;
 	GstElement 	*pipeline 	= data->pipeline;
 
 	/*

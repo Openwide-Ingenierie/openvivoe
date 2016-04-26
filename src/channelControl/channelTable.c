@@ -491,18 +491,9 @@ static gboolean roi_requests_handler( struct channelTable_entry * table_entry ){
 	 * Now update pipeline
 	 * If an error occurs, we just reset the old roi parameters' values of channel and videoFormat_entry
 	 */
-	if ( ! update_pipeline_SP_non_scalable_roi_changes( table_entry->stream_datas ,  table_entry ) ){
-		/* retsore old value */ 
-		table_entry->channelHorzRes 		= table_entry->old_channelHorzRes ;
-		table_entry->channelVertRes 		= table_entry->old_channelVertRes ;
-		table_entry->channelRoiOriginTop 	= table_entry->old_channelRoiOriginTop;
-		table_entry->channelRoiOriginLeft 	= table_entry->old_channelRoiOriginLeft;
-		table_entry->channelRoiExtentBottom = table_entry->old_channelRoiExtentBottom;
-		table_entry->channelRoiExtentRight 	= table_entry->old_channelRoiExtentRight;
-
+	if ( ! update_pipeline_SP_non_scalable_roi_changes( table_entry->stream_datas ,  table_entry ) )
 		return FALSE;
-
-	}else{
+	else{
 
 		/* if there is a change in channel's resolution or channel's ROI parameters --> change channel type to ROI */
 		if ( table_entry->channelType != roi ){
@@ -538,6 +529,7 @@ channelTable_handler(
     netsnmp_table_request_info 		*table_info;
     struct channelTable_entry   	*table_entry;
 	int 							ret 			= 0;
+	struct videoFormatTable_entry *videoFormat_entry;
     DEBUGMSGTL(("channelTable:handler", "Processing request (%d)\n", reqinfo->mode));
 
     switch (reqinfo->mode) {
@@ -826,6 +818,7 @@ channelTable_handler(
                 /* or possibly 'netsnmp_check_vb_int_range' */
                 ret = netsnmp_check_vb_int( request->requestvb );
                 if ( ret != SNMP_ERR_NOERROR ) {
+
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;
                 }
@@ -846,14 +839,19 @@ channelTable_handler(
                 break;
             case COLUMN_CHANNELROIORIGINTOP:
                 /* or possibly 'netsnmp_check_vb_int_range' */
-                ret = netsnmp_check_vb_int( request->requestvb );
+				/* get the corresponding videoFormatTable to get the maximum value of the top parameter */
+				videoFormat_entry =  videoFormatTable_getEntry( table_entry->channelVideoFormatIndex ) ;				
+                ret = netsnmp_check_vb_int_range ( request->requestvb , 0 , videoFormat_entry->videoFormatMaxVertRes );
 				if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;
                 }
                 break;
             case COLUMN_CHANNELROIORIGINLEFT:
-                ret = netsnmp_check_vb_int( request->requestvb );				
+                ret = netsnmp_check_vb_int_range ( request->requestvb, 0 , table_entry->channelHorzRes );
+				/* get the corresponding videoFormatTable to get the maximum value of the left parameter */
+				videoFormat_entry =  videoFormatTable_getEntry( table_entry->channelVideoFormatIndex ) ;				
+                ret = netsnmp_check_vb_int_range ( request->requestvb , 0 , videoFormat_entry->videoFormatMaxHorzRes );
                 if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;
@@ -1016,38 +1014,64 @@ channelTable_handler(
             case COLUMN_CHANNELHORZRES:
                 table_entry->old_channelHorzRes 				= table_entry->channelHorzRes;
                 table_entry->channelHorzRes     				= *request->requestvb->val.integer;
-				if ( table_entry->channelHorzRes != table_entry->old_channelHorzRes )
-					roi_requests_handler( table_entry );
+				if ( table_entry->channelHorzRes != table_entry->old_channelHorzRes ) {
+					if ( ! roi_requests_handler( table_entry ) ){
+						netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_GENERR  );
+						return SNMP_ERR_NOERROR;
+					}
+				}
                 break;
             case COLUMN_CHANNELVERTRES:
                 table_entry->old_channelVertRes 				= table_entry->channelVertRes;
                 table_entry->channelVertRes     				= *request->requestvb->val.integer;
-				if ( table_entry->channelVertRes !=  table_entry->old_channelVertRes )
-					roi_requests_handler( table_entry );
+				if ( table_entry->channelVertRes !=  table_entry->old_channelVertRes ){
+					if ( ! roi_requests_handler( table_entry ) ){
+						netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_GENERR  );
+						return SNMP_ERR_NOERROR;
+					}
+				}
                 break;
             case COLUMN_CHANNELROIORIGINTOP:
                 table_entry->old_channelRoiOriginTop 			= table_entry->channelRoiOriginTop;
                 table_entry->channelRoiOriginTop     			= *request->requestvb->val.integer;
-				if ( table_entry->channelRoiOriginTop !=  table_entry->old_channelRoiOriginTop )
+				if ( table_entry->channelRoiOriginTop !=  table_entry->old_channelRoiOriginTop ){
+					if ( ! roi_requests_handler( table_entry ) ){
+						netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_GENERR  );
+						return SNMP_ERR_NOERROR;
+					}
+				}
+
 					roi_requests_handler( table_entry );
                 break;
             case COLUMN_CHANNELROIORIGINLEFT:
                 table_entry->old_channelRoiOriginLeft 			= table_entry->channelRoiOriginLeft;
                 table_entry->channelRoiOriginLeft     			= *request->requestvb->val.integer;
-				if ( table_entry->channelRoiOriginLeft !=  table_entry->old_channelRoiOriginLeft )
-					roi_requests_handler( table_entry );
+				if ( table_entry->channelRoiOriginLeft !=  table_entry->old_channelRoiOriginLeft ){
+					if ( ! roi_requests_handler( table_entry ) ){
+						netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_GENERR  );
+						return SNMP_ERR_NOERROR;
+					}
+				}
                 break;
             case COLUMN_CHANNELROIEXTENTBOTTOM:
                 table_entry->old_channelRoiExtentBottom 		= table_entry->channelRoiExtentBottom;
                 table_entry->channelRoiExtentBottom     		= *request->requestvb->val.integer;
-				if ( table_entry->channelRoiExtentBottom !=  table_entry->old_channelRoiExtentBottom )
-					roi_requests_handler( table_entry );
+				if ( table_entry->channelRoiExtentBottom !=  table_entry->old_channelRoiExtentBottom ){
+					if ( ! roi_requests_handler( table_entry ) ){
+						netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_GENERR  );
+						return SNMP_ERR_NOERROR;
+					}
+				}
                 break;
             case COLUMN_CHANNELROIEXTENTRIGHT:
                 table_entry->old_channelRoiExtentRight 			= table_entry->channelRoiExtentRight;
                 table_entry->channelRoiExtentRight    			= *request->requestvb->val.integer;
-				if ( table_entry->channelRoiExtentRight !=  table_entry->old_channelRoiExtentRight )
-					roi_requests_handler( table_entry );
+				if ( table_entry->channelRoiExtentRight !=  table_entry->old_channelRoiExtentRight ){
+					if ( ! roi_requests_handler( table_entry ) ){
+						netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_GENERR  );
+						return SNMP_ERR_NOERROR;
+					}
+				}
                 break;
             case COLUMN_CHANNELRECEIVEIPADDRESS:
                 table_entry->old_channelReceiveIpAddress 		= table_entry->channelReceiveIpAddress;
