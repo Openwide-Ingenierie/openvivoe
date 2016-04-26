@@ -12,7 +12,7 @@
  */
 typedef struct{
 	GstElement 		*pipeline;
-	GstElement 		*sink;
+	GstElement 		*udp_elem;
 	GstBus 			*bus;
     guint 			bus_watch_id;
 	rtp_data 		*rtp_datas;

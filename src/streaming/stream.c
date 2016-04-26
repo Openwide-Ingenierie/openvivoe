@@ -271,7 +271,7 @@ int init_stream_SP( int videoFormatIndex ){
 		init_redirection( data, videoFormatIndex );
 		/* for convenience we store the last element added in pipeline here, even if it is not it purpose , this will be used to retrieve the last element of the pipeline later
 		 * in append_SP_pipeline_for_redirection */
-		data->sink = last ; 
+		data->udp_elem = last ; 
 		redirection = TRUE;
 	}
 	else

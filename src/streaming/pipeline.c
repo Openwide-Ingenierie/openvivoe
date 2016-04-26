@@ -317,7 +317,7 @@ GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
 		return NULL;
 	}
 
-	data->sink = last;
+	data->udp_elem = last;
 	/* Before returning, free the entry created at the begging*/
 	free(video_stream_info);
 	return last;
@@ -349,10 +349,10 @@ GstElement *append_SP_pipeline_for_redirection(GstCaps *caps, long videoFormatIn
 	/* Now build the corresponding pipeline according to the caps*/ 
 	/*
 	 * As it was convenient, the last element added in a redirection's service provider's pipeline has been stored in
-	 * data->sink, so the input element to pass to the addRTP function is the last element added in pipeline ( the bin made from the 
+	 * data->udp_elem, so the input element to pass to the addRTP function is the last element added in pipeline ( the bin made from the 
 	 * gst_source commmand line given by the user in vivoe-mib.conf configuration file */
 
-	last = addRTP(data->pipeline , data->bus , data->bus_watch_id , data->sink  , videoFormat_entry , data , caps);
+	last = addRTP(data->pipeline , data->bus , data->bus_watch_id , data->udp_elem  , videoFormat_entry , data , caps);
 	if(last == NULL){
 		g_printerr("Failed to append pipeline for redirection\n");
 		return NULL;
@@ -376,7 +376,7 @@ GstElement *append_SP_pipeline_for_redirection(GstCaps *caps, long videoFormatIn
 	}
 
 	/* foe convenience sinl contained the source element "intervideosrc" but it is not it purposes */
-	data->sink = last;
+	data->udp_elem = last;
 	channel_entry->stream_datas = data;
 	return last;
 }
@@ -762,6 +762,8 @@ GstElement* create_pipeline_serviceUser( gpointer 					stream_datas,
 	first =  addUDP_SU( pipeline, 		bus,
 						bus_watch_id, 	caps, 
 						channel_entry);
+
+	data->udp_elem = first;
 
 	/* check if everything went ok */
 	if ( first == NULL )
