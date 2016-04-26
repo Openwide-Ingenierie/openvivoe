@@ -32,6 +32,7 @@
 #include "../../include/announcement/sdp.h"
 #include "../../include/streaming/stream_registration.h"
 #include "../../include/streaming/stream.h"
+#include "../../include/streaming/pipeline.h"
 
 /*
  * BYTE 0:
@@ -361,14 +362,28 @@ gboolean receive_announcement(){
 					delete_steaming_data(iterator); /* delet streaming has it is stopped */
 				}
 				else{
+
 					stream_data 	*data 	=  iterator->stream_datas;
-					if ( data == NULL ){ /* if pipeline is not created yet, create it and start to display the stream */
-						if ( !init_stream_SU ( caps, iterator) )
-							start_streaming( iterator->stream_datas, iterator->channelVideoFormatIndex);
+					/*
+					 * If pipeline is not created yet, create it and start to display the stream
+					 */
+					if ( data == NULL ){ 
+						if ( !init_stream_SU ( caps, iterator ) )
+							start_streaming ( iterator->stream_datas, iterator->channelVideoFormatIndex );
 						/* init the video channelUserDesc field */
 						iterator->channelUserDesc 		= strdup( (const char*) channel_desc);	
 						iterator->channelUserDesc_len 	= strlen(channel_desc);
 					}
+					/*
+					 * otherwise, replace udpsrc element's caps with the caps extracted from SDP file 
+					 */
+					else{
+						GstCaps *current_caps;
+						g_object_get ( G_OBJECT ( data->udp_elem ) , "caps" , &current_caps , NULL ) ;
+						if ( ! gst_caps_is_equal ( caps, current_caps ) )
+							set_udpsrc_param( data->udp_elem , iterator , caps ) ;
+					}
+
 				}
 			}
 			iterator = iterator->next_SU;

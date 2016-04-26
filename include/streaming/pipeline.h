@@ -8,7 +8,7 @@
 # define PIPELINE_H
 
 void set_udpsink_param( GstElement *udpsink, long channel_entry_index);
-
+void set_udpsrc_param( GstElement *udpsrc, struct channelTable_entry * channel_entry, GstCaps* caps ) ; 
 GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
 											GstElement* input,
 											long videoChannelIndex);

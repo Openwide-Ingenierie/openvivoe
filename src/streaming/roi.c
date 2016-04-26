@@ -27,6 +27,8 @@
 #include "../../include/channelControl/channelTable.h"
 #include "../../include/mibParameters.h"
 #include "../../include/conf/mib-conf.h"
+#include "../../include/streaming/stream_registration.h"
+#include "../../include/streaming/stream.h"
 
 static void set_roi_values_videoFormat_entry( struct videoFormatTable_entry *video_stream_info ,  roi_data *roi_datas) {
 	
@@ -199,10 +201,19 @@ GstElement *handle_roi( GstElement *pipeline, GstElement *input, struct videoFor
 		
 }
 
-gboolean update_pipeline_SP_non_scalable_roi_changes( GstElement *pipeline, struct channelTable_entry *channel_entry){
+gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , struct channelTable_entry *channel_entry){
+
+	GstElement 	*source;
+	GstElement 	*next_elem;
+	stream_data *data 		=  stream_datas;
+	GstElement 	*pipeline 	= data->pipeline;
+
+	/*
+	 * return if the stream data or pipeline have not been initialize 
+	 */
+	if ( !data || !pipeline )
+		return FALSE;
 	
-	GstElement *source;
-	GstElement *next_elem;
 	/* 
 	 * First checks if the channel was already an ROI.
 	 * Then we just need to update the element's parameter of the ROI
@@ -259,11 +270,16 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( GstElement *pipeline, stru
 				return FALSE;
 
 		/* then get the payloader */
-		if ( strcmp ( channel_entry->channelVideoFormat , RAW_NAME ) ){
-			
+		if ( !strcmp ( channel_entry->channelVideoFormat , RAW_NAME ) ){
+	
 			/* next element after source should be rtp raw payloader */
 			next_elem = gst_bin_get_by_name ( GST_BIN ( pipeline ) , "rtpvrawpay" ) ;
 			
+			if ( !next_elem ){
+				g_printerr("Cannot find payloader in pipeline\n");
+				return FALSE;
+			}
+
 			/* now , pause the pipeline if it was running */
 			/* save the state of pipeline */
 			int state = GST_STATE( pipeline );
@@ -288,7 +304,7 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( GstElement *pipeline, stru
 			return TRUE;
 
 		}
-		else if ( strcmp ( channel_entry->channelVideoFormat , MPEG4_NAME ) ){
+		else if ( !strcmp ( channel_entry->channelVideoFormat , MPEG4_NAME ) ){
 			/* next element after source should be mpeg4 parser */
 			next_elem = gst_bin_get_by_name ( GST_BIN ( pipeline ) , "mpeg4videoparse" ) ;
 			
@@ -327,7 +343,7 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( GstElement *pipeline, stru
 			return TRUE;
 
 		}
-		else if ( strcmp ( channel_entry->channelVideoFormat , J2K_NAME ) ){
+		else if ( !strcmp ( channel_entry->channelVideoFormat , J2K_NAME ) ){
 			/* next element after source should be mpeg4 parser */
 			next_elem = gst_bin_get_by_name ( GST_BIN ( pipeline ) , "capsfilter-image/x-jpc" ) ;
 			

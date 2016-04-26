@@ -23,6 +23,7 @@
 #include "../../include/streaming/stream_registration.h"
 #include "../../include/streaming/pipeline.h"
 #include "../../include/streaming/stream.h"
+#include "../../include/streaming/roi.h"
 
 
 
@@ -297,8 +298,10 @@ gboolean channelTable_updateEntry(struct channelTable_entry * entry, int videoFo
        struct videoFormatTable_entry *videoFormatentry         = videoFormatTable_getEntry( videoFormatNumberIndex );
        if ( videoFormatentry == NULL)
                return FALSE;
+
 	   channelTable_fill_entry( entry, videoFormatentry );
-       		/* update the stream data */
+
+	   /* update the stream data */
 		entry->stream_datas 								= videoFormatentry->stream_datas;
 		
 		/* check if streaming was in play state */
@@ -309,7 +312,7 @@ gboolean channelTable_updateEntry(struct channelTable_entry * entry, int videoFo
 
 		stream_data *data 									= entry->stream_datas;
 		/* transform IP from long to char * */
-		set_udpsink_param(data->sink, entry->channelIndex);
+		set_udpsink_param(data->udp_elem, entry->channelIndex);
 
 		return TRUE;
 }
@@ -476,40 +479,55 @@ gboolean channelSatus_requests_handler( struct channelTable_entry * table_entry 
 /**
  * \brief handles the call of function according 
  * \param table_entry the table entry on which the request applies
- * \return a SNMP error code or SNP_ERR_NO_ERROR
+ * \return TRUE on success, FALSE on failure
  */
-int roi_requests_handler( struct channelTable_entry * table_entry ){
+static gboolean roi_requests_handler( struct channelTable_entry * table_entry ){
 
-	int return_value = SNMP_ERR_NOERROR;
-
+	/* 
+	 * If the extent parameters are set, but ROI origin is 0, reset the extent parameter to 0 and report failure 
+	 */
 	if ( ( table_entry->channelRoiExtentBottom != 0 || table_entry->channelRoiExtentRight != 0 ) && ( table_entry->channelRoiOriginTop == 0 && table_entry->channelRoiOriginLeft == 0 ) ){
-		return_value = SNMP_ERR_WRONGVALUE;	
-
-		/* set extent parameters to 0 if top and left have been set to 0 */
-		if ( table_entry->channelRoiOriginTop == 0 && table_entry->channelRoiOriginLeft == 0 ){
 			table_entry->channelRoiExtentBottom = 0 ;
 			table_entry->channelRoiExtentRight 	= 0 ;
+			return FALSE;
 		}
 
-		/* if there is a change in channel's resolution or channel's ROI parameters --> change channel type to ROI */
+
+			
+
+		/* update a copy of the videoFormat associated videoFormat in consequences */
+		struct videoFormatTable_entry *vf_copy =  videoFormatTable_getEntry( table_entry->channelVideoFormatIndex ) ;
+		update_videoFormat_entry_roi_from_channelTable_entry ( vf_copy , table_entry );
+
+
+		/* 
+		 * Now update pipeline
+		 * If an error occurs, we just reset the old roi parameters' values of channel and videoFormat_entry */
+	if ( ! update_pipeline_SP_non_scalable_roi_changes( table_entry->stream_datas ,  table_entry ) ){
+		/* retsore old value */ 
+		table_entry->channelHorzRes = table_entry->old_channelHorzRes ;
+		table_entry->channelVertRes = table_entry->old_channelVertRes ;
+		table_entry->channelRoiOriginTop = table_entry->old_channelRoiOriginTop;
+		table_entry->channelRoiOriginLeft= table_entry->old_channelRoiOriginLeft;
+		table_entry->channelRoiOriginLeft= table_entry->old_channelRoiOriginLeft;
+		table_entry->channelRoiOriginLeft= table_entry->old_channelRoiOriginLeft;
+
+		return FALSE;
+
+	}else{
+				/* if there is a change in channel's resolution or channel's ROI parameters --> change channel type to ROI */
 		if ( 	( 	table_entry->channelHorzRes 		!= table_entry->old_channelHorzRes 			||
 					table_entry->channelVertRes 		!= table_entry->old_channelVertRes 			||
 					table_entry->channelRoiOriginTop 	!= table_entry->old_channelRoiOriginTop 	||
 					table_entry->channelRoiOriginLeft 	!= table_entry->old_channelRoiOriginLeft 	) &&
 				table_entry->channelType != roi 
 		   )
-			table_entry->channelType = 	roi ;
-
-		/* update a copy of the videoFormat associated videoFormat in consequences */
-		struct videoFormatTable_entry *vf_copy =  videoFormatTable_getEntry( table_entry->channelVideoFormatIndex ) ;
-
-		/* now update pipeline */
-	// update_pipeline_SP_non_scalable_roi_changes( GstElement *pipeline, struct channelTable_entry *channel_entry) ;
-
-
-		return return_value;	
-
+		table_entry->channelType = 	roi ;
+		channelSatus_requests_handler(  table_entry ) ;
 	}
+
+	return TRUE;
+
 }
 
 
@@ -997,6 +1015,7 @@ channelTable_handler(
             case COLUMN_CHANNELHORZRES:
                 table_entry->old_channelHorzRes 				= table_entry->channelHorzRes;
                 table_entry->channelHorzRes     				= *request->requestvb->val.integer;
+				roi_requests_handler( table_entry ); 
                 break;
             case COLUMN_CHANNELVERTRES:
                 table_entry->old_channelVertRes 				= table_entry->channelVertRes;
