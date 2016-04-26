@@ -244,11 +244,6 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , st
 				return FALSE;
 			}
 			
-			printf("top: %ld\n",videoFormat_entry->videoFormatRoiOriginTop );
-			printf("left: %ld\n",videoFormat_entry->videoFormatRoiOriginLeft );
-			printf("bottom: %ld\n = maxvertres %ld - ( roitop %ld + roivertres %ld )\n", videoFormat_entry->videoFormatMaxVertRes - ( videoFormat_entry->videoFormatRoiOriginTop 	+ videoFormat_entry->videoFormatRoiVertRes  ) , videoFormat_entry->videoFormatMaxVertRes , videoFormat_entry->videoFormatRoiOriginTop, videoFormat_entry->videoFormatRoiVertRes  );
-			printf("right: %ld\n",videoFormat_entry->videoFormatMaxHorzRes - ( videoFormat_entry->videoFormatRoiOriginLeft	+ videoFormat_entry->videoFormatRoiHorzRes ));
-		
 			/* 
 			 * If values are negative (which could happen if a bad value is set to ROI resolution, and top, then set parameters to zero
 			 */

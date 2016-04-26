@@ -483,47 +483,35 @@ gboolean channelSatus_requests_handler( struct channelTable_entry * table_entry 
  */
 static gboolean roi_requests_handler( struct channelTable_entry * table_entry ){
 
+	/* update a copy of the videoFormat associated videoFormat in consequences */
+	struct videoFormatTable_entry *vf_copy =  videoFormatTable_getEntry( table_entry->channelVideoFormatIndex ) ;
+	update_videoFormat_entry_roi_from_channelTable_entry ( vf_copy , table_entry );
+
 	/* 
-	 * If the extent parameters are set, but ROI origin is 0, reset the extent parameter to 0 and report failure 
+	 * Now update pipeline
+	 * If an error occurs, we just reset the old roi parameters' values of channel and videoFormat_entry
 	 */
-	if ( ( table_entry->channelRoiExtentBottom != 0 || table_entry->channelRoiExtentRight != 0 ) && ( table_entry->channelRoiOriginTop == 0 && table_entry->channelRoiOriginLeft == 0 ) ){
-			table_entry->channelRoiExtentBottom = 0 ;
-			table_entry->channelRoiExtentRight 	= 0 ;
-			return FALSE;
-		}
-
-
-			
-
-		/* update a copy of the videoFormat associated videoFormat in consequences */
-		struct videoFormatTable_entry *vf_copy =  videoFormatTable_getEntry( table_entry->channelVideoFormatIndex ) ;
-		update_videoFormat_entry_roi_from_channelTable_entry ( vf_copy , table_entry );
-
-
-		/* 
-		 * Now update pipeline
-		 * If an error occurs, we just reset the old roi parameters' values of channel and videoFormat_entry */
 	if ( ! update_pipeline_SP_non_scalable_roi_changes( table_entry->stream_datas ,  table_entry ) ){
 		/* retsore old value */ 
-		table_entry->channelHorzRes = table_entry->old_channelHorzRes ;
-		table_entry->channelVertRes = table_entry->old_channelVertRes ;
-		table_entry->channelRoiOriginTop = table_entry->old_channelRoiOriginTop;
-		table_entry->channelRoiOriginLeft= table_entry->old_channelRoiOriginLeft;
-		table_entry->channelRoiOriginLeft= table_entry->old_channelRoiOriginLeft;
-		table_entry->channelRoiOriginLeft= table_entry->old_channelRoiOriginLeft;
+		table_entry->channelHorzRes 		= table_entry->old_channelHorzRes ;
+		table_entry->channelVertRes 		= table_entry->old_channelVertRes ;
+		table_entry->channelRoiOriginTop 	= table_entry->old_channelRoiOriginTop;
+		table_entry->channelRoiOriginLeft 	= table_entry->old_channelRoiOriginLeft;
+		table_entry->channelRoiExtentBottom = table_entry->old_channelRoiExtentBottom;
+		table_entry->channelRoiExtentRight 	= table_entry->old_channelRoiExtentRight;
 
 		return FALSE;
 
 	}else{
-				/* if there is a change in channel's resolution or channel's ROI parameters --> change channel type to ROI */
-		if ( 	( 	table_entry->channelHorzRes 		!= table_entry->old_channelHorzRes 			||
-					table_entry->channelVertRes 		!= table_entry->old_channelVertRes 			||
-					table_entry->channelRoiOriginTop 	!= table_entry->old_channelRoiOriginTop 	||
-					table_entry->channelRoiOriginLeft 	!= table_entry->old_channelRoiOriginLeft 	) &&
-				table_entry->channelType != roi 
-		   )
-		table_entry->channelType = 	roi ;
-		return channelSatus_requests_handler(  table_entry ) ;
+
+		/* if there is a change in channel's resolution or channel's ROI parameters --> change channel type to ROI */
+		if ( table_entry->channelType != roi ){
+
+			table_entry->channelType = 	roi ;
+			return channelSatus_requests_handler(  table_entry ) ;
+
+		}
+
 	}
 
 	return TRUE;
@@ -942,28 +930,41 @@ channelTable_handler(
             table_info  =     netsnmp_extract_table_info(      request);
     
             switch (table_info->colnum) {
-            case COLUMN_CHANNELUSERDESC:
-				if ( deviceInfo.parameters[num_DeviceMode]._value.int_val	!= maintenanceMode){
-					netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_RESOURCEUNAVAILABLE  );
-					return SNMP_ERR_NOERROR;
-				}
-                break;
-
-            case COLUMN_CHANNELINTERPACKETDELAY:
-				if ( deviceInfo.parameters[num_DeviceMode]._value.int_val	!= maintenanceMode){
-					netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_RESOURCEUNAVAILABLE  );
-					return SNMP_ERR_NOERROR;
-				}
-                break;
-            case COLUMN_CHANNELSAPMESSAGEINTERVAL:
-				if ( deviceInfo.parameters[num_DeviceMode]._value.int_val	!= maintenanceMode){
-					netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_RESOURCEUNAVAILABLE  );
-					return SNMP_ERR_NOERROR;
-				}
-                break;
-            case COLUMN_CHANNELDEFAULTVIDEOFORMATINDEX:
-				if ( deviceInfo.parameters[num_DeviceMode]._value.int_val	!= maintenanceMode){
-					netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_RESOURCEUNAVAILABLE  );
+				case COLUMN_CHANNELUSERDESC:
+					if ( deviceInfo.parameters[num_DeviceMode]._value.int_val	!= maintenanceMode){
+						netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_RESOURCEUNAVAILABLE  );
+						return SNMP_ERR_NOERROR;
+					}
+					break;
+				case COLUMN_CHANNELROIEXTENTBOTTOM:
+					/* extent parameters cannot be modify if channelRoiOriginTop or channelRoiOriginLeft is not set */
+					if ( table_entry->channelRoiOriginTop == 0 && table_entry->channelRoiOriginLeft == 0 ){
+						netsnmp_set_request_error(reqinfo, requests , SNMP_ERR_BADVALUE );
+						return SNMP_ERR_NOERROR;
+					}
+					break;
+				case COLUMN_CHANNELROIEXTENTRIGHT:
+					/* extent parameters cannot be modify if channelRoiOriginTop or channelRoiOriginLeft is not set */
+					if ( table_entry->channelRoiOriginTop == 0 && table_entry->channelRoiOriginLeft == 0 ){
+						netsnmp_set_request_error(reqinfo, requests , SNMP_ERR_BADVALUE );
+						return SNMP_ERR_NOERROR;
+					}
+					break;
+				case COLUMN_CHANNELINTERPACKETDELAY:
+					if ( deviceInfo.parameters[num_DeviceMode]._value.int_val	!= maintenanceMode){
+						netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_RESOURCEUNAVAILABLE  );
+						return SNMP_ERR_NOERROR;
+					}
+					break;
+				case COLUMN_CHANNELSAPMESSAGEINTERVAL:
+					if ( deviceInfo.parameters[num_DeviceMode]._value.int_val	!= maintenanceMode){
+						netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_RESOURCEUNAVAILABLE  );
+						return SNMP_ERR_NOERROR;
+					}
+					break;
+				case COLUMN_CHANNELDEFAULTVIDEOFORMATINDEX:
+					if ( deviceInfo.parameters[num_DeviceMode]._value.int_val	!= maintenanceMode){
+						netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_RESOURCEUNAVAILABLE  );
 					return SNMP_ERR_NOERROR;
 				}
                 break;
@@ -1015,29 +1016,38 @@ channelTable_handler(
             case COLUMN_CHANNELHORZRES:
                 table_entry->old_channelHorzRes 				= table_entry->channelHorzRes;
                 table_entry->channelHorzRes     				= *request->requestvb->val.integer;
-				roi_requests_handler( table_entry ); 
+				if ( table_entry->channelHorzRes != table_entry->old_channelHorzRes )
+					roi_requests_handler( table_entry );
                 break;
             case COLUMN_CHANNELVERTRES:
                 table_entry->old_channelVertRes 				= table_entry->channelVertRes;
                 table_entry->channelVertRes     				= *request->requestvb->val.integer;
-				roi_requests_handler( table_entry ); 				
+				if ( table_entry->channelVertRes !=  table_entry->old_channelVertRes )
+					roi_requests_handler( table_entry );
                 break;
             case COLUMN_CHANNELROIORIGINTOP:
                 table_entry->old_channelRoiOriginTop 			= table_entry->channelRoiOriginTop;
                 table_entry->channelRoiOriginTop     			= *request->requestvb->val.integer;
-				roi_requests_handler( table_entry ); 				
+				if ( table_entry->channelRoiOriginTop !=  table_entry->old_channelRoiOriginTop )
+					roi_requests_handler( table_entry );
                 break;
             case COLUMN_CHANNELROIORIGINLEFT:
                 table_entry->old_channelRoiOriginLeft 			= table_entry->channelRoiOriginLeft;
                 table_entry->channelRoiOriginLeft     			= *request->requestvb->val.integer;
+				if ( table_entry->channelRoiOriginLeft !=  table_entry->old_channelRoiOriginLeft )
+					roi_requests_handler( table_entry );
                 break;
             case COLUMN_CHANNELROIEXTENTBOTTOM:
                 table_entry->old_channelRoiExtentBottom 		= table_entry->channelRoiExtentBottom;
                 table_entry->channelRoiExtentBottom     		= *request->requestvb->val.integer;
+				if ( table_entry->channelRoiExtentBottom !=  table_entry->old_channelRoiExtentBottom )
+					roi_requests_handler( table_entry );
                 break;
             case COLUMN_CHANNELROIEXTENTRIGHT:
                 table_entry->old_channelRoiExtentRight 			= table_entry->channelRoiExtentRight;
                 table_entry->channelRoiExtentRight    			= *request->requestvb->val.integer;
+				if ( table_entry->channelRoiExtentRight !=  table_entry->old_channelRoiExtentRight )
+					roi_requests_handler( table_entry );
                 break;
             case COLUMN_CHANNELRECEIVEIPADDRESS:
                 table_entry->old_channelReceiveIpAddress 		= table_entry->channelReceiveIpAddress;
