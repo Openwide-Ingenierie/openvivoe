@@ -383,6 +383,7 @@ gboolean receive_announcement(){
 						if ( ! gst_caps_is_equal ( caps, current_caps ) ){
 							gst_element_set_state (data->pipeline, GST_STATE_NULL ) ;
 							set_udpsrc_param( data->udp_elem , iterator , caps ) ;
+							update_channelTable_entry_roi_from_caps ( iterator , caps ) ;
 							gst_element_set_state (data->pipeline, GST_STATE_PLAYING);
 						}
 					}

@@ -153,6 +153,8 @@ struct channelTable_entry * channelTable_get_from_VF_index(int index);
 
 gboolean update_videoFormat_entry_roi_from_channelTable_entry ( struct videoFormatTable_entry *videoFormat_entry , struct channelTable_entry *channel_entry ) ;
 
+void update_channelTable_entry_roi_from_caps ( struct channelTable_entry *channel_entry , GstCaps *caps ) ;
+
 void channelTable_delete();
 
 int channelSatus_requests_handler( struct channelTable_entry * table_entry );

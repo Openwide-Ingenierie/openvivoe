@@ -285,6 +285,32 @@ gboolean update_videoFormat_entry_roi_from_channelTable_entry ( struct videoForm
 
 	/* return TRUE */
 	return TRUE;
+
+}
+
+/**
+ * \brief update the content of the channelTable_entry with the new caps receive
+ * \param entry the entry in channelTable to update
+ * \param  videoFormatIndex the VF that will be used to get the parameters 
+ * \return TRUE if we succeed to update the parameters
+ */
+void update_channelTable_entry_roi_from_caps ( struct channelTable_entry *channel_entry , GstCaps *caps ) 
+{
+	
+	/* only the ROI parameters of the videoFormat_entry can be modifies, otherwise nothing could */
+	GstStructure *caps_str = gst_caps_get_structure	(caps , 0) ;
+	channel_entry->channelHorzRes = (long) strtol( g_value_get_string( gst_structure_get_value(caps_str , "width")) , NULL, 10) ;
+	channel_entry->channelVertRes = (long) strtol( g_value_get_string( gst_structure_get_value(caps_str , "height")) , NULL, 10) ;
+	//channel_entry->channelRoiOriginTop = (long) strtol( g_value_get_string( gst_structure_get_value(caps_str , "roitop")) , NULL, 10) ;
+	//channel_entry->channelRoiOriginLeft = (long) strtol( g_value_get_string( gst_structure_get_value(caps_str , "roileft")) , NULL, 10) ;
+	//channel_entry->channelRoiExtentBottom = (long) strtol( g_value_get_string( gst_structure_get_value(caps_str , "roibottom")) , NULL, 10) ;
+	//channel_entry->channelRoiExtentRight = (long) strtol( g_value_get_string( gst_structure_get_value(caps_str , "roiright")) , NULL, 10) ;
+	
+	/* 
+	 * This function is only used on the Service Users side, so there is no need to update the corresponding 
+	 * videoFormat_entry (as it does not exist anyway ) 
+	 */
+
 }
 
 /**
