@@ -380,8 +380,11 @@ gboolean receive_announcement(){
 					else{
 						GstCaps *current_caps;
 						g_object_get ( G_OBJECT ( data->udp_elem ) , "caps" , &current_caps , NULL ) ;
-						if ( ! gst_caps_is_equal ( caps, current_caps ) )
+						if ( ! gst_caps_is_equal ( caps, current_caps ) ){
+							gst_element_set_state (data->pipeline, GST_STATE_NULL ) ;
 							set_udpsrc_param( data->udp_elem , iterator , caps ) ;
+							gst_element_set_state (data->pipeline, GST_STATE_PLAYING);
+						}
 					}
 
 				}

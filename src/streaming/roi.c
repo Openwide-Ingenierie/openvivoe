@@ -219,6 +219,7 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , st
 	 * Then we just need to update the element's parameter of the ROI
 	 */
 	if ( channel_entry->channelType == roi ){
+	
 		/*
 		 * In that case it means that the videocrop or videoscale element are already in pipeline. 
 		 * the VIVOE standard also specifies that if a ROI is non-scalable it should remain as so for ever. 
