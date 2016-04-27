@@ -139,6 +139,7 @@ static gboolean create_fmtp_media(struct channelTable_entry * channel_entry, Gst
 
 	/* if the channel is a ROI, then add roiTop and roiLeft paramerters */
 	if ( channel_entry->channelType == roi ){
+
 		/* 
 		 * The roi parameters to add to the ftmp SDP's line
 		 * Adding a space ' ' at the beginning of this line hase been done on purpose, 

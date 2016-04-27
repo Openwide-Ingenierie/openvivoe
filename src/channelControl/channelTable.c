@@ -493,15 +493,14 @@ static gboolean roi_requests_handler( struct channelTable_entry * table_entry ){
 	 */
 	if ( ! update_pipeline_SP_non_scalable_roi_changes( table_entry->stream_datas ,  table_entry ) )
 		return FALSE;
-	else{
+	else
+	{
 
 		/* if there is a change in channel's resolution or channel's ROI parameters --> change channel type to ROI */
-		if ( table_entry->channelType != roi ){
-
+		if ( table_entry->channelType != roi )
 			table_entry->channelType = 	roi ;
-			return channelSatus_requests_handler(  table_entry ) ;
 
-		}
+		return channelSatus_requests_handler(  table_entry ) ;
 
 	}
 
