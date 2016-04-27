@@ -46,7 +46,7 @@ static const char* interlace_mode_to_string(int interlaced_mode_val){
  * \param media the media to modify: where to store the new information
  * \return TRUE on success FALSE otherwise
  */
-static gboolean create_raw_media(struct channelTable_entry * channel_entry, GstSDPMedia *media)
+static gchar *create_raw_media(struct channelTable_entry * channel_entry, GstSDPMedia *media)
 {
 	stream_data *data = channel_entry->stream_datas;
 	gchar *fmtp =  g_strdup_printf ("%ld sampling=%s; width=%ld; height=%ld; depth=%ld; colorimetry=%s; %s",
@@ -58,12 +58,12 @@ static gboolean create_raw_media(struct channelTable_entry * channel_entry, GstS
 										channel_entry->channelColorimetry,
 										interlace_mode_to_string (channel_entry->channelInterlaced)
 									);
-	if( gst_sdp_media_add_attribute (media, "fmtp", fmtp)!= GST_SDP_OK ){
+	/*if( gst_sdp_media_add_attribute (media, "fmtp", fmtp)!= GST_SDP_OK ){
 		g_printerr("ERROR: problem in media creation for SDP file\n");
 		return FALSE;
 	}
-	free(fmtp);
-	return TRUE;
+	free(fmtp);*/
+	return fmtp;
 }
 
 /**
@@ -72,7 +72,7 @@ static gboolean create_raw_media(struct channelTable_entry * channel_entry, GstS
  * \param media the media to modify: where to store the new information
  * \return TRUE on success, FALSE on FAILURE
  */
-static gboolean create_mpeg4_media(struct channelTable_entry * channel_entry, GstSDPMedia *media)
+static gchar *create_mpeg4_media(struct channelTable_entry * channel_entry, GstSDPMedia *media)
 {
 	stream_data *data = channel_entry->stream_datas;
 	gchar  		*fmtp =  g_strdup_printf("%ld  profile-level-id=%s; config=%s",
@@ -80,12 +80,7 @@ static gboolean create_mpeg4_media(struct channelTable_entry * channel_entry, Gs
 											data->rtp_datas->profile_level_id,
 											data->rtp_datas->config
 										);
-	if( gst_sdp_media_add_attribute (media, "fmtp", fmtp)!= GST_SDP_OK ){
-		g_printerr("ERROR: problem in media creation for SDP file\n");
-		return FALSE;
-	}
-	free(fmtp);
-	return TRUE;
+	return fmtp;
 }
 
 /**
@@ -94,7 +89,7 @@ static gboolean create_mpeg4_media(struct channelTable_entry * channel_entry, Gs
  * \param media the media to modify: where to store the new information
  * \return TRUE on success, FALSE on failure
  */
-static gboolean create_j2k_media(struct channelTable_entry * channel_entry, GstSDPMedia *media)
+static gchar *create_j2k_media(struct channelTable_entry * channel_entry, GstSDPMedia *media)
 {
 	stream_data *data = channel_entry->stream_datas;
 	gchar *fmtp =  g_strdup_printf ("%ld sampling=%s; width=%ld; height=%ld;",
@@ -104,13 +99,7 @@ static gboolean create_j2k_media(struct channelTable_entry * channel_entry, GstS
 										channel_entry->channelVertRes/*,
 										interlace_mode_to_string (channel_entry->channelInterlaced)*/
 									);
-	if( gst_sdp_media_add_attribute (media, "fmtp", fmtp)!= GST_SDP_OK ){
-		g_printerr("ERROR: problem in media creation for SDP file\n");
-		return FALSE;
-	}
-
-	free(fmtp);
-	return TRUE;
+	return fmtp;
 }
 
 
@@ -131,18 +120,47 @@ static gboolean error_function(){
  */
 static gboolean create_fmtp_media(struct channelTable_entry * channel_entry, GstSDPMedia *media)
 {
+	gchar *fmtp; /* the string to retrieve the fmtp line of SDP file */
 	if ( !strcmp( channel_entry->channelVideoFormat, RAW_NAME )){ // case RAW format
-		if( !create_raw_media(channel_entry, media))
+		fmtp = create_raw_media(channel_entry, media) ;
+		if ( ! fmtp )
 			return error_function();
 	}else if ( !strcmp(channel_entry->channelVideoFormat , MPEG4_NAME )){ // case MPEG-6 format
-		if( !create_mpeg4_media(channel_entry, media))
+		fmtp = create_mpeg4_media(channel_entry, media) ;
+		if ( ! fmtp )
 			return error_function();
 	}else if ( !strcmp( channel_entry->channelVideoFormat , J2K_NAME)){ // case J2000 format
-		if( !create_j2k_media(channel_entry, media))
+		fmtp = create_j2k_media(channel_entry, media) ;
+		if ( ! fmtp )
 			return error_function();
 	}else{
 		return error_function();
 	}
+
+	/* if the channel is a ROI, then add roiTop and roiLeft paramerters */
+	if ( channel_entry->channelType == roi ){
+		/* 
+		 * The roi parameters to add to the ftmp SDP's line
+		 * Adding a space ' ' at the beginning of this line hase been done on purpose, 
+		 * as we will concatenate it to the existing fmtp line
+		 */
+		gchar *roi_params = g_strdup_printf (" roiTop=%ld; roiLeft=%ld",
+										channel_entry->channelRoiOriginTop,
+										channel_entry->channelRoiOriginLeft);
+
+		/* extent ftmp buffer size so we can concatenate roi_params string to it */ 
+		fmtp = (gchar *) realloc ( fmtp , strlen( fmtp ) + strlen ( roi_params ) + 1 );
+		strcat ( fmtp , roi_params ) ;
+		free(roi_params);
+
+	}
+
+	if( gst_sdp_media_add_attribute (media, "fmtp", fmtp)!= GST_SDP_OK ){
+		g_printerr("ERROR: problem in media creation for SDP file\n");
+		return error_function();
+	}
+
+	free(fmtp); /* memory has been allocated in creta_medianame_media() function */
 	return TRUE;
 }
 
