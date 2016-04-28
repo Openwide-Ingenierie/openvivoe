@@ -376,7 +376,7 @@ static gchar *get_vivoe_element ( gchar *cmdline, gchar *vivoe_element_name, gch
  */
 static gchar *vivoe_redirect(gchar *cmdline){
 
-	gchar *return_value = get_vivoe_element ( cmdline, VIVOE_REDIRECT_NAME , "name" );
+	gchar *return_value = get_vivoe_element ( cmdline, VIVOE_REDIRECT_NAME , VIVOE_REDIRECT_PROPERTY_NAME );
 
 	/* 
 	 * For vivoe-redirect the element should have a propoerty, otherwise, it is an error, so if vivoe-redirect has been
@@ -397,7 +397,7 @@ static gchar *vivoe_redirect(gchar *cmdline){
  */
 static gchar *vivoe_roi(gchar *cmdline){
 
-	return get_vivoe_element ( cmdline, VIVOE_ROI_NAME , "type" );
+	return get_vivoe_element ( cmdline, VIVOE_ROI_NAME , VIVOE_ROI_PROPERTY_NAME );
 
 }
 
@@ -876,8 +876,6 @@ gchar* get_roi_parameters_for_sources (GKeyFile* gkf, int index, roi_data *roi_d
 		roi_extent_bottom 	= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_EXTENT_BOTTOM, error, TRUE );
 		roi_extent_right 	= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_EXTENT_RIGHT, 	error, TRUE );
 
-
-
 		/* if the value were not found, set the ROI parameters to 0 */
 
 		/* if No ROI_top AND No_ROI_left but extent parameters are set */
@@ -952,9 +950,11 @@ static gboolean init_roi_data(GKeyFile* gkf ){
 	for ( index_source = 1 ; index_source <=  videoFormatNumber._value.int_val ; index_source++){
 
 		roi_type = get_roi_parameters_for_sources (gkf, index_source , roi_table.roi_datas[size] ) ;
+
 			if ( roi_type ){
-				redirection.redirect_channels[size] =(redirect_data*) malloc ( sizeof ( redirect_data ) ) ;		
-				roi_table.roi_datas[size]->roi_type = g_strdup ( roi_type ); 
+				redirection.redirect_channels[size] 		= (redirect_data*) malloc ( sizeof ( redirect_data ) ) ;		
+				roi_table.roi_datas[size]->roi_type 		= g_strdup ( roi_type ); 
+				roi_table.roi_datas[size]->video_SP_index 	= index_source ;
 				roi_table.size ++;
 			}
 

@@ -10,7 +10,7 @@
 /**
  * \brief This is the name of the configuration file to use for the subAgent handling the VIVOE MIB
  */
-#define CONFIG_FILE 				"vivoe-mib.conf"
+#define CONFIG_FILE 					"vivoe-mib.conf"
 
 /**
  * \brief the names of the groups that should be found in the configuration file
@@ -21,69 +21,79 @@
 /**
  * \brief the names of the groups that could be found in the configuration file
  */
-#define GROUP_NAME_SOURCE			"source_"
-#define GROUP_NAME_RECEIVER			"receiver_"
+#define GROUP_NAME_SOURCE					"source_"
+#define GROUP_NAME_RECEIVER					"receiver_"
 
 /**
  * \brief the names of the keys that could be found in the configuration file under group [source_x]
  */
-#define KEY_NAME_CHANNEL_DESC		"channelUserDesc"
+#define KEY_NAME_CHANNEL_DESC			"channelUserDesc"
 
 /**
  * \brief the names of the keys that could be found in the configuration file under group [source_x]
  */
-#define KEY_NAME_DEFAULT_IP			"defaultReceiveIP"
+#define KEY_NAME_DEFAULT_IP				"defaultReceiveIP"
 
 /**
  * \brief the names of the keys that could be found in the configuration file under group [source_x] 
  */
-#define ROI_WIDTH 					"ROI_width_default"
+#define ROI_WIDTH 						"ROI_width_default"
 
 /**
  * \brief the names of the keys that could be found in the configuration file under group [source_x] 
  */
-#define ROI_HEIGHT 					"ROI_height_default"
+#define ROI_HEIGHT 						"ROI_height_default"
 
 /**
  * \brief the names of the keys that could be found in the configuration file under group [source_x] 
  */
-#define ROI_ORIGIN_TOP 				"ROI_top_default"
+#define ROI_ORIGIN_TOP 					"ROI_top_default"
 
 /**
  * \brief the names of the keys that could be found in the configuration file under group [source_x] 
  */
-#define ROI_ORIGIN_LEFT 			"ROI_left_default"
+#define ROI_ORIGIN_LEFT 				"ROI_left_default"
 
 /**
  * \brief the names of the keys that could be found in the configuration file under group [source_x] 
  */
-#define ROI_EXTENT_RIGHT 			"ROI_extentright_default"
+#define ROI_EXTENT_RIGHT 				"ROI_extentright_default"
 
 /**
  * \brief the names of the keys that could be found in the configuration file under group [source_x] 
  */
-#define  ROI_EXTENT_BOTTOM			"ROI_extentbottom_default"
+#define  ROI_EXTENT_BOTTOM				"ROI_extentbottom_default"
 
 
 /**
  * \brief the name of the Gstreamer command line used by the user to give the input video to vivoe
  */
-#define GST_SOURCE_CMDLINE 			"gst_source"
+#define GST_SOURCE_CMDLINE 				"gst_source"
 
 /**
  * \brief the name of the Gstreamer command line used by the user to output the video 
  */
-#define GST_SINK_CMDLINE 			"gst_sink"
+#define GST_SINK_CMDLINE 				"gst_sink"
 
 /**
  * \brief the value that should have a gst_source or gst_sink command line to be a redirection
  */
-#define VIVOE_REDIRECT_NAME 		"vivoe-redirect"
+#define VIVOE_REDIRECT_NAME 			"vivoe-redirect"
+
+/**
+ * \brief name of vivoe-redirect property
+ */
+#define VIVOE_REDIRECT_PROPERTY_NAME	"name"
 
 /**
  * \brief the name of the Gstreamer element to use for scaling video on this device 
  */
-#define VIVOE_ROI_NAME 				"vivoe-roi"
+#define VIVOE_ROI_NAME 					"vivoe-roi"
+
+/**
+ * \brief name of vivoe-roi property
+ */
+#define VIVOE_ROI_PROPERTY_NAME			"scalable"
 
 /*functions' definitions*/
 int 	init_mib_content(); /*check the groups, key and values of the MIB's parameters*/
