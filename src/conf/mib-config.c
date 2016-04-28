@@ -325,12 +325,57 @@ static void init_mib_global_parameter(){
 }
 
 /**
+ * \brief give the vlaue of vivoe-element's property, "", if the element is ine cmdline but no property is set, NULL otherwise
+ * \param the cmdline to analyze
+ * \return the vlaue of vivoe-element's property, "", if the element is ine cmdline but no property is set, NULL otherwise
+ */
+static gchar *get_vivoe_element ( gchar *cmdline, gchar *vivoe_element_name, gchar *property ) {
+
+	if ( cmdline == NULL )
+		return NULL;
+
+	gchar **splitted, **gst_elements;
+
+	gchar *property_name = g_strdup ( property );
+
+	/* parse entirely the command line */
+	splitted = g_strsplit ( cmdline , "!", -1);
+
+	for (int i = 0 ; i < g_strv_length(splitted); i++){
+
+		gst_elements = g_strsplit ( splitted[i] , " ", -1);
+
+		/* check if the gst element mention contains the redirection element */
+		if (g_strv_contains ((const gchar * const *) gst_elements, vivoe_element_name )){
+			/* if so splitted[i] should also contained a string with "name=..." where ... is the name given to the corresponding elements */
+			property_name = realloc( property_name, strlen("="));
+			strcat ( property_name , "=");
+			property_name = g_strdup( g_strrstr ( splitted[i] , property_name ) );	
+			g_strstrip( property_name );
+
+			/* free splitted */
+			g_strfreev(splitted);
+
+			return property_name;
+		}
+	}
+
+	/* free splitted */
+	g_strfreev(splitted);
+
+	return NULL;
+
+}
+
+/**
  * \brief specify if the cmdline is a redirection, if so returns the "name" parameter
  * \param the cmdline to analyze
  * \return the "name" argument or null if no name argument or if cmdlie is not a redirection
  */
 static gchar *vivoe_redirect(gchar *cmdline){
 
+	return get_vivoe_element ( cmdline, VIVOE_REDIRECT_NAME , "name" );
+#if 0
 	if ( cmdline == NULL )
 		return NULL;
 
@@ -363,33 +408,50 @@ static gchar *vivoe_redirect(gchar *cmdline){
 	g_strfreev(splitted);
 
 	return NULL;
+#endif //if 0
+
 }
 
 /**
 * \brief specify if the cmdline contains the element vivoe-roi to specify that the channel is a ROI
  * \param the cmdline to analyze
- * \return TRUE if the channel is a ROI
+ * \return the type of roi in a string ( scalable or non_scalable) if the channel is a ROI or NULL
  */
-static gboolean vivoe_roi(gchar *cmdline){
+static gchar *vivoe_roi(gchar *cmdline){
 
 	if ( cmdline == NULL )
-		return FALSE;
+		return NULL;
 
-	gchar **splitted;
+	gchar **splitted, **gst_elements;
+
+	gchar *name;
 
 	/* parse entirely the command line */
 	splitted = g_strsplit ( cmdline , "!", -1);
 
-	/* check if the gst element mention contains the redirection element */
-	if (  g_strv_contains ((const gchar * const *) splitted , VIVOE_ROI_NAME ) ){
-		/* free splitted */
-		g_strfreev(splitted);
-		return TRUE;
+	for (int i = 0 ; i < g_strv_length(splitted); i++){
+
+		gst_elements = g_strsplit ( splitted[i] , " ", -1);
+
+		/* check if the gst element mention contains the redirection element */
+		if (g_strv_contains ((const gchar * const *) gst_elements, VIVOE_REDIRECT_NAME )){
+			/* if so splitted[i] should also contained a string with "name=..." where ... is the name given to the corresponding elements */
+
+			name = g_strdup( g_strrstr ( splitted[i] , "type=" ) );		
+			g_strstrip( name );
+
+			/* free splitted */
+			g_strfreev(splitted);
+
+			return name;
+		}
 	}
 
 	/* free splitted */
 	g_strfreev(splitted);
-	return FALSE;
+
+	return NULL;
+
 }
 
 /**
@@ -849,7 +911,7 @@ gboolean get_roi_parameters_for_sources ( int index, roi_data *roi_datas){
 	/* Build the name that the group should have */
 	sprintf(source_name, "%s%d", source_prefix, index);
 
-	if ( ! vivoe_roi ( cmdline )){
+	if ( ! vivoe_roi ( cmdline ) ){
 			roi_width 			= 0;
 			roi_height 			= 0;
 			roi_top 			= 0;
