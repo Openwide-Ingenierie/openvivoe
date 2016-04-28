@@ -331,8 +331,8 @@ static void init_mib_global_parameter(){
  */
 static gchar *vivoe_redirect(gchar *cmdline){
 
-	if ( cmdline == null )
-		return null;
+	if ( cmdline == NULL )
+		return NULL;
 
 	gchar **splitted, **gst_elements;
 
@@ -362,7 +362,7 @@ static gchar *vivoe_redirect(gchar *cmdline){
 	/* free splitted */
 	g_strfreev(splitted);
 
-	return null;
+	return NULL;
 }
 
 /**
@@ -370,25 +370,26 @@ static gchar *vivoe_redirect(gchar *cmdline){
  * \param the cmdline to analyze
  * \return TRUE if the channel is a ROI
  */
-static gchar *vivoe_roi(gchar *cmdline){
+static gboolean vivoe_roi(gchar *cmdline){
 
-	if ( cmdline == null )
-		return null;
+	if ( cmdline == NULL )
+		return FALSE;
 
-	gchar **splitted, **gst_elements;
-
-	gchar *name;
+	gchar **splitted;
 
 	/* parse entirely the command line */
 	splitted = g_strsplit ( cmdline , "!", -1);
 
 	/* check if the gst element mention contains the redirection element */
-	return g_strv_contains ((const gchar * const *) splitted , VIVOE_ROI_NAME ) ;
+	if (  g_strv_contains ((const gchar * const *) splitted , VIVOE_ROI_NAME ) ){
+		/* free splitted */
+		g_strfreev(splitted);
+		return TRUE;
+	}
 
 	/* free splitted */
 	g_strfreev(splitted);
-
-	return null;
+	return FALSE;
 }
 
 /**
@@ -825,6 +826,9 @@ gboolean get_roi_parameters_for_sources ( int index, roi_data *roi_datas){
 	 */
 	gchar 		**groups;
 
+	/* the gt_source cmdline */
+	gchar * cmdline;
+
 	/*
 	 * the roi parameters retreive from the configuration file
 	 */
@@ -838,35 +842,38 @@ gboolean get_roi_parameters_for_sources ( int index, roi_data *roi_datas){
 	/*first we load the different Groups of the configuration file
 	 * second parameter "gchar* length" is optional*/
 	groups = g_key_file_get_groups(gkf, NULL);
+	cmdline = get_source_cmdline(gkf, index );
 
 	char *source_prefix = "source_";
 	char *source_name = (char*) malloc( strlen(source_prefix)+2 * sizeof(char));
 	/* Build the name that the group should have */
 	sprintf(source_name, "%s%d", source_prefix, index);
 
-	roi_width 			= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_WIDTH, 		error, TRUE );
-	roi_height 			= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_HEIGHT, 		error, TRUE );
-	roi_top 			= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_ORIGIN_TOP , 	error, TRUE );
-	roi_left 			= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_ORIGIN_LEFT, 	error, TRUE );
-	roi_extent_bottom 	= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_EXTENT_BOTTOM, error, TRUE );
-	roi_extent_right 	= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_EXTENT_RIGHT, 	error, TRUE );
-
-	/* if the value were not found, set the ROI parameters to 0 */
-
-	/* if No ROI_top AND No_ROI_left */
-	if ( roi_width == -1 && roi_height == -1 && roi_top == -1 && roi_left == -1 ){
-		if (  roi_extent_bottom == -1 && roi_extent_right == -1 ) {
+	if ( ! vivoe_roi ( cmdline )){
 			roi_width 			= 0;
 			roi_height 			= 0;
 			roi_top 			= 0;
 			roi_left 			= 0;
 			roi_extent_bottom 	= 0;
 			roi_extent_right 	= 0;
-		}
-		else if ( roi_extent_bottom != -1 || roi_extent_right != -1 ){
+
+	}else{
+
+		roi_width 			= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_WIDTH, 		error, TRUE );
+		roi_height 			= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_HEIGHT, 		error, TRUE );
+		roi_top 			= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_ORIGIN_TOP , 	error, TRUE );
+		roi_left 			= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_ORIGIN_LEFT, 	error, TRUE );
+		roi_extent_bottom 	= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_EXTENT_BOTTOM, error, TRUE );
+		roi_extent_right 	= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_EXTENT_RIGHT, 	error, TRUE );
+
+	}
+
+	/* if the value were not found, set the ROI parameters to 0 */
+
+	/* if No ROI_top AND No_ROI_left but extent parameters are set */
+	if ( (roi_top == -1 && roi_left == -1) && ( roi_extent_bottom != -1 || roi_extent_right != -1 ) ) {
 			g_printerr("keys %s and/or %s cannot be set if %s and %s not present\n", ROI_EXTENT_BOTTOM, ROI_EXTENT_RIGHT, ROI_ORIGIN_TOP, ROI_ORIGIN_LEFT);
 			return FALSE;
-		}
 	}
 
 	/* if only on ROI_top or ROI_left */
