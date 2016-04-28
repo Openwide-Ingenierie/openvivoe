@@ -883,16 +883,40 @@ gboolean get_roi_parameters_for_sources (GKeyFile* gkf, int index, roi_data *roi
 		/*
 		 * check if values given in configuration file are correct
 		 */
+
+		/* 
+		 * if origin parameters set, but no ROI resolution specified 
+		 */
+		if ( ( roi_top != -1 || roi_left != -1 ) && ( roi_width == -1 && roi_height ==-1) ){
+
+				g_printerr ( "ERROR: [source_%d] ROI's origin specified but no ROI resolution found\n", index );
+				return FALSE;
+
+		}
+
 		if  ( scalable )
 		{
 
 			/* if extent object are set but not origin object */
 			if ( (roi_extent_bottom != -1 || roi_extent_right != -1) && (roi_top == -1 && roi_left==-1)  ){
-				g_printerr ( " ERROR scalable ROI cannot have %s and %s set if %s and %s are not set too", ROI_EXTENT_BOTTOM , ROI_EXTENT_RIGHT , ROI_ORIGIN_TOP , ROI_ORIGIN_LEFT );
+				g_printerr ( " ERROR: [source_%d] scalable ROI cannot have %s and %s set if %s and %s are not set too", index, ROI_EXTENT_BOTTOM , ROI_EXTENT_RIGHT , ROI_ORIGIN_TOP , ROI_ORIGIN_LEFT );
 				return FALSE;
 			}
 
 		}
+
+		if ( roi_width == -1 )
+			roi_width = 0 ;
+		if ( roi_height == -1 )
+			roi_height = 0 ;
+		if (roi_top  == -1 )
+			roi_top = 0 ;
+		if ( roi_left == -1 )
+			roi_left = 0 ;
+		if ( roi_extent_bottom == -1 )
+			roi_extent_bottom = 0 ;
+		if ( roi_extent_right == -1 )
+			roi_extent_right = 0 ;
 
 		/*
 		 * save those values to roi_datas
@@ -903,7 +927,7 @@ gboolean get_roi_parameters_for_sources (GKeyFile* gkf, int index, roi_data *roi
 		roi_datas->roi_left 			= roi_left;
 		roi_datas->roi_extent_bottom 	= roi_extent_bottom;
 		roi_datas->roi_extent_right 	= roi_extent_right;
-		roi_datas->scalalble 			= scalable;
+		roi_datas->scalable 			= scalable;
 
 		free(source_name);
 
@@ -934,9 +958,10 @@ static gboolean init_roi_data(GKeyFile* gkf ){
 	/* get redirection data for service provider */
 	for ( index_source = 1 ; index_source <=  videoFormatNumber._value.int_val ; index_source++){
 
+		roi_table.roi_datas[size] 		= (roi_data*) malloc ( sizeof ( roi_data ) ) ;		
+
 		if ( get_roi_parameters_for_sources (gkf, index_source , roi_table.roi_datas[size] ) ){
 
-				redirection.redirect_channels[size] 		= (redirect_data*) malloc ( sizeof ( redirect_data ) ) ;		
 				roi_table.roi_datas[size]->video_SP_index 	= index_source ;
 				roi_table.size ++;
 
