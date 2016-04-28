@@ -819,7 +819,7 @@ void set_default_IP_from_conf(int index, const char* new_default_ip){
  * \param roi_datas the roi_data structure to fill
  * \return TRUE if ROI values are valid, FALSE otherwise
  */
-gchar* get_roi_parameters_for_sources (GKeyFile* gkf, int index, roi_data *roi_datas){
+gboolean get_roi_parameters_for_sources (GKeyFile* gkf, int index, roi_data *roi_datas){
 
 	/* Define the error pointer we will be using to check for errors in the configuration file */
     GError 		*error 	= NULL;
@@ -838,12 +838,13 @@ gchar* get_roi_parameters_for_sources (GKeyFile* gkf, int index, roi_data *roi_d
 	/*
 	 * the roi parameters retreive from the configuration file
 	 */
-	long roi_width;
-	long roi_height;
-	long roi_top;
-	long roi_left;
-	long roi_extent_bottom;
-	long roi_extent_right;
+	long 		roi_width;
+	long 		roi_height;
+	long 		roi_top;
+	long 		roi_left;
+	long 		roi_extent_bottom;
+	long 		roi_extent_right;
+	gboolean 	scalable = FALSE;
 
 	/*first we load the different Groups of the configuration file
 	 * second parameter "gchar* length" is optional*/
@@ -860,7 +861,7 @@ gchar* get_roi_parameters_for_sources (GKeyFile* gkf, int index, roi_data *roi_d
 		roi_left 			= 0;
 		roi_extent_bottom 	= 0;
 		roi_extent_right 	= 0;
-		return NULL;
+		return FALSE;
 
 	}else{
 
@@ -876,38 +877,22 @@ gchar* get_roi_parameters_for_sources (GKeyFile* gkf, int index, roi_data *roi_d
 		roi_extent_bottom 	= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_EXTENT_BOTTOM, error, TRUE );
 		roi_extent_right 	= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_EXTENT_RIGHT, 	error, TRUE );
 
-		/* if the value were not found, set the ROI parameters to 0 */
+		if ( ! strcmp ( roi_type ,  "scalable=true" ) )
+			scalable = TRUE;
 
-		/* if No ROI_top AND No_ROI_left but extent parameters are set */
-		if ( (roi_top == -1 && roi_left == -1) && ( roi_extent_bottom != -1 || roi_extent_right != -1 ) ) {
-			g_printerr("keys %s and/or %s cannot be set if %s and %s not present\n", ROI_EXTENT_BOTTOM, ROI_EXTENT_RIGHT, ROI_ORIGIN_TOP, ROI_ORIGIN_LEFT);
-			return NULL;
-		}
+		/*
+		 * check if values given in configuration file are correct
+		 */
+		if  ( scalable )
+		{
 
-		/* if only on ROI_top or ROI_left */
-		else if ( ! ( roi_width != -1 && roi_height != -1 && roi_top != -1 && roi_left != -1 ) ){
-			g_printerr("Keys %s, %s, %s, %s should all be defined\n",ROI_WIDTH, ROI_HEIGHT, ROI_ORIGIN_TOP, ROI_ORIGIN_LEFT);
-			return NULL;
-		}
-
-		/* if both ROI_top and ROI_left present */
-		else {
-
-			/* if no roi_extent_bottom and no roi_extent right */
-			if (  roi_extent_bottom == -1 && roi_extent_right == -1 ) {
-				roi_extent_bottom 	= 0;
-				roi_extent_right 	= 0;
-			}
-
-			/* if only one of extent parameter present */
-			else if ( ( roi_extent_bottom == -1 && roi_extent_right != -1 ) || ( roi_extent_bottom != -1 && roi_extent_right == -1 ) ){
-				g_printerr("Keys %s and %s should be both in configuration file\n", ROI_ORIGIN_TOP, ROI_ORIGIN_LEFT);
-				return NULL;
+			/* if extent object are set but not origin object */
+			if ( (roi_extent_bottom != -1 || roi_extent_right != -1) && (roi_top == -1 && roi_left==-1)  ){
+				g_printerr ( " ERROR scalable ROI cannot have %s and %s set if %s and %s are not set too", ROI_EXTENT_BOTTOM , ROI_EXTENT_RIGHT , ROI_ORIGIN_TOP , ROI_ORIGIN_LEFT );
+				return FALSE;
 			}
 
 		}
-
-		/* there all roi parameters should be correctly set, or we should have already returned */
 
 		/*
 		 * save those values to roi_datas
@@ -918,10 +903,11 @@ gchar* get_roi_parameters_for_sources (GKeyFile* gkf, int index, roi_data *roi_d
 		roi_datas->roi_left 			= roi_left;
 		roi_datas->roi_extent_bottom 	= roi_extent_bottom;
 		roi_datas->roi_extent_right 	= roi_extent_right;
+		roi_datas->scalalble 			= scalable;
 
 		free(source_name);
 
-		return roi_type;
+		return TRUE;
 
 	}
 
@@ -938,7 +924,6 @@ roi_str roi_table ;
  */
 static gboolean init_roi_data(GKeyFile* gkf ){
 	
-	gchar *roi_type;
 	int index_source; 
 
 	/* malloc the roi_table */	
@@ -949,14 +934,15 @@ static gboolean init_roi_data(GKeyFile* gkf ){
 	/* get redirection data for service provider */
 	for ( index_source = 1 ; index_source <=  videoFormatNumber._value.int_val ; index_source++){
 
-		roi_type = get_roi_parameters_for_sources (gkf, index_source , roi_table.roi_datas[size] ) ;
+		if ( get_roi_parameters_for_sources (gkf, index_source , roi_table.roi_datas[size] ) ){
 
-			if ( roi_type ){
 				redirection.redirect_channels[size] 		= (redirect_data*) malloc ( sizeof ( redirect_data ) ) ;		
-				roi_table.roi_datas[size]->roi_type 		= g_strdup ( roi_type ); 
 				roi_table.roi_datas[size]->video_SP_index 	= index_source ;
 				roi_table.size ++;
-			}
+
+		}else
+
+			return FALSE;
 
 	}
 
@@ -1074,7 +1060,8 @@ int init_mib_content(){
 	init_redirection_data( gkf );
 
 	/* init gstreamer's command line to see if there will be roi */
-	init_roi_data( gkf );
+	if ( ! init_roi_data( gkf ) )
+		return EXIT_FAILURE;
 
 	close_mib_configuration_file( gkf );
 
