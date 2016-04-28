@@ -194,7 +194,21 @@ typedef struct{
 	long 	roi_left;
 	long 	roi_extent_bottom;
 	long 	roi_extent_right;
+	gchar 	*roi_type;
+	int 	source_index;
 }roi_data;
+
+
+/**
+ * \brief a NULL terminated array that contains all the redirection_data of the current program
+ */
+typedef struct {
+	int 			size;
+	roi_data 	*(*roi_datas);
+}roi_str;
+
+extern redirection_str roi_table ;
+
 
 /** 
  * \brief The main loop of the program, because to be able to acces it everywhere in the program
