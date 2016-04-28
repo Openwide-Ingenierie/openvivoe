@@ -327,12 +327,12 @@ static void init_mib_global_parameter(){
 /**
  * \brief specify if the cmdline is a redirection, if so returns the "name" parameter
  * \param the cmdline to analyze
- * \return the "name" argument or NULL if no name argument or if cmdlie is not a redirection
+ * \return the "name" argument or null if no name argument or if cmdlie is not a redirection
  */
 static gchar *vivoe_redirect(gchar *cmdline){
 
-	if ( cmdline == NULL )
-		return NULL;
+	if ( cmdline == null )
+		return null;
 
 	gchar **splitted, **gst_elements;
 
@@ -346,7 +346,7 @@ static gchar *vivoe_redirect(gchar *cmdline){
 		gst_elements = g_strsplit ( splitted[i] , " ", -1);
 
 		/* check if the gst element mention contains the redirection element */
-		if (g_strv_contains ((const gchar * const *) gst_elements,VIVOE_REDIRECT_NAME )){
+		if (g_strv_contains ((const gchar * const *) gst_elements, VIVOE_REDIRECT_NAME )){
 			/* if so splitted[i] should also contained a string with "name=..." where ... is the name given to the corresponding elements */
 
 			name = g_strdup( g_strrstr ( splitted[i] , "name=" ) );		
@@ -362,7 +362,33 @@ static gchar *vivoe_redirect(gchar *cmdline){
 	/* free splitted */
 	g_strfreev(splitted);
 
-	return NULL;
+	return null;
+}
+
+/**
+* \brief specify if the cmdline contains the element vivoe-roi to specify that the channel is a ROI
+ * \param the cmdline to analyze
+ * \return TRUE if the channel is a ROI
+ */
+static gchar *vivoe_roi(gchar *cmdline){
+
+	if ( cmdline == null )
+		return null;
+
+	gchar **splitted, **gst_elements;
+
+	gchar *name;
+
+	/* parse entirely the command line */
+	splitted = g_strsplit ( cmdline , "!", -1);
+
+	/* check if the gst element mention contains the redirection element */
+	return g_strv_contains ((const gchar * const *) splitted , VIVOE_ROI_NAME ) ;
+
+	/* free splitted */
+	g_strfreev(splitted);
+
+	return null;
 }
 
 /**
@@ -778,7 +804,10 @@ void set_default_IP_from_conf(int index, const char* new_default_ip){
 }
 
 /** 
- * \brief
+ * \brief register into the structure roi_data the MIB ROI parameters' values extract from the configuration file
+ * \param index the source index from which we should be looking for ROI parameters
+ * \param roi_datas the roi_data structure to fill
+ * \return TRUE if ROI values are valid, FALSE otherwise
  */
 gboolean get_roi_parameters_for_sources ( int index, roi_data *roi_datas){
 

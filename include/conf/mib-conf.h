@@ -28,6 +28,7 @@
  * \brief the names of the keys that could be found in the configuration file under group [source_x]
  */
 #define KEY_NAME_CHANNEL_DESC		"channelUserDesc"
+
 /**
  * \brief the names of the keys that could be found in the configuration file under group [source_x]
  */
@@ -78,6 +79,12 @@
  * \brief the value that should have a gst_source or gst_sink command line to be a redirection
  */
 #define VIVOE_REDIRECT_NAME 		"vivoe-redirect"
+
+/**
+ * \brief the name of the Gstreamer element to use for scaling video on this device 
+ */
+#define VIVOE_ROI_NAME 				"vivoe-roi"
+
 /*functions' definitions*/
 int 	init_mib_content(); /*check the groups, key and values of the MIB's parameters*/
 gchar 	*init_sources_from_conf(int index); /* get the command line used to initiate the streams */
