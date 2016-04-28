@@ -83,7 +83,7 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline, GstElement *input
 	GstElement *videocrop 		= NULL;
 	GstElement *capsfilter 		= NULL;
 	GstElement *videoscale 		= NULL;
-	GstElement *last 			= NULL; 
+	GstElement *last 			= NULL;
 
 	if ( roi_exists ( video_stream_info ) ){
 		videoconvert = gst_element_factory_make_log ( "videoconvert", "videoconvert" );
@@ -96,12 +96,14 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline, GstElement *input
 			gst_bin_remove( GST_BIN (pipeline), videoconvert);
 			return NULL;
 		}
-		/*
+
+	/*
 	 * This will be helpfull for all kinds of ROI
 	 */
 	input = videoconvert;
 
-	}else
+	}
+	else
 		return input;
 
 		if ( roi_is_non_scalable( video_stream_info ) ){
@@ -124,11 +126,15 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline, GstElement *input
 
 	else if ( roi_is_decimated ( video_stream_info ) || roi_is_interpolated ( video_stream_info ) ){
 
+		/* 
+		 * For now, we consider that the user has already insert that element in its pipeline 
+		 */
 
+		/*
 		videoscale = gst_element_factory_make_log ( "videoscale", "videoscale" );
 		if ( !videoscale )
 			return NULL;
-
+*/
 		capsfilter = gst_element_factory_make_log ( "capsfilter", "capsfilter_roi" );
 
 		/* build the parameter for the caps filter */
@@ -157,9 +163,9 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline, GstElement *input
 		}
 		
 		input = capsfilter ;
+		
+		last = NULL;
 
-		last = videocrop;
-	
 	}
 
 	if( last ){
@@ -183,8 +189,13 @@ GstElement *handle_roi( GstElement *pipeline, GstElement *input, struct videoFor
 	GstElement *last = NULL;
 
 	/* retrieve default value from configuration */
-	if ( !get_roi_parameters_for_sources ( video_stream_info->videoFormatIndex , &roi_datas) )
+//	if ( !get_roi_parameters_for_sources ( video_stream_info->videoFormatIndex , &roi_datas) )
 		return NULL;
+
+	/* 
+	 * if the  element vivoe-roi has been detected in pipeline, then the video is a ROI. So its type is set to ROI 
+	 */
+	video_stream_info->videoFormatType = roi ;
 
 	/* 
 	 * Set the ROI parameter into the videoFormat Entry 

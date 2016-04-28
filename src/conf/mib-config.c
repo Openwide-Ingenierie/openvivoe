@@ -350,6 +350,8 @@ static gchar *get_vivoe_element ( gchar *cmdline, gchar *vivoe_element_name, gch
 			/* if so splitted[i] should also contained a string with "name=..." where ... is the name given to the corresponding elements */
 			property_name = realloc( property_name, strlen("="));
 			strcat ( property_name , "=");
+			if ( !property_name )
+				return "";
 			property_name = g_strdup( g_strrstr ( splitted[i] , property_name ) );	
 			g_strstrip( property_name );
 
@@ -370,45 +372,21 @@ static gchar *get_vivoe_element ( gchar *cmdline, gchar *vivoe_element_name, gch
 /**
  * \brief specify if the cmdline is a redirection, if so returns the "name" parameter
  * \param the cmdline to analyze
- * \return the "name" argument or null if no name argument or if cmdlie is not a redirection
+ * \return the "name" argument or null if no name argument or if cmdline is not a redirection
  */
 static gchar *vivoe_redirect(gchar *cmdline){
 
-	return get_vivoe_element ( cmdline, VIVOE_REDIRECT_NAME , "name" );
-#if 0
-	if ( cmdline == NULL )
+	gchar *return_value = get_vivoe_element ( cmdline, VIVOE_REDIRECT_NAME , "name" );
+
+	/* 
+	 * For vivoe-redirect the element should have a propoerty, otherwise, it is an error, so if vivoe-redirect has been
+	 * found with no name=... property, return NULL
+	 */
+
+	if ( (return_value != NULL ) && (! strcmp(return_value , "" ) ) )
 		return NULL;
 
-	gchar **splitted, **gst_elements;
-
-	gchar *name;
-
-	/* parse entirely the command line */
-	splitted = g_strsplit ( cmdline , "!", -1);
-
-	for (int i = 0 ; i < g_strv_length(splitted); i++){
-
-		gst_elements = g_strsplit ( splitted[i] , " ", -1);
-
-		/* check if the gst element mention contains the redirection element */
-		if (g_strv_contains ((const gchar * const *) gst_elements, VIVOE_REDIRECT_NAME )){
-			/* if so splitted[i] should also contained a string with "name=..." where ... is the name given to the corresponding elements */
-
-			name = g_strdup( g_strrstr ( splitted[i] , "name=" ) );		
-			g_strstrip( name );
-
-			/* free splitted */
-			g_strfreev(splitted);
-
-			return name;
-		}
-	}
-
-	/* free splitted */
-	g_strfreev(splitted);
-
-	return NULL;
-#endif //if 0
+	return return_value;
 
 }
 
@@ -419,38 +397,7 @@ static gchar *vivoe_redirect(gchar *cmdline){
  */
 static gchar *vivoe_roi(gchar *cmdline){
 
-	if ( cmdline == NULL )
-		return NULL;
-
-	gchar **splitted, **gst_elements;
-
-	gchar *name;
-
-	/* parse entirely the command line */
-	splitted = g_strsplit ( cmdline , "!", -1);
-
-	for (int i = 0 ; i < g_strv_length(splitted); i++){
-
-		gst_elements = g_strsplit ( splitted[i] , " ", -1);
-
-		/* check if the gst element mention contains the redirection element */
-		if (g_strv_contains ((const gchar * const *) gst_elements, VIVOE_REDIRECT_NAME )){
-			/* if so splitted[i] should also contained a string with "name=..." where ... is the name given to the corresponding elements */
-
-			name = g_strdup( g_strrstr ( splitted[i] , "type=" ) );		
-			g_strstrip( name );
-
-			/* free splitted */
-			g_strfreev(splitted);
-
-			return name;
-		}
-	}
-
-	/* free splitted */
-	g_strfreev(splitted);
-
-	return NULL;
+	return get_vivoe_element ( cmdline, VIVOE_ROI_NAME , "type" );
 
 }
 
@@ -841,9 +788,9 @@ void set_default_IP_from_conf(int index, const char* new_default_ip){
     GError 		*error 	= NULL;
 
 	/* a location to store the path of the openned configuration file */
-	gchar 		*gkf_path = NULL;
+	gchar* gkf_path = NULL;
 
-	 /* Declaration of a pointer that will contain our configuration file*/
+	/* Declaration of a pointer that will contain our configuration file*/
 	GKeyFile 	*gkf 	= open_mib_configuration_file(error, &gkf_path);
 
 	/* Declaration of an array of gstring (gchar**) that will contain the name of the different groups
@@ -872,24 +819,21 @@ void set_default_IP_from_conf(int index, const char* new_default_ip){
  * \param roi_datas the roi_data structure to fill
  * \return TRUE if ROI values are valid, FALSE otherwise
  */
-gboolean get_roi_parameters_for_sources ( int index, roi_data *roi_datas){
+gchar* get_roi_parameters_for_sources (GKeyFile* gkf, int index, roi_data *roi_datas){
 
 	/* Define the error pointer we will be using to check for errors in the configuration file */
     GError 		*error 	= NULL;
-
-	/* a location to store the path of the openned configuration file */
-	gchar* gkf_path = NULL;
-
-	 /* Declaration of a pointer that will contain our configuration file*/
-	GKeyFile 	*gkf 	= open_mib_configuration_file(error, &gkf_path);
 
 	/* Declaration of an array of gstring (gchar**) that will contain the name of the different groups
 	 * declared in the configuration file
 	 */
 	gchar 		**groups;
 
-	/* the gt_source cmdline */
+	/* the gst_source cmdline */
 	gchar * cmdline;
+
+	/* the type of roi detected */
+	gchar *roi_type ;
 
 	/*
 	 * the roi parameters retreive from the configuration file
@@ -903,23 +847,27 @@ gboolean get_roi_parameters_for_sources ( int index, roi_data *roi_datas){
 
 	/*first we load the different Groups of the configuration file
 	 * second parameter "gchar* length" is optional*/
-	groups = g_key_file_get_groups(gkf, NULL);
-	cmdline = get_source_cmdline(gkf, index );
+	groups 		= g_key_file_get_groups(gkf, NULL);
+	cmdline 	= get_source_cmdline(gkf, index );
+	roi_type 	= vivoe_roi ( cmdline ) ;
 
-	char *source_prefix = "source_";
-	char *source_name = (char*) malloc( strlen(source_prefix)+2 * sizeof(char));
-	/* Build the name that the group should have */
-	sprintf(source_name, "%s%d", source_prefix, index);
+	printf(" roi type : %s\n", roi_type);
+	if ( !roi_type  ){
 
-	if ( ! vivoe_roi ( cmdline ) ){
-			roi_width 			= 0;
-			roi_height 			= 0;
-			roi_top 			= 0;
-			roi_left 			= 0;
-			roi_extent_bottom 	= 0;
-			roi_extent_right 	= 0;
+		roi_width 			= 0;
+		roi_height 			= 0;
+		roi_top 			= 0;
+		roi_left 			= 0;
+		roi_extent_bottom 	= 0;
+		roi_extent_right 	= 0;
+		return NULL;
 
 	}else{
+
+		char *source_prefix = "source_";
+		char *source_name = (char*) malloc( strlen(source_prefix)+2 * sizeof(char));
+		/* Build the name that the group should have */
+		sprintf(source_name, "%s%d", source_prefix, index);
 
 		roi_width 			= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_WIDTH, 		error, TRUE );
 		roi_height 			= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_HEIGHT, 		error, TRUE );
@@ -928,56 +876,94 @@ gboolean get_roi_parameters_for_sources ( int index, roi_data *roi_datas){
 		roi_extent_bottom 	= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_EXTENT_BOTTOM, error, TRUE );
 		roi_extent_right 	= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_EXTENT_RIGHT, 	error, TRUE );
 
-	}
 
-	/* if the value were not found, set the ROI parameters to 0 */
 
-	/* if No ROI_top AND No_ROI_left but extent parameters are set */
-	if ( (roi_top == -1 && roi_left == -1) && ( roi_extent_bottom != -1 || roi_extent_right != -1 ) ) {
+		/* if the value were not found, set the ROI parameters to 0 */
+
+		/* if No ROI_top AND No_ROI_left but extent parameters are set */
+		if ( (roi_top == -1 && roi_left == -1) && ( roi_extent_bottom != -1 || roi_extent_right != -1 ) ) {
 			g_printerr("keys %s and/or %s cannot be set if %s and %s not present\n", ROI_EXTENT_BOTTOM, ROI_EXTENT_RIGHT, ROI_ORIGIN_TOP, ROI_ORIGIN_LEFT);
-			return FALSE;
-	}
-
-	/* if only on ROI_top or ROI_left */
-	else if ( ! ( roi_width != -1 && roi_height != -1 && roi_top != -1 && roi_left != -1 ) ){
-		g_printerr("Keys %s, %s, %s, %s should all be defined\n",ROI_WIDTH, ROI_HEIGHT, ROI_ORIGIN_TOP, ROI_ORIGIN_LEFT);
-		return FALSE;
-	}
-
-	/* if both ROI_top and ROI_left present */
-	else {
-		
-		/* if no roi_extent_bottom and no roi_extent right */
-		if (  roi_extent_bottom == -1 && roi_extent_right == -1 ) {
-			roi_extent_bottom 	= 0;
-			roi_extent_right 	= 0;
-		}
-		
-		/* if only one of extent parameter present */
-		else if ( ( roi_extent_bottom == -1 && roi_extent_right != -1 ) || ( roi_extent_bottom != -1 && roi_extent_right == -1 ) ){
-			g_printerr("Keys %s and %s should be both in configuration file\n", ROI_ORIGIN_TOP, ROI_ORIGIN_LEFT);
-			return FALSE;
+			return NULL;
 		}
 
+		/* if only on ROI_top or ROI_left */
+		else if ( ! ( roi_width != -1 && roi_height != -1 && roi_top != -1 && roi_left != -1 ) ){
+			g_printerr("Keys %s, %s, %s, %s should all be defined\n",ROI_WIDTH, ROI_HEIGHT, ROI_ORIGIN_TOP, ROI_ORIGIN_LEFT);
+			return NULL;
+		}
+
+		/* if both ROI_top and ROI_left present */
+		else {
+
+			/* if no roi_extent_bottom and no roi_extent right */
+			if (  roi_extent_bottom == -1 && roi_extent_right == -1 ) {
+				roi_extent_bottom 	= 0;
+				roi_extent_right 	= 0;
+			}
+
+			/* if only one of extent parameter present */
+			else if ( ( roi_extent_bottom == -1 && roi_extent_right != -1 ) || ( roi_extent_bottom != -1 && roi_extent_right == -1 ) ){
+				g_printerr("Keys %s and %s should be both in configuration file\n", ROI_ORIGIN_TOP, ROI_ORIGIN_LEFT);
+				return NULL;
+			}
+
+		}
+
+		/* there all roi parameters should be correctly set, or we should have already returned */
+
+		/*
+		 * save those values to roi_datas
+		 */
+		roi_datas->roi_width 			= roi_width;
+		roi_datas->roi_height 			= roi_height;
+		roi_datas->roi_top 				= roi_top;
+		roi_datas->roi_left 			= roi_left;
+		roi_datas->roi_extent_bottom 	= roi_extent_bottom;
+		roi_datas->roi_extent_right 	= roi_extent_right;
+
+		free(source_name);
+
+		return roi_type;
+
 	}
 
-	/* there all roi parameters should be correctly set, or we should have already returned */
+}
+/**
+ * \brief definition of the roi structure table that will contains the roi data
+ */
+roi_str roi_table ;
 
-	 /*
-	  * save those values to roi_datas
-	 */
-	roi_datas->roi_width 			= roi_width;
-	roi_datas->roi_height 			= roi_height;
-	roi_datas->roi_top 				= roi_top;
-	roi_datas->roi_left 			= roi_left;
-	roi_datas->roi_extent_bottom 	= roi_extent_bottom;
-	roi_datas->roi_extent_right 	= roi_extent_right;
+/**
+ * \brief create the mapping to link redirection between service provider and service user
+ * \param gkf a openned GKeyFile
+ * \return TRUE on success, FALSE on FAILURE
+ */
+static gboolean init_roi_data(GKeyFile* gkf ){
+	
+	gchar *roi_type;
+	int index_source; 
 
-	free(source_name);
-	close_mib_configuration_file(gkf);
+	/* malloc the roi_table */	
+	roi_table.roi_datas = (roi_data**) malloc ( sizeof ( roi_data* ));
+
+	int size = 0 ;
+
+	/* get redirection data for service provider */
+	for ( index_source = 1 ; index_source <=  videoFormatNumber._value.int_val ; index_source++){
+
+		roi_type = get_roi_parameters_for_sources (gkf, index_source , roi_table.roi_datas[size] ) ;
+			if ( roi_type ){
+				redirection.redirect_channels[size] =(redirect_data*) malloc ( sizeof ( redirect_data ) ) ;		
+				roi_table.roi_datas[size]->roi_type = g_strdup ( roi_type ); 
+				roi_table.size ++;
+			}
+
+	}
+
 	return TRUE;
 
 }
+
 
 /**
  * \brief definition of the redirection structure that will contains the redirection data
@@ -1084,7 +1070,11 @@ int init_mib_content(){
 	 /* initialize global parameter of the mib that value cannot be found inside conguration file */
 	init_mib_global_parameter();
 
+	/* parse gstreamer's command line to see if there will be redirection */
 	init_redirection_data( gkf );
+
+	/* init gstreamer's command line to see if there will be roi */
+	init_roi_data( gkf );
 
 	close_mib_configuration_file( gkf );
 

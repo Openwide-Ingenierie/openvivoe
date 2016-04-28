@@ -56,6 +56,7 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 							guint 							bus_watch_id, 	GstElement* input,
 							struct videoFormatTable_entry 	*video_info,	gpointer stream_datas, 	
 							GstCaps 						*caps){
+
 	/*Create element that will be add to the pipeline */
 	GstElement *rtp = NULL;
 	GstElement *parser;
@@ -81,7 +82,7 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 
 	}
 
-	input = handle_roi ( pipeline ,  input , video_info ,  video_caps ) ;
+//	input = handle_roi ( pipeline ,  input , video_info ,  video_caps ) ;
 	if ( !input )
 		return NULL;
 
@@ -456,8 +457,10 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 						GstBus *bus,
 	GstElement 		*last = NULL;
 	GstStructure 	*video_caps 	= gst_caps_get_structure(caps, 0);
 	char 			*encoding  		= (char*) gst_structure_get_string(video_caps, "encoding-name");
+
 	/* Fill the MIB a first Time */
 	fill_entry(video_caps, video_info, stream_datas);
+
 	if ( gst_structure_has_field( video_caps, "encoding-name")){
 		/* For Raw video */		
 		if ( strcmp( RAW_NAME,encoding) == 0 ){
