@@ -852,7 +852,6 @@ gboolean get_roi_parameters_for_sources (GKeyFile* gkf, int index, roi_data *roi
 	cmdline 	= get_source_cmdline(gkf, index );
 	roi_type 	= vivoe_roi ( cmdline ) ;
 
-	printf(" roi type : %s\n", roi_type);
 	if ( !roi_type  ){
 
 		roi_width 			= 0;

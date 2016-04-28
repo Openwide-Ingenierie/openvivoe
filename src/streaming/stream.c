@@ -84,7 +84,7 @@ static gboolean bus_call (  GstBus     *bus,
 /**
  * \brief specify if a SP is a redirection (check if it is in the redirection_channel array)
  * \param videoFormatIndex the index of the videoFormat to check 
- * \return the corresponding redirect_data found or NULL 
+ * \return the corresponding redirect_data if found or NULL 
  */
 static redirect_data *SP_is_redirection(long videoFormatIndex){
 
@@ -101,7 +101,7 @@ static redirect_data *SP_is_redirection(long videoFormatIndex){
 /**
  * \brief specify if a SU is a redirection (check if it is in the redirection_channel array)
  * \param channelIndex the index of the channel to check 
- * \return the corresponding redirect_data found or NULL 
+ * \return the corresponding redirect_data if found or NULL 
  */
 static redirect_data  *SU_is_redirection(long channelIndex, long *videoFormatIndex){
 
@@ -111,6 +111,23 @@ static redirect_data  *SU_is_redirection(long channelIndex, long *videoFormatInd
 			*videoFormatIndex = redirection.redirect_channels[i]->video_SP_index;
 			return redirection.redirect_channels[i];
 		}
+	}
+
+	return NULL; /* if not found, returns NULL */
+
+}
+
+/**
+ * \brief specify if a SP is a roi (check if it is in the roi_table array)
+ * \param videoFormatIndex the index of the videoFormat to check 
+ * \return the corresponding roi_data if found or NULL 
+ */
+static roi_data *SP_is_roi(long videoFormatIndex){
+
+	int i = 0;
+	for ( i = 0;  i< roi_table.size; i ++ ){	
+		if ( roi_table.roi_datas[i]->video_SP_index == videoFormatIndex ) /* if found, then returns */
+			return roi_table.roi_datas[i];
 	}
 
 	return NULL; /* if not found, returns NULL */
@@ -165,7 +182,10 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 		return NULL;
 
 	/* check if it is a redirection */
-	redirect_data *redirection_data = SP_is_redirection( videoFormatIndex ); 
+	redirect_data *redirection_data = SP_is_redirection( videoFormatIndex );
+
+	/* check if it is a redirection */
+	roi_data *roi_data = SP_is_roi( videoFormatIndex );
 
 	if( redirection_data ){
 
@@ -181,6 +201,27 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 		g_object_set (bin, "format", GST_FORMAT_TIME, NULL);
 		/* configure appsrc to act like a live source: place a timestamp in each buffer it delivers */
 		g_object_set (bin, "is-live", TRUE, NULL);
+
+	}
+	else if ( roi_data ){
+		/* 
+		 * If the SP is a roi --> pipeline cannot be parsed as such, as it will contain vivoe-roi element 
+		 * So parse to make a bin from beginning of pipeline to vivoe-roi element
+		 */
+
+		/*
+		 * first retrieve from cmdline, the pipeline before "vivoe-roi" 
+		 */
+		gchar *to_not_parse = g_strrstr ( cmdline , VIVOE_ROI_NAME ) ;
+		gchar *to_parse	= g_strndup (cmdline , strlen( cmdline ) - strlen( to_not_parse ) - strlen( "! " ) );
+		/* build first par of source pipeline */
+		bin  = gst_parse_bin_from_description ( to_parse,
+												TRUE,
+												&error);
+
+		gst_element_set_name ( bin ,  "source" );
+
+		free ( to_parse);		
 
 	}
 	else{

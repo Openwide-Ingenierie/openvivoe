@@ -188,14 +188,14 @@ extern redirection_str redirection;
  * \brief a structure to save the data related to ROI
  */
 typedef struct{
-	long 	roi_width;
-	long 	roi_height;
-	long 	roi_top;
-	long 	roi_left;
-	long 	roi_extent_bottom;
-	long 	roi_extent_right;
-	gchar 	*roi_type;
-	int 	source_index;
+	long 		roi_width;
+	long 		roi_height;
+	long 		roi_top;
+	long 		roi_left;
+	long 		roi_extent_bottom;
+	long 		roi_extent_right;
+	gboolean 	scalable;
+	int 		video_SP_index;
 }roi_data;
 
 
@@ -207,7 +207,7 @@ typedef struct {
 	roi_data 	*(*roi_datas);
 }roi_str;
 
-extern redirection_str roi_table ;
+extern roi_str roi_table ;
 
 
 /** 
