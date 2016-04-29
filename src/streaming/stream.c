@@ -161,17 +161,13 @@ static void init_redirection( gpointer stream_datas, long videoFormatIndex ){
 static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 	GError 		*error 				= NULL; /* an Object to save errors when they occurs */
 	GstElement 	*bin 				= NULL; /* to return last element of pipeline */
-	gchar 		*cmdline 			= init_sources_from_conf( videoFormatIndex );
 
-	/* check if everything went ok */	
-	if (cmdline == NULL)
-		return NULL;
 
 	/* check if it is a redirection */
 	redirect_data *redirection_data = SP_is_redirection( videoFormatIndex );
 
 	/* check if it is a redirection */
-	roi_data *roi_data = SP_is_roi( videoFormatIndex );
+	roi_data *roi_datas = SP_is_roi( videoFormatIndex );
 
 	if( redirection_data ){
 
@@ -189,7 +185,7 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 		g_object_set (bin, "is-live", TRUE, NULL);
 
 	}
-	else if ( roi_data ){
+	else if ( roi_datas ){
 		/* 
 		 * If the SP is a roi --> pipeline cannot be parsed as such, as it will contain vivoe-roi element 
 		 * So parse to make a bin from beginning of pipeline to vivoe-roi element
@@ -198,24 +194,29 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 		/*
 		 * first retrieve from cmdline, the pipeline before "vivoe-roi" 
 		 */
-		gchar *to_not_parse = g_strrstr ( cmdline , VIVOE_ROI_NAME ) ;
-		gchar *to_parse	= g_strndup (cmdline , strlen( cmdline ) - strlen( to_not_parse ) - strlen( "! " ) );
 		/* build first par of source pipeline */
-		bin  = gst_parse_bin_from_description ( to_parse,
+		bin  = gst_parse_bin_from_description ( roi_datas->gst_before_roi_elt,
 												TRUE,
 												&error);
 
 		gst_element_set_name ( bin ,  "source" );
-
-		free ( to_parse);		
 
 	}
 	else{
+
+		gchar 		*cmdline 			= init_sources_from_conf( videoFormatIndex );
+		/* check if everything went ok */	
+		if (cmdline == NULL)
+			return NULL;
+
 		bin  = gst_parse_bin_from_description ( cmdline,
-												TRUE,
-												&error);
+				TRUE,
+				&error);
 
 		gst_element_set_name ( bin ,  "source" );
+
+		/* free ressources */
+		free(cmdline);
 
 	}
 
@@ -223,9 +224,6 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 		g_printerr("Failed to parse: %s\n",error->message);
 	   	return NULL;	
 	}
-
-	/* free ressources */
-	free(cmdline);
 
 	/* add bin in pipeline */
 	gst_bin_add (GST_BIN(pipeline), bin);
