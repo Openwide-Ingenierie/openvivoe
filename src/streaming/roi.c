@@ -97,10 +97,9 @@ roi_data *SP_is_roi(long videoFormatIndex){
 
 static GstElement *adapt_pipeline_to_roi(GstElement *pipeline , GstElement *input , struct videoFormatTable_entry *video_stream_info , roi_data *roi_datas, GstStructure *video_caps ) {
 
-	GstElement *videoconvert 	= NULL;
-	GstElement *videocrop 		= NULL;
-	GstElement *capsfilter 		= NULL;
-	GstElement *last 			= NULL;
+	GstElement 	*videocrop 	= NULL;
+	GstElement 	*capsfilter 	= NULL;
+	GstElement 	*last 		= NULL;
 
 /*	videoconvert = gst_element_factory_make_log ( "videoconvert", "videoconvert" );
 	if ( !videoconvert )
@@ -204,6 +203,7 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline , GstElement *inpu
 
 GstElement *handle_roi( GstElement *pipeline, GstElement *input, struct videoFormatTable_entry *video_stream_info , GstStructure *video_caps ) {
 
+	GError 		*error 				= NULL; /* an Object to save errors when they occurs */
 	GstElement *last = NULL;
 
 	/* 
@@ -232,6 +232,31 @@ GstElement *handle_roi( GstElement *pipeline, GstElement *input, struct videoFor
 	 * This will initialize the ROI parameters to 0 if they were not specified in the configuration file
 	 */
 	set_roi_values_videoFormat_entry( video_stream_info , roi_datas);
+
+	/* 
+	 * Now parse the rest of the gst_source pipeline
+	 */
+	if ( roi_datas->gst_after_roi_elt ){
+
+		/* build last part of source pipeline */
+		GstElement *bin  = gst_parse_bin_from_description ( roi_datas->gst_after_roi_elt,
+												TRUE,
+												&error);
+
+		gst_element_set_name ( bin ,  "bin_after_vivoe_roi" );
+
+		gst_bin_add ( GST_BIN(pipeline) , bin );
+
+		if ( !gst_element_link_log (last, bin)){
+			gst_bin_remove( GST_BIN (pipeline), bin);
+			return NULL;
+		}
+
+		last = bin ;
+
+
+	}
+
 	return last;
 		
 }
