@@ -196,17 +196,12 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 	 *  _ if no, increase viodeFormatNumber, and  add a new entry in the table
 	 */
 
-	int videoFormatType; 
-	if ( video_info->videoFormatRoiHorzRes && video_info->videoFormatRoiVertRes )
-		videoFormatType = roi;
-	else
-		videoFormatType = videoChannel;
 
 
 	if(videoFormatTable_head == NULL){
 
 		/* Then we are sure that we can create a new entry */
-		videoFormatTable_createEntry( 	video_info->videoFormatIndex, 						videoFormatType,
+		videoFormatTable_createEntry( 	video_info->videoFormatIndex, 						video_info->videoFormatType,
 				disable, 																	video_info->videoFormatBase,
 				video_info->videoFormatSampling, 											video_info->videoFormatBitDepth,
 				video_info->videoFormatFps,				 									video_info->videoFormatColorimetry,
@@ -238,7 +233,7 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 		}
 
 		/* At the  same time we copy all of those parameters into video channel */
-		channelTable_createEntry( 	channelNumber._value.int_val+1, 							videoFormatType,
+		channelTable_createEntry( 	channelNumber._value.int_val+1, 							video_info->videoFormatType,
 				channelUserDesc, 																stop,
 				video_info->videoFormatIndex, 													video_info->videoFormatBase,
 				video_info->videoFormatSampling, 												video_info->videoFormatBitDepth,
@@ -278,7 +273,7 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 			 * So add it!
 			 * But check that the maximum number of video format has not been reached already
 			 */
-			videoFormatTable_createEntry( 	video_info->videoFormatIndex,													videoChannel,
+			videoFormatTable_createEntry( 	video_info->videoFormatIndex,													video_info->videoFormatType,
 											disable, 																		video_info->videoFormatBase,
 											video_info->videoFormatSampling, 												video_info->videoFormatBitDepth,
 											video_info->videoFormatFps,				 										video_info->videoFormatColorimetry,
@@ -311,7 +306,7 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 		}
 
 			/* At the  same time we copy all of those parameters into video channel */
-			channelTable_createEntry( 	channelNumber._value.int_val+1, 													videoChannel,
+			channelTable_createEntry( 	channelNumber._value.int_val+1, 													video_info->videoFormatType,
 										channelUserDesc, 																	stop,
 										video_info->videoFormatIndex, 														video_info->videoFormatBase,
 										video_info->videoFormatSampling, 													video_info->videoFormatBitDepth,

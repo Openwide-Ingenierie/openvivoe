@@ -677,10 +677,10 @@ static GstElement *parse_conf_for_redirection( GstElement *pipeline, GstElement 
  * \param caps the caps built from the SDP, may be replace if this is a redirection
  * \return GstElement* the last element added to the pipeline (appsink or a displayer like x(v)imagesink)
  */
-static GstElement* addSink_SU( 	GstElement *pipeline, 						GstBus *bus,
-								guint bus_watch_id, 						GstElement *input, 	
-								struct channelTable_entry 	*channel_entry, gchar 	*cmdline, 
-								redirect_data *redirect, 					GstCaps *caps
+static GstElement* addSink_SU( 	GstElement 					*pipeline, 		GstBus 		*bus,
+								guint 						bus_watch_id, 	GstElement 	*input, 	
+								struct channelTable_entry 	*channel_entry, gchar 		*cmdline, 
+								redirect_data 				*redirect, 		GstCaps 	*caps
 								){
 
 	GError 		*error 				= NULL; /* an Object to save errors when they occurs */

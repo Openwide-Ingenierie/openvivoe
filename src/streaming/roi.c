@@ -42,6 +42,9 @@ static void set_roi_values_videoFormat_entry( struct videoFormatTable_entry *vid
 	video_stream_info->videoFormatRoiExtentBottom 	= roi_datas->roi_extent_bottom;
 	video_stream_info->videoFormatRoiExtentRight 	= roi_datas->roi_extent_right;
 
+	/* set the videoFormat type to roi */
+	video_stream_info->videoFormatType 				= roi ;
+
 }
 
 #if 0
@@ -97,7 +100,6 @@ roi_data *SP_is_roi(long videoFormatIndex){
 
 static GstElement *adapt_pipeline_to_roi(GstElement *pipeline , GstElement *input , struct videoFormatTable_entry *video_stream_info , roi_data *roi_datas, GstStructure *video_caps ) {
 
-	GstElement 	*videoconvert 	= NULL;
 	GstElement 	*videocrop 		= NULL;
 	GstElement 	*capsfilter 	= NULL;
 	GstElement 	*last 			= NULL;
@@ -140,24 +142,11 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline , GstElement *inpu
 
 		last = capsfilter ;
 
-
 	}
 
 	else
 	{	
-	/*	videoconvert = gst_element_factory_make_log ( "videoconvert", "videoconvert" );
-		if ( !videoconvert )
-			return NULL;
 
-		gst_bin_add ( GST_BIN(pipeline) , videoconvert);
-
-		if ( !gst_element_link_log (input, videoconvert)){
-			gst_bin_remove( GST_BIN (pipeline), videoconvert);
-			return NULL;
-		}
-
-		input = videoconvert ;
-*/
 		videocrop = gst_element_factory_make_log ( "videocrop", "videocrop" );
 		if ( !videocrop )
 			return NULL;
@@ -185,9 +174,9 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline , GstElement *inpu
 		else{
 
 			g_object_set ( 	G_OBJECT ( videocrop ) , 
-					"top" 		,  0, 
-					"left" 		, 	0, 
-					"bottom" 	,  0,
+					"top" 		, 0, 
+					"left" 		, 0, 
+					"bottom" 	, 0,
 					"right" 	, 0,
 					NULL
 					);
@@ -225,8 +214,10 @@ GstElement *handle_roi( GstElement *pipeline, GstElement *input, struct videoFor
 	roi_data *roi_datas =	SP_is_roi( video_stream_info->videoFormatIndex ) ;
 
 	/* if this is not a roi, return input element */
-	if ( !roi_datas )
+	if ( !roi_datas ){
+		video_stream_info->videoFormatType = videoChannel ;
 		return input;
+	}
 
 	/* 
 	 * if the  element vivoe-roi has been detected in pipeline, then the video is a ROI. So its type is set to ROI 

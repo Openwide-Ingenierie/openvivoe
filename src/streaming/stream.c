@@ -195,7 +195,7 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 		 * first retrieve from cmdline, the pipeline before "vivoe-roi" 
 		 */
 		/* build first par of source pipeline */
-		printf("%s\n", roi_datas->gst_before_roi_elt ) ;
+
 		bin  = gst_parse_bin_from_description ( roi_datas->gst_before_roi_elt,
 												TRUE,
 												&error);
