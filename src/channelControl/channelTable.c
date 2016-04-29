@@ -299,12 +299,30 @@ void update_channelTable_entry_roi_from_caps ( struct channelTable_entry *channe
 	
 	/* only the ROI parameters of the videoFormat_entry can be modifies, otherwise nothing could */
 	GstStructure *caps_str = gst_caps_get_structure	(caps , 0) ;
-	channel_entry->channelHorzRes = (long) strtol( g_value_get_string( gst_structure_get_value(caps_str , "width")) , NULL, 10) ;
-	channel_entry->channelVertRes = (long) strtol( g_value_get_string( gst_structure_get_value(caps_str , "height")) , NULL, 10) ;
-	//channel_entry->channelRoiOriginTop = (long) strtol( g_value_get_string( gst_structure_get_value(caps_str , "roitop")) , NULL, 10) ;
-	//channel_entry->channelRoiOriginLeft = (long) strtol( g_value_get_string( gst_structure_get_value(caps_str , "roileft")) , NULL, 10) ;
-	//channel_entry->channelRoiExtentBottom = (long) strtol( g_value_get_string( gst_structure_get_value(caps_str , "roibottom")) , NULL, 10) ;
-	//channel_entry->channelRoiExtentRight = (long) strtol( g_value_get_string( gst_structure_get_value(caps_str , "roiright")) , NULL, 10) ;
+
+	const gchar *temp = g_value_get_string( gst_structure_get_value(caps_str , "width"));
+	if ( temp )
+		channel_entry->channelHorzRes = (long) strtol( temp , NULL, 10) ;
+
+	temp = g_value_get_string( gst_structure_get_value(caps_str , "height")) ;
+	if ( temp )
+		channel_entry->channelVertRes = (long) strtol( temp , NULL, 10) ;
+
+	temp = g_value_get_string( gst_structure_get_value(caps_str , "roitop")) ;
+	if ( temp )
+		channel_entry->channelRoiOriginTop = (long) strtol( temp , NULL, 10) ;
+
+	temp = g_value_get_string( gst_structure_get_value(caps_str , "roileft")) ;
+	if ( temp )
+	channel_entry->channelRoiOriginLeft = (long) strtol( temp , NULL, 10) ;
+
+	temp = g_value_get_string( gst_structure_get_value(caps_str , "roibottom")) ;
+	if ( temp )
+		channel_entry->channelRoiExtentBottom = (long) strtol( temp , NULL, 10) ;
+
+	temp = g_value_get_string( gst_structure_get_value(caps_str , "roiright")) ;
+	if ( temp )
+		channel_entry->channelRoiExtentRight = (long) strtol( temp , NULL, 10) ;
 	
 	/* 
 	 * This function is only used on the Service Users side, so there is no need to update the corresponding 

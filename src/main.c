@@ -114,7 +114,7 @@ int main (int   argc,  char *argv[]){
 
 	/* create the GMainLoop*/
 	main_loop = g_main_loop_new (NULL, FALSE);
-	
+
 	/* data associated to stream */
 	stop_program_data 			stop_data;
 	stop_data.deamon_name 		= argv[0];

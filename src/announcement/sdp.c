@@ -137,6 +137,7 @@ static gboolean create_fmtp_media(struct channelTable_entry * channel_entry, Gst
 		return error_function();
 	}
 
+#if 0
 	/* if the channel is a ROI, then add roiTop and roiLeft paramerters */
 	if ( channel_entry->channelType == roi ){
 
@@ -155,6 +156,7 @@ static gboolean create_fmtp_media(struct channelTable_entry * channel_entry, Gst
 		free(roi_params);
 
 	}
+#endif 
 
 	if( gst_sdp_media_add_attribute (media, "fmtp", fmtp)!= GST_SDP_OK ){
 		g_printerr("ERROR: problem in media creation for SDP file\n");
@@ -323,6 +325,6 @@ GstCaps* get_SDP(unsigned char *array, int sdp_msg_size, in_addr_t *multicast_ad
 	gst_caps_set_value ( caps,
                   		 "framerate",
                    		&res );
-	
+
 	return caps;
 }
