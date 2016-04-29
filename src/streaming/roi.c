@@ -97,30 +97,13 @@ roi_data *SP_is_roi(long videoFormatIndex){
 
 static GstElement *adapt_pipeline_to_roi(GstElement *pipeline , GstElement *input , struct videoFormatTable_entry *video_stream_info , roi_data *roi_datas, GstStructure *video_caps ) {
 
-	GstElement 	*videocrop 	= NULL;
+	GstElement 	*videoconvert 	= NULL;
+	GstElement 	*videocrop 		= NULL;
 	GstElement 	*capsfilter 	= NULL;
-	GstElement 	*last 		= NULL;
+	GstElement 	*last 			= NULL;
 
-/*	videoconvert = gst_element_factory_make_log ( "videoconvert", "videoconvert" );
-	if ( !videoconvert )
-		return NULL;
-
-	gst_bin_add ( GST_BIN(pipeline) , videoconvert);
-
-	if ( !gst_element_link_log (input, videoconvert)){
-		gst_bin_remove( GST_BIN (pipeline), videoconvert);
-		return NULL;
-	}
-
-	 * This will be helpfull for all kinds of ROI
-
-	input = videoconvert;
-
-*/
 	/* if the ROI is scalable, the videoscale element should have been inserted in the pipeline, (it should certainly be the input element) */ 
 	if ( roi_datas->scalable ){
-
-
 
 		/* 
 		 * For now, we consider that the user has already insert that element in its pipeline 
@@ -155,32 +138,60 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline , GstElement *inpu
 				NULL
 				);
 
-		gst_bin_add ( GST_BIN(pipeline) , capsfilter );
+		last = capsfilter ;
 
-		if ( !gst_element_link_log (input, capsfilter)){
-			gst_bin_remove( GST_BIN (pipeline), capsfilter);
-			return NULL;
-		}
-
-		input = capsfilter ;
-
-		last = NULL;
 
 	}
 
 	else
 	{	
+	/*	videoconvert = gst_element_factory_make_log ( "videoconvert", "videoconvert" );
+		if ( !videoconvert )
+			return NULL;
+
+		gst_bin_add ( GST_BIN(pipeline) , videoconvert);
+
+		if ( !gst_element_link_log (input, videoconvert)){
+			gst_bin_remove( GST_BIN (pipeline), videoconvert);
+			return NULL;
+		}
+
+		input = videoconvert ;
+*/
 		videocrop = gst_element_factory_make_log ( "videocrop", "videocrop" );
 		if ( !videocrop )
 			return NULL;
 
-		g_object_set ( 	G_OBJECT ( videocrop ) , 
-				"top" 		,  roi_datas->roi_top, 
-				"left" 		,  roi_datas->roi_left, 
-				"bottom" 	,  video_stream_info->videoFormatMaxHorzRes - ( roi_datas->roi_top 	+ roi_datas->roi_height  ),
-				"right" 	,  video_stream_info->videoFormatMaxHorzRes - ( roi_datas->roi_left	+ roi_datas->roi_width ),
-				NULL
-				);
+		/* 
+		 * check if the user have already initialized data for its ROI
+		 * If so, replace height and width value with the one computed from the ROI parameter 
+		 */
+		if ( roi_datas->roi_extent_bottom 	!= 0 	|| 
+				roi_datas->roi_extent_right != 0 	|| 
+				roi_datas->roi_top 			!= 0 	|| 
+				roi_datas->roi_left 		!= 0 ){
+
+			g_object_set ( 	G_OBJECT ( videocrop ) , 
+					"top" 		,  roi_datas->roi_top, 
+					"left" 		,  roi_datas->roi_left, 
+					"bottom" 	,  video_stream_info->videoFormatMaxHorzRes - ( roi_datas->roi_top 	+ roi_datas->roi_height  ),
+					"right" 	,  video_stream_info->videoFormatMaxHorzRes - ( roi_datas->roi_left	+ roi_datas->roi_width ),
+					NULL
+					);
+		}
+		/*
+		 * If not, just set the crop parameters to 0 
+		 */
+		else{
+
+			g_object_set ( 	G_OBJECT ( videocrop ) , 
+					"top" 		,  0, 
+					"left" 		, 	0, 
+					"bottom" 	,  0,
+					"right" 	, 0,
+					NULL
+					);
+		}
 
 		last = videocrop;
 
@@ -226,6 +237,8 @@ GstElement *handle_roi( GstElement *pipeline, GstElement *input, struct videoFor
 	 * Now adapt the pipeline in consequence of the detected ROI value
 	 */
 	last = adapt_pipeline_to_roi ( pipeline , input , video_stream_info , roi_datas , video_caps );
+	if ( !last )
+		return NULL;
 
 	/* 
 	 * Set the ROI parameter into the videoFormat Entry 

@@ -15,14 +15,14 @@
 /**
  * \brief the names of the groups that should be found in the configuration file
  */
-#define GROUP_NAME_DEVICEINFO		"deviceInfo"
-#define GROUP_NAME_CHANNELCONTROL	"channelControl"
+#define GROUP_NAME_DEVICEINFO			"deviceInfo"
+#define GROUP_NAME_CHANNELCONTROL		"channelControl"
 
 /**
  * \brief the names of the groups that could be found in the configuration file
  */
-#define GROUP_NAME_SOURCE					"source_"
-#define GROUP_NAME_RECEIVER					"receiver_"
+#define GROUP_NAME_SOURCE				"source_"
+#define GROUP_NAME_RECEIVER				"receiver_"
 
 /**
  * \brief the names of the keys that could be found in the configuration file under group [source_x]
