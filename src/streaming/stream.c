@@ -21,6 +21,7 @@
 #include "../../include/log.h"
 #include "../../include/videoFormatInfo/videoFormatTable.h"
 #include "../../include/channelControl/channelTable.h"
+#include "../../include/streaming/roi.h"
 #include "../../include/streaming/pipeline.h"
 #include "../../include/streaming/detect.h"
 #include "../../include/streaming/stream_registration.h"
@@ -117,22 +118,7 @@ static redirect_data  *SU_is_redirection(long channelIndex, long *videoFormatInd
 
 }
 
-/**
- * \brief specify if a SP is a roi (check if it is in the roi_table array)
- * \param videoFormatIndex the index of the videoFormat to check 
- * \return the corresponding roi_data if found or NULL 
- */
-static roi_data *SP_is_roi(long videoFormatIndex){
 
-	int i = 0;
-	for ( i = 0;  i< roi_table.size; i ++ ){	
-		if ( roi_table.roi_datas[i]->video_SP_index == videoFormatIndex ) /* if found, then returns */
-			return roi_table.roi_datas[i];
-	}
-
-	return NULL; /* if not found, returns NULL */
-
-}
 
 /** 
  * \brief create emtpy entries in VFT and CT for the redirection entries for a SP

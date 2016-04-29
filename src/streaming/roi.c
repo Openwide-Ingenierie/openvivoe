@@ -44,7 +44,7 @@ static void set_roi_values_videoFormat_entry( struct videoFormatTable_entry *vid
 
 }
 
-
+#if 0
 static gboolean roi_exists ( struct videoFormatTable_entry *video_stream_info ){
 	return  ! ( video_stream_info->videoFormatRoiHorzRes 	== 0 &&
 				video_stream_info->videoFormatRoiVertRes 	== 0 &&
@@ -76,95 +76,114 @@ static gboolean roi_is_interpolated( struct videoFormatTable_entry *video_stream
 
 
 }
+#endif // if 0
 
-static GstElement *adapt_pipeline_to_roi(GstElement *pipeline, GstElement *input, struct videoFormatTable_entry *video_stream_info , GstStructure *video_caps ) {
+/**
+ * \brief specify if a SP is a roi (check if it is in the roi_table array)
+ * \param videoFormatIndex the index of the videoFormat to check 
+ * \return the corresponding roi_data if found or NULL 
+ */
+roi_data *SP_is_roi(long videoFormatIndex){
+
+	int i = 0;
+	for ( i = 0;  i< roi_table.size; i ++ ){	
+		if ( roi_table.roi_datas[i]->video_SP_index == videoFormatIndex ) /* if found, then returns */
+			return roi_table.roi_datas[i];
+	}
+
+	return NULL; /* if not found, returns NULL */
+
+}
+
+static GstElement *adapt_pipeline_to_roi(GstElement *pipeline , GstElement *input , struct videoFormatTable_entry *video_stream_info , roi_data *roi_datas, GstStructure *video_caps ) {
 
 	GstElement *videoconvert 	= NULL;
 	GstElement *videocrop 		= NULL;
 	GstElement *capsfilter 		= NULL;
-	GstElement *videoscale 		= NULL;
 	GstElement *last 			= NULL;
 
-	if ( roi_exists ( video_stream_info ) ){
-		videoconvert = gst_element_factory_make_log ( "videoconvert", "videoconvert" );
-		if ( !videoconvert )
-			return NULL;
+/*	videoconvert = gst_element_factory_make_log ( "videoconvert", "videoconvert" );
+	if ( !videoconvert )
+		return NULL;
 
-		gst_bin_add ( GST_BIN(pipeline) , videoconvert);
+	gst_bin_add ( GST_BIN(pipeline) , videoconvert);
 
-		if ( !gst_element_link_log (input, videoconvert)){
-			gst_bin_remove( GST_BIN (pipeline), videoconvert);
-			return NULL;
-		}
+	if ( !gst_element_link_log (input, videoconvert)){
+		gst_bin_remove( GST_BIN (pipeline), videoconvert);
+		return NULL;
+	}
 
-	/*
 	 * This will be helpfull for all kinds of ROI
-	 */
+
 	input = videoconvert;
 
-	}
-	else
-		return input;
+*/
+	/* if the ROI is scalable, the videoscale element should have been inserted in the pipeline, (it should certainly be the input element) */ 
+	if ( roi_datas->scalable ){
 
-		if ( roi_is_non_scalable( video_stream_info ) ){
 
-		videocrop = gst_element_factory_make_log ( "videocrop", "videocrop" );
-		if ( !videocrop )
-			return NULL;
-
-		g_object_set ( 	G_OBJECT ( videocrop ) , 
-						"top" 		,  video_stream_info->videoFormatRoiOriginTop , 
-						"left" 		,  video_stream_info->videoFormatRoiOriginLeft , 
-						"bottom" 	,  video_stream_info->videoFormatMaxVertRes - ( video_stream_info->videoFormatRoiOriginTop 	+ video_stream_info->videoFormatRoiVertRes  ),
-						"right" 	,  video_stream_info->videoFormatMaxHorzRes - ( video_stream_info->videoFormatRoiOriginLeft	+ video_stream_info->videoFormatRoiHorzRes  ),
-						NULL
-					);
-		
-		last = videocrop;
-
-	}
-
-	else if ( roi_is_decimated ( video_stream_info ) || roi_is_interpolated ( video_stream_info ) ){
 
 		/* 
 		 * For now, we consider that the user has already insert that element in its pipeline 
 		 */
 
-		/*
-		videoscale = gst_element_factory_make_log ( "videoscale", "videoscale" );
-		if ( !videoscale )
-			return NULL;
-*/
 		capsfilter = gst_element_factory_make_log ( "capsfilter", "capsfilter_roi" );
 
 		/* build the parameter for the caps filter */
 
 		/* first, get the detected caps of the video  (for the meida type) */
-		GstCaps *caps_filter = gst_caps_new_full ( video_caps , NULL );
 
-		/* replace height and width value with the one computed from the ROI parameter */
-		g_object_set ( 	G_OBJECT ( caps_filter ) , 
-						"height" 	,  video_stream_info->videoFormatRoiExtentBottom 	- video_stream_info->videoFormatRoiOriginTop ,
-						"width" 	,  video_stream_info->videoFormatRoiExtentRight		- video_stream_info->videoFormatRoiOriginLeft,
-						NULL
-					);
-		
+		GstCaps *caps_filter = gst_caps_new_full ( gst_structure_copy ( video_caps ) , NULL );
+
+		/* 
+		 * check if the user have already initialized data for its ROI
+		 * If so, replace height and width value with the one computed from the ROI parameter 
+		 */
+		if ( roi_datas->roi_extent_bottom 	!= 0 	|| 
+				roi_datas->roi_extent_right != 0 	|| 
+				roi_datas->roi_top 			!= 0 	|| 
+				roi_datas->roi_left 		!= 0 )
+		{
+			gst_caps_set_simple ( caps_filter , 
+					"height" , G_TYPE_INT	,  roi_datas->roi_extent_bottom 	- roi_datas->roi_top ,
+					"width" , G_TYPE_INT	,  roi_datas->roi_extent_right		- roi_datas->roi_left,
+					NULL);
+		}
+
 		/* set the caps to the capsfilter */
 		g_object_set ( 	G_OBJECT ( capsfilter ) , 
-						"caps" 	, caps_filter,
-						NULL
-					);
-		
+				"caps" 	, caps_filter,
+				NULL
+				);
+
 		gst_bin_add ( GST_BIN(pipeline) , capsfilter );
 
 		if ( !gst_element_link_log (input, capsfilter)){
 			gst_bin_remove( GST_BIN (pipeline), capsfilter);
 			return NULL;
 		}
-		
+
 		input = capsfilter ;
-		
+
 		last = NULL;
+
+	}
+
+	else
+	{	
+		videocrop = gst_element_factory_make_log ( "videocrop", "videocrop" );
+		if ( !videocrop )
+			return NULL;
+
+		g_object_set ( 	G_OBJECT ( videocrop ) , 
+				"top" 		,  roi_datas->roi_top, 
+				"left" 		,  roi_datas->roi_left, 
+				"bottom" 	,  video_stream_info->videoFormatMaxHorzRes - ( roi_datas->roi_top 	+ roi_datas->roi_height  ),
+				"right" 	,  video_stream_info->videoFormatMaxHorzRes - ( roi_datas->roi_left	+ roi_datas->roi_width ),
+				NULL
+				);
+
+		last = videocrop;
 
 	}
 
@@ -185,12 +204,18 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline, GstElement *input
 
 GstElement *handle_roi( GstElement *pipeline, GstElement *input, struct videoFormatTable_entry *video_stream_info , GstStructure *video_caps ) {
 
-	roi_data roi_datas;
 	GstElement *last = NULL;
 
-	/* retrieve default value from configuration */
-//	if ( !get_roi_parameters_for_sources ( video_stream_info->videoFormatIndex , &roi_datas) )
-		return NULL;
+	/* 
+	 * Check if channel is a ROI
+	 * when the structure video_stream_info has been create in file pipeline.c and function create_pipeline_videochannel 
+	 * we have save the videoFormatIndex under the parameter videoFormatIndex
+	 */
+	roi_data *roi_datas =	SP_is_roi( video_stream_info->videoFormatIndex ) ;
+
+	/* if this is not a roi, return input element */
+	if ( !roi_datas )
+		return input;
 
 	/* 
 	 * if the  element vivoe-roi has been detected in pipeline, then the video is a ROI. So its type is set to ROI 
@@ -198,16 +223,15 @@ GstElement *handle_roi( GstElement *pipeline, GstElement *input, struct videoFor
 	video_stream_info->videoFormatType = roi ;
 
 	/* 
+	 * Now adapt the pipeline in consequence of the detected ROI value
+	 */
+	last = adapt_pipeline_to_roi ( pipeline , input , video_stream_info , roi_datas , video_caps );
+
+	/* 
 	 * Set the ROI parameter into the videoFormat Entry 
 	 * This will initialize the ROI parameters to 0 if they were not specified in the configuration file
 	 */
-	set_roi_values_videoFormat_entry( video_stream_info , &roi_datas);
-
-	/* 
-	 * Now adapt the pipeline in consequence of the detected ROI value
-	 */
-	last = adapt_pipeline_to_roi ( pipeline , input , video_stream_info , video_caps );
-
+	set_roi_values_videoFormat_entry( video_stream_info , roi_datas);
 	return last;
 		
 }
@@ -247,7 +271,7 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , st
 		 * We should not chceck the values entered by the user. As an example, this is not where we should 
 		 * check that the ROI want from non-scalable to scalable. 
 		 */
-		if ( roi_is_non_scalable (  videoFormat_entry ) ){
+//		if ( roi_is_non_scalable (  videoFormat_entry ) ){
 
 			/* we should found a crop element */
 			GstElement *videocrop = gst_bin_get_by_name ( GST_BIN ( pipeline ) , "videocrop" ) ;
@@ -280,9 +304,9 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , st
 						NULL
 					);
 
-		}else{
+//		}else{
 			return FALSE;
-		}
+//		}
 		
 		return TRUE;	
 
