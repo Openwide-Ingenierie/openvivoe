@@ -196,7 +196,8 @@ typedef struct{
 	long 		roi_extent_right;
 	gboolean 	scalable;
 	int 		video_SP_index;
-	gchar 		*gst_cmdline;
+	gchar 		*gst_before_roi_elt;
+	gchar 		*gst_after_roi_elt;
 }roi_data;
 
 

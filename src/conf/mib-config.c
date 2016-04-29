@@ -928,6 +928,38 @@ gboolean get_roi_parameters_for_sources (GKeyFile* gkf, int index, roi_data *roi
 		roi_datas->roi_extent_right 	= roi_extent_right;
 		roi_datas->scalable 			= scalable;
 
+		/*
+		 * Now we are going to parse the gst_source command line to save in the roi data:
+		 * _ the pipeline's part that stands before the element vivoe-roi
+		 * _the pipeline's part the stands after the element vivoe-roi , or NULL if no pipeline is found after vivoe-roi elements
+		 */
+
+		/*
+		 * first retrieve from cmdline, the pipeline before "vivoe-roi" 
+		 */
+		gchar *to_not_parse = g_strrstr ( cmdline , VIVOE_ROI_NAME ) ;
+		gchar *gst_before_roi_elt = g_strndup (cmdline , strlen( cmdline ) - strlen( to_not_parse ) - strlen( "! " ) );
+		/* if to_parse variable is NULL, then there is a problem in configuration file, return FALSE */
+		if (! gst_before_roi_elt ){
+			g_printerr("In configuration file no pipeline was found be \"%s\" element\n", VIVOE_ROI_NAME);
+			return FALSE;
+		}
+
+		/*
+		 * Then retrieve from cmdline, the pipeline after "vivoe-roi" 
+		 */
+
+		/* 
+		 * The string variable to_not_parse obtained before is a pointer to vivoe-roi and the rest of the pipeline.
+		 * In this string, we get the firs occurence of the "!" that should be just before the next element to parse 
+		 */
+
+		gchar *	gst_after_roi_elt= g_strrstr ( to_not_parse , "!" ) ;
+
+		roi_datas->gst_before_roi_elt 	= gst_before_roi_elt;
+		roi_datas->gst_after_roi_elt 	= 	gst_after_roi_elt; 
+
+		free( gst_before_roi_elt ) ;
 		free(source_name);
 
 		return TRUE;
