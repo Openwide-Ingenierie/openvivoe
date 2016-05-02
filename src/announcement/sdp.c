@@ -58,11 +58,7 @@ static gchar *create_raw_media(struct channelTable_entry * channel_entry, GstSDP
 										channel_entry->channelColorimetry,
 										interlace_mode_to_string (channel_entry->channelInterlaced)
 									);
-	/*if( gst_sdp_media_add_attribute (media, "fmtp", fmtp)!= GST_SDP_OK ){
-		g_printerr("ERROR: problem in media creation for SDP file\n");
-		return FALSE;
-	}
-	free(fmtp);*/
+
 	return fmtp;
 }
 
@@ -322,6 +318,7 @@ GstCaps* get_SDP(unsigned char *array, int sdp_msg_size, in_addr_t *multicast_ad
 	g_value_init (&res, GST_TYPE_FRACTION);
 	int framerate_num = strtol(gst_sdp_media_get_attribute_val (media, "framerate"), NULL, 10);
 	gst_value_set_fraction(&res,  framerate_num, 1 );
+	
 	gst_caps_set_value ( caps,
                   		 "framerate",
                    		&res );

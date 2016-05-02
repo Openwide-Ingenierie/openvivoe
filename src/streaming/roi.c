@@ -255,7 +255,6 @@ GstElement *handle_roi( GstElement *pipeline, GstElement *input, struct videoFor
 
 		last = bin ;
 
-
 	}
 
 	return last;
@@ -323,21 +322,26 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , st
 	}
 	else if ( capsfilter ) 
 	{
-		int height 	= 	videoFormat_entry->videoFormatRoiOriginTop 		-  videoFormat_entry->videoFormatRoiOriginTop ;
-		int width 	= 	videoFormat_entry->videoFormatRoiExtentRight 	- videoFormat_entry->videoFormatRoiOriginLeft;
+
+		int height 	= 	videoFormat_entry->videoFormatRoiExtentBottom	- videoFormat_entry->videoFormatRoiOriginTop ;
+		int width 	= 	videoFormat_entry->videoFormatRoiExtentRight 	- videoFormat_entry->videoFormatRoiOriginLeft ;
 
 		GstCaps *new_caps;
 		g_object_get ( G_OBJECT( capsfilter ) , "caps" , &new_caps , NULL ) ;
-
-		if ( height < 0 || width == 0)
-			return FALSE;
+		
+		/*
+		 * If height or width is under or equal to 0, then it will not display anything
+		 * But we need to return TRUE. It is the user's responsability to take caution when modifying the ROI
+		 * parameters.
+		 */
+		if (  height <= 0 || width <= 0  )
+			return TRUE;
 
 		else{
-
-
+			new_caps = gst_caps_make_writable ( new_caps );
 			gst_caps_set_simple (  new_caps , 
-					"height" , G_TYPE_INT	,  height ,
-					"width" , G_TYPE_INT	,  width,
+					"height" , G_TYPE_INT	,  height 	,
+					"width" , G_TYPE_INT	,  width 	,
 					NULL);
 
 		}
