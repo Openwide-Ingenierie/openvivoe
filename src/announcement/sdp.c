@@ -133,7 +133,6 @@ static gboolean create_fmtp_media(struct channelTable_entry * channel_entry, Gst
 		return error_function();
 	}
 
-#if 0
 	/* if the channel is a ROI, then add roiTop and roiLeft paramerters */
 	if ( channel_entry->channelType == roi ){
 
@@ -145,6 +144,18 @@ static gboolean create_fmtp_media(struct channelTable_entry * channel_entry, Gst
 		gchar *roi_params = g_strdup_printf (" roiTop=%ld; roiLeft=%ld",
 										channel_entry->channelRoiOriginTop,
 										channel_entry->channelRoiOriginLeft);
+		
+		/*
+		 * if this is a scalable ROI
+		 */
+	   if ( channel_entry->channelRoiExtentBottom != 0 || channel_entry->channelRoiExtentRight != 0 ){
+			gchar *roi_extent_params =  g_strdup_printf(" roiBottom=%ld; roiRight=%ld", 
+					channel_entry->channelRoiExtentBottom,		
+					channel_entry->channelRoiExtentRight ) ;
+			roi_params = (gchar *) realloc ( roi_params , strlen( roi_params ) + strlen ( roi_extent_params ) + 1 );
+			strcat ( roi_params , roi_extent_params ) ;
+			free(roi_extent_params);
+	   }
 
 		/* extent ftmp buffer size so we can concatenate roi_params string to it */ 
 		fmtp = (gchar *) realloc ( fmtp , strlen( fmtp ) + strlen ( roi_params ) + 1 );
@@ -152,7 +163,6 @@ static gboolean create_fmtp_media(struct channelTable_entry * channel_entry, Gst
 		free(roi_params);
 
 	}
-#endif 
 
 	if( gst_sdp_media_add_attribute (media, "fmtp", fmtp)!= GST_SDP_OK ){
 		g_printerr("ERROR: problem in media creation for SDP file\n");
@@ -322,6 +332,8 @@ GstCaps* get_SDP(unsigned char *array, int sdp_msg_size, in_addr_t *multicast_ad
 	gst_caps_set_value ( caps,
                   		 "framerate",
                    		&res );
+
+	printf("%s\n", gst_caps_to_string( caps ) );
 
 	return caps;
 }
