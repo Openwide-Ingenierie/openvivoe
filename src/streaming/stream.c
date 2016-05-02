@@ -200,6 +200,11 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 												TRUE,
 												&error);
 
+		if ( error != NULL){
+			g_printerr("Failed to parse: %s\n",error->message);
+	   		return NULL;	
+		}
+
 		gst_element_set_name ( bin ,  "source" );
 
 	}

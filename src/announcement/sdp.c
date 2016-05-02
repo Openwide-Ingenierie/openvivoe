@@ -141,7 +141,7 @@ static gboolean create_fmtp_media(struct channelTable_entry * channel_entry, Gst
 		 * Adding a space ' ' at the beginning of this line hase been done on purpose, 
 		 * as we will concatenate it to the existing fmtp line
 		 */
-		gchar *roi_params = g_strdup_printf (" roiTop=%ld; roiLeft=%ld",
+		gchar *roi_params = g_strdup_printf ("; roiTop=%ld; roiLeft=%ld",
 										channel_entry->channelRoiOriginTop,
 										channel_entry->channelRoiOriginLeft);
 		
@@ -149,7 +149,7 @@ static gboolean create_fmtp_media(struct channelTable_entry * channel_entry, Gst
 		 * if this is a scalable ROI
 		 */
 	   if ( channel_entry->channelRoiExtentBottom != 0 || channel_entry->channelRoiExtentRight != 0 ){
-			gchar *roi_extent_params =  g_strdup_printf(" roiBottom=%ld; roiRight=%ld", 
+			gchar *roi_extent_params =  g_strdup_printf("; roiBottom=%ld; roiRight=%ld", 
 					channel_entry->channelRoiExtentBottom,		
 					channel_entry->channelRoiExtentRight ) ;
 			roi_params = (gchar *) realloc ( roi_params , strlen( roi_params ) + strlen ( roi_extent_params ) + 1 );
@@ -276,12 +276,11 @@ gboolean create_SDP(GstSDPMessage 	*msg, struct channelTable_entry * channel_ent
 		return error_function();
 	if ( gst_sdp_message_add_media (msg, media))
 		return error_function();
-	//printf("%s\n", gst_sdp_message_as_text(msg));
+//	printf("%s\n", gst_sdp_message_as_text(msg));
 	free(rtmpmap);
 	free(framerate);
 	 return TRUE;
 }
-
 
 /**
  * \brief Builds a SDP Message structure from a string representation, creates an associated pipeline, starts it
@@ -321,8 +320,10 @@ GstCaps* get_SDP(unsigned char *array, int sdp_msg_size, in_addr_t *multicast_ad
 
 	/* get caps from the SDP's media field */
 	media 			= gst_sdp_message_get_media(msg , 0);
+
+	/* get the caps from Media */
 	GstCaps *caps 	= gst_sdp_media_get_caps_from_media (media, 96);
-	
+
 	/* set framerate to caps */
 	GValue res = G_VALUE_INIT;
 	g_value_init (&res, GST_TYPE_FRACTION);
@@ -332,8 +333,6 @@ GstCaps* get_SDP(unsigned char *array, int sdp_msg_size, in_addr_t *multicast_ad
 	gst_caps_set_value ( caps,
                   		 "framerate",
                    		&res );
-
-	printf("%s\n", gst_caps_to_string( caps ) );
 
 	return caps;
 }

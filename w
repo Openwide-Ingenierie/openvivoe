@@ -48,12 +48,42 @@ static void set_roi_values_videoFormat_entry( struct videoFormatTable_entry *vid
 }
 
 
+#if 0
+static gboolean roi_exists ( struct videoFormatTable_entry *video_stream_info ){
+	return  ! ( video_stream_info->videoFormatRoiHorzRes 	== 0 &&
+				video_stream_info->videoFormatRoiVertRes 	== 0 &&
+			   	video_stream_info->videoFormatRoiOriginTop 	== 0 &&
+				video_stream_info->videoFormatRoiOriginLeft == 0 );
+}
+
+
+
+static gboolean roi_is_decimated( struct videoFormatTable_entry *video_stream_info ) {
+
+	return ( roi_exists( video_stream_info ) 																													&&
+			!roi_is_non_scalable( video_stream_info ) 																											&&
+		   	( video_stream_info->videoFormatRoiHorzRes < ( video_stream_info->videoFormatRoiExtentRight		- video_stream_info->videoFormatRoiOriginLeft )) 	&&
+			( video_stream_info->videoFormatRoiVertRes < ( video_stream_info->videoFormatRoiExtentBottom	- video_stream_info->videoFormatRoiOriginTop )) );
+
+}
+
+static gboolean roi_is_interpolated( struct videoFormatTable_entry *video_stream_info ) {
+
+	return ( roi_exists( video_stream_info ) 																													&&
+			!roi_is_non_scalable( video_stream_info ) 																											&&
+		   	( video_stream_info->videoFormatRoiHorzRes > ( video_stream_info->videoFormatRoiExtentRight		- video_stream_info->videoFormatRoiOriginLeft )) 	&&
+			( video_stream_info->videoFormatRoiVertRes > ( video_stream_info->videoFormatRoiExtentBottom	- video_stream_info->videoFormatRoiOriginTop )) );
+
+
+}
+#endif // if 0
+
 /**
  * \brief specify if a SP is a roi (check if it is in the roi_table array)
  * \param videoFormatIndex the index of the videoFormat to check 
  * \return the corresponding roi_data if found or NULL 
  */
-roi_data *SP_is_roi(long videoFormatIndex){
+static roi_data *SP_is_roi(long videoFormatIndex){
 
 	int i = 0;
 	for ( i = 0;  i< roi_table.size; i ++ ){	
@@ -65,70 +95,6 @@ roi_data *SP_is_roi(long videoFormatIndex){
 
 }
 
-GstElement *get_scaling_element_name ( roi_data *roi_datas ){
-
-	GstElement *scaling_elt  = NULL;
-	GError * error = NULL ;
-	/*
-	 * The right next element to vivoe-roi element should be the scaling element
-	 * in case of a ROI channel 
-	 */
-	/*
-	 * retreive first occurence of '!', the name of the scaling element is the name right 
-	 * before
-	 */
-	gchar *remaining_pipeline 	= g_strrstr ( roi_datas->gst_after_roi_elt , "!" ) ;
-
-	/* 
-	 * in case there are no remaining pipeline, maybe the only element left is the scaling element 
-	 * that should be the case with RAW scaling for example 
-	 */
-	if ( !remaining_pipeline ){
-
-		/*
-	 	* build a bin from this description
-	 	*/
-		scaling_elt = gst_parse_bin_from_description (roi_datas->gst_after_roi_elt ,
-												TRUE,
-												&error);
-		
-		gst_element_set_name ( scaling_elt ,  "scaling_element" );		
-		
-		if ( error != NULL){
-			g_printerr("Failed to parse: %s\n",error->message);
-	   		return NULL;	
-		}
-
-	}
-	else {
-
-		gchar *name_scaling_elt		= g_strndup (roi_datas->gst_after_roi_elt , strlen( roi_datas->gst_after_roi_elt ) - strlen( remaining_pipeline ) - strlen( "! " ) );
-
-		/* 
-		 * modify the roi_data to replace gst_after_roi_elt with the remaining pipeline 
-		 */
-
-		roi_datas->gst_after_roi_elt = g_strdup ( remaining_pipeline );
-
-		/*
-		 * build a bin from this description
-		 */
-		scaling_elt = gst_parse_bin_from_description (name_scaling_elt ,
-				TRUE,
-				&error);
-		
-		gst_element_set_name ( scaling_elt ,  "scaling_element" );				
-
-		if ( error != NULL){
-			g_printerr("Failed to parse: %s\n",error->message);
-			return NULL;	
-		}
-
-	}
-	
-	return scaling_elt;
-
-}
 
 
 static GstElement *adapt_pipeline_to_roi(GstElement *pipeline , GstElement *input , struct videoFormatTable_entry *video_stream_info , roi_data *roi_datas, GstStructure *video_caps ) {
@@ -136,7 +102,7 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline , GstElement *inpu
 	GstElement 	*videocrop 		= NULL;
 	GstElement 	*capsfilter 	= NULL;
 	GstElement 	*last 			= NULL;
-	GstElement *scaling_elt 	= NULL;
+
 
 	/* 
 	 * In any case, we will need a videocrop element in our pipeline 
@@ -182,19 +148,11 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline , GstElement *inpu
 	/* if the ROI is scalable, the videoscale element should have been inserted in the pipeline, (it should certainly be the input element) */ 
 	if ( roi_datas->scalable ){
 
-		scaling_elt = get_scaling_element_name ( roi_datas );
-
-		/* if no scacling element found */
-		if ( ! scaling_elt )
-			return NULL;
-
 		/* 
 		 * For now, we consider that the user has already insert that element in its pipeline 
 		 */
 
 		capsfilter = gst_element_factory_make_log ( "capsfilter", "capsfilter_roi" );
-		if ( ! capsfilter )
-			return NULL;
 
 		/* build the parameter for the caps filter */
 
@@ -213,7 +171,7 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline , GstElement *inpu
 		{
 			gst_caps_set_simple ( caps_filter , 
 					"height" , G_TYPE_INT	, video_stream_info->videoFormatRoiVertRes ,
-					"width" , G_TYPE_INT	, video_stream_info->videoFormatRoiHorzRes ,
+					"width" , G_TYPE_INT	,  video_stream_info->videoFormatRoiHorzRes ,
 					NULL);
 		}
 
@@ -223,25 +181,16 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline , GstElement *inpu
 				NULL
 				);
 
+		last = capsfilter ;
+
 	}
 
-	if( videocrop ){
-		gst_bin_add ( GST_BIN(pipeline) , videocrop );
+	if( last ){
+		gst_bin_add ( GST_BIN(pipeline) , last );
 
-		if ( !gst_element_link_log (input,videocrop )){
-			gst_bin_remove( GST_BIN (pipeline),videocrop );
+		if ( !gst_element_link_log (input, last)){
+			gst_bin_remove( GST_BIN (pipeline), last);
 			return NULL;
-		}
-
-		last = videocrop ;
-		
-		if  ( roi_datas->scalable ){
-			gst_bin_add_many ( GST_BIN(pipeline) , scaling_elt , capsfilter, NULL );
-
-			if ( !gst_element_link_many ( last , scaling_elt, capsfilter, NULL ))
-				return NULL;
-
-			last = capsfilter ;
 		}
 
 		return last;
