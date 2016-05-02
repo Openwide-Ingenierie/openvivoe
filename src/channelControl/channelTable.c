@@ -529,24 +529,21 @@ static gboolean roi_requests_handler( struct channelTable_entry * table_entry ){
 
 	/* update a copy of the videoFormat associated videoFormat in consequences */
 	struct videoFormatTable_entry *vf_copy =  videoFormatTable_getEntry( table_entry->channelVideoFormatIndex ) ;
+	/* Now, copy the ROI parameters to the correspnding videoFormat */
 	update_videoFormat_entry_roi_from_channelTable_entry ( vf_copy , table_entry );
 
 	/* 
 	 * Now update pipeline
 	 * If an error occurs, we just reset the old roi parameters' values of channel and videoFormat_entry
 	 */
-	if ( ! update_pipeline_SP_non_scalable_roi_changes( table_entry->stream_datas ,  table_entry ) )
+	if ( ! update_pipeline_SP_non_scalable_roi_changes( table_entry->stream_datas ,  table_entry ) ){
+		
+
 		return FALSE;
-	else
-	{
-
-		/* if there is a change in channel's resolution or channel's ROI parameters --> change channel type to ROI */
-		if ( table_entry->channelType != roi )
-			table_entry->channelType = 	roi ;
-
-		return channelSatus_requests_handler(  table_entry ) ;
 
 	}
+	else
+		return channelSatus_requests_handler(  table_entry ) ;
 
 	return TRUE;
 
@@ -1069,7 +1066,7 @@ channelTable_handler(
                 table_entry->channelVertRes     				= *request->requestvb->val.integer;
 				if ( table_entry->channelVertRes !=  table_entry->old_channelVertRes ){
 					if ( ! roi_requests_handler( table_entry ) ){
-						netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_GENERR  );
+						netsnmp_set_request_error(reqinfo, requests , SNMP_ERR_GENERR  );
 						return SNMP_ERR_NOERROR;
 					}
 				}
@@ -1079,19 +1076,17 @@ channelTable_handler(
                 table_entry->channelRoiOriginTop     			= *request->requestvb->val.integer;
 				if ( table_entry->channelRoiOriginTop !=  table_entry->old_channelRoiOriginTop ){
 					if ( ! roi_requests_handler( table_entry ) ){
-						netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_GENERR  );
+						netsnmp_set_request_error(reqinfo, requests , SNMP_ERR_GENERR  );
 						return SNMP_ERR_NOERROR;
 					}
 				}
-
-					roi_requests_handler( table_entry );
                 break;
             case COLUMN_CHANNELROIORIGINLEFT:
                 table_entry->old_channelRoiOriginLeft 			= table_entry->channelRoiOriginLeft;
                 table_entry->channelRoiOriginLeft     			= *request->requestvb->val.integer;
 				if ( table_entry->channelRoiOriginLeft !=  table_entry->old_channelRoiOriginLeft ){
 					if ( ! roi_requests_handler( table_entry ) ){
-						netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_GENERR  );
+						netsnmp_set_request_error(reqinfo, requests , SNMP_ERR_GENERR  );
 						return SNMP_ERR_NOERROR;
 					}
 				}
@@ -1101,7 +1096,7 @@ channelTable_handler(
                 table_entry->channelRoiExtentBottom     		= *request->requestvb->val.integer;
 				if ( table_entry->channelRoiExtentBottom !=  table_entry->old_channelRoiExtentBottom ){
 					if ( ! roi_requests_handler( table_entry ) ){
-						netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_GENERR  );
+						netsnmp_set_request_error(reqinfo, requests , SNMP_ERR_GENERR  );
 						return SNMP_ERR_NOERROR;
 					}
 				}
@@ -1111,7 +1106,7 @@ channelTable_handler(
                 table_entry->channelRoiExtentRight    			= *request->requestvb->val.integer;
 				if ( table_entry->channelRoiExtentRight !=  table_entry->old_channelRoiExtentRight ){
 					if ( ! roi_requests_handler( table_entry ) ){
-						netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_GENERR  );
+						netsnmp_set_request_error(reqinfo, requests , SNMP_ERR_GENERR  );
 						return SNMP_ERR_NOERROR;
 					}
 				}
@@ -1179,6 +1174,12 @@ channelTable_handler(
             case COLUMN_CHANNELROIORIGINTOP:
                 table_entry->channelRoiOriginTop     			= table_entry->old_channelRoiOriginTop;
                 table_entry->old_channelRoiOriginTop 			= 0;
+				/* 
+				 *  If we go there, then something went wrong on the ROI changes. We may want to reset the ROI parameters in 
+				 *  the videoFormatTable for them to be identical to the ROI parameters in channelTable 
+				 */
+				struct videoFormatTable_entry *vf_copy =  videoFormatTable_getEntry( table_entry->channelVideoFormatIndex ) ;
+				update_videoFormat_entry_roi_from_channelTable_entry ( vf_copy , table_entry );
                 break;
             case COLUMN_CHANNELROIORIGINLEFT:
                 table_entry->channelRoiOriginLeft     			= table_entry->old_channelRoiOriginLeft;
