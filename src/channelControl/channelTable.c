@@ -525,12 +525,10 @@ gboolean channelSatus_requests_handler( struct channelTable_entry * table_entry 
  * \param table_entry the table entry on which the request applies
  * \return TRUE on success, FALSE on failure
  */
-static gboolean roi_requests_handler( struct channelTable_entry * table_entry ){
+static gboolean roi_requests_handler( struct channelTable_entry * table_entry , struct videoFormatTable_entry *videoFormat_entry ){
 
 	/* update a copy of the videoFormat associated videoFormat in consequences */
-	struct videoFormatTable_entry *vf_copy =  videoFormatTable_getEntry( table_entry->channelVideoFormatIndex ) ;
-	/* Now, copy the ROI parameters to the correspnding videoFormat */
-	update_videoFormat_entry_roi_from_channelTable_entry ( vf_copy , table_entry );
+	update_videoFormat_entry_roi_from_channelTable_entry ( videoFormat_entry , table_entry );
 
 	/* 
 	 * Now update pipeline
@@ -569,20 +567,30 @@ channelTable_handler(
     netsnmp_table_request_info 		*table_info;
     struct channelTable_entry   	*table_entry;
 	int 							ret 			= 0;
-	struct videoFormatTable_entry *videoFormat_entry;
+	/*
+	 * As we may need it for several parameters of the channel Table
+	 * I think it is better to get the corresponding videoFormat here.
+	 * Event if in some cases it will be useless 
+	 */
+	struct videoFormatTable_entry *videoFormat_entry ;
+
     DEBUGMSGTL(("channelTable:handler", "Processing request (%d)\n", reqinfo->mode));
 
     switch (reqinfo->mode) {
-        /*
+
+		/* 
          * Read-support (also covers GetNext requests)
          */
+
+
     case MODE_GET:
         for (request=requests; request; request=request->next) {
+
             table_entry = (struct channelTable_entry *)
                               netsnmp_extract_iterator_context(request);
             table_info  =     netsnmp_extract_table_info(      request);
-    
-            switch (table_info->colnum) {
+
+		switch (table_info->colnum) {
             case COLUMN_CHANNELTYPE:
                 if ( !table_entry ) {
                     netsnmp_set_request_error(reqinfo, request,
@@ -811,6 +819,7 @@ channelTable_handler(
         }
         break;
 
+	
         /*
          * Write-support
          */
@@ -819,6 +828,8 @@ channelTable_handler(
             table_entry = (struct channelTable_entry *)
                               netsnmp_extract_iterator_context(request);
             table_info  =     netsnmp_extract_table_info(      request);
+
+			videoFormat_entry =  ( struct videoFormatTable_entry *) videoFormatTable_getEntry( table_entry->channelVideoFormatIndex ) ;
 			
 			/* check if the index we are trying to modify is in the table, if no, return */
 			if ( index_out_of_range( reginfo,
@@ -880,7 +891,6 @@ channelTable_handler(
             case COLUMN_CHANNELROIORIGINTOP:
                 /* or possibly 'netsnmp_check_vb_int_range' */
 				/* get the corresponding videoFormatTable to get the maximum value of the top parameter */
-				videoFormat_entry =  videoFormatTable_getEntry( table_entry->channelVideoFormatIndex ) ;				
                 ret = netsnmp_check_vb_int_range ( request->requestvb , 0 , videoFormat_entry->videoFormatMaxVertRes );
 				if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
@@ -890,7 +900,6 @@ channelTable_handler(
             case COLUMN_CHANNELROIORIGINLEFT:
                 ret = netsnmp_check_vb_int_range ( request->requestvb, 0 , table_entry->channelHorzRes );
 				/* get the corresponding videoFormatTable to get the maximum value of the left parameter */
-				videoFormat_entry =  videoFormatTable_getEntry( table_entry->channelVideoFormatIndex ) ;				
                 ret = netsnmp_check_vb_int_range ( request->requestvb , 0 , videoFormat_entry->videoFormatMaxHorzRes );
                 if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
@@ -1026,6 +1035,9 @@ channelTable_handler(
             table_entry = (struct channelTable_entry *)
                               netsnmp_extract_iterator_context(request);
             table_info  =     netsnmp_extract_table_info(      request);
+
+			videoFormat_entry =  ( struct videoFormatTable_entry *) videoFormatTable_getEntry( table_entry->channelVideoFormatIndex ) ;
+
             switch (table_info->colnum) {
             case COLUMN_CHANNELUSERDESC:
 				table_entry->old_channelUserDesc = strdup(table_entry->channelUserDesc);
@@ -1055,7 +1067,7 @@ channelTable_handler(
                 table_entry->old_channelHorzRes 				= table_entry->channelHorzRes;
                 table_entry->channelHorzRes     				= *request->requestvb->val.integer;
 				if ( table_entry->channelHorzRes != table_entry->old_channelHorzRes ) {
-					if ( ! roi_requests_handler( table_entry ) ){
+					if ( ! roi_requests_handler( table_entry , videoFormat_entry ) ){
 						netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_GENERR  );
 						return SNMP_ERR_NOERROR;
 					}
@@ -1065,7 +1077,7 @@ channelTable_handler(
                 table_entry->old_channelVertRes 				= table_entry->channelVertRes;
                 table_entry->channelVertRes     				= *request->requestvb->val.integer;
 				if ( table_entry->channelVertRes !=  table_entry->old_channelVertRes ){
-					if ( ! roi_requests_handler( table_entry ) ){
+					if ( ! roi_requests_handler( table_entry , videoFormat_entry) ){
 						netsnmp_set_request_error(reqinfo, requests , SNMP_ERR_GENERR  );
 						return SNMP_ERR_NOERROR;
 					}
@@ -1075,7 +1087,7 @@ channelTable_handler(
                 table_entry->old_channelRoiOriginTop 			= table_entry->channelRoiOriginTop;
                 table_entry->channelRoiOriginTop     			= *request->requestvb->val.integer;
 				if ( table_entry->channelRoiOriginTop !=  table_entry->old_channelRoiOriginTop ){
-					if ( ! roi_requests_handler( table_entry ) ){
+					if ( ! roi_requests_handler( table_entry , videoFormat_entry) ){
 						netsnmp_set_request_error(reqinfo, requests , SNMP_ERR_GENERR  );
 						return SNMP_ERR_NOERROR;
 					}
@@ -1085,7 +1097,7 @@ channelTable_handler(
                 table_entry->old_channelRoiOriginLeft 			= table_entry->channelRoiOriginLeft;
                 table_entry->channelRoiOriginLeft     			= *request->requestvb->val.integer;
 				if ( table_entry->channelRoiOriginLeft !=  table_entry->old_channelRoiOriginLeft ){
-					if ( ! roi_requests_handler( table_entry ) ){
+					if ( ! roi_requests_handler( table_entry , videoFormat_entry) ){
 						netsnmp_set_request_error(reqinfo, requests , SNMP_ERR_GENERR  );
 						return SNMP_ERR_NOERROR;
 					}
@@ -1095,7 +1107,7 @@ channelTable_handler(
                 table_entry->old_channelRoiExtentBottom 		= table_entry->channelRoiExtentBottom;
                 table_entry->channelRoiExtentBottom     		= *request->requestvb->val.integer;
 				if ( table_entry->channelRoiExtentBottom !=  table_entry->old_channelRoiExtentBottom ){
-					if ( ! roi_requests_handler( table_entry ) ){
+					if ( ! roi_requests_handler( table_entry , videoFormat_entry) ){
 						netsnmp_set_request_error(reqinfo, requests , SNMP_ERR_GENERR  );
 						return SNMP_ERR_NOERROR;
 					}
@@ -1105,7 +1117,7 @@ channelTable_handler(
                 table_entry->old_channelRoiExtentRight 			= table_entry->channelRoiExtentRight;
                 table_entry->channelRoiExtentRight    			= *request->requestvb->val.integer;
 				if ( table_entry->channelRoiExtentRight !=  table_entry->old_channelRoiExtentRight ){
-					if ( ! roi_requests_handler( table_entry ) ){
+					if ( ! roi_requests_handler( table_entry , videoFormat_entry) ){
 						netsnmp_set_request_error(reqinfo, requests , SNMP_ERR_GENERR  );
 						return SNMP_ERR_NOERROR;
 					}
@@ -1143,6 +1155,8 @@ channelTable_handler(
             table_entry = (struct channelTable_entry *)
                               netsnmp_extract_iterator_context(request);
             table_info  =     netsnmp_extract_table_info(      request);
+
+			videoFormat_entry =  ( struct videoFormatTable_entry *) videoFormatTable_getEntry( table_entry->channelVideoFormatIndex ) ;
     
             switch (table_info->colnum) {
             case COLUMN_CHANNELUSERDESC:
@@ -1178,20 +1192,22 @@ channelTable_handler(
 				 *  If we go there, then something went wrong on the ROI changes. We may want to reset the ROI parameters in 
 				 *  the videoFormatTable for them to be identical to the ROI parameters in channelTable 
 				 */
-				struct videoFormatTable_entry *vf_copy =  videoFormatTable_getEntry( table_entry->channelVideoFormatIndex ) ;
-				update_videoFormat_entry_roi_from_channelTable_entry ( vf_copy , table_entry );
+				update_videoFormat_entry_roi_from_channelTable_entry ( videoFormat_entry , table_entry );
                 break;
             case COLUMN_CHANNELROIORIGINLEFT:
                 table_entry->channelRoiOriginLeft     			= table_entry->old_channelRoiOriginLeft;
                 table_entry->old_channelRoiOriginLeft 			= 0;
+				update_videoFormat_entry_roi_from_channelTable_entry ( videoFormat_entry , table_entry );
                 break;
             case COLUMN_CHANNELROIEXTENTBOTTOM:
                 table_entry->channelRoiExtentBottom     		= table_entry->old_channelRoiExtentBottom;
                 table_entry->old_channelRoiExtentBottom 		= 0;
+				update_videoFormat_entry_roi_from_channelTable_entry ( videoFormat_entry , table_entry );				
                 break;
             case COLUMN_CHANNELROIEXTENTRIGHT:
                 table_entry->channelRoiExtentRight     			= table_entry->old_channelRoiExtentRight;
                 table_entry->old_channelRoiExtentRight 			= 0;
+				update_videoFormat_entry_roi_from_channelTable_entry ( videoFormat_entry , table_entry );			
                 break;
             case COLUMN_CHANNELRECEIVEIPADDRESS:
                 table_entry->channelReceiveIpAddress     		= table_entry->old_channelReceiveIpAddress;
