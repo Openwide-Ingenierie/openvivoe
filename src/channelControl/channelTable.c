@@ -491,7 +491,7 @@ gboolean channelSatus_requests_handler( struct channelTable_entry * table_entry 
 		case roi:
 			if ( table_entry->channelStatus 		== start){
 				prepare_socket( table_entry );
-				send_announcement ( table_entry );
+				send_announcement ( table_entry ); /* send the announcement once, so it is received shorlty be all Service Users */
 				g_timeout_add(table_entry->channelSapMessageInterval,send_announcement, table_entry );
 				if ( !start_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex)){
 					g_printerr( "ERROR: failed to start streaming\n");

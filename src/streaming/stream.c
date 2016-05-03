@@ -429,6 +429,8 @@ gboolean start_streaming (gpointer stream_datas, long channelVideoFormatIndex ){
 	stream_data *data 								= stream_datas;
 	struct videoFormatTable_entry * stream_entry 	= videoFormatTable_getEntry(channelVideoFormatIndex);
 	if ( data->pipeline != NULL){
+		if ( GST_STATE ( data->pipeline ) == GST_STATE_PLAYING )
+			return TRUE;
 		/* Set the pipeline to "playing" state*/
 		g_print ("Now playing channel: %ld\n",channelVideoFormatIndex );
 		gst_element_set_state (data->pipeline, GST_STATE_PLAYING);
