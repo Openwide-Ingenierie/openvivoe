@@ -27,6 +27,7 @@
 #include "../../include/channelControl/channelTable.h"
 #include "../../include/mibParameters.h"
 #include "../../include/conf/mib-conf.h"
+#include "../../include/streaming/detect.h"
 #include "../../include/streaming/stream_registration.h"
 #include "../../include/streaming/stream.h"
 
@@ -67,6 +68,43 @@ roi_data *SP_is_roi(long videoFormatIndex){
 	}
 
 	return NULL; /* if not found, returns NULL */
+
+}
+
+static gboolean SP_roi_mp4_config_update (gpointer stream_datas,  struct videoFormatTable_entry * videoFormat_entry ) {
+	
+	/* get the stream_data from the channel */
+	stream_data 	*data 			= stream_datas; 
+
+	/* A structure to save the new detected caps */
+	GstStructure 	*video_caps;
+
+	/*
+	 * get the parser from the MPEG-4 pipeline and rtppayloader element
+	 * */
+	GstElement *rtpmp4vpay = gst_bin_get_by_name( GST_BIN ( data->pipeline ), "rtpmp4vpay") ;
+
+	if ( !rtpmp4vpay ){
+		g_printerr ("Failed to adapt MPEG-4 pipeline for ROI\n");
+		return FALSE;
+	}
+
+	/*
+	 * detect the new video caps 
+	 */
+ 	video_caps = type_detection_for_roi( GST_BIN(data->pipeline), rtpmp4vpay , data->udp_elem ) ;
+	
+	if ( !video_caps ){
+		g_printerr ("Failed to adapt MPEG-4 pipeline for ROI\n");
+		return FALSE;
+	}
+
+	/*
+	 * fill rtp data and other mib parameters in needed 
+	 */
+	fill_entry(video_caps,videoFormat_entry , stream_datas);
+
+	return TRUE;
 
 }
 
@@ -456,8 +494,6 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , st
 					NULL
 					);
 
-			return TRUE;
-
 		}
 		else{
 
@@ -466,6 +502,22 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , st
 
 		}
 	}
-	else
-		return TRUE;
+
+
+	/*
+	 * Now, for MPEG-4 video only, we must update the "config" parameters for the new SDP file 
+	 * that will be built 
+	 */
+	if ( ! strcmp( channel_entry->channelVideoFormat , MPEG4_NAME ) ){
+
+		printf("11111111111111111111111\n");
+		/*
+		 * call handle mpeg config update
+		 */
+		if ( !SP_roi_mp4_config_update (stream_datas, videoFormat_entry ))
+			return FALSE;
+
+	}
+
+	return TRUE;
 }

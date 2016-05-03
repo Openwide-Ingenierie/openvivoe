@@ -131,9 +131,9 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
 	}
 	/*videoFormatInterlaced*/
 	if( gst_structure_has_field(source_str_caps, "interlace-mode")){
-		 gchar* video_interlaced_mode						= g_value_dup_string(gst_structure_get_value(source_str_caps, "interlace-mode"));
-		 if 	( !strcmp( (char*)video_interlaced_mode, "progressive"))
-		 	video_info->videoFormatInterlaced 		= vivoe_progressive;
+		gchar* video_interlaced_mode						= g_value_dup_string(gst_structure_get_value(source_str_caps, "interlace-mode"));
+		if 	( !strcmp( (char*)video_interlaced_mode, "progressive"))
+			video_info->videoFormatInterlaced 		= vivoe_progressive;
 		else if ( !strcmp( (char*)video_interlaced_mode, "interlaced"))
 			video_info->videoFormatInterlaced 		= vivoe_interlaced;
 		else
@@ -144,7 +144,7 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
 		if (G_VALUE_HOLDS_INT(gst_structure_get_value(source_str_caps, "height")))
 			video_info->videoFormatMaxVertRes		= (long) g_value_get_int( gst_structure_get_value(source_str_caps, "height"));
 		else
-		 	video_info->videoFormatMaxVertRes		= strtol ( (char* ) g_value_dup_string ( gst_structure_get_value(source_str_caps, "height")), NULL , 10 ); /* the string is converted into long int, basis 10 */
+			video_info->videoFormatMaxVertRes		= strtol ( (char* ) g_value_dup_string ( gst_structure_get_value(source_str_caps, "height")), NULL , 10 ); /* the string is converted into long int, basis 10 */
 	}	
 	/*videoFormatMaxHorzRes*/
 	if( gst_structure_has_field(source_str_caps, "width")){
@@ -173,12 +173,13 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
 
 	/* profile-level-id */
 	if( gst_structure_has_field(source_str_caps, "profile-level-id")){	
-			data->rtp_datas->profile_level_id		= (char*) g_value_dup_string (gst_structure_get_value(source_str_caps, "profile-level-id"));
+		data->rtp_datas->profile_level_id		= (char*) g_value_dup_string (gst_structure_get_value(source_str_caps, "profile-level-id"));
 	}
 
 	/* config */
-	if( gst_structure_has_field(source_str_caps, "config")){	
-			data->rtp_datas->config 				= (char*) g_value_dup_string (gst_structure_get_value(source_str_caps, "config"));
+	if( gst_structure_has_field(source_str_caps, "config")){
+		data->rtp_datas->config 				= (char*) g_value_dup_string (gst_structure_get_value(source_str_caps, "config"));
+		printf("%s\n",data->rtp_datas->config );
 	}
 }
 

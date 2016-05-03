@@ -57,8 +57,8 @@ static void cb_typefound ( 	GstElement  			*typefind,
  */
 static GstStructure* type_detection_with_sink(GstBin *pipeline, GstElement *input_video,GstElement *sink ){
 
-	GstElement *typefind;
-	GstCaps *found_caps;
+	GstElement 	*typefind;
+	GstCaps 	*found_caps;
 
 	/* Create typefind element */
 	typefind = gst_element_factory_make_log ("typefind", NULL);	
@@ -105,7 +105,7 @@ static GstStructure* type_detection_with_sink(GstBin *pipeline, GstElement *inpu
  * \param input_video the video stream we want to know the caps from
  * \return a pointer to the detected structure, NULL otherwise
  */
-GstStructure* type_detection(GstBin *pipeline, GstElement *input_video,GstElement *sink){
+GstStructure* type_detection(GstBin *pipeline, GstElement *input_video , GstElement *sink){
 	GstStructure *str_detected;
 	if (sink == NULL){
 		GstElement  *fakesink;
@@ -119,5 +119,65 @@ GstStructure* type_detection(GstBin *pipeline, GstElement *input_video,GstElemen
 	}else{
 		str_detected = type_detection_with_sink( pipeline, input_video, sink);
 	}
+	return str_detected;
+}
+
+/**
+ * \brief this function just detect the caps between an element and a sink already in pipeline and already link to each other
+ */
+GstStructure* type_detection_for_roi(GstBin *pipeline, GstElement *input , GstElement *sink ){
+
+	GstElement 	*typefind;
+	GstCaps 	*found_caps;
+
+	/* 
+	 * Start by unlink the input and the sink element
+	 */
+	gst_element_unlink ( input , sink );
+
+	/* Create typefind element */
+	typefind = gst_element_factory_make_log ("typefind", NULL);	
+
+	if(typefind == NULL)
+		return NULL;
+	
+	/* Connect typefind element to handler */
+	g_signal_connect (typefind, "have-type", G_CALLBACK (cb_typefound), &found_caps);
+	gst_bin_add (GST_BIN (pipeline), typefind );
+
+	gst_element_link_many (input, typefind, sink, NULL);
+	gst_element_set_state (GST_ELEMENT (pipeline), GST_STATE_PLAYING);
+
+	/* run the main loop until type is found so we execute callback function */
+	if( g_main_loop_is_running (main_loop) ){
+  		g_main_loop_quit (main_loop);
+		was_running = TRUE; /* save the fact that we have quit the main loop */
+	}
+
+	/* run the main loop so the typefind can be performed */
+	g_main_loop_run (main_loop);
+	
+	if( internal_error )
+		return NULL;
+
+	/* Video type found */	
+  	gst_element_set_state (GST_ELEMENT (pipeline), GST_STATE_NULL);
+
+	/*Remove typefind and fakesink from pipeline */
+	gst_element_unlink_many( input, typefind, sink, NULL);
+	gst_bin_remove(GST_BIN(pipeline), typefind);
+
+
+	/* 
+	 * Re-link the input element and the sink
+	 */
+	if ( ! gst_element_link (input , sink ) )
+		return NULL ;
+
+	/* Get video Caps */
+	GstCaps 		*detected 		= found_caps;
+//	printf("%s\n", gst_caps_to_string(detected));
+	GstStructure 	*str_detected 	= gst_caps_get_structure(detected, 0);
+
 	return str_detected;
 }
