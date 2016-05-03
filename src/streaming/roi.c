@@ -71,6 +71,12 @@ roi_data *SP_is_roi(long videoFormatIndex){
 
 }
 
+/**
+ * \brief update the "config" propoerty stored in rtp_data of the given stream_data using a typefind
+ * \param the steam_data we will use to detect caps and we will update
+ * \param the corresponding videoformat_entry to fill
+ * \return  TRUE on succes, FALSE on failure ( as caps not found for example )
+ */
 static gboolean SP_roi_mp4_config_update (gpointer stream_datas,  struct videoFormatTable_entry * videoFormat_entry ) {
 	
 	/* get the stream_data from the channel */
@@ -102,12 +108,17 @@ static gboolean SP_roi_mp4_config_update (gpointer stream_datas,  struct videoFo
 	/*
 	 * fill rtp data and other mib parameters in needed 
 	 */
-	fill_entry(video_caps,videoFormat_entry , stream_datas);
+	fill_entry(video_caps, videoFormat_entry , stream_datas);
 
 	return TRUE;
 
 }
 
+/**
+ * \brief retrieve the scaling element used in gst_source pipeline
+ * \param roi_datas the roi_data corresônding to this source
+ * \return  the scaling element buit from description on succes, or NULL if no scaling element has been found
+ */
 GstElement *get_scaling_element ( roi_data *roi_datas ){
 
 	GstElement *scaling_elt  = NULL;
@@ -120,14 +131,13 @@ GstElement *get_scaling_element ( roi_data *roi_datas ){
 	 * retreive first occurence of '!', the name of the scaling element is the name right 
 	 * before
 	 */
-	gchar *remaining_pipeline 	= strstr ( roi_datas->gst_after_roi_elt , "!" ) + 1 ;
+	gchar *remaining_pipeline = strstr ( roi_datas->gst_after_roi_elt , "!" );
 
 	/* 
 	 * in case there are no remaining pipeline, maybe the only element left is the scaling element 
 	 * that should be the case with RAW scaling for example 
 	 */
 	if ( !remaining_pipeline ){
-
 		/*
 	 	* build a bin from this description
 	 	*/
@@ -144,6 +154,11 @@ GstElement *get_scaling_element ( roi_data *roi_datas ){
 
 	}
 	else {
+
+		/*
+		 * start by remainin the "!" from the string to parse
+		 */
+		remaining_pipeline += 1 ;
 
 		gchar *name_scaling_elt		= g_strndup (roi_datas->gst_after_roi_elt , strlen( roi_datas->gst_after_roi_elt ) - strlen( remaining_pipeline ) - strlen( "! " ) );
 
@@ -173,7 +188,15 @@ GstElement *get_scaling_element ( roi_data *roi_datas ){
 
 }
 
-
+/**
+ * \brief adapt the pipeline to ROI: inset cropping element and capsfilter on the right position if needed
+ * \param pipeline the corresponding pipeline to adapt
+ * \param input the element to use when linking element
+ * \param video_stream_info the fake videoFormat_entry to fill with new information
+ * \param roi_datas the roi data corresponding to this entry
+ * \param video_caps the caps of the input vidoe
+ * \return input if no element added, other it returns the last element added in pipeline
+ */
 static GstElement *adapt_pipeline_to_roi(GstElement *pipeline , GstElement *input , struct videoFormatTable_entry *video_stream_info , roi_data *roi_datas, GstStructure *video_caps ) {
 
 	GstElement 	*videocrop 		= NULL;
@@ -324,6 +347,14 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline , GstElement *inpu
 
 }
 
+/**
+ * \brief handle the ROI on starting: add element if needed, parse the gst_source cmdline after vivoe-roi element and add the result to pipeline
+ * \param pipeline the corresponding pipeline to adapt
+ * \param input the element to use when linking element
+ * \param video_stream_info the fake videoFormat_entry to fill with new information
+ * \param video_caps the caps of the input vidoe
+ * \return input if no element added, other it returns the last element added in pipeline
+ */
 GstElement *handle_roi( GstElement *pipeline, GstElement *input, struct videoFormatTable_entry *video_stream_info , GstStructure *video_caps ) {
 
 	GError 		*error 				= NULL; /* an Object to save errors when they occurs */
@@ -387,6 +418,12 @@ GstElement *handle_roi( GstElement *pipeline, GstElement *input, struct videoFor
 		
 }
 
+/**
+ * \brief update the property of videocrop and videoscale element in pipeline according to the values given by the user in the MIB
+ * \param the stream_data associated to this channel
+ * \param channel_entry the corresponding channel entry
+ * \return TRUE on succes, FALSE on failure such as wrong values given in the MIB
+ */
 gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , struct channelTable_entry *channel_entry){
 
 	stream_data *data 		= stream_datas;
@@ -510,7 +547,6 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , st
 	 */
 	if ( ! strcmp( channel_entry->channelVideoFormat , MPEG4_NAME ) ){
 
-		printf("11111111111111111111111\n");
 		/*
 		 * call handle mpeg config update
 		 */

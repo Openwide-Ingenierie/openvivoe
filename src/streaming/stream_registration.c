@@ -179,7 +179,6 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
 	/* config */
 	if( gst_structure_has_field(source_str_caps, "config")){
 		data->rtp_datas->config 				= (char*) g_value_dup_string (gst_structure_get_value(source_str_caps, "config"));
-		printf("%s\n",data->rtp_datas->config );
 	}
 }
 

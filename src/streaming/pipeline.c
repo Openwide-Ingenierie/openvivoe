@@ -407,7 +407,6 @@ void set_udpsrc_param( GstElement *udpsrc, struct channelTable_entry * channel_e
                     "port", 			DEFAULT_MULTICAST_PORT,
 					"caps", 			caps, 
                     NULL);
-	printf("%s\n", gst_caps_to_string( caps ) );
 
 }
 

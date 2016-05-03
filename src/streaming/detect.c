@@ -130,6 +130,12 @@ GstStructure* type_detection_for_roi(GstBin *pipeline, GstElement *input , GstEl
 	GstElement 	*typefind;
 	GstCaps 	*found_caps;
 
+	/*
+	 * stop pipeline if it was running 
+	 */
+	gst_element_set_state (GST_ELEMENT (pipeline), GST_STATE_NULL);
+
+
 	/* 
 	 * Start by unlink the input and the sink element
 	 */
@@ -144,7 +150,6 @@ GstStructure* type_detection_for_roi(GstBin *pipeline, GstElement *input , GstEl
 	/* Connect typefind element to handler */
 	g_signal_connect (typefind, "have-type", G_CALLBACK (cb_typefound), &found_caps);
 	gst_bin_add (GST_BIN (pipeline), typefind );
-
 	gst_element_link_many (input, typefind, sink, NULL);
 	gst_element_set_state (GST_ELEMENT (pipeline), GST_STATE_PLAYING);
 
