@@ -65,7 +65,7 @@ roi_data *SP_is_roi(long videoFormatIndex){
 
 }
 
-GstElement *get_scaling_element_name ( roi_data *roi_datas ){
+GstElement *get_scaling_element ( roi_data *roi_datas ){
 
 	GstElement *scaling_elt  = NULL;
 	GError * error = NULL ;
@@ -139,34 +139,14 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline , GstElement *inpu
 	GstElement *scaling_elt 	= NULL;
 
 	/* 
-	 * In any case, we will need a videocrop element in our pipeline 
+	 * In any case, we will need a videocrop element in our pipeline;
+	 * On the begining , start by setting its parameters to 0.
 	 */
 
 	videocrop = gst_element_factory_make_log ( "videocrop", "videocrop" );
 	if ( !videocrop )
 		return NULL;
 
-	/* 
-	 * check if the user have already initialized data for its ROI
-	 * If so, replace height and width value with the one computed from the ROI parameter 
-	 */
-	if ( roi_datas->roi_extent_bottom 	!= 0 	|| 
-			roi_datas->roi_extent_right != 0 	|| 
-			roi_datas->roi_top 			!= 0 	|| 
-			roi_datas->roi_left 		!= 0 ){
-
-		g_object_set ( 	G_OBJECT ( videocrop ) , 
-				"top" 		,  roi_datas->roi_top, 
-				"left" 		,  roi_datas->roi_left, 
-				"bottom" 	,  video_stream_info->videoFormatMaxVertRes - ( roi_datas->roi_top 	+ roi_datas->roi_height  ),
-				"right" 	,  video_stream_info->videoFormatMaxHorzRes - ( roi_datas->roi_left	+ roi_datas->roi_width ),
-				NULL
-				);
-	}
-	/*
-	 * If not, just set the crop parameters to 0 
-	 */
-	else{
 
 		g_object_set ( 	G_OBJECT ( videocrop ) , 
 				"top" 		, 0, 
@@ -175,14 +155,40 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline , GstElement *inpu
 				"right" 	, 0,
 				NULL
 				);
-	}
 
 	last = videocrop;
 
-	/* if the ROI is scalable, the videoscale element should have been inserted in the pipeline, (it should certainly be the input element) */ 
+	/*
+	 * If the ROI is a scalble roi : the element in pipeline should be vivoe-roi scalable=true
+	 * Then, 2 elements need to be inserted in pipeline: the scaling element, that we will retrieve from the gst_source
+	 * command line and that should be located in roi_datas->gst_after_roi_elt. Then, once the scaling element is added in the pipeline
+	 * the element that should be added in pipeline is a capsfilter. It should be set to the video resolution if the resolution of the ROI
+	 * is not set in the configuration file, or to the ROI resolution given by the user in configuration file 
+	 */
 	if ( roi_datas->scalable ){
 
-		scaling_elt = get_scaling_element_name ( roi_datas );
+
+		/*
+		 * Start by adjusting the cropping element 
+		 */
+		if ( 	roi_datas->roi_extent_bottom 		!= 0 	|| 
+				roi_datas->roi_extent_right 		!= 0 	|| 
+				roi_datas->roi_top 					!= 0 	|| 
+				roi_datas->roi_left 				!= 0 ){
+
+		g_object_set ( 	G_OBJECT ( videocrop ) , 
+				"top" 		,  roi_datas->roi_top, 
+				"left" 		,  roi_datas->roi_left, 
+				"bottom" 	,  video_stream_info->videoFormatMaxVertRes - ( roi_datas->roi_top 	+ roi_datas->roi_extent_bottom  ),
+				"right" 	,  video_stream_info->videoFormatMaxHorzRes - ( roi_datas->roi_left	+ roi_datas->roi_extent_right ),
+				NULL
+				);
+		}
+
+		/* but if no parameters set in configuration file, let the cropping parameters to 0 */
+
+
+		scaling_elt = get_scaling_element ( roi_datas );
 
 		/* if no scacling element found */
 		if ( ! scaling_elt )
@@ -206,23 +212,47 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline , GstElement *inpu
 		 * check if the user have already initialized data for its ROI
 		 * If so, replace height and width value with the one computed from the ROI parameter 
 		 */
-		if ( roi_datas->roi_extent_bottom 	!= 0 	|| 
-				roi_datas->roi_extent_right != 0 	|| 
-				roi_datas->roi_top 			!= 0 	|| 
-				roi_datas->roi_left 		!= 0 )
+		if ( roi_datas->roi_width 	!= 0 	|| 
+			roi_datas->roi_height 	!= 0 	 )
 		{
-			gst_caps_set_simple ( caps_filter , 
-					"height" , G_TYPE_INT	, video_stream_info->videoFormatRoiVertRes ,
-					"width" , G_TYPE_INT	, video_stream_info->videoFormatRoiHorzRes ,
-					NULL);
-		}
 
+			gst_caps_set_simple ( caps_filter , 
+					"height" , G_TYPE_INT	, roi_datas->roi_height ,
+					"width" , G_TYPE_INT	, roi_datas->roi_width ,
+					NULL);
+
+		}
+		/*
+		 * otherwise, just let the caps filter be the same resolution as the resolution found before vivoe-roi element 
+		 */
 		/* set the caps to the capsfilter */
 		g_object_set ( 	G_OBJECT ( capsfilter ) , 
 				"caps" 	, caps_filter,
 				NULL
 				);
 
+	}
+	/* if the ROI is not scalable */
+	else{
+		/* 
+		 * check if the user have already initialized data for its ROI
+		 * If so, replace height and width value with the one computed from the ROI parameter 
+		 */
+		if ( 	roi_datas->roi_width 			!= 0 	|| 
+				roi_datas->roi_extent_right 	!= 0 	|| 
+				roi_datas->roi_top 				!= 0 	|| 
+				roi_datas->roi_left 			!= 0 ){
+
+			g_object_set ( 	G_OBJECT ( videocrop ) , 
+					"top" 		,  roi_datas->roi_top, 
+					"left" 		,  roi_datas->roi_left, 
+					"bottom" 	,  video_stream_info->videoFormatMaxVertRes - ( roi_datas->roi_top 	+ roi_datas->roi_height  ),
+					"right" 	,  video_stream_info->videoFormatMaxHorzRes - ( roi_datas->roi_left	+ roi_datas->roi_width ),
+					NULL
+					);
+		}
+
+		/* if no parameters are set in configuration file, let the parameters top, left, bottom and right to 0 */
 	}
 
 	if( videocrop ){
