@@ -953,7 +953,7 @@ gboolean get_roi_parameters_for_sources (GKeyFile* gkf, int index, roi_data *roi
 		 * The string variable to_not_parse obtained before is a pointer to vivoe-roi and the rest of the pipeline.
 		 * In this string, we get the first occurence of the "!" that should be just before the next element to parse 
 		 */
-		gchar *	gst_after_roi_elt = (g_strrstr ( to_not_parse , "!" )) +1 ; /* add +1 to discard "!" present at the begining of the string */
+		gchar *	gst_after_roi_elt = (strstr ( to_not_parse , "!" )) +1 ; /* add +1 to discard "!" present at the begining of the string */
 
 		if ( gst_before_roi_elt )
 			roi_datas->gst_before_roi_elt 	= g_strdup ( gst_before_roi_elt );

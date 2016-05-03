@@ -82,7 +82,7 @@ GstElement *get_scaling_element ( roi_data *roi_datas ){
 	 * retreive first occurence of '!', the name of the scaling element is the name right 
 	 * before
 	 */
-	gchar *remaining_pipeline 	= g_strrstr ( roi_datas->gst_after_roi_elt , "!" ) ;
+	gchar *remaining_pipeline 	= strstr ( roi_datas->gst_after_roi_elt , "!" ) + 1 ;
 
 	/* 
 	 * in case there are no remaining pipeline, maybe the only element left is the scaling element 
@@ -416,8 +416,6 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , st
 
 		if ( right < 0 )
 			right = 0 ;
-
-		printf("%ld %ld %ld %ld \n", top, left, bottom, right);
 
 		g_object_set ( 	G_OBJECT ( videocrop_roi ) , 
 				"top" 		, top , 
