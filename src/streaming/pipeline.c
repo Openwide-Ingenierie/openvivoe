@@ -29,6 +29,7 @@
 #include "../../include/streaming/stream_registration.h"
 #include "../../include/multicast.h"
 #include "../../include/mibParameters.h"
+#include "../../include/streaming/name.h"
 #include "../../include/streaming/filter.h"
 #include "../../include/streaming/detect.h"
 #include "../../include/streaming/roi.h"
@@ -74,7 +75,7 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 
  	}else{
 
-		GstElement *appsrc = gst_bin_get_by_name( GST_BIN ( pipeline ) , "src-redirection" ) ;
+		GstElement *appsrc = gst_bin_get_by_name( GST_BIN ( pipeline ) , APPSRC_NAME ) ;
 		g_object_set ( appsrc , "caps" ,  caps , NULL) ;
 		video_caps = gst_caps_get_structure( caps, 0 );
 		/* This is a redirection, fill the MIB once for all */
@@ -98,7 +99,7 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 	if ( gst_structure_has_name( video_caps, "video/x-raw") ){
 
 		/* For Raw video */
-		rtp 	= gst_element_factory_make_log ("rtpvrawpay", "rtpvrawpay");
+		rtp 	= gst_element_factory_make_log ("rtpvrawpay", RTPRAWPAY_NAME); 
 		if ( !rtp )
 			return NULL;
 
@@ -113,7 +114,7 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 		 * We do not have to add it again 
 		 */
 		if ( caps == NULL ){
-			parser 	= gst_element_factory_make_log ("mpeg4videoparse", "parser");
+		parser 	= gst_element_factory_make_log ("mpeg4videoparse", MPEG4PARSER_NAME );
 			if ( !parser )
 				return NULL;
 
@@ -126,7 +127,7 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 
 		}
 
-		rtp 	= gst_element_factory_make_log ("rtpmp4vpay", "rtpmp4vpay");
+		rtp 	= gst_element_factory_make_log ("rtpmp4vpay", RTPMP4PAY_NAME );
 		if ( !rtp )
 			return NULL;
 
@@ -142,7 +143,7 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 		 * and image-j2p
 		 */
 
-		GstElement *capsfilter = gst_element_factory_make_log("capsfilter", "capsfilter-image/x-jpc");
+		GstElement *capsfilter = gst_element_factory_make_log("capsfilter", CAPSFITER_J2K_NAME ) ;
 
 		GstCaps *caps_jpeg2000 = gst_caps_new_empty_simple("image/x-jpc");
 	
@@ -159,7 +160,7 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 		input = capsfilter;
 
 		/* For J2K video */
-		rtp 	= gst_element_factory_make_log ("rtpj2kpay", "rtpj2kpay");
+		rtp 	= gst_element_factory_make_log ("rtpj2kpay", RTPJ2KPAY_NAME );
 		if ( !rtp )
 			return NULL;
 	}
@@ -246,7 +247,7 @@ static GstElement* addUDP( 	GstElement *pipeline, 	GstBus *bus,
 	GstElement *udpsink;
 		
 	/* Create the UDP sink */
-    udpsink = gst_element_factory_make_log ("udpsink", "udpsink");
+    udpsink = gst_element_factory_make_log ("udpsink", UDPSINK_NAME );
 
 	if ( !udpsink )
 		return NULL;
@@ -427,7 +428,7 @@ static GstElement* addUDP_SU( 	GstElement *pipeline, 	GstBus *bus,
 	GstElement *udpsrc;
 		
 	/* Create the UDP sink */
-    udpsrc = gst_element_factory_make_log ("udpsrc", "udpsrc");
+    udpsrc = gst_element_factory_make_log ("udpsrc", UDPSRC_NAME );
 
 	if ( !udpsrc )
 		return NULL;
@@ -472,14 +473,14 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 						GstBus *bus,
 	if ( gst_structure_has_field( video_caps, "encoding-name")){
 		/* For Raw video */		
 		if ( strcmp( RAW_NAME,encoding) == 0 ){
-			rtp 	= gst_element_factory_make_log ("rtpvrawdepay", "rtpvrawdepay");
+			rtp 	= gst_element_factory_make_log ("rtpvrawdepay" , RTPRAWDEPAY_NAME );
 			/* Check if everything went ok */
 			if( rtp == NULL)
 				return NULL;
 
 		}else if  ( strcmp( MPEG4_NAME , encoding) == 0 ){
 			/* For MPEG-4 video */
-			rtp 	= gst_element_factory_make_log ("rtpmp4vdepay", "rtpmp4vdepay");
+			rtp 	= gst_element_factory_make_log ("rtpmp4vdepay" , RTPMP4DEPAY_NAME );
 			/* Checek if everything went ok */
 			if( rtp == NULL)
 				return NULL;
@@ -487,7 +488,7 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 						GstBus *bus,
 		} 	
 		/* For J2K video */		
 		else if ( strcmp( J2K_NAME , encoding) == 0 ){
-			rtp 	= gst_element_factory_make_log ("rtpj2kdepay", "rtpj2kdepay");
+			rtp 	= gst_element_factory_make_log ("rtpj2kdepay" , RTPJ2KDEPAY_NAME );
 			/* Check if everything went ok */
 			if( rtp == NULL)
 				return NULL;
@@ -529,7 +530,7 @@ static GstFlowReturn
 	sample = gst_app_sink_pull_sample (GST_APP_SINK (appsink));
 
 	/* get appsource an push new sample */
-	appsource = gst_bin_get_by_name (GST_BIN (pipeline_SP), "src-redirection");
+	appsource = gst_bin_get_by_name (GST_BIN (pipeline_SP), APPSRC_NAME );
 	ret = gst_app_src_push_sample (GST_APP_SRC (appsource), sample); 
 	gst_object_unref (appsource);
 
@@ -554,7 +555,7 @@ static GstElement *handle_redirection_SU_pipeline ( GstElement *pipeline, GstCap
 	if  (gst_structure_has_name( video_caps, "video/mpeg")){
 
 		/* Add the MPEG-4 parser in SU pipeline */
-		GstElement *parser 	= gst_element_factory_make_log ("mpeg4videoparse", "parser");
+		GstElement *parser 	= gst_element_factory_make_log ("mpeg4videoparse", MPEG4PARSER_NAME);
 		if ( !parser )
 			return NULL;
 
@@ -569,7 +570,7 @@ static GstElement *handle_redirection_SU_pipeline ( GstElement *pipeline, GstCap
 	/* in case J2K video type has been detected */
 	else if  ( g_strv_contains ( J2K_STR_NAMES, gst_structure_get_name(video_caps))){
 
-		GstElement *capsfilter = gst_element_factory_make_log("capsfilter", "capsfilter-image/x-jpc");
+		GstElement *capsfilter = gst_element_factory_make_log("capsfilter", CAPSFITER_J2K_NAME );
 
 		GstCaps *caps_jpeg2000 = gst_caps_new_empty_simple("image/x-jpc");
 	
@@ -704,7 +705,7 @@ static GstElement* addSink_SU( 	GstElement 					*pipeline, 		GstBus 		*bus,
 	{
 
 		/* add app sink */
-		sink = gst_element_factory_make_log("appsink", "redirect-sink");
+		sink = gst_element_factory_make_log( "appsink" , APPSINK_NAME );
 		
 		if ( !sink)
 			return NULL;

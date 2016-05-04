@@ -21,6 +21,7 @@
 #include "../../include/log.h"
 #include "../../include/videoFormatInfo/videoFormatTable.h"
 #include "../../include/channelControl/channelTable.h"
+#include "../../include/streaming/name.h"
 #include "../../include/streaming/roi.h"
 #include "../../include/streaming/pipeline.h"
 #include "../../include/streaming/detect.h"
@@ -172,7 +173,7 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 	if( redirection_data ){
 
 		/* if so build the appropriate source */
-		bin = gst_element_factory_make_log( "appsrc", "src-redirection");
+		bin = gst_element_factory_make_log( "appsrc", APPSRC_NAME);
 		if ( !bin )
 	   		return NULL;
 		
@@ -205,7 +206,7 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 	   		return NULL;	
 		}
 
-		gst_element_set_name ( bin ,  "source" );
+		gst_element_set_name ( bin ,  SOURCE_NAME );
 
 	}
 	else{
@@ -219,7 +220,7 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 				TRUE,
 				&error);
 
-		gst_element_set_name ( bin ,  "source" );
+		gst_element_set_name ( bin ,  SOURCE_NAME );
 
 		/* free ressources */
 		free(cmdline);
@@ -298,7 +299,7 @@ int init_stream_SP( int videoFormatIndex ){
 	
 	gboolean redirection = FALSE; 
 	/* if this is a redirection */
-	if ( !strcmp(GST_ELEMENT_NAME(last), "src-redirection") ){ 
+	if ( !strcmp(GST_ELEMENT_NAME(last), APPSRC_NAME) ){ 
 		init_redirection( data, videoFormatIndex );
 		/* for convenience we store the last element added in pipeline here, even if it is not it purpose , this will be used to retrieve the last element of the pipeline later
 		 * in append_SP_pipeline_for_redirection */

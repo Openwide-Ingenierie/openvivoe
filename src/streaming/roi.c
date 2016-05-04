@@ -27,6 +27,7 @@
 #include "../../include/channelControl/channelTable.h"
 #include "../../include/mibParameters.h"
 #include "../../include/conf/mib-conf.h"
+#include "../../include/streaming/name.h"
 #include "../../include/streaming/detect.h"
 #include "../../include/streaming/stream_registration.h"
 #include "../../include/streaming/stream.h"
@@ -35,11 +36,11 @@ static void set_roi_values_videoFormat_entry( struct videoFormatTable_entry *vid
 	
 	/* set resolution */
 	if ( roi_datas->roi_width || roi_datas->roi_height ){
-		video_stream_info->videoFormatRoiVertRes 		= roi_datas->roi_width;
-		video_stream_info->videoFormatRoiHorzRes 		= roi_datas->roi_height;
+		video_stream_info->videoFormatRoiVertRes 	= roi_datas->roi_width;
+		video_stream_info->videoFormatRoiHorzRes 	= roi_datas->roi_height;
 	}else{
-		video_stream_info->videoFormatRoiVertRes 		= video_stream_info->videoFormatMaxVertRes ;
-		video_stream_info->videoFormatRoiHorzRes 		= video_stream_info->videoFormatMaxHorzRes ;
+		video_stream_info->videoFormatRoiVertRes 	= video_stream_info->videoFormatMaxVertRes ;
+		video_stream_info->videoFormatRoiHorzRes 	= video_stream_info->videoFormatMaxHorzRes ;
 	}
 
 	/* set values other values */
@@ -88,7 +89,7 @@ static gboolean SP_roi_mp4_config_update (gpointer stream_datas,  struct videoFo
 	/*
 	 * get the parser from the MPEG-4 pipeline and rtppayloader element
 	 * */
-	GstElement *rtpmp4vpay = gst_bin_get_by_name( GST_BIN ( data->pipeline ), "rtpmp4vpay") ;
+	GstElement *rtpmp4vpay = gst_bin_get_by_name( GST_BIN ( data->pipeline ), RTPMP4PAY_NAME ) ;
 
 	if ( !rtpmp4vpay ){
 		g_printerr ("Failed to adapt MPEG-4 pipeline for ROI\n");
@@ -145,7 +146,7 @@ GstElement *get_scaling_element ( roi_data *roi_datas ){
 												TRUE,
 												&error);
 		
-		gst_element_set_name ( scaling_elt ,  "scaling_element" );		
+		gst_element_set_name ( scaling_elt , SCLAING_ELT_NAME  );		
 		
 		if ( error != NULL){
 			g_printerr("Failed to parse: %s\n",error->message);
@@ -209,7 +210,7 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline , GstElement *inpu
 	 * On the begining , start by setting its parameters to 0.
 	 */
 
-	videocrop = gst_element_factory_make_log ( "videocrop", "videocrop_roi" );
+	videocrop = gst_element_factory_make_log ( "videocrop", VIDEOCROP_ROI_NAME );
 	if ( !videocrop )
 		return NULL;
 
@@ -264,7 +265,7 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline , GstElement *inpu
 		 * For now, we consider that the user has already insert that element in its pipeline 
 		 */
 
-		capsfilter = gst_element_factory_make_log ( "capsfilter", "capsfilter_roi" );
+		capsfilter = gst_element_factory_make_log ( "capsfilter", CAPSFILTER_ROI_NAME );
 		if ( ! capsfilter )
 			return NULL;
 
@@ -453,8 +454,8 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , st
 	 */
 
 	/* we should found a crop element */
-	GstElement *videocrop_roi 	= gst_bin_get_by_name ( GST_BIN ( pipeline ) , "videocrop_roi" ) ;
-	GstElement *capsfilter_roi 	= gst_bin_get_by_name ( GST_BIN ( pipeline ) , "capsfilter_roi" ) ;
+	GstElement *videocrop_roi 	= gst_bin_get_by_name ( GST_BIN ( pipeline ) , VIDEOCROP_ROI_NAME ) ;
+	GstElement *capsfilter_roi 	= gst_bin_get_by_name ( GST_BIN ( pipeline ) , CAPSFILTER_ROI_NAME ) ;
 
 	/*
 	 * if videocrop is not NULL, then, this is a non-scalbale ROI

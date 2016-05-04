@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "../../include/mibParameters.h"
+#include "../../include/streaming/name.h"
 #include "../../include/streaming/detect.h"
 #include "../../include/log.h"
 
@@ -109,7 +110,7 @@ GstStructure* type_detection(GstBin *pipeline, GstElement *input_video , GstElem
 	GstStructure *str_detected;
 	if (sink == NULL){
 		GstElement  *fakesink;
-		fakesink = gst_element_factory_make_log ("fakesink", "sink");
+		fakesink = gst_element_factory_make_log ("fakesink", SINK_TYPEFIND_NAME );
 		if(fakesink == NULL)
 			return NULL;
 
