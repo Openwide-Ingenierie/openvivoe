@@ -541,7 +541,6 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , st
 		}
 	}
 
-
 	/*
 	 * Now, for MPEG-4 video only, we must update the "config" parameters for the new SDP file 
 	 * that will be built 
