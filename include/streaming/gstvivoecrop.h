@@ -49,7 +49,8 @@ GType gst_vivoe_crop_get_type (void);
 
 G_END_DECLS
 
-
+gboolean
+vivoecrop_init (void) ;
 /* pad templates */
 
 #define VIDEO_SRC_CAPS \

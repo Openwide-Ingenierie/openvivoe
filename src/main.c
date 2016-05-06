@@ -28,6 +28,7 @@
 #include "../include/channelControl/channelTable.h"
 #include "../include/announcement/sap.h"
 #include "../include/multicast.h"
+#include "../include/streaming/gstvivoecrop.h"
 #include "../include/streaming/stream_registration.h"
 #include "../include/streaming/stream.h"
 #include "../include/daemon.h"
@@ -104,6 +105,21 @@ gboolean internal_error = FALSE;
  */
 gboolean was_running = FALSE;
 
+gboolean vivoe_gstreamer_initiation(int   argc,  char *argv[]){
+
+	gst_init (&argc, &argv);
+
+	/*
+	 * register vivoecrop plugin
+	 */
+	
+	if ( ! vivoecrop_init () )
+		g_error("Failed to load Gstreamer's vivoecrop module");
+	else
+	return TRUE;	
+
+}
+
 /**
  * \brief the data needed to pass to functions used to exit the program nicely
  * \param argc the number of argument
@@ -126,7 +142,8 @@ int main (int   argc,  char *argv[]){
 
 	/* In case of an service Provider */
 	/* Initialize GStreamer */
-	gst_init (&argc, &argv);
+	if ( !vivoe_gstreamer_initiation( argc,  argv) )
+		return EXIT_FAILURE;
 
 	/* init SubAgent Deamon */
 	if ( open_vivoe_daemon (argv[0]) )
@@ -151,7 +168,7 @@ int main (int   argc,  char *argv[]){
 			g_main_loop_run (main_loop);
 		}
 		else{
-			g_error("An Gstreamer's error occur\n");
+			g_error("An Gstreamer's error occurs\n");
 			return EXIT_FAILURE;
 		}
 

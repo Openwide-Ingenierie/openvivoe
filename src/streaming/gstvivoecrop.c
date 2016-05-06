@@ -89,8 +89,8 @@ gst_vivoe_crop_class_init (GstVivoeCropClass * klass)
         gst_caps_from_string (VIDEO_SINK_CAPS)));
 
   gst_element_class_set_static_metadata (GST_ELEMENT_CLASS(klass),
-      "FIXME Long name", "Generic", "FIXME Description",
-      "FIXME <fixme@example.com>");
+      "vivoecrop", "Generic", "The Vivoe's gstreamer's crop module",
+      "Hoel Vasseur <hoel.vasseur@smile.fr>");
 
   gobject_class->set_property = gst_vivoe_crop_set_property;
   gobject_class->get_property = gst_vivoe_crop_get_property;
@@ -226,33 +226,46 @@ plugin_init (GstPlugin * plugin)
       GST_TYPE_VIVOE_CROP);
 }
 
-static gboolean
-register_elements (GstPlugin *plugin)
-{
-  return gst_element_register (plugin, "vivoecrop",
-			       GST_RANK_NONE, MY_PLUGIN_TYPE);
-}
-
 /* FIXME: these are normally defined by the GStreamer build system.
    If you are creating an element to be included in gst-plugins-*,
    remove these, as they're always defined.  Otherwise, edit as
    appropriate for your external plugin package. */
 #ifndef VERSION
-#define VERSION "0.0.FIXME"
+#define VERSION "1.0"
 #endif
 #ifndef PACKAGE
-#define PACKAGE "FIXME_package"
+#define PACKAGE "vivoecrop"
 #endif
 #ifndef PACKAGE_NAME
-#define PACKAGE_NAME "FIXME_package_name"
+#define PACKAGE_NAME "vivoecrop"
+#endif
+#ifndef SOURCE
+#define SOURCE "gstvideocrop.c"
 #endif
 #ifndef GST_PACKAGE_ORIGIN
-#define GST_PACKAGE_ORIGIN "http://FIXME.org/"
+#define GST_PACKAGE_ORIGIN "localhost:openvivoe"
 #endif
+
+gboolean
+vivoecrop_init (void)
+{
+	return  gst_plugin_register_static (GST_VERSION_MAJOR,
+			GST_VERSION_MINOR,
+			"vivoecrop",
+			"The Vivoe's gstreamer's crop module",
+			plugin_init, 
+			VERSION,
+			"LGPL", 
+			PACKAGE_NAME,
+		   	SOURCE,	
+			GST_PACKAGE_ORIGIN
+			);
+
+}
 
 GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
     GST_VERSION_MINOR,
     vivoecrop,
-    "FIXME plugin description",
+    "The Vivoe's gstreamer's crop module",
     plugin_init, VERSION, "LGPL", PACKAGE_NAME, GST_PACKAGE_ORIGIN)
 
