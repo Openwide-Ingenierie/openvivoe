@@ -1122,8 +1122,8 @@ int init_mib_content(){
 	init_redirection_data( gkf );
 
 	/* init gstreamer's command line to see if there will be roi */
-	if ( ! init_roi_data( gkf ) )
-		return EXIT_FAILURE;
+//	if ( ! init_roi_data( gkf ) )
+//		return EXIT_FAILURE;
 
 	close_mib_configuration_file( gkf );
 
