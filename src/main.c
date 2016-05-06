@@ -87,7 +87,7 @@ static void default_startUp_mode(gpointer loop){
 	for (int i=1; i<=channelNumber._value.int_val; i++){
 		struct channelTable_entry * entry 	= channelTable_getEntry(i);
 		if ( entry->channelType == serviceUser && entry->channelDefaultReceiveIpAddress ){
-			entry->channelStatus 			= start;
+			entry->channelStatus 			= channelStart;
 			entry->channelReceiveIpAddress 	= entry->channelDefaultReceiveIpAddress;
 			channelSatus_requests_handler( entry );
 		}

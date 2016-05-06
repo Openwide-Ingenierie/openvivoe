@@ -55,8 +55,8 @@
 typedef enum {vivoe_interlaced = 1, vivoe_progressive,  vivoe_none }interlaced_mode;
 
 /* values for channelStatus */
-#define start 						1
-#define stop 						2
+#define channelStart 				1
+#define channelStop 				2
 #define singleFrame 				3
 #define default_SAP_interval 		1000
 

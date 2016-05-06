@@ -234,7 +234,7 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 
 		/* At the  same time we copy all of those parameters into video channel */
 		channelTable_createEntry( 	channelNumber._value.int_val+1, 							video_info->videoFormatType,
-				channelUserDesc, 																stop,
+				channelUserDesc, 																channelStop,
 				video_info->videoFormatIndex, 													video_info->videoFormatBase,
 				video_info->videoFormatSampling, 												video_info->videoFormatBitDepth,
 				video_info->videoFormatFps,				 										video_info->videoFormatColorimetry,
@@ -307,7 +307,7 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 
 			/* At the  same time we copy all of those parameters into video channel */
 			channelTable_createEntry( 	channelNumber._value.int_val+1, 													video_info->videoFormatType,
-										channelUserDesc, 																	stop,
+										channelUserDesc, 																	channelStop,
 										video_info->videoFormatIndex, 														video_info->videoFormatBase,
 										video_info->videoFormatSampling, 													video_info->videoFormatBitDepth,
 										video_info->videoFormatFps,				 											video_info->videoFormatColorimetry,

@@ -213,7 +213,7 @@ struct channelTable_entry *	channelTable_create_empty_entry(int index,long chann
     	      				index, /* Appen one channel to the list, its index is just the number of channel incremented by one */
 							channel_type,
 					    	channelUserDesc,
-    						stop,
+    						channelStop,
 						    videoFormatNumber,
 						    "",
 						    "",
@@ -489,7 +489,7 @@ gboolean channelSatus_requests_handler( struct channelTable_entry * table_entry 
 	switch( table_entry->channelType ){
 		case videoChannel: /* case ServiceProvider */
 		case roi:
-			if ( table_entry->channelStatus 		== start){
+			if ( table_entry->channelStatus 		== channelStart){
 				prepare_socket( table_entry );
 				send_announcement ( table_entry ); /* send the announcement once, so it is received shorlty be all Service Users */
 				g_timeout_add(table_entry->channelSapMessageInterval,send_announcement, table_entry );
@@ -499,14 +499,14 @@ gboolean channelSatus_requests_handler( struct channelTable_entry * table_entry 
 				}
 				return TRUE;
 			}
-			else if ( table_entry->channelStatus 	== stop)
+			else if ( table_entry->channelStatus 	== channelStop)
 				return stop_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex );	
 			break;
 		case serviceUser:
-			if ( table_entry->channelStatus 		== start){
+			if ( table_entry->channelStatus 		== channelStart){
 				add_in_channel_SU(table_entry);
 			}
-			else if ( table_entry->channelStatus 	== stop){
+			else if ( table_entry->channelStatus 	== channelStop){
 				delete_steaming_data(table_entry);
 			 	pop_from_channel_SU(table_entry);
 			}
@@ -848,7 +848,7 @@ channelTable_handler(
                 break;
             case COLUMN_CHANNELSTATUS:
                 /* or possibly 'netsnmp_check_vb_int_range' */
-                ret = netsnmp_check_vb_int_range( request->requestvb, start, singleFrame );
+                ret = netsnmp_check_vb_int_range( request->requestvb, channelStart, singleFrame );
                 if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;

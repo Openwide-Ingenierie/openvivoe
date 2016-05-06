@@ -224,6 +224,10 @@ static char*  build_SAP_msg(struct channelTable_entry * entry, int *sap_msg_leng
 		g_printerr("Failed to create SDP message\n");
 		return FALSE;
 	}
+	
+	/* 
+	 * build the SDP message 
+	 */
 	create_SDP(msg, entry);
 
 	/* extract the randomly generated session_version integer */
@@ -287,7 +291,7 @@ gboolean send_announcement(gpointer entry){
 	 */
 	int nb_bytes = -1;
 	struct channelTable_entry * channel_entry = entry;
-	if( channel_entry->channelStatus == stop ){
+	if( channel_entry->channelStatus == channelStop ){
 		/* Build deletion packet */
 		channel_entry->sap_datas->udp_payload = build_SAP_msg(channel_entry, &(channel_entry->sap_datas->udp_payload_length), TRUE);
 		nb_bytes = sendto( 	sap_socket.udp_socket_fd,
