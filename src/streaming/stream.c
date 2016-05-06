@@ -251,7 +251,7 @@ int handle_SP_default_StartUp_mode(long videoFormatIndex ){
 		g_printerr("ERROR: try to start a source that has no channel associated\n");
 		return EXIT_FAILURE;
 	}
-	entry->channelStatus 				= start;
+	entry->channelStatus 				= channelStart;
 
 	if ( channelSatus_requests_handler( entry ))
 		return EXIT_SUCCESS;
