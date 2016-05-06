@@ -130,7 +130,7 @@ int main (int   argc,  char *argv[]){
 
 	/* init SubAgent Deamon */
 	if ( open_vivoe_daemon (argv[0]) )
-		return EXIT_FAILURE;	
+		return EXIT_FAILURE;
 
 	/* add the idle function that handle SNMP request every 100ms */
 	g_timeout_add (100, handle_snmp_request, NULL);

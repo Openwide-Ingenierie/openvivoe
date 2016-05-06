@@ -21,6 +21,7 @@
 #include "../../include/log.h"
 #include "../../include/videoFormatInfo/videoFormatTable.h"
 #include "../../include/channelControl/channelTable.h"
+#include "../../include/deviceError.h"
 #include "../../include/streaming/name.h"
 #include "../../include/streaming/roi.h"
 #include "../../include/streaming/pipeline.h"
@@ -55,7 +56,10 @@ static gboolean bus_call (  GstBus     *bus,
 								   GError *error;
 								   gst_message_parse_error (msg, &error, &debug);
 								   g_free (debug);
-
+									/* 
+									 * Send the TRAP message 
+									 */
+									send_deviceError_trap() ;
 								   g_printerr ("Error: %s\n", error->message);
 								   g_error_free (error);
 								   internal_error = TRUE;
@@ -68,7 +72,10 @@ static gboolean bus_call (  GstBus     *bus,
 								   GError *error;
 								   gst_message_parse_warning (msg, &error, &debug);
 								   g_free (debug);
-
+									/* 
+									 * Send the TRAP message 
+									 */
+									send_deviceError_trap() ;
 								   g_printerr ("Error: %s\n", error->message);
 								   g_error_free (error);
 								   internal_error = TRUE;
