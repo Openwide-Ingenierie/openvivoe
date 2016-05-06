@@ -226,6 +226,13 @@ plugin_init (GstPlugin * plugin)
       GST_TYPE_VIVOE_CROP);
 }
 
+static gboolean
+register_elements (GstPlugin *plugin)
+{
+  return gst_element_register (plugin, "vivoecrop",
+			       GST_RANK_NONE, MY_PLUGIN_TYPE);
+}
+
 /* FIXME: these are normally defined by the GStreamer build system.
    If you are creating an element to be included in gst-plugins-*,
    remove these, as they're always defined.  Otherwise, edit as
