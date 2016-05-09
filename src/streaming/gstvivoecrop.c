@@ -75,32 +75,33 @@ G_DEFINE_TYPE_WITH_CODE (GstVivoeCrop, gst_vivoe_crop, GST_TYPE_VIDEO_FILTER,
 static void
 gst_vivoe_crop_class_init (GstVivoeCropClass * klass)
 {
-  GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
-  GstBaseTransformClass *base_transform_class = GST_BASE_TRANSFORM_CLASS (klass);
-  GstVideoFilterClass *video_filter_class = GST_VIDEO_FILTER_CLASS (klass);
 
-  /* Setting up pads and setting metadata should be moved to
-     base_class_init if you intend to subclass this class. */
-  gst_element_class_add_pad_template (GST_ELEMENT_CLASS(klass),
-      gst_pad_template_new ("src", GST_PAD_SRC, GST_PAD_ALWAYS,
-        gst_caps_from_string (VIDEO_SRC_CAPS)));
-  gst_element_class_add_pad_template (GST_ELEMENT_CLASS(klass),
-      gst_pad_template_new ("sink", GST_PAD_SINK, GST_PAD_ALWAYS,
-        gst_caps_from_string (VIDEO_SINK_CAPS)));
+	GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
+	GstBaseTransformClass *base_transform_class = GST_BASE_TRANSFORM_CLASS (klass);
+	GstVideoFilterClass *video_filter_class = GST_VIDEO_FILTER_CLASS (klass);
 
-  gst_element_class_set_static_metadata (GST_ELEMENT_CLASS(klass),
-      "vivoecrop", "Generic", "The Vivoe's gstreamer's crop module",
-      "Hoel Vasseur <hoel.vasseur@smile.fr>");
+	/* Setting up pads and setting metadata should be moved to
+	   base_class_init if you intend to subclass this class. */
+	gst_element_class_add_pad_template (GST_ELEMENT_CLASS(klass),
+			gst_pad_template_new ("src", GST_PAD_SRC, GST_PAD_ALWAYS,
+				gst_caps_from_string (VIDEO_SRC_CAPS)));
+	gst_element_class_add_pad_template (GST_ELEMENT_CLASS(klass),
+			gst_pad_template_new ("sink", GST_PAD_SINK, GST_PAD_ALWAYS,
+				gst_caps_from_string (VIDEO_SINK_CAPS)));
 
-  gobject_class->set_property = gst_vivoe_crop_set_property;
-  gobject_class->get_property = gst_vivoe_crop_get_property;
-  gobject_class->dispose = gst_vivoe_crop_dispose;
-  gobject_class->finalize = gst_vivoe_crop_finalize;
-  base_transform_class->start = GST_DEBUG_FUNCPTR (gst_vivoe_crop_start);
-  base_transform_class->stop = GST_DEBUG_FUNCPTR (gst_vivoe_crop_stop);
-  video_filter_class->set_info = GST_DEBUG_FUNCPTR (gst_vivoe_crop_set_info);
-  video_filter_class->transform_frame = GST_DEBUG_FUNCPTR (gst_vivoe_crop_transform_frame);
-  video_filter_class->transform_frame_ip = GST_DEBUG_FUNCPTR (gst_vivoe_crop_transform_frame_ip);
+	gst_element_class_set_static_metadata (GST_ELEMENT_CLASS(klass),
+			"vivoecrop", "Generic", "The Vivoe's gstreamer cropping module",
+			"Hoel Vasseur <hoel.vasseur@smile.fr>");
+
+	gobject_class->set_property 			= gst_vivoe_crop_set_property;
+	gobject_class->get_property 			= gst_vivoe_crop_get_property;
+	gobject_class->dispose 					= gst_vivoe_crop_dispose;
+	gobject_class->finalize 				= gst_vivoe_crop_finalize;
+	base_transform_class->start 			= GST_DEBUG_FUNCPTR (gst_vivoe_crop_start);
+	base_transform_class->stop 				= GST_DEBUG_FUNCPTR (gst_vivoe_crop_stop);
+	video_filter_class->set_info 			= GST_DEBUG_FUNCPTR (gst_vivoe_crop_set_info);
+//	video_filter_class->transform_frame 	= GST_DEBUG_FUNCPTR (gst_vivoe_crop_transform_frame);
+	video_filter_class->transform_frame_ip 	= GST_DEBUG_FUNCPTR (gst_vivoe_crop_transform_frame_ip);
 
 }
 
@@ -193,27 +194,32 @@ gst_vivoe_crop_set_info (GstVideoFilter * filter, GstCaps * incaps,
 
   return TRUE;
 }
-
+#if 0
 /* transform */
 static GstFlowReturn
 gst_vivoe_crop_transform_frame (GstVideoFilter * filter, GstVideoFrame * inframe,
     GstVideoFrame * outframe)
 {
+
   GstVivoeCrop *vivoecrop = GST_VIVOE_CROP (filter);
 
   GST_DEBUG_OBJECT (vivoecrop, "transform_frame");
-
+  
   return GST_FLOW_OK;
+
 }
+#endif
 
 static GstFlowReturn
 gst_vivoe_crop_transform_frame_ip (GstVideoFilter * filter, GstVideoFrame * frame)
 {
-  GstVivoeCrop *vivoecrop = GST_VIVOE_CROP (filter);
 
-  GST_DEBUG_OBJECT (vivoecrop, "transform_frame_ip");
+	GstVivoeCrop *vivoecrop = GST_VIVOE_CROP (filter);
 
-  return GST_FLOW_OK;
+	GST_DEBUG_OBJECT (vivoecrop, "transform_frame_ip");
+
+	return GST_FLOW_OK;
+
 }
 
 static gboolean
@@ -231,16 +237,16 @@ plugin_init (GstPlugin * plugin)
    remove these, as they're always defined.  Otherwise, edit as
    appropriate for your external plugin package. */
 #ifndef VERSION
-#define VERSION "1.0"
+#define VERSION 			"1.0"
 #endif
 #ifndef PACKAGE
-#define PACKAGE "vivoecrop"
+#define PACKAGE 			"vivoecrop"
 #endif
 #ifndef PACKAGE_NAME
-#define PACKAGE_NAME "vivoecrop"
+#define PACKAGE_NAME 		"vivoecrop"
 #endif
 #ifndef SOURCE
-#define SOURCE "gstvideocrop.c"
+#define SOURCE 				"gstvideocrop.c"
 #endif
 #ifndef GST_PACKAGE_ORIGIN
 #define GST_PACKAGE_ORIGIN "localhost:openvivoe"
@@ -249,23 +255,24 @@ plugin_init (GstPlugin * plugin)
 gboolean
 vivoecrop_init (void)
 {
+
 	return  gst_plugin_register_static (GST_VERSION_MAJOR,
 			GST_VERSION_MINOR,
 			"vivoecrop",
-			"The Vivoe's gstreamer's crop module",
+			"The Vivoe's gstreamer cropping module",
 			plugin_init, 
 			VERSION,
 			"LGPL", 
 			PACKAGE_NAME,
-		   	SOURCE,	
+			SOURCE,	
 			GST_PACKAGE_ORIGIN
 			);
 
 }
 
 GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
-    GST_VERSION_MINOR,
-    vivoecrop,
-    "The Vivoe's gstreamer's crop module",
-    plugin_init, VERSION, "LGPL", PACKAGE_NAME, GST_PACKAGE_ORIGIN)
+		GST_VERSION_MINOR,
+		vivoecrop,
+		"The Vivoe's gstreamer's crop module",
+		plugin_init, VERSION, "LGPL", PACKAGE_NAME, GST_PACKAGE_ORIGIN)
 
