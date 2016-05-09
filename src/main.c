@@ -28,7 +28,7 @@
 #include "../include/channelControl/channelTable.h"
 #include "../include/announcement/sap.h"
 #include "../include/multicast.h"
-#include "../include/streaming/gstvivoecrop.h"
+#include "../include/streaming/vivoecrop/gstvideocrop.h"
 #include "../include/streaming/stream_registration.h"
 #include "../include/streaming/stream.h"
 #include "../include/daemon.h"
@@ -116,7 +116,7 @@ gboolean vivoe_gstreamer_initiation(int   argc,  char *argv[]){
 	if ( ! vivoecrop_init () )
 		g_error("Failed to load Gstreamer's vivoecrop module");
 	else
-	return TRUE;	
+		return TRUE;	
 
 }
 
@@ -145,6 +145,22 @@ int main (int   argc,  char *argv[]){
 	if ( !vivoe_gstreamer_initiation( argc,  argv) )
 		return EXIT_FAILURE;
 
+	GError *error = NULL;
+	GstElement *pipeline = gst_parse_launch ( "v4l2src ! capsfilter caps=\"video/x-raw,format=RGB,width=640,height=480\" ! videoconvert ! vivoecrop top=250 ! videoconvert ! xvimagesink" /*"v4l2src device=/dev/video0 ! capsfilter caps=\"video/x-raw,format=RGB,width=640,height=480,interlace-mode=(string)progressive,framerate=(fraction)20/1\" ! vivoecrop ! xvimagesink "*/, &error);	
+
+
+	if ( error != NULL)
+		g_printerr ("Error: %s\n", error->message);
+
+	/*
+	 * In order tp DEBUG gstreamer 
+	 */
+	GST_DEBUG_BIN_TO_DOT_FILE( GST_BIN (pipeline) , GST_DEBUG_GRAPH_SHOW_ALL, "pipeline");
+
+	gst_element_set_state( pipeline, GST_STATE_PLAYING );
+	g_main_loop_run (main_loop);
+
+#if 0
 	/* init SubAgent Deamon */
 	if ( open_vivoe_daemon (argv[0]) )
 		return EXIT_FAILURE;
@@ -161,6 +177,7 @@ int main (int   argc,  char *argv[]){
 	  	 || deviceInfo.parameters[num_DeviceType]._value.int_val == device_both)
 		g_timeout_add(1000, receive_announcement, NULL);
 
+	/* iterate */
 	do {
 		/* Iterate */
 		if ( !internal_error){
@@ -175,5 +192,6 @@ int main (int   argc,  char *argv[]){
 	}while(was_running);
 
 	return EXIT_SUCCESS;
+#endif 
 }
 
