@@ -88,7 +88,7 @@
 /**
  * \brief the name of the Gstreamer element to use for scaling video on this device 
  */
-#define VIVOE_ROI_NAME 					"vivoe-roi"
+#define VIVOE_ROI_NAME 					"vivoecrop"
 
 /**
  * \brief name of vivoe-roi property

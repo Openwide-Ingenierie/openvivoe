@@ -329,7 +329,7 @@ static void init_mib_global_parameter(){
  * \param the cmdline to analyze
  * \return the vlaue of vivoe-element's property, "", if the element is ine cmdline but no property is set, NULL otherwise
  */
-static gchar *get_vivoe_element ( gchar *cmdline, gchar *vivoe_element_name, gchar *property ) {
+static gchar *get_vivoe_element_with_property ( gchar *cmdline, gchar *vivoe_element_name, gchar *property ) {
 
 	if ( cmdline == NULL )
 		return NULL;
@@ -370,13 +370,43 @@ static gchar *get_vivoe_element ( gchar *cmdline, gchar *vivoe_element_name, gch
 }
 
 /**
+ * \briefspecifies if the cmdline contains a VIVOE ROI element 
+ * \param the cmdline to analyze
+ * \return TRUE if the cmdline contains a ROI element 
+ */
+static gboolean get_vivoe_element ( gchar *cmdline, gchar *vivoe_element_name ) {
+
+	if ( cmdline == NULL )
+		return FALSE;
+
+	gchar **splitted;
+
+	/* parse entirely the command line with "!" and spaces "!"*/
+	splitted = g_strsplit_set( cmdline , " !", -1);
+
+	/* check if the gst element mention contains the  searched element */
+	if (g_strv_contains ((const gchar * const *) splitted, vivoe_element_name )){
+		/* free splitted */
+		g_strfreev(splitted);
+
+		return TRUE;
+	}
+
+	/* free splitted */
+	g_strfreev(splitted);
+
+	return FALSE;
+
+}
+
+/**
  * \brief specify if the cmdline is a redirection, if so returns the "name" parameter
  * \param the cmdline to analyze
  * \return the "name" argument or null if no name argument or if cmdline is not a redirection
  */
 static gchar *vivoe_redirect(gchar *cmdline){
 
-	gchar *return_value = get_vivoe_element ( cmdline, VIVOE_REDIRECT_NAME , VIVOE_REDIRECT_PROPERTY_NAME );
+	gchar *return_value = get_vivoe_element_with_property ( cmdline, VIVOE_REDIRECT_NAME, VIVOE_REDIRECT_PROPERTY_NAME );
 
 	/* 
 	 * For vivoe-redirect the element should have a propoerty, otherwise, it is an error, so if vivoe-redirect has been
@@ -395,9 +425,9 @@ static gchar *vivoe_redirect(gchar *cmdline){
  * \param the cmdline to analyze
  * \return the type of roi in a string ( scalable or non_scalable) if the channel is a ROI or NULL
  */
-static gchar *vivoe_roi(gchar *cmdline){
+static gboolean vivoe_roi(gchar *cmdline){
 
-	return get_vivoe_element ( cmdline, VIVOE_ROI_NAME , VIVOE_ROI_PROPERTY_NAME );
+	return get_vivoe_element ( cmdline, VIVOE_ROI_NAME );
 
 }
 
@@ -832,9 +862,6 @@ gboolean get_roi_parameters_for_sources (GKeyFile* gkf, int index, roi_data *roi
 	/* the gst_source cmdline */
 	gchar * cmdline;
 
-	/* the type of roi detected */
-	gchar *roi_type ;
-
 	/*
 	 * the roi parameters retreive from the configuration file
 	 */
@@ -850,9 +877,9 @@ gboolean get_roi_parameters_for_sources (GKeyFile* gkf, int index, roi_data *roi
 	 * second parameter "gchar* length" is optional*/
 	groups 		= g_key_file_get_groups(gkf, NULL);
 	cmdline 	= get_source_cmdline(gkf, index );
-	roi_type 	= vivoe_roi ( cmdline ) ;
+	scalable 	= vivoe_roi ( cmdline ) ;
 
-	if ( !roi_type  ){
+	if ( !scalable  ){
 
 		roi_width 			= 0;
 		roi_height 			= 0;
@@ -875,9 +902,6 @@ gboolean get_roi_parameters_for_sources (GKeyFile* gkf, int index, roi_data *roi
 		roi_left 			= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_ORIGIN_LEFT, 	error, TRUE );
 		roi_extent_bottom 	= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_EXTENT_BOTTOM, error, TRUE );
 		roi_extent_right 	= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_EXTENT_RIGHT, 	error, TRUE );
-
-		if ( ! strcmp ( roi_type ,  "scalable=true" ) )
-			scalable = TRUE;
 
 		/*
 		 * check if values given in configuration file are correct
@@ -927,7 +951,7 @@ gboolean get_roi_parameters_for_sources (GKeyFile* gkf, int index, roi_data *roi
 		roi_datas->roi_extent_bottom 	= roi_extent_bottom;
 		roi_datas->roi_extent_right 	= roi_extent_right;
 		roi_datas->scalable 			= scalable;
-
+#if 0
 		/*
 		 * Now we are going to parse the gst_source command line to save in the roi data:
 		 * _ the pipeline's part that stands before the element vivoe-roi
@@ -967,7 +991,7 @@ gboolean get_roi_parameters_for_sources (GKeyFile* gkf, int index, roi_data *roi
 
 		free( gst_before_roi_elt ) ;
 		free(source_name);
-
+#endif 
 		return TRUE;
 
 	}
@@ -1122,8 +1146,8 @@ int init_mib_content(){
 	init_redirection_data( gkf );
 
 	/* init gstreamer's command line to see if there will be roi */
-//	if ( ! init_roi_data( gkf ) )
-//		return EXIT_FAILURE;
+	if ( ! init_roi_data( gkf ) )
+		return EXIT_FAILURE;
 
 	close_mib_configuration_file( gkf );
 
