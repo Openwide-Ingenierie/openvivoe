@@ -28,7 +28,7 @@
 #include "../include/channelControl/channelTable.h"
 #include "../include/announcement/sap.h"
 #include "../include/multicast.h"
-#include "../include/streaming/vivoecrop/gstvideocrop.h"
+#include "../include/streaming/vivoecrop/gstvivoecrop.h"
 #include "../include/streaming/stream_registration.h"
 #include "../include/streaming/stream.h"
 #include "../include/daemon.h"
@@ -144,9 +144,9 @@ int main (int   argc,  char *argv[]){
 	/* Initialize GStreamer */
 	if ( !vivoe_gstreamer_initiation( argc,  argv) )
 		return EXIT_FAILURE;
-
+#if 0
 	GError *error = NULL;
-	GstElement *pipeline = gst_parse_launch ( "v4l2src ! capsfilter caps=\"video/x-raw,format=RGB,width=640,height=480\" ! videoconvert ! vivoecrop top=250 ! videoconvert ! xvimagesink" /*"v4l2src device=/dev/video0 ! capsfilter caps=\"video/x-raw,format=RGB,width=640,height=480,interlace-mode=(string)progressive,framerate=(fraction)20/1\" ! vivoecrop ! xvimagesink "*/, &error);	
+	GstElement *pipeline = gst_parse_launch ( "v4l2src ! capsfilter caps=\"video/x-raw,format=I420,width=640,height=480\" ! videoconvert ! vivoecrop top=250 ! videoconvert ! xvimagesink" /*"v4l2src device=/dev/video0 ! capsfilter caps=\"video/x-raw,format=RGB,width=640,height=480,interlace-mode=(string)progressive,framerate=(fraction)20/1\" ! vivoecrop ! xvimagesink "*/, &error);	
 
 
 	if ( error != NULL)
@@ -160,7 +160,8 @@ int main (int   argc,  char *argv[]){
 	gst_element_set_state( pipeline, GST_STATE_PLAYING );
 	g_main_loop_run (main_loop);
 
-#if 0
+#endif  //if 0
+
 	/* init SubAgent Deamon */
 	if ( open_vivoe_daemon (argv[0]) )
 		return EXIT_FAILURE;
@@ -192,6 +193,6 @@ int main (int   argc,  char *argv[]){
 	}while(was_running);
 
 	return EXIT_SUCCESS;
-#endif 
+
 }
 

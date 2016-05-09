@@ -60,7 +60,7 @@
 #include <gstreamer-1.0/gst/gst.h>
 #include <gstreamer-1.0/gst/video/video.h>
 
-#include "../../../include/streaming/vivoecrop/gstvideocrop.h"
+#include "../../../include/streaming/vivoecrop/gstvivoecrop.h"
 #include "../../../include/streaming/vivoecrop/gstaspectratiocrop.h"
 
 #include <string.h>
