@@ -9,7 +9,7 @@
 #include <glib-2.0/glib.h>
 
 #include <gstreamer-1.0/gst/gst.h>
-#include <gst/video/video.h>
+#include <gstreamer-1.0/gst/video/video.h>
 #include <gstreamer-1.0/gst/app/gstappsrc.h>
 #include <gstreamer-1.0/gst/app/gstappsink.h>
 
@@ -27,6 +27,7 @@
 #include "../../include/channelControl/channelTable.h"
 #include "../../include/mibParameters.h"
 #include "../../include/conf/mib-conf.h"
+#include "../../include/streaming/vivoecrop/gstvivoecrop.h"
 #include "../../include/streaming/name.h"
 #include "../../include/streaming/detect.h"
 #include "../../include/streaming/stream_registration.h"
@@ -351,6 +352,50 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline , GstElement *inpu
 }
 #endif 
 
+
+/**
+ * \brief retireve the vivoecrop element in a bin
+ * \param input the source element (should be the bin build from gst_source description)
+ */
+GstElement *get_vivoecrop_element( GstElement *input ){
+
+	GstIterator *iter = NULL;
+	gboolean done;
+
+	iter = gst_bin_iterate_elements (GST_BIN ( input ));
+
+	done = FALSE;
+	while (!done)
+	{
+
+		GValue item = G_VALUE_INIT;
+
+		switch (gst_iterator_next (iter, &item)) {
+			case GST_ITERATOR_OK:
+				if (GST_IS_VIVOE_CROP( g_value_get_object (&item)) ) 
+					return GST_ELEMENT(g_value_get_object (&item));
+				else
+					break;
+			case GST_ITERATOR_RESYNC:
+				// We don't rollback anything, we just ignore already processed ones
+				gst_iterator_resync (iter);
+				break;
+			case GST_ITERATOR_ERROR:
+				g_printerr("Error while iteratin through gst_source bin\n");
+				done = TRUE;
+				break;
+			case GST_ITERATOR_DONE:
+				done = TRUE;
+				break;
+		}
+	}
+
+	gst_iterator_free (iter);
+
+	return NULL;
+
+}
+
 /**
  * \brief handle the ROI on starting: add element if needed, parse the gst_source cmdline after vivoe-roi element and add the result to pipeline
  * \param pipeline the corresponding pipeline to adapt
@@ -359,10 +404,9 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline , GstElement *inpu
  * \param video_caps the caps of the input vidoe
  * \return input if no element added, other it returns the last element added in pipeline
  */
-void handle_roi( GstElement *pipeline, GstElement *input, struct videoFormatTable_entry *video_stream_info , GstStructure *video_caps ) {
+gboolean handle_roi( GstElement *pipeline, GstElement *input, struct videoFormatTable_entry *video_stream_info , GstStructure *video_caps ) {
 
-	GError 		*error 				= NULL; /* an Object to save errors when they occurs */
-	GstElement *last = NULL;
+	GstElement 	*vivoecrop = NULL;
 
 	/* 
 	 * Check if channel is a ROI
@@ -390,9 +434,19 @@ void handle_roi( GstElement *pipeline, GstElement *input, struct videoFormatTabl
 	/* 
 	 * Now adapt the pipeline in consequence of the detected ROI value
 	 */
-//	last = adapt_pipeline_to_roi ( pipeline , input , video_stream_info , roi_datas , video_caps );
-//	if ( !last )
-//		return NULL;
+	vivoecrop = get_vivoecrop_element( input );
+	if ( !vivoecrop )
+		return FALSE;
+
+	g_object_set ( 	G_OBJECT ( vivoecrop ) , 
+				"top" 		, 0, 
+				"left" 		, 0, 
+				"bottom" 	, 0,
+				"right" 	, 0,
+				NULL
+				);
+
+	return TRUE;
 
 }
 
@@ -431,8 +485,13 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , st
 	 */
 
 	/* we should found a crop element */
-	GstElement *videocrop_roi 	= gst_bin_get_by_name ( GST_BIN ( pipeline ) , VIDEOCROP_ROI_NAME ) ;
-	GstElement *capsfilter_roi 	= gst_bin_get_by_name ( GST_BIN ( pipeline ) , CAPSFILTER_ROI_NAME ) ;
+	GstElement *videocrop_roi 	= gst_bin_get_by_name ( GST_BIN ( pipeline ) , SOURCE_NAME ) ;
+	if ( !videocrop_roi ){
+		/* try again  with app_src name (maybe this is a redirection */
+		GstElement *videocrop_roi 	= gst_bin_get_by_name ( GST_BIN ( pipeline ) , APPSRC_NAME ) ;
+		if ( !videocrop_roi )
+			return FALSE;
+	}
 
 	/*
 	 * if videocrop is not NULL, then, this is a non-scalbale ROI
@@ -486,7 +545,7 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , st
 		return FALSE;
 
 	}
-	
+#if 0	
 	/*
 	 * if roi is scalable, the element capsfilter_roi should be in pipeline 
 	 */
@@ -522,7 +581,6 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , st
 	 * Now, for MPEG-4 video only, we must update the "config" parameters for the new SDP file 
 	 * that will be built 
 	 */
-#if 0
 	if ( ! strcmp( channel_entry->channelVideoFormat , MPEG4_NAME ) ){
 
 		/*

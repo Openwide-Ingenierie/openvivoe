@@ -76,6 +76,7 @@ struct _GstVivoeCropClass
 };
 
 GType gst_video_crop_get_type (void);
+
 gboolean vivoecrop_init (void) ;
 G_END_DECLS
 
