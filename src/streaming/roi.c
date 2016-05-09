@@ -115,6 +115,7 @@ static gboolean SP_roi_mp4_config_update (gpointer stream_datas,  struct videoFo
 
 }
 
+#if 0
 /**
  * \brief retrieve the scaling element used in gst_source pipeline
  * \param roi_datas the roi_data corresônding to this source
@@ -186,6 +187,7 @@ GstElement *get_scaling_element ( roi_data *roi_datas ){
 	}
 	
 	return scaling_elt;
+
 
 }
 
@@ -347,6 +349,7 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline , GstElement *inpu
 		return input;
 
 }
+#endif 
 
 /**
  * \brief handle the ROI on starting: add element if needed, parse the gst_source cmdline after vivoe-roi element and add the result to pipeline
@@ -356,7 +359,7 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline , GstElement *inpu
  * \param video_caps the caps of the input vidoe
  * \return input if no element added, other it returns the last element added in pipeline
  */
-GstElement *handle_roi( GstElement *pipeline, GstElement *input, struct videoFormatTable_entry *video_stream_info , GstStructure *video_caps ) {
+void handle_roi( GstElement *pipeline, GstElement *input, struct videoFormatTable_entry *video_stream_info , GstStructure *video_caps ) {
 
 	GError 		*error 				= NULL; /* an Object to save errors when they occurs */
 	GstElement *last = NULL;
@@ -371,52 +374,26 @@ GstElement *handle_roi( GstElement *pipeline, GstElement *input, struct videoFor
 	/* if this is not a roi, return input element */
 	if ( !roi_datas ){
 		video_stream_info->videoFormatType = videoChannel ;
-		return input;
-	}
+	}else{
 
-	/* 
-	 * if the  element vivoe-roi has been detected in pipeline, then the video is a ROI. So its type is set to ROI 
-	 */
-	video_stream_info->videoFormatType = roi ;
+		/* 
+		 * if the  element vivoe-roi has been detected in pipeline, then the video is a ROI. So its type is set to ROI 
+		 */
+		video_stream_info->videoFormatType = roi ;
+		/* 
+		 * Set the ROI parameter into the videoFormat Entry 
+		 * This will initialize the ROI parameters to 0 if they were not specified in the configuration file
+		 */
+		set_roi_values_videoFormat_entry( video_stream_info , roi_datas);
+	}
 
 	/* 
 	 * Now adapt the pipeline in consequence of the detected ROI value
 	 */
-	last = adapt_pipeline_to_roi ( pipeline , input , video_stream_info , roi_datas , video_caps );
-	if ( !last )
-		return NULL;
+//	last = adapt_pipeline_to_roi ( pipeline , input , video_stream_info , roi_datas , video_caps );
+//	if ( !last )
+//		return NULL;
 
-	/* 
-	 * Set the ROI parameter into the videoFormat Entry 
-	 * This will initialize the ROI parameters to 0 if they were not specified in the configuration file
-	 */
-	set_roi_values_videoFormat_entry( video_stream_info , roi_datas);
-
-	/* 
-	 * Now parse the rest of the gst_source pipeline
-	 */
-	if ( roi_datas->gst_after_roi_elt ){
-
-		/* build last part of source pipeline */
-		GstElement *bin  = gst_parse_bin_from_description ( roi_datas->gst_after_roi_elt,
-												TRUE,
-												&error);
-
-		gst_element_set_name ( bin ,  "bin_after_vivoe_roi" );
-
-		gst_bin_add ( GST_BIN(pipeline) , bin );
-
-		if ( !gst_element_link_log (last, bin)){
-			gst_bin_remove( GST_BIN (pipeline), bin);
-			return NULL;
-		}
-
-		last = bin ;
-
-	}
-
-	return last;
-		
 }
 
 /**

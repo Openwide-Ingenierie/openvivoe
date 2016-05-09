@@ -175,7 +175,7 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 	redirect_data *redirection_data = SP_is_redirection( videoFormatIndex );
 
 	/* check if it is a redirection */
-	roi_data *roi_datas = SP_is_roi( videoFormatIndex );
+//	roi_data *roi_datas = SP_is_roi( videoFormatIndex );
 
 	if( redirection_data ){
 
@@ -193,6 +193,7 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 		g_object_set (bin, "is-live", TRUE, NULL);
 
 	}
+#if 0
 	else if ( roi_datas ){
 		/* 
 		 * If the SP is a roi --> pipeline cannot be parsed as such, as it will contain vivoe-roi element 
@@ -216,6 +217,7 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 		gst_element_set_name ( bin ,  SOURCE_NAME );
 
 	}
+#endif //if 0
 	else{
 
 		gchar 		*cmdline 			= init_sources_from_conf( videoFormatIndex );

@@ -86,7 +86,8 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 	/* 
 	 * Handle the ROI 
 	 */
-	input = handle_roi ( pipeline ,  input , video_info ,  video_caps ) ;
+	handle_roi ( pipeline ,  input , video_info ,  video_caps ) ;
+
 	if ( !input)
 		return NULL; 
 
