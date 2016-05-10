@@ -26,7 +26,7 @@
 #include "../../include/videoFormatInfo/videoFormatTable.h"
 #include "../../include/channelControl/channelTable.h"
 #include "../../include/conf/mib-conf.h"
-#include "../../include/streaming/vivoecrop/gstvivoecrop.h"
+#include "../../include/streaming/plugin/vivoecrop/gstvivoecrop.h"
 #include "../../include/streaming/name.h"
 #include "../../include/streaming/detect.h"
 #include "../../include/streaming/stream_registration.h"

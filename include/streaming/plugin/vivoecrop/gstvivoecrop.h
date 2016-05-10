@@ -21,7 +21,7 @@
 #define __GST_VIVOE_CROP_H__
 
 #include <gst/video/gstvideofilter.h>
-#include "../../../include/mibParameters.h"
+#include "../../../../include/mibParameters.h"
 
 G_BEGIN_DECLS
 

@@ -64,11 +64,12 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
-#include "../../../include/streaming/vivoecrop/gstvivoecrop.h"
-#include "../../../include/streaming/vivoecrop/gstaspectratiocrop.h"
+#include "../../../../include/streaming/plugin/plugin.h"
+#include "../../../../include/streaming/plugin/vivoecrop/gstvivoecrop.h"
+#include "../../../../include/streaming/plugin/vivoecrop/gstaspectratiocrop.h"
 
-#include "../../../include/mibParameters.h"
-#include "../../../include/videoFormatInfo/videoFormatTable.h"
+#include "../../../../include/mibParameters.h"
+#include "../../../../include/videoFormatInfo/videoFormatTable.h"
 
 #include <string.h>
 
@@ -886,8 +887,6 @@ gst_vivoe_crop_get_roi_values_from_MIB( GstVivoeCrop * vcrop , 	gint *top , gint
 	if ( *right < 0 || *right >= ( videoFormat_entry->videoFormatMaxHorzRes - videoFormat_entry->videoFormatRoiOriginLeft)  )
 		*right = 0 ;
 	
-	printf("%d %d %d %d \n", *top, *left, *bottom, *right);
-
 } 
 
 void
@@ -941,27 +940,6 @@ plugin_init (GstPlugin * plugin)
 	return FALSE;
 }
 
-
-/* FIXME: these are normally defined by the GStreamer build system.
-   If you are creating an element to be included in gst-plugins-*,
-   remove these, as they're always defined.  Otherwise, edit as
-   appropriate for your external plugin package. */
-#ifndef VERSION
-#define VERSION 			"1.0"
-#endif
-#ifndef PACKAGE
-#define PACKAGE 			"vivoecrop"
-#endif
-#ifndef PACKAGE_NAME
-#define PACKAGE_NAME 		"vivoecrop"
-#endif
-#ifndef SOURCE
-#define SOURCE 				"gstvideocrop.c"
-#endif
-#ifndef GST_PACKAGE_ORIGIN
-#define GST_PACKAGE_ORIGIN "localhost:openvivoe"
-#endif
-
 	gboolean
 vivoecrop_init (void)
 {
@@ -979,9 +957,3 @@ vivoecrop_init (void)
 			);
 
 }
-
-GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
-		GST_VERSION_MINOR,
-		vivoecrop,
-		"Crops video into a MIB defined region",
-		plugin_init, VERSION, "LGPL", PACKAGE_NAME, GST_PACKAGE_ORIGIN)
