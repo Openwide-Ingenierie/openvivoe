@@ -80,7 +80,8 @@ GType gst_video_crop_get_type (void);
 
 void
 gst_vivoe_crop_set_videoformatindex (GObject * object,  const gint value);
-
+void
+gst_vivoe_crop_get_videoformatindex (GObject * object, int *value);
 gboolean vivoecrop_init (void) ;
 G_END_DECLS
 

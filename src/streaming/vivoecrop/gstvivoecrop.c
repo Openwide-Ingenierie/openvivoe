@@ -818,6 +818,26 @@ gst_vivoe_crop_set_videoformatindex (GObject * object, const int value){
 
 }
 
+/**
+ * \brief get the property videoformatindex from the code but not from cmdline
+ * \param object the plugin that will be modified
+ * \param value the new value of videoFormatIndex
+ */
+void
+gst_vivoe_crop_get_videoformatindex (GObject * object, int *value){
+	GstVivoeCrop *vivoe_crop;
+
+	vivoe_crop = GST_VIVOE_CROP (object);
+
+	/* lock the plug-in */
+	GST_OBJECT_LOCK (vivoe_crop);
+
+	 *value = vivoe_crop->videoformatindex ;
+
+	GST_OBJECT_UNLOCK (vivoe_crop);	
+
+}
+
 
 static gboolean
 plugin_init (GstPlugin * plugin)
