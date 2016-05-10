@@ -7,7 +7,6 @@
 #ifndef ROI_H
 # define ROI_H
 
-roi_data 	*SP_is_roi(long videoFormatIndex) ;
 gboolean 	handle_roi( GstElement *pipeline, GstElement *input, struct videoFormatTable_entry *video_stream_info , GstStructure *video_caps );
 gboolean 	update_pipeline_SP_non_scalable_roi_changes( GstElement *pipeline, struct channelTable_entry *channel_entry) ;
 

@@ -25,7 +25,6 @@
 #include "../../include/log.h"
 #include "../../include/videoFormatInfo/videoFormatTable.h"
 #include "../../include/channelControl/channelTable.h"
-#include "../../include/mibParameters.h"
 #include "../../include/conf/mib-conf.h"
 #include "../../include/streaming/vivoecrop/gstvivoecrop.h"
 #include "../../include/streaming/name.h"
@@ -56,22 +55,7 @@ static void set_roi_values_videoFormat_entry( struct videoFormatTable_entry *vid
 }
 
 
-/**
- * \brief specify if a SP is a roi (check if it is in the roi_table array)
- * \param videoFormatIndex the index of the videoFormat to check 
- * \return the corresponding roi_data if found or NULL 
- */
-roi_data *SP_is_roi(long videoFormatIndex){
 
-	int i = 0;
-	for ( i = 0;  i< roi_table.size; i ++ ){	
-		if ( roi_table.roi_datas[i]->video_SP_index == videoFormatIndex ) /* if found, then returns */
-			return roi_table.roi_datas[i];
-	}
-
-	return NULL; /* if not found, returns NULL */
-
-}
 
 /**
  * \brief update the "config" propoerty stored in rtp_data of the given stream_data using a typefind
@@ -464,17 +448,6 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , st
 	if ( !data || !pipeline )
 		return FALSE;
 
-	/*
-	 * Get the corresponding videoFormat_Entry
-	 */
-
-	struct videoFormatTable_entry * videoFormat_entry = videoFormatTable_getEntry ( channel_entry->channelVideoFormatIndex ) ;
-
-	/* 
-	 * Get the ROi data of the videoFormat Entry
-	 */
-	roi_data *roi_datas =	SP_is_roi( videoFormat_entry->videoFormatIndex ) ;
-
 	/* 
 	 * The values in the table should already been updated. Here we just handle the pipeline here.
 	 * We should not chceck the values entered by the user. As an example, this is not where we should 
@@ -482,67 +455,22 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , st
 	 */
 
 	/* we should found a crop element */
-	GstElement *videocrop_roi 	= gst_bin_get_by_name ( GST_BIN ( pipeline ) , SOURCE_NAME ) ;
-	if ( !videocrop_roi ){
+	GstElement *source 	= gst_bin_get_by_name ( GST_BIN ( pipeline ) , SOURCE_NAME ) ;
+	if ( !source){
 		/* try again  with app_src name (maybe this is a redirection */
-		GstElement *videocrop_roi 	= gst_bin_get_by_name ( GST_BIN ( pipeline ) , APPSRC_NAME ) ;
-		if ( !videocrop_roi )
+		source 	= gst_bin_get_by_name ( GST_BIN ( pipeline ) , APPSRC_NAME ) ;
+		if ( !source )
 			return FALSE;
 	}
 
 	/*
 	 * if videocrop is not NULL, then, this is a non-scalbale ROI
 	 */
-	if ( videocrop_roi ){
-		int top = 0 ;
-		int left = 0 ;
-		int bottom = 0 ;
-		int right = 0 ;
-
-		/* 
-		 * If values are negative (which could happen if a bad value is set to ROI resolution, and top, then set parameters to zero
-		 */
-		top 	=  videoFormat_entry->videoFormatRoiOriginTop ;
-		if ( top < 0 )
-			top = 0 ;
-
-		left 	=  videoFormat_entry->videoFormatRoiOriginLeft ;
-		if ( left < 0 )
-			left = 0 ;
-
-		if ( roi_datas->scalable ){
-			if ( videoFormat_entry->videoFormatRoiExtentBottom != 0 )
-				bottom 	= videoFormat_entry->videoFormatMaxVertRes - ( videoFormat_entry->videoFormatRoiOriginTop 	+ videoFormat_entry->videoFormatRoiExtentBottom  ) ;
-			if (videoFormat_entry->videoFormatRoiExtentRight != 0 )
-				right 	= videoFormat_entry->videoFormatMaxHorzRes - ( videoFormat_entry->videoFormatRoiOriginLeft	+ videoFormat_entry->videoFormatRoiExtentRight  ) ;
-		}else{ 
-			bottom 	= videoFormat_entry->videoFormatMaxVertRes - ( videoFormat_entry->videoFormatRoiOriginTop 	+ videoFormat_entry->videoFormatRoiVertRes  ) ;
-			right 	= videoFormat_entry->videoFormatMaxHorzRes - ( videoFormat_entry->videoFormatRoiOriginLeft	+ videoFormat_entry->videoFormatRoiHorzRes  ) ;			
-		}
-
-		if ( bottom < 0 )
-			bottom = 0 ;
-
-		if ( right < 0 )
-			right = 0 ;
-
-		g_object_set ( 	G_OBJECT ( videocrop_roi ) , 
-				"top" 		, top , 
-				"left" 		, left, 
-				"bottom" 	, bottom,
-				"right" 	, right,
-				NULL
-				);
-
+	if ( source ){
+		GstElement *vivoecrop = get_vivoecrop_element( source );
+		gst_vivoe_crop_update (G_OBJECT ( vivoecrop ));
 	}
-	else
-	{
-
-		g_printerr("ERROR: No ROI element has been found for this videoFormat\n");
-		return FALSE;
-
-	}
-#if 0	
+#if 0
 	/*
 	 * if roi is scalable, the element capsfilter_roi should be in pipeline 
 	 */

@@ -60,8 +60,15 @@
 #include <gstreamer-1.0/gst/gst.h>
 #include <gstreamer-1.0/gst/video/video.h>
 
+#include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+
 #include "../../../include/streaming/vivoecrop/gstvivoecrop.h"
 #include "../../../include/streaming/vivoecrop/gstaspectratiocrop.h"
+
+#include "../../../include/mibParameters.h"
+#include "../../../include/videoFormatInfo/videoFormatTable.h"
 
 #include <string.h>
 
@@ -838,6 +845,95 @@ gst_vivoe_crop_get_videoformatindex (GObject * object, int *value){
 
 }
 
+/**
+ * \brief specify if a SP is a roi (check if it is in the roi_table array)
+ * \param videoFormatIndex the index of the videoFormat to check 
+ * \return the corresponding roi_data if found or NULL 
+ */
+roi_data *SP_is_roi(long videoFormatIndex){
+
+	int i = 0;
+	for ( i = 0;  i< roi_table.size; i ++ ){	
+		if ( roi_table.roi_datas[i]->video_SP_index == videoFormatIndex ) /* if found, then returns */
+			return roi_table.roi_datas[i];
+	}
+
+	return NULL; /* if not found, returns NULL */
+
+}
+
+static void 
+gst_vivoe_crop_get_roi_values_from_MIB( GstVivoeCrop * vcrop , 	gint *top , gint *left , gint *bottom , gint *right ){
+
+	/* get the roi_data associated to the plugin vivoecrop */
+	roi_data *roi_datas =	SP_is_roi( vcrop->videoformatindex ) ;
+
+	/* get the videoFormat_entry corresponding to our index */
+	struct videoFormatTable_entry *videoFormat_entry = videoFormatTable_getEntry( vcrop->videoformatindex ) ;
+
+	/* 
+	 * If values are negative (which could happen if a bad value is set to ROI resolution, and top, then set parameters to zero
+	 */
+	*top 	=  videoFormat_entry->videoFormatRoiOriginTop ;
+	if ( top < 0 )
+		top = 0 ;
+
+	*left 	=  videoFormat_entry->videoFormatRoiOriginLeft ;
+	if ( *left < 0 )
+		*left = 0 ;
+
+//	if ( roi_datas->scalable ){
+	//	if ( videoFormat_entry->videoFormatRoiExtentBottom != 0 )
+			*bottom 	= videoFormat_entry->videoFormatMaxVertRes - ( videoFormat_entry->videoFormatRoiOriginTop 	+ videoFormat_entry->videoFormatRoiExtentBottom  ) ;
+	//	if (videoFormat_entry->videoFormatRoiExtentRight != 0 )
+			*right 	= videoFormat_entry->videoFormatMaxHorzRes - ( videoFormat_entry->videoFormatRoiOriginLeft	+ videoFormat_entry->videoFormatRoiExtentRight  ) ;
+//	}else{ 
+		*bottom 	= videoFormat_entry->videoFormatMaxVertRes - ( videoFormat_entry->videoFormatRoiOriginTop 	+ videoFormat_entry->videoFormatRoiVertRes  ) ;
+		*right 		= videoFormat_entry->videoFormatMaxHorzRes - ( videoFormat_entry->videoFormatRoiOriginLeft	+ videoFormat_entry->videoFormatRoiHorzRes  ) ;			
+//	}
+
+	if ( *bottom < 0 || *bottom >= videoFormat_entry->videoFormatMaxVertRes )
+		*bottom = 0 ;
+
+	if ( *right < 0 || *right >= videoFormat_entry->videoFormatMaxHorzRes )
+		*right = 0 ;
+
+} 
+
+void
+gst_vivoe_crop_update (GObject * object)
+{
+	GstVivoeCrop *vivoe_crop;
+
+	vivoe_crop = GST_VIVOE_CROP (object);
+
+	GST_OBJECT_LOCK (vivoe_crop);
+
+	gint top;
+	gint left;
+	gint bottom;
+	gint right;
+	printf("111111111111111111111\n");
+	gst_vivoe_crop_get_roi_values_from_MIB( vivoe_crop , &top , &left , &bottom , &right ); 
+
+	printf("222222222222222222222\n");
+	gst_vivoe_crop_set_crop (vivoe_crop, top ,
+			&vivoe_crop->prop_top);
+	gst_vivoe_crop_set_crop (vivoe_crop, left ,
+			&vivoe_crop->prop_left);
+	gst_vivoe_crop_set_crop (vivoe_crop, bottom ,
+			&vivoe_crop->prop_bottom);
+	gst_vivoe_crop_set_crop (vivoe_crop, right ,
+			&vivoe_crop->prop_right);
+
+	GST_LOG_OBJECT (vivoe_crop, "l=%d,r=%d,b=%d,t=%d, need_update:%d",
+			vivoe_crop->prop_left, vivoe_crop->prop_right, vivoe_crop->prop_bottom,
+			vivoe_crop->prop_top, vivoe_crop->need_update);
+
+	GST_OBJECT_UNLOCK (vivoe_crop);
+
+	gst_base_transform_reconfigure_src (GST_BASE_TRANSFORM (vivoe_crop));
+}
 
 static gboolean
 plugin_init (GstPlugin * plugin)
