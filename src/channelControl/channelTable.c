@@ -338,6 +338,7 @@ void update_channelTable_entry_roi_from_caps ( struct channelTable_entry *channe
  * \return TRUE if we succeed to update the parameters
  */
 gboolean channelTable_updateEntry(struct channelTable_entry * entry, int videoFormatNumberIndex){
+
        /* get the correspondante entry in the table of VideoFormat */
        struct videoFormatTable_entry *videoFormatentry         = videoFormatTable_getEntry( videoFormatNumberIndex );
        if ( videoFormatentry == NULL)

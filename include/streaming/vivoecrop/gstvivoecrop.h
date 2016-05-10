@@ -83,7 +83,6 @@ void
 gst_vivoe_crop_set_videoformatindex (GObject * object,  const gint value);
 void
 gst_vivoe_crop_get_videoformatindex (GObject * object, int *value);
-roi_data 	*SP_is_roi(long videoFormatIndex) ;
 void gst_vivoe_crop_update (GObject * object);
 
 gboolean vivoecrop_init (void) ;

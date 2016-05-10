@@ -420,6 +420,7 @@ static gchar *vivoe_redirect(gchar *cmdline){
 
 }
 
+#if 0
 /**
 * \brief specify if the cmdline contains the element vivoe-roi to specify that the channel is a ROI
  * \param the cmdline to analyze
@@ -430,6 +431,7 @@ static gboolean vivoe_roi(gchar *cmdline){
 	return get_vivoe_element ( cmdline, VIVOE_ROI_NAME );
 
 }
+#endif 
 
 /**
  * \brief check if the group contains the given key, get the corresponding char value or display appropriate error to the user
@@ -842,6 +844,7 @@ void set_default_IP_from_conf(int index, const char* new_default_ip){
 	close_mib_configuration_file(gkf);
 
 }
+#if 0
 
 /** 
  * \brief register into the structure roi_data the MIB ROI parameters' values extract from the configuration file
@@ -951,7 +954,6 @@ gboolean get_roi_parameters_for_sources (GKeyFile* gkf, int index, roi_data *roi
 		roi_datas->roi_extent_bottom 	= roi_extent_bottom;
 		roi_datas->roi_extent_right 	= roi_extent_right;
 		roi_datas->scalable 			= scalable;
-#if 0
 		/*
 		 * Now we are going to parse the gst_source command line to save in the roi data:
 		 * _ the pipeline's part that stands before the element vivoe-roi
@@ -991,7 +993,6 @@ gboolean get_roi_parameters_for_sources (GKeyFile* gkf, int index, roi_data *roi
 
 		free( gst_before_roi_elt ) ;
 		free(source_name);
-#endif 
 		return TRUE;
 
 	}
@@ -1036,6 +1037,7 @@ static gboolean init_roi_data(GKeyFile* gkf ){
 
 }
 
+#endif
 
 /**
  * \brief definition of the redirection structure that will contains the redirection data
@@ -1146,9 +1148,10 @@ int init_mib_content(){
 	init_redirection_data( gkf );
 
 	/* init gstreamer's command line to see if there will be roi */
+#if 0
 	if ( ! init_roi_data( gkf ) )
 		return EXIT_FAILURE;
-
+#endif 
 	close_mib_configuration_file( gkf );
 
 	return EXIT_SUCCESS;

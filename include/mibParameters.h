@@ -184,32 +184,6 @@ typedef struct {
 
 extern redirection_str redirection;
 
-/**
- * \brief a structure to save the data related to ROI
- */
-typedef struct{
-	long 		roi_width;
-	long 		roi_height;
-	long 		roi_top;
-	long 		roi_left;
-	long 		roi_extent_bottom;
-	long 		roi_extent_right;
-	gboolean 	scalable;
-	int 		video_SP_index;
-}roi_data;
-
-
-/**
- * \brief a NULL terminated array that contains all the redirection_data of the current program
- */
-typedef struct {
-	int 			size;
-	roi_data 	*(*roi_datas);
-}roi_str;
-
-extern roi_str roi_table ;
-
-
 /** 
  * \brief The main loop of the program, because to be able to acces it everywhere in the program
  */

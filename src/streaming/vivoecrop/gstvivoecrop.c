@@ -845,28 +845,9 @@ gst_vivoe_crop_get_videoformatindex (GObject * object, int *value){
 
 }
 
-/**
- * \brief specify if a SP is a roi (check if it is in the roi_table array)
- * \param videoFormatIndex the index of the videoFormat to check 
- * \return the corresponding roi_data if found or NULL 
- */
-roi_data *SP_is_roi(long videoFormatIndex){
-
-	int i = 0;
-	for ( i = 0;  i< roi_table.size; i ++ ){	
-		if ( roi_table.roi_datas[i]->video_SP_index == videoFormatIndex ) /* if found, then returns */
-			return roi_table.roi_datas[i];
-	}
-
-	return NULL; /* if not found, returns NULL */
-
-}
-
 static void 
 gst_vivoe_crop_get_roi_values_from_MIB( GstVivoeCrop * vcrop , 	gint *top , gint *left , gint *bottom , gint *right ){
 
-	/* get the roi_data associated to the plugin vivoecrop */
-	roi_data *roi_datas =	SP_is_roi( vcrop->videoformatindex ) ;
 
 	/* get the videoFormat_entry corresponding to our index */
 	struct videoFormatTable_entry *videoFormat_entry = videoFormatTable_getEntry( vcrop->videoformatindex ) ;
@@ -882,15 +863,15 @@ gst_vivoe_crop_get_roi_values_from_MIB( GstVivoeCrop * vcrop , 	gint *top , gint
 	if ( *left < 0 )
 		*left = 0 ;
 
-//	if ( roi_datas->scalable ){
-	//	if ( videoFormat_entry->videoFormatRoiExtentBottom != 0 )
+	if ( videoFormat_entry->roi_scalable ){
+		if ( videoFormat_entry->videoFormatRoiExtentBottom != 0 )
 			*bottom 	= videoFormat_entry->videoFormatMaxVertRes - ( videoFormat_entry->videoFormatRoiOriginTop 	+ videoFormat_entry->videoFormatRoiExtentBottom  ) ;
-	//	if (videoFormat_entry->videoFormatRoiExtentRight != 0 )
+		if (videoFormat_entry->videoFormatRoiExtentRight != 0 )
 			*right 	= videoFormat_entry->videoFormatMaxHorzRes - ( videoFormat_entry->videoFormatRoiOriginLeft	+ videoFormat_entry->videoFormatRoiExtentRight  ) ;
-//	}else{ 
+	}else{ 
 		*bottom 	= videoFormat_entry->videoFormatMaxVertRes - ( videoFormat_entry->videoFormatRoiOriginTop 	+ videoFormat_entry->videoFormatRoiVertRes  ) ;
 		*right 		= videoFormat_entry->videoFormatMaxHorzRes - ( videoFormat_entry->videoFormatRoiOriginLeft	+ videoFormat_entry->videoFormatRoiHorzRes  ) ;			
-//	}
+	}
 
 	if ( *bottom < 0 || *bottom >= videoFormat_entry->videoFormatMaxVertRes )
 		*bottom = 0 ;
@@ -913,10 +894,12 @@ gst_vivoe_crop_update (GObject * object)
 	gint left;
 	gint bottom;
 	gint right;
-	printf("111111111111111111111\n");
+
+	/*
+	 * Compute the correct values top, left, bottom and right from values from the MIB
+	 */
 	gst_vivoe_crop_get_roi_values_from_MIB( vivoe_crop , &top , &left , &bottom , &right ); 
 
-	printf("222222222222222222222\n");
 	gst_vivoe_crop_set_crop (vivoe_crop, top ,
 			&vivoe_crop->prop_top);
 	gst_vivoe_crop_set_crop (vivoe_crop, left ,

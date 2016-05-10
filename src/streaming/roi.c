@@ -32,6 +32,7 @@
 #include "../../include/streaming/stream_registration.h"
 #include "../../include/streaming/stream.h"
 
+#if 0
 static void set_roi_values_videoFormat_entry( struct videoFormatTable_entry *video_stream_info ,  roi_data *roi_datas) {
 	
 	/* set resolution */
@@ -53,9 +54,7 @@ static void set_roi_values_videoFormat_entry( struct videoFormatTable_entry *vid
 	video_stream_info->videoFormatType 				= roi ;
 
 }
-
-
-
+#endif
 
 /**
  * \brief update the "config" propoerty stored in rtp_data of the given stream_data using a typefind
@@ -393,34 +392,35 @@ gboolean handle_roi( GstElement *pipeline, GstElement *input, struct videoFormat
 	GstElement 	*vivoecrop = NULL;
 
 	/* 
-	 * Check if channel is a ROI
-	 * when the structure video_stream_info has been create in file pipeline.c and function create_pipeline_videochannel 
-	 * we have save the videoFormatIndex under the parameter videoFormatIndex
+	 * iterates though the bin source to find the element vivoecrop
 	 */
-	roi_data *roi_datas =	SP_is_roi( video_stream_info->videoFormatIndex ) ;
-
-	/* if this is not a roi, return input element */
-	if ( !roi_datas ){
+	vivoecrop = get_vivoecrop_element( input );
+	if ( !vivoecrop ){
+		/*
+		 * then this is not a ROI channel , set the type to videoChannel and exit function */
 		video_stream_info->videoFormatType = videoChannel ;
-	}else{
-
-		/* 
-		 * if the  element vivoe-roi has been detected in pipeline, then the video is a ROI. So its type is set to ROI 
-		 */
-		video_stream_info->videoFormatType = roi ;
-		/* 
-		 * Set the ROI parameter into the videoFormat Entry 
-		 * This will initialize the ROI parameters to 0 if they were not specified in the configuration file
-		 */
-		set_roi_values_videoFormat_entry( video_stream_info , roi_datas);
+		return FALSE;
 	}
 
 	/* 
-	 * Now adapt the pipeline in consequence of the detected ROI value
+	 * If we get here, it means that the element vivoecrop has been found in the pipeline, so this videoFormat is a roi
 	 */
-	vivoecrop = get_vivoecrop_element( input );
-	if ( !vivoecrop )
-		return FALSE;
+	video_stream_info->videoFormatType = roi;
+	
+	/* start by setting boolean roi_scalable to FALSE */
+	video_stream_info->roi_scalable = TRUE;
+	
+	/* 
+	 * Check if roi is scalable
+	 */
+	/* FIXME */
+
+
+	/* 
+	 * Set the ROI parameter into the videoFormat Entry 
+	 * This will initialize the ROI parameters to 0 if they were not specified in the configuration file
+	 */
+//	set_roi_values_videoFormat_entry( video_stream_info , roi_datas);
 
 	/*
 	 * set the index on vivoecrop element

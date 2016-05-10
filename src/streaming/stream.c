@@ -23,7 +23,6 @@
 #include "../../include/channelControl/channelTable.h"
 #include "../../include/deviceError.h"
 #include "../../include/streaming/name.h"
-#include "../../include/streaming/roi.h"
 #include "../../include/streaming/pipeline.h"
 #include "../../include/streaming/detect.h"
 #include "../../include/streaming/stream_registration.h"
@@ -148,7 +147,7 @@ static void init_redirection( gpointer stream_datas, long videoFormatIndex ){
 									0, 					0,
 									0,					0,
 									0, 					0,
-									data);
+									data, 				-1	); /* using -1 for roi_scalable boolean for a empty entry, as it should be meaningless */
 	
 	char *channelUserDesc = get_desc_from_conf(videoFormatIndex);
 
@@ -190,31 +189,6 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 		g_object_set (bin, "is-live", TRUE, NULL);
 
 	}
-#if 0
-	else if ( roi_datas ){
-		/* 
-		 * If the SP is a roi --> pipeline cannot be parsed as such, as it will contain vivoe-roi element 
-		 * So parse to make a bin from beginning of pipeline to vivoe-roi element
-		 */
-
-		/*
-		 * first retrieve from cmdline, the pipeline before "vivoe-roi" 
-		 */
-		/* build first par of source pipeline */
-
-		bin  = gst_parse_bin_from_description ( roi_datas->gst_before_roi_elt,
-												TRUE,
-												&error);
-
-		if ( error != NULL){
-			g_printerr("Failed to parse: %s\n",error->message);
-	   		return NULL;	
-		}
-
-		gst_element_set_name ( bin ,  SOURCE_NAME );
-
-	}
-#endif //if 0
 	else{
 
 		gchar 		*cmdline 			= init_sources_from_conf( videoFormatIndex );
