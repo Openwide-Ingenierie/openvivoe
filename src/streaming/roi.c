@@ -26,6 +26,7 @@
 #include "../../include/videoFormatInfo/videoFormatTable.h"
 #include "../../include/channelControl/channelTable.h"
 #include "../../include/conf/mib-conf.h"
+#include "../../include/streaming/plugin/vivoecaps/vivoecaps.h"
 #include "../../include/streaming/plugin/vivoecrop/gstvivoecrop.h"
 #include "../../include/streaming/name.h"
 #include "../../include/streaming/detect.h"
@@ -337,10 +338,11 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline , GstElement *inpu
 
 
 /**
- * \brief retireve the vivoecrop element in a bin
+ * \brief retrieve the element of type type in a bin
  * \param pipeline the pipeline in which we are looking for vivoecrop element
+ * \param type the element's type we are looking for ( should normally be GST_TYPE_VIVOE_CROP or GST_TYPE_VIVOE_CAPS )
  */
-GstElement *get_vivoecrop_element( GstElement *pipeline ){
+GstElement *get_element_from_bin( GstElement *pipeline  , GType type){
 
 	GstIterator *iter = NULL;
 	gboolean done;
@@ -355,7 +357,7 @@ GstElement *get_vivoecrop_element( GstElement *pipeline ){
 
 		switch (gst_iterator_next (iter, &item)) {
 			case GST_ITERATOR_OK:
-				if (GST_IS_VIVOE_CROP( g_value_get_object (&item)) ) 
+				if (G_TYPE_CHECK_INSTANCE_TYPE(g_value_get_object (&item), type))
 					return GST_ELEMENT(g_value_get_object (&item));
 				else
 					break;
@@ -390,11 +392,12 @@ GstElement *get_vivoecrop_element( GstElement *pipeline ){
 gboolean handle_roi( GstElement *pipeline, struct videoFormatTable_entry *video_stream_info , GstStructure *video_caps ) {
 
 	GstElement 	*vivoecrop = NULL;
+	GstElement 	*vivoecaps = NULL;
 
 	/* 
 	 * iterates though the bin source to find the element vivoecrop
 	 */
-	vivoecrop = get_vivoecrop_element( pipeline );
+	vivoecrop = get_element_from_bin( pipeline, GST_TYPE_VIVOE_CROP );	
 	if ( !vivoecrop ){
 		/*
 		 * then this is not a ROI channel , set the type to videoChannel and exit function */
@@ -407,14 +410,26 @@ gboolean handle_roi( GstElement *pipeline, struct videoFormatTable_entry *video_
 	 */
 	video_stream_info->videoFormatType = roi;
 	
-	/* start by setting boolean roi_scalable to FALSE */
-	video_stream_info->roi_scalable = TRUE;
-	
 	/* 
 	 * Check if roi is scalable
 	 */
-	/* FIXME */
+	/* 
+	 * iterates though the bin source to find the element vivoecaps
+	 */
+	vivoecaps = get_element_from_bin( pipeline, GST_TYPE_VIVOE_CAPS );	
+		/*
+		 * then the ROI is scalable
+		 */
+	if ( vivoecaps ){
 
+		/* set the caps to the vivoecaps element */
+		GstCaps *caps_filter = gst_caps_new_full ( gst_structure_copy ( video_caps ) , NULL );
+		g_object_set ( 	G_OBJECT ( vivoecaps ) , 
+				"caps" 	, caps_filter,
+				NULL
+				);
+
+	}
 
 	/* 
 	 * Set the ROI parameter into the videoFormat Entry 
@@ -441,6 +456,7 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , st
 
 	stream_data *data 		= stream_datas;
 	GstElement 	*pipeline 	= data->pipeline;
+	gboolean 	scalable 	= FALSE;
 
 	/*
 	 * return if the stream data or pipeline have not been initialize 
@@ -453,8 +469,31 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , st
 	 * We should not chceck the values entered by the user. As an example, this is not where we should 
 	 * check that the ROI want from non-scalable to scalable. 
 	 */
-	GstElement *vivoecrop = get_vivoecrop_element( pipeline );
-	gst_vivoe_crop_update (G_OBJECT ( vivoecrop ));
+	GstElement *vivoecrop = get_element_from_bin( pipeline, GST_TYPE_VIVOE_CROP );
+	GstElement *vivoecaps = get_element_from_bin( pipeline, GST_TYPE_VIVOE_CAPS );
+
+	if ( vivoecaps )
+		scalable = TRUE ;
+
+	gst_vivoe_crop_update (G_OBJECT ( vivoecrop ), scalable);
+
+//	if ( scalable )
+///		GstCaps *new_caps;
+//		g_object_get ( G_OBJECT( vivoecaps  ) , "caps" , &new_caps , NULL ) ;
+///
+///		new_caps = gst_caps_make_writable ( new_caps );
+///		gst_caps_set_simple (  new_caps , 
+//				"height" , G_TYPE_INT	,  videoFormat_entry->videoFormatRoiVertRes 	,
+//				"width" , G_TYPE_INT	,  videoFormat_entry->videoFormatRoiHorzRes 	,
+//				NULL);
+//
+//		/* set the caps to the capsfilter */
+//		g_object_set ( 	G_OBJECT ( capsfilter_roi ) , 
+//				"caps" 	, new_caps ,
+//				NULL
+//				);
+//	}
+
 
 #if 0
 	/*

@@ -48,7 +48,7 @@ struct videoFormatTable_entry * videoFormatTable_createEntry( 	long  videoFormat
 																long videoFormatRoiVertRes, 		long videoFormatRoiOriginTop,	
 																long videoFormatRoiOriginLeft,		long videoFormatRoiExtentBottom,
 																long videoFormatRoiExtentRight, 	long videoFormatRtpPt, 
-																gpointer stream_datas, 				gboolean roi_scalable) {
+																gpointer stream_datas) {
 
     struct videoFormatTable_entry *entry;
     entry = SNMP_MALLOC_TYPEDEF(struct videoFormatTable_entry);
@@ -82,9 +82,6 @@ struct videoFormatTable_entry * videoFormatTable_createEntry( 	long  videoFormat
 	/* add streaming information to a videoFormat */
 	entry->stream_datas                 = stream_datas;
 	
-	/* set the roi_scalable boolean */
-	entry->roi_scalable 				= roi_scalable ;
-
 	/* Link it into the list of entries */ 
     entry->next = videoFormatTable_head;
     videoFormatTable_head = entry;

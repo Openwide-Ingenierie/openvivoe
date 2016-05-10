@@ -211,7 +211,7 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 				video_info->videoFormatRoiVertRes, 											video_info->videoFormatRoiOriginTop,
 				video_info->videoFormatRoiOriginLeft,										video_info->videoFormatRoiExtentBottom,
 				video_info->videoFormatRoiExtentRight, 										data->rtp_datas->rtp_type,
-				data, 																		video_info->roi_scalable);
+				data);
 
 		char *channelUserDesc = get_desc_from_conf(video_info->videoFormatIndex);
 		if (channelUserDesc == NULL)
@@ -283,7 +283,7 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 											video_info->videoFormatRoiVertRes, 												video_info->videoFormatRoiOriginTop,
 											video_info->videoFormatRoiOriginLeft,											video_info->videoFormatRoiExtentBottom,
 											video_info->videoFormatRoiExtentRight, 											data->rtp_datas->rtp_type,
-											data, 																			video_info->roi_scalable);
+											data );
 
 			/* increase videoFormatNumber as we added an entry */
 			char *channelUserDesc = get_desc_from_conf(video_info->videoFormatIndex);

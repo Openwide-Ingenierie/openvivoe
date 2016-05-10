@@ -147,7 +147,7 @@ static void init_redirection( gpointer stream_datas, long videoFormatIndex ){
 									0, 					0,
 									0,					0,
 									0, 					0,
-									data, 				-1	); /* using -1 for roi_scalable boolean for a empty entry, as it should be meaningless */
+									data);
 	
 	char *channelUserDesc = get_desc_from_conf(videoFormatIndex);
 

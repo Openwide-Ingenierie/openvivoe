@@ -856,7 +856,7 @@ gst_vivoe_crop_get_videoformatindex (GObject * object, int *value){
 }
 
 static void 
-gst_vivoe_crop_get_roi_values_from_MIB( GstVivoeCrop * vcrop , 	gint *top , gint *left , gint *bottom , gint *right ){
+gst_vivoe_crop_get_roi_values_from_MIB( GstVivoeCrop * vcrop , 	gint *top , gint *left , gint *bottom , gint *right, gboolean scalable ){
 
 
 	/* get the videoFormat_entry corresponding to our index */
@@ -873,10 +873,13 @@ gst_vivoe_crop_get_roi_values_from_MIB( GstVivoeCrop * vcrop , 	gint *top , gint
 	if ( *left < 0 )
 		*left = 0 ;
 
-	if ( videoFormat_entry->roi_scalable ){
+	if ( scalable )
+	{
 		*bottom = videoFormat_entry->videoFormatMaxVertRes - ( videoFormat_entry->videoFormatRoiOriginTop 	+ videoFormat_entry->videoFormatRoiExtentBottom  ) ;
 		*right 	= videoFormat_entry->videoFormatMaxHorzRes - ( videoFormat_entry->videoFormatRoiOriginLeft	+ videoFormat_entry->videoFormatRoiExtentRight  ) ;
-	}else{ 
+	}
+	else
+	{ 
 		*bottom	= videoFormat_entry->videoFormatMaxVertRes - ( videoFormat_entry->videoFormatRoiOriginTop 	+ videoFormat_entry->videoFormatRoiVertRes  ) ;
 		*right 	= videoFormat_entry->videoFormatMaxHorzRes - ( videoFormat_entry->videoFormatRoiOriginLeft	+ videoFormat_entry->videoFormatRoiHorzRes  ) ;			
 	}
@@ -890,7 +893,7 @@ gst_vivoe_crop_get_roi_values_from_MIB( GstVivoeCrop * vcrop , 	gint *top , gint
 } 
 
 void
-gst_vivoe_crop_update (GObject * object)
+gst_vivoe_crop_update (GObject * object, gboolean scalable)
 {
 	GstVivoeCrop *vivoe_crop;
 
@@ -906,7 +909,7 @@ gst_vivoe_crop_update (GObject * object)
 	/*
 	 * Compute the correct values top, left, bottom and right from values from the MIB
 	 */
-	gst_vivoe_crop_get_roi_values_from_MIB( vivoe_crop , &top , &left , &bottom , &right ); 
+	gst_vivoe_crop_get_roi_values_from_MIB( vivoe_crop , &top , &left , &bottom , &right, scalable ); 
 
 	gst_vivoe_crop_set_crop (vivoe_crop, top ,
 			&vivoe_crop->prop_top);

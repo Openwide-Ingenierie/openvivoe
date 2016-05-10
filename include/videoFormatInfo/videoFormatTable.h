@@ -80,9 +80,6 @@ struct videoFormatTable_entry {
 	/* a stream assoicated to the channel */
 	gpointer stream_datas;
 
-	/* specify if the roi is scalable or not, meaningless if VF is not a roi */
-	gboolean roi_scalable;
-
 	/* Illustrate using a simple linked list */
 	int   valid;
 	struct videoFormatTable_entry *next;
@@ -100,7 +97,7 @@ struct videoFormatTable_entry * videoFormatTable_createEntry( 	long  videoFormat
 																long videoFormatRoiVertRes, 		long videoFormatRoiOriginTop,
 																long videoFormatRoiOriginLeft,		long videoFormatRoiExtentBottom,
 																long videoFormatRoiExtentRight, 	long videoFormatRtpPt, 
-																gpointer stream_datas, 				gboolean roi_scalable);
+																gpointer stream_datas );
 
 struct videoFormatTable_entry * videoFormatTable_getEntry(int index);
 void 							videoFormatTable_delete();
