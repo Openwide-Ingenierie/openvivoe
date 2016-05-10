@@ -338,14 +338,14 @@ static GstElement *adapt_pipeline_to_roi(GstElement *pipeline , GstElement *inpu
 
 /**
  * \brief retireve the vivoecrop element in a bin
- * \param input the source element (should be the bin build from gst_source description)
+ * \param pipeline the pipeline in which we are looking for vivoecrop element
  */
-GstElement *get_vivoecrop_element( GstElement *input ){
+GstElement *get_vivoecrop_element( GstElement *pipeline ){
 
 	GstIterator *iter = NULL;
 	gboolean done;
 
-	iter = gst_bin_iterate_elements (GST_BIN ( input ));
+	iter = gst_bin_iterate_recurse (GST_BIN ( pipeline ));
 
 	done = FALSE;
 	while (!done)
@@ -387,14 +387,14 @@ GstElement *get_vivoecrop_element( GstElement *input ){
  * \param video_caps the caps of the input vidoe
  * \return input if no element added, other it returns the last element added in pipeline
  */
-gboolean handle_roi( GstElement *pipeline, GstElement *input, struct videoFormatTable_entry *video_stream_info , GstStructure *video_caps ) {
+gboolean handle_roi( GstElement *pipeline, struct videoFormatTable_entry *video_stream_info , GstStructure *video_caps ) {
 
 	GstElement 	*vivoecrop = NULL;
 
 	/* 
 	 * iterates though the bin source to find the element vivoecrop
 	 */
-	vivoecrop = get_vivoecrop_element( input );
+	vivoecrop = get_vivoecrop_element( pipeline );
 	if ( !vivoecrop ){
 		/*
 		 * then this is not a ROI channel , set the type to videoChannel and exit function */
@@ -453,23 +453,9 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , st
 	 * We should not chceck the values entered by the user. As an example, this is not where we should 
 	 * check that the ROI want from non-scalable to scalable. 
 	 */
+	GstElement *vivoecrop = get_vivoecrop_element( pipeline );
+	gst_vivoe_crop_update (G_OBJECT ( vivoecrop ));
 
-	/* we should found a crop element */
-	GstElement *source 	= gst_bin_get_by_name ( GST_BIN ( pipeline ) , SOURCE_NAME ) ;
-	if ( !source){
-		/* try again  with app_src name (maybe this is a redirection */
-		source 	= gst_bin_get_by_name ( GST_BIN ( pipeline ) , APPSRC_NAME ) ;
-		if ( !source )
-			return FALSE;
-	}
-
-	/*
-	 * if videocrop is not NULL, then, this is a non-scalbale ROI
-	 */
-	if ( source ){
-		GstElement *vivoecrop = get_vivoecrop_element( source );
-		gst_vivoe_crop_update (G_OBJECT ( vivoecrop ));
-	}
 #if 0
 	/*
 	 * if roi is scalable, the element capsfilter_roi should be in pipeline 
