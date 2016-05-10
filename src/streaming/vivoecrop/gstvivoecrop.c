@@ -107,10 +107,12 @@ static GstStaticPadTemplate sink_template = GST_STATIC_PAD_TEMPLATE ("sink",
 #define gst_vivoe_crop_parent_class parent_class
 G_DEFINE_TYPE (GstVivoeCrop, gst_vivoe_crop, GST_TYPE_VIDEO_FILTER);
 
+#if 0
 static void gst_vivoe_crop_set_property (GObject * object, guint prop_id,
     const GValue * value, GParamSpec * pspec);
 static void gst_vivoe_crop_get_property (GObject * object, guint prop_id,
     GValue * value, GParamSpec * pspec);
+#endif 
 
 static GstCaps *gst_vivoe_crop_transform_caps (GstBaseTransform * trans,
     GstPadDirection direction, GstCaps * caps, GstCaps * filter_caps);
@@ -172,16 +174,22 @@ gst_vivoe_crop_src_event (GstBaseTransform * trans, GstEvent * event)
 static void
 gst_vivoe_crop_class_init (GstVivoeCropClass * klass)
 {
-  GObjectClass *gobject_class;
+#if 0
+  GObjectClass *gobject_class;	
+#endif //if 0
+
   GstElementClass *element_class;
   GstBaseTransformClass *basetransform_class;
   GstVideoFilterClass *vfilter_class;
 
+#if 0
   gobject_class = (GObjectClass *) klass;
+#endif //if 0
   element_class = (GstElementClass *) klass;
   basetransform_class = (GstBaseTransformClass *) klass;
   vfilter_class = (GstVideoFilterClass *) klass;
 
+#if 0
   gobject_class->set_property = gst_vivoe_crop_set_property;
   gobject_class->get_property = gst_vivoe_crop_get_property;
 
@@ -201,7 +209,7 @@ gst_vivoe_crop_class_init (GstVivoeCropClass * klass)
       g_param_spec_int ("bottom", "Bottom",
           "Pixels to crop at bottom (-1 to auto-crop)", -1, G_MAXINT, 0,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
-
+#endif 
   gst_element_class_add_static_pad_template (element_class, &sink_template);
   gst_element_class_add_static_pad_template (element_class, &src_template);
   gst_element_class_set_static_metadata (element_class, "vivoecrop",
@@ -736,6 +744,7 @@ gst_vivoe_crop_set_crop (GstVivoeCrop * vcrop, gint new_value, gint * prop)
 	}
 }
 
+#if 0
 static void
 gst_vivoe_crop_set_property (GObject * object, guint prop_id,
     const GValue * value, GParamSpec * pspec)
@@ -804,7 +813,7 @@ gst_vivoe_crop_get_property (GObject * object, guint prop_id, GValue * value,
 	GST_OBJECT_UNLOCK (vivoe_crop);
 
 }
-
+#endif 
 /**
  * \brief this function has been defined to be able to set the property videoformatindex from the code but not from cmdline
  * \param object the plugin that will be modified
