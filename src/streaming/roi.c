@@ -438,13 +438,10 @@ gboolean handle_roi( GstElement *pipeline, GstElement *input, struct videoFormat
 	if ( !vivoecrop )
 		return FALSE;
 
-	g_object_set ( 	G_OBJECT ( vivoecrop ) , 
-				"top" 		, 0, 
-				"left" 		, 0, 
-				"bottom" 	, 0,
-				"right" 	, 0,
-				NULL
-				);
+	/*
+	 * set the index on vivoecrop element
+	 */
+	gst_vivoe_crop_set_videoformatindex ( G_OBJECT ( vivoecrop ) , video_stream_info->videoFormatIndex );
 
 	return TRUE;
 

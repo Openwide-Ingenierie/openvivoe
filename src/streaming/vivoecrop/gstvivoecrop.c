@@ -65,12 +65,13 @@
 
 #include <string.h>
 
-GST_DEBUG_CATEGORY_STATIC (vivoecrop_debug);
-#define GST_CAT_DEFAULT vivoecrop_debug
+GST_DEBUG_CATEGORY_STATIC (gst_vivoe_crop_debug_category);
+#define GST_CAT_DEFAULT gst_vivoe_crop_debug_category
 
 enum
 {
   PROP_0,
+  PROP_VIDEOFORMATINDEX,
   PROP_LEFT,
   PROP_RIGHT,
   PROP_TOP,
@@ -213,10 +214,11 @@ gst_vivoe_crop_class_init (GstVivoeCropClass * klass)
 static void
 gst_vivoe_crop_init (GstVivoeCrop * vcrop)
 {
-  vcrop->crop_right = 0;
-  vcrop->crop_left = 0;
-  vcrop->crop_top = 0;
-  vcrop->crop_bottom = 0;
+  vcrop->crop_right 		= 0;
+  vcrop->crop_left 			= 0;
+  vcrop->crop_top 			= 0;
+  vcrop->crop_bottom 		= 0;
+  vcrop->videoformatindex 	= 0;
 }
 
 #define ROUND_DOWN_2(n)  ((n)&(~1))
@@ -401,330 +403,330 @@ static GstFlowReturn
 gst_vivoe_crop_transform_frame (GstVideoFilter * vfilter,
     GstVideoFrame * in_frame, GstVideoFrame * out_frame)
 {
-  GstVivoeCrop *vcrop = GST_VIVOE_CROP (vfilter);
+	GstVivoeCrop *vcrop = GST_VIVOE_CROP (vfilter);
 
-  if (G_UNLIKELY (vcrop->need_update)) {
-    if (!gst_vivoe_crop_set_info (vfilter, NULL, &vcrop->in_info, NULL,
-            &vcrop->out_info)) {
-      return GST_FLOW_ERROR;
-    }
-  }
+	if (G_UNLIKELY (vcrop->need_update)) {
+		if (!gst_vivoe_crop_set_info (vfilter, NULL, &vcrop->in_info, NULL,
+					&vcrop->out_info)) {
+			return GST_FLOW_ERROR;
+		}
+	}
 
-  switch (vcrop->packing) {
-	case VIVOE_CROP_PIXEL_FORMAT_PACKED_SIMPLE:
-      gst_vivoe_crop_transform_packed_simple (vcrop, in_frame, out_frame);
-      break;
-    case VIVOE_CROP_PIXEL_FORMAT_PACKED_COMPLEX:
-      gst_vivoe_crop_transform_packed_complex (vcrop, in_frame, out_frame);
-      break;
-    case VIVOE_CROP_PIXEL_FORMAT_PLANAR:
-      gst_vivoe_crop_transform_planar (vcrop, in_frame, out_frame);
-      break;
-    case VIVOE_CROP_PIXEL_FORMAT_SEMI_PLANAR:
-      gst_vivoe_crop_transform_semi_planar (vcrop, in_frame, out_frame);
-      break;
-    default:
-      g_assert_not_reached ();
-  }
+	switch (vcrop->packing) {
+		case VIVOE_CROP_PIXEL_FORMAT_PACKED_SIMPLE:
+			gst_vivoe_crop_transform_packed_simple (vcrop, in_frame, out_frame);
+			break;
+		case VIVOE_CROP_PIXEL_FORMAT_PACKED_COMPLEX:
+			gst_vivoe_crop_transform_packed_complex (vcrop, in_frame, out_frame);
+			break;
+		case VIVOE_CROP_PIXEL_FORMAT_PLANAR:
+			gst_vivoe_crop_transform_planar (vcrop, in_frame, out_frame);
+			break;
+		case VIVOE_CROP_PIXEL_FORMAT_SEMI_PLANAR:
+			gst_vivoe_crop_transform_semi_planar (vcrop, in_frame, out_frame);
+			break;
+		default:
+			g_assert_not_reached ();
+	}
 
-  return GST_FLOW_OK;
+	return GST_FLOW_OK;
 }
 
 static gint
 gst_vivoe_crop_transform_dimension (gint val, gint delta)
 {
-  gint64 new_val = (gint64) val + (gint64) delta;
+	gint64 new_val = (gint64) val + (gint64) delta;
 
-  new_val = CLAMP (new_val, 1, G_MAXINT);
+	new_val = CLAMP (new_val, 1, G_MAXINT);
 
-  return (gint) new_val;
+	return (gint) new_val;
 }
 
 static gboolean
 gst_vivoe_crop_transform_dimension_value (const GValue * src_val,
     gint delta, GValue * dest_val, GstPadDirection direction, gboolean dynamic)
 {
-  gboolean ret = TRUE;
+	gboolean ret = TRUE;
 
-  if (G_VALUE_HOLDS_INT (src_val)) {
-    gint ival = g_value_get_int (src_val);
-    ival = gst_vivoe_crop_transform_dimension (ival, delta);
+	if (G_VALUE_HOLDS_INT (src_val)) {
+		gint ival = g_value_get_int (src_val);
+		ival = gst_vivoe_crop_transform_dimension (ival, delta);
 
-    if (dynamic) {
-      if (direction == GST_PAD_SRC) {
-        if (ival == G_MAXINT) {
-          g_value_init (dest_val, G_TYPE_INT);
-          g_value_set_int (dest_val, ival);
-        } else {
-          g_value_init (dest_val, GST_TYPE_INT_RANGE);
-          gst_value_set_int_range (dest_val, ival, G_MAXINT);
-        }
-      } else {
-        if (ival == 1) {
-          g_value_init (dest_val, G_TYPE_INT);
-          g_value_set_int (dest_val, ival);
-        } else {
-          g_value_init (dest_val, GST_TYPE_INT_RANGE);
-          gst_value_set_int_range (dest_val, 1, ival);
-        }
-      }
-    } else {
-      g_value_init (dest_val, G_TYPE_INT);
-      g_value_set_int (dest_val, ival);
-    }
-  } else if (GST_VALUE_HOLDS_INT_RANGE (src_val)) {
-    gint min = gst_value_get_int_range_min (src_val);
-    gint max = gst_value_get_int_range_max (src_val);
+		if (dynamic) {
+			if (direction == GST_PAD_SRC) {
+				if (ival == G_MAXINT) {
+					g_value_init (dest_val, G_TYPE_INT);
+					g_value_set_int (dest_val, ival);
+				} else {
+					g_value_init (dest_val, GST_TYPE_INT_RANGE);
+					gst_value_set_int_range (dest_val, ival, G_MAXINT);
+				}
+			} else {
+				if (ival == 1) {
+					g_value_init (dest_val, G_TYPE_INT);
+					g_value_set_int (dest_val, ival);
+				} else {
+					g_value_init (dest_val, GST_TYPE_INT_RANGE);
+					gst_value_set_int_range (dest_val, 1, ival);
+				}
+			}
+		} else {
+			g_value_init (dest_val, G_TYPE_INT);
+			g_value_set_int (dest_val, ival);
+		}
+	} else if (GST_VALUE_HOLDS_INT_RANGE (src_val)) {
+		gint min = gst_value_get_int_range_min (src_val);
+		gint max = gst_value_get_int_range_max (src_val);
 
-    min = gst_vivoe_crop_transform_dimension (min, delta);
-    max = gst_vivoe_crop_transform_dimension (max, delta);
+		min = gst_vivoe_crop_transform_dimension (min, delta);
+		max = gst_vivoe_crop_transform_dimension (max, delta);
 
-    if (dynamic) {
-      if (direction == GST_PAD_SRC)
-        max = G_MAXINT;
-      else
-        min = 1;
-    }
+		if (dynamic) {
+			if (direction == GST_PAD_SRC)
+				max = G_MAXINT;
+			else
+				min = 1;
+		}
 
-    if (min == max) {
-      g_value_init (dest_val, G_TYPE_INT);
-      g_value_set_int (dest_val, min);
-    } else {
-      g_value_init (dest_val, GST_TYPE_INT_RANGE);
-      gst_value_set_int_range (dest_val, min, max);
-    }
-  } else if (GST_VALUE_HOLDS_LIST (src_val)) {
-    gint i;
+		if (min == max) {
+			g_value_init (dest_val, G_TYPE_INT);
+			g_value_set_int (dest_val, min);
+		} else {
+			g_value_init (dest_val, GST_TYPE_INT_RANGE);
+			gst_value_set_int_range (dest_val, min, max);
+		}
+	} else if (GST_VALUE_HOLDS_LIST (src_val)) {
+		gint i;
 
-    g_value_init (dest_val, GST_TYPE_LIST);
+		g_value_init (dest_val, GST_TYPE_LIST);
 
-    for (i = 0; i < gst_value_list_get_size (src_val); ++i) {
-      const GValue *list_val;
-      GValue newval = { 0, };
+		for (i = 0; i < gst_value_list_get_size (src_val); ++i) {
+			const GValue *list_val;
+			GValue newval = { 0, };
 
-      list_val = gst_value_list_get_value (src_val, i);
-      if (gst_vivoe_crop_transform_dimension_value (list_val, delta, &newval,
-              direction, dynamic))
-        gst_value_list_append_value (dest_val, &newval);
-      g_value_unset (&newval);
-    }
+			list_val = gst_value_list_get_value (src_val, i);
+			if (gst_vivoe_crop_transform_dimension_value (list_val, delta, &newval,
+						direction, dynamic))
+				gst_value_list_append_value (dest_val, &newval);
+			g_value_unset (&newval);
+		}
 
-    if (gst_value_list_get_size (dest_val) == 0) {
-      g_value_unset (dest_val);
-      ret = FALSE;
-    }
-  } else {
-    ret = FALSE;
-  }
+		if (gst_value_list_get_size (dest_val) == 0) {
+			g_value_unset (dest_val);
+			ret = FALSE;
+		}
+	} else {
+		ret = FALSE;
+	}
 
-  return ret;
+	return ret;
 }
 
 static GstCaps *
 gst_vivoe_crop_transform_caps (GstBaseTransform * trans,
     GstPadDirection direction, GstCaps * caps, GstCaps * filter_caps)
 {
-  GstVivoeCrop *vcrop;
-  GstCaps *other_caps;
-  gint dy, dx, i, left, right, bottom, top;
-  gboolean w_dynamic, h_dynamic;
+	GstVivoeCrop *vcrop;
+	GstCaps *other_caps;
+	gint dy, dx, i, left, right, bottom, top;
+	gboolean w_dynamic, h_dynamic;
 
-  vcrop = GST_VIVOE_CROP (trans);
+	vcrop = GST_VIVOE_CROP (trans);
 
-  GST_OBJECT_LOCK (vcrop);
+	GST_OBJECT_LOCK (vcrop);
 
-  GST_LOG_OBJECT (vcrop, "l=%d,r=%d,b=%d,t=%d",
-      vcrop->prop_left, vcrop->prop_right, vcrop->prop_bottom, vcrop->prop_top);
+	GST_LOG_OBJECT (vcrop, "l=%d,r=%d,b=%d,t=%d",
+			vcrop->prop_left, vcrop->prop_right, vcrop->prop_bottom, vcrop->prop_top);
 
-  w_dynamic = (vcrop->prop_left == -1 || vcrop->prop_right == -1);
-  h_dynamic = (vcrop->prop_top == -1 || vcrop->prop_bottom == -1);
+	w_dynamic = (vcrop->prop_left == -1 || vcrop->prop_right == -1);
+	h_dynamic = (vcrop->prop_top == -1 || vcrop->prop_bottom == -1);
 
-  left = (vcrop->prop_left == -1) ? 0 : vcrop->prop_left;
-  right = (vcrop->prop_right == -1) ? 0 : vcrop->prop_right;
-  bottom = (vcrop->prop_bottom == -1) ? 0 : vcrop->prop_bottom;
-  top = (vcrop->prop_top == -1) ? 0 : vcrop->prop_top;
+	left = (vcrop->prop_left == -1) ? 0 : vcrop->prop_left;
+	right = (vcrop->prop_right == -1) ? 0 : vcrop->prop_right;
+	bottom = (vcrop->prop_bottom == -1) ? 0 : vcrop->prop_bottom;
+	top = (vcrop->prop_top == -1) ? 0 : vcrop->prop_top;
 
-  GST_OBJECT_UNLOCK (vcrop);
+	GST_OBJECT_UNLOCK (vcrop);
 
-  if (direction == GST_PAD_SRC) {
-    dx = left + right;
-    dy = top + bottom;
-  } else {
-    dx = 0 - (left + right);
-    dy = 0 - (top + bottom);
-  }
+	if (direction == GST_PAD_SRC) {
+		dx = left + right;
+		dy = top + bottom;
+	} else {
+		dx = 0 - (left + right);
+		dy = 0 - (top + bottom);
+	}
 
-  GST_LOG_OBJECT (vcrop, "transforming caps %" GST_PTR_FORMAT, caps);
+	GST_LOG_OBJECT (vcrop, "transforming caps %" GST_PTR_FORMAT, caps);
 
-  other_caps = gst_caps_new_empty ();
+	other_caps = gst_caps_new_empty ();
 
-  for (i = 0; i < gst_caps_get_size (caps); ++i) {
-    const GValue *v;
-    GstStructure *structure, *new_structure;
-    GValue w_val = { 0, }, h_val = {
-    0,};
+	for (i = 0; i < gst_caps_get_size (caps); ++i) {
+		const GValue *v;
+		GstStructure *structure, *new_structure;
+		GValue w_val = { 0, }, h_val = {
+			0,};
 
-    structure = gst_caps_get_structure (caps, i);
+		structure = gst_caps_get_structure (caps, i);
 
-    v = gst_structure_get_value (structure, "width");
-    if (!gst_vivoe_crop_transform_dimension_value (v, dx, &w_val, direction,
-            w_dynamic)) {
-      GST_WARNING_OBJECT (vcrop, "could not tranform width value with dx=%d"
-          ", caps structure=%" GST_PTR_FORMAT, dx, structure);
-      continue;
-    }
+		v = gst_structure_get_value (structure, "width");
+		if (!gst_vivoe_crop_transform_dimension_value (v, dx, &w_val, direction,
+					w_dynamic)) {
+			GST_WARNING_OBJECT (vcrop, "could not tranform width value with dx=%d"
+					", caps structure=%" GST_PTR_FORMAT, dx, structure);
+			continue;
+		}
 
-    v = gst_structure_get_value (structure, "height");
-    if (!gst_vivoe_crop_transform_dimension_value (v, dy, &h_val, direction,
-            h_dynamic)) {
-      g_value_unset (&w_val);
-      GST_WARNING_OBJECT (vcrop, "could not tranform height value with dy=%d"
-          ", caps structure=%" GST_PTR_FORMAT, dy, structure);
-      continue;
-    }
+		v = gst_structure_get_value (structure, "height");
+		if (!gst_vivoe_crop_transform_dimension_value (v, dy, &h_val, direction,
+					h_dynamic)) {
+			g_value_unset (&w_val);
+			GST_WARNING_OBJECT (vcrop, "could not tranform height value with dy=%d"
+					", caps structure=%" GST_PTR_FORMAT, dy, structure);
+			continue;
+		}
 
-    new_structure = gst_structure_copy (structure);
-    gst_structure_set_value (new_structure, "width", &w_val);
-    gst_structure_set_value (new_structure, "height", &h_val);
-    g_value_unset (&w_val);
-    g_value_unset (&h_val);
-    GST_LOG_OBJECT (vcrop, "transformed structure %2d: %" GST_PTR_FORMAT
-        " => %" GST_PTR_FORMAT, i, structure, new_structure);
-    gst_caps_append_structure (other_caps, new_structure);
-  }
+		new_structure = gst_structure_copy (structure);
+		gst_structure_set_value (new_structure, "width", &w_val);
+		gst_structure_set_value (new_structure, "height", &h_val);
+		g_value_unset (&w_val);
+		g_value_unset (&h_val);
+		GST_LOG_OBJECT (vcrop, "transformed structure %2d: %" GST_PTR_FORMAT
+				" => %" GST_PTR_FORMAT, i, structure, new_structure);
+		gst_caps_append_structure (other_caps, new_structure);
+	}
 
-  if (!gst_caps_is_empty (other_caps) && filter_caps) {
-    GstCaps *tmp = gst_caps_intersect_full (filter_caps, other_caps,
-        GST_CAPS_INTERSECT_FIRST);
-    gst_caps_replace (&other_caps, tmp);
-    gst_caps_unref (tmp);
-  }
+	if (!gst_caps_is_empty (other_caps) && filter_caps) {
+		GstCaps *tmp = gst_caps_intersect_full (filter_caps, other_caps,
+				GST_CAPS_INTERSECT_FIRST);
+		gst_caps_replace (&other_caps, tmp);
+		gst_caps_unref (tmp);
+	}
 
-  return other_caps;
+	return other_caps;
 }
 
 static gboolean
 gst_vivoe_crop_set_info (GstVideoFilter * vfilter, GstCaps * in,
     GstVideoInfo * in_info, GstCaps * out, GstVideoInfo * out_info)
 {
-  GstVivoeCrop *crop = GST_VIVOE_CROP (vfilter);
-  int dx, dy;
+	GstVivoeCrop *crop = GST_VIVOE_CROP (vfilter);
+	int dx, dy;
 
-  GST_OBJECT_LOCK (crop);
-  crop->need_update = FALSE;
-  crop->crop_left = crop->prop_left;
-  crop->crop_right = crop->prop_right;
-  crop->crop_top = crop->prop_top;
-  crop->crop_bottom = crop->prop_bottom;
-  GST_OBJECT_UNLOCK (crop);
+	GST_OBJECT_LOCK (crop);
+	crop->need_update = FALSE;
+	crop->crop_left = crop->prop_left;
+	crop->crop_right = crop->prop_right;
+	crop->crop_top = crop->prop_top;
+	crop->crop_bottom = crop->prop_bottom;
+	GST_OBJECT_UNLOCK (crop);
 
-  dx = GST_VIDEO_INFO_WIDTH (in_info) - GST_VIDEO_INFO_WIDTH (out_info);
-  dy = GST_VIDEO_INFO_HEIGHT (in_info) - GST_VIDEO_INFO_HEIGHT (out_info);
+	dx = GST_VIDEO_INFO_WIDTH (in_info) - GST_VIDEO_INFO_WIDTH (out_info);
+	dy = GST_VIDEO_INFO_HEIGHT (in_info) - GST_VIDEO_INFO_HEIGHT (out_info);
 
-  if (crop->crop_left == -1 && crop->crop_right == -1) {
-    crop->crop_left = dx / 2;
-    crop->crop_right = dx / 2 + (dx & 1);
-  } else if (crop->crop_left == -1) {
-    if (G_UNLIKELY (crop->crop_right > dx))
-      goto cropping_too_much;
-    crop->crop_left = dx - crop->crop_right;
-  } else if (crop->crop_right == -1) {
-    if (G_UNLIKELY (crop->crop_left > dx))
-      goto cropping_too_much;
-    crop->crop_right = dx - crop->crop_left;
-  }
+	if (crop->crop_left == -1 && crop->crop_right == -1) {
+		crop->crop_left = dx / 2;
+		crop->crop_right = dx / 2 + (dx & 1);
+	} else if (crop->crop_left == -1) {
+		if (G_UNLIKELY (crop->crop_right > dx))
+			goto cropping_too_much;
+		crop->crop_left = dx - crop->crop_right;
+	} else if (crop->crop_right == -1) {
+		if (G_UNLIKELY (crop->crop_left > dx))
+			goto cropping_too_much;
+		crop->crop_right = dx - crop->crop_left;
+	}
 
-  if (crop->crop_top == -1 && crop->crop_bottom == -1) {
-    crop->crop_top = dy / 2;
-    crop->crop_bottom = dy / 2 + (dy & 1);
-  } else if (crop->crop_top == -1) {
-    if (G_UNLIKELY (crop->crop_bottom > dy))
-      goto cropping_too_much;
-    crop->crop_top = dy - crop->crop_bottom;
-  } else if (crop->crop_bottom == -1) {
-    if (G_UNLIKELY (crop->crop_top > dy))
-      goto cropping_too_much;
-    crop->crop_bottom = dy - crop->crop_top;
-  }
+	if (crop->crop_top == -1 && crop->crop_bottom == -1) {
+		crop->crop_top = dy / 2;
+		crop->crop_bottom = dy / 2 + (dy & 1);
+	} else if (crop->crop_top == -1) {
+		if (G_UNLIKELY (crop->crop_bottom > dy))
+			goto cropping_too_much;
+		crop->crop_top = dy - crop->crop_bottom;
+	} else if (crop->crop_bottom == -1) {
+		if (G_UNLIKELY (crop->crop_top > dy))
+			goto cropping_too_much;
+		crop->crop_bottom = dy - crop->crop_top;
+	}
 
-  if (G_UNLIKELY ((crop->crop_left + crop->crop_right) >=
-          GST_VIDEO_INFO_WIDTH (in_info)
-          || (crop->crop_top + crop->crop_bottom) >=
-          GST_VIDEO_INFO_HEIGHT (in_info)))
-    goto cropping_too_much;
+	if (G_UNLIKELY ((crop->crop_left + crop->crop_right) >=
+				GST_VIDEO_INFO_WIDTH (in_info)
+				|| (crop->crop_top + crop->crop_bottom) >=
+				GST_VIDEO_INFO_HEIGHT (in_info)))
+		goto cropping_too_much;
 
-  if (in && out)
-    GST_LOG_OBJECT (crop, "incaps = %" GST_PTR_FORMAT ", outcaps = %"
-        GST_PTR_FORMAT, in, out);
+	if (in && out)
+		GST_LOG_OBJECT (crop, "incaps = %" GST_PTR_FORMAT ", outcaps = %"
+				GST_PTR_FORMAT, in, out);
 
-  if ((crop->crop_left | crop->crop_right | crop->crop_top | crop->
-          crop_bottom) == 0) {
-    GST_LOG_OBJECT (crop, "we are using passthrough");
-    gst_base_transform_set_passthrough (GST_BASE_TRANSFORM (crop), TRUE);
-  } else {
-    GST_LOG_OBJECT (crop, "we are not using passthrough");
-    gst_base_transform_set_passthrough (GST_BASE_TRANSFORM (crop), FALSE);
-  }
+	if ((crop->crop_left | crop->crop_right | crop->crop_top | crop->
+				crop_bottom) == 0) {
+		GST_LOG_OBJECT (crop, "we are using passthrough");
+		gst_base_transform_set_passthrough (GST_BASE_TRANSFORM (crop), TRUE);
+	} else {
+		GST_LOG_OBJECT (crop, "we are not using passthrough");
+		gst_base_transform_set_passthrough (GST_BASE_TRANSFORM (crop), FALSE);
+	}
 
-  if (GST_VIDEO_INFO_IS_RGB (in_info)
-      || GST_VIDEO_INFO_IS_GRAY (in_info)) {
-    crop->packing = VIVOE_CROP_PIXEL_FORMAT_PACKED_SIMPLE;
-  } else {
-    switch (GST_VIDEO_INFO_FORMAT (in_info)) {
-      case GST_VIDEO_FORMAT_AYUV:
-        crop->packing = VIVOE_CROP_PIXEL_FORMAT_PACKED_SIMPLE;
-        break;
-      case GST_VIDEO_FORMAT_YVYU:
-      case GST_VIDEO_FORMAT_YUY2:
-      case GST_VIDEO_FORMAT_UYVY:
-        crop->packing = VIVOE_CROP_PIXEL_FORMAT_PACKED_COMPLEX;
-        if (GST_VIDEO_INFO_FORMAT (in_info) == GST_VIDEO_FORMAT_UYVY) {
-          /* UYVY = 4:2:2 - [U0 Y0 V0 Y1] [U2 Y2 V2 Y3] [U4 Y4 V4 Y5] */
-          crop->macro_y_off = 1;
-        } else {
-          /* YUYV = 4:2:2 - [Y0 U0 Y1 V0] [Y2 U2 Y3 V2] [Y4 U4 Y5 V4] = YUY2 */
-          crop->macro_y_off = 0;
-        }
-        break;
-      case GST_VIDEO_FORMAT_I420:
-      case GST_VIDEO_FORMAT_YV12:
-        crop->packing = VIVOE_CROP_PIXEL_FORMAT_PLANAR;
-        break;
-      case GST_VIDEO_FORMAT_NV12:
-      case GST_VIDEO_FORMAT_NV21:
-        crop->packing = VIVOE_CROP_PIXEL_FORMAT_SEMI_PLANAR;
-        break;
-      default:
-        goto unknown_format;
-    }
-  }
+	if (GST_VIDEO_INFO_IS_RGB (in_info)
+			|| GST_VIDEO_INFO_IS_GRAY (in_info)) {
+		crop->packing = VIVOE_CROP_PIXEL_FORMAT_PACKED_SIMPLE;
+	} else {
+		switch (GST_VIDEO_INFO_FORMAT (in_info)) {
+			case GST_VIDEO_FORMAT_AYUV:
+				crop->packing = VIVOE_CROP_PIXEL_FORMAT_PACKED_SIMPLE;
+				break;
+			case GST_VIDEO_FORMAT_YVYU:
+			case GST_VIDEO_FORMAT_YUY2:
+			case GST_VIDEO_FORMAT_UYVY:
+				crop->packing = VIVOE_CROP_PIXEL_FORMAT_PACKED_COMPLEX;
+				if (GST_VIDEO_INFO_FORMAT (in_info) == GST_VIDEO_FORMAT_UYVY) {
+					/* UYVY = 4:2:2 - [U0 Y0 V0 Y1] [U2 Y2 V2 Y3] [U4 Y4 V4 Y5] */
+					crop->macro_y_off = 1;
+				} else {
+					/* YUYV = 4:2:2 - [Y0 U0 Y1 V0] [Y2 U2 Y3 V2] [Y4 U4 Y5 V4] = YUY2 */
+					crop->macro_y_off = 0;
+				}
+				break;
+			case GST_VIDEO_FORMAT_I420:
+			case GST_VIDEO_FORMAT_YV12:
+				crop->packing = VIVOE_CROP_PIXEL_FORMAT_PLANAR;
+				break;
+			case GST_VIDEO_FORMAT_NV12:
+			case GST_VIDEO_FORMAT_NV21:
+				crop->packing = VIVOE_CROP_PIXEL_FORMAT_SEMI_PLANAR;
+				break;
+			default:
+				goto unknown_format;
+		}
+	}
 
-  crop->in_info = *in_info;
-  crop->out_info = *out_info;
+	crop->in_info = *in_info;
+	crop->out_info = *out_info;
 
-  return TRUE;
+	return TRUE;
 
-  /* ERROR */
+	/* ERROR */
 cropping_too_much:
-  {
-    GST_WARNING_OBJECT (crop, "we are cropping too much");
-    return FALSE;
-  }
+	{
+		GST_WARNING_OBJECT (crop, "we are cropping too much");
+		return FALSE;
+	}
 unknown_format:
-  {
-    GST_WARNING_OBJECT (crop, "Unsupported format");
-    return FALSE;
-  }
+	{
+		GST_WARNING_OBJECT (crop, "Unsupported format");
+		return FALSE;
+	}
 }
 
 /* called with object lock */
-static inline void
+	static inline void
 gst_vivoe_crop_set_crop (GstVivoeCrop * vcrop, gint new_value, gint * prop)
 {
-  if (*prop != new_value) {
-    *prop = new_value;
-    vcrop->need_update = TRUE;
-  }
+	if (*prop != new_value) {
+		*prop = new_value;
+		vcrop->need_update = TRUE;
+	}
 }
 
 static void
@@ -770,35 +772,57 @@ static void
 gst_vivoe_crop_get_property (GObject * object, guint prop_id, GValue * value,
     GParamSpec * pspec)
 {
-  GstVivoeCrop *vivoe_crop;
+	GstVivoeCrop *vivoe_crop;
 
-  vivoe_crop = GST_VIVOE_CROP (object);
+	vivoe_crop = GST_VIVOE_CROP (object);
 
-  GST_OBJECT_LOCK (vivoe_crop);
-  switch (prop_id) {
-    case PROP_LEFT:
-      g_value_set_int (value, vivoe_crop->prop_left);
-      break;
-    case PROP_RIGHT:
-      g_value_set_int (value, vivoe_crop->prop_right);
-      break;
-    case PROP_TOP:
-      g_value_set_int (value, vivoe_crop->prop_top);
-      break;
-    case PROP_BOTTOM:
-      g_value_set_int (value, vivoe_crop->prop_bottom);
-      break;
-    default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-      break;
-  }
-  GST_OBJECT_UNLOCK (vivoe_crop);
+	GST_OBJECT_LOCK (vivoe_crop);
+	switch (prop_id) {
+		case PROP_LEFT:
+			g_value_set_int (value, vivoe_crop->prop_left);
+			break;
+		case PROP_RIGHT:
+			g_value_set_int (value, vivoe_crop->prop_right);
+			break;
+		case PROP_TOP:
+			g_value_set_int (value, vivoe_crop->prop_top);
+			break;
+		case PROP_BOTTOM:
+			g_value_set_int (value, vivoe_crop->prop_bottom);
+			break;
+		default:
+			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+			break;
+	}
+	GST_OBJECT_UNLOCK (vivoe_crop);
+
 }
+
+/**
+ * \brief this function has been defined to be able to set the property videoformatindex from the code but not from cmdline
+ * \param object the plugin that will be modified
+ * \param value the new value of videoFormatIndex
+ */
+void
+gst_vivoe_crop_set_videoformatindex (GObject * object, const int value){
+	GstVivoeCrop *vivoe_crop;
+
+	vivoe_crop = GST_VIVOE_CROP (object);
+
+	/* lock the plug-in */
+	GST_OBJECT_LOCK (vivoe_crop);
+
+	vivoe_crop->videoformatindex = value ;
+
+	GST_OBJECT_UNLOCK (vivoe_crop);	
+
+}
+
 
 static gboolean
 plugin_init (GstPlugin * plugin)
 {
-  GST_DEBUG_CATEGORY_INIT (vivoecrop_debug, "vivoecrop", 0, "vivoecrop");
+  GST_DEBUG_CATEGORY_INIT (gst_vivoe_crop_debug_category, "vivoecrop", 0, "vivoecrop");
 
   if (gst_element_register (plugin, "vivoecrop", GST_RANK_NONE,
           GST_TYPE_VIVOE_CROP)

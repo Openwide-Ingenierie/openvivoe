@@ -25,21 +25,21 @@
 G_BEGIN_DECLS
 
 #define GST_TYPE_VIVOE_CROP \
-  (gst_vivoe_crop_get_type())
+	(gst_vivoe_crop_get_type())
 #define GST_VIVOE_CROP(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST((obj),GST_TYPE_VIVOE_CROP,GstVivoeCrop))
+	(G_TYPE_CHECK_INSTANCE_CAST((obj),GST_TYPE_VIVOE_CROP,GstVivoeCrop))
 #define GST_VIVOE_CROP_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST((klass),GST_TYPE_VIVOE_CROP,GstVivoeCropClass))
+	(G_TYPE_CHECK_CLASS_CAST((klass),GST_TYPE_VIVOE_CROP,GstVivoeCropClass))
 #define GST_IS_VIVOE_CROP(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE((obj),GST_TYPE_VIVOE_CROP))
+	(G_TYPE_CHECK_INSTANCE_TYPE((obj),GST_TYPE_VIVOE_CROP))
 #define GST_IS_VIVOE_CROP_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE((klass),GST_TYPE_VIVOE_CROP))
+	(G_TYPE_CHECK_CLASS_TYPE((klass),GST_TYPE_VIVOE_CROP))
 
 typedef enum {
-  VIVOE_CROP_PIXEL_FORMAT_PACKED_SIMPLE = 0,  /* RGBx, AYUV */
-  VIVOE_CROP_PIXEL_FORMAT_PACKED_COMPLEX,     /* UYVY, YVYU */
-  VIVOE_CROP_PIXEL_FORMAT_PLANAR,             /* I420, YV12 */
-  VIVOE_CROP_PIXEL_FORMAT_SEMI_PLANAR         /* NV12, NV21 */
+	VIVOE_CROP_PIXEL_FORMAT_PACKED_SIMPLE = 0,  /* RGBx, AYUV */
+	VIVOE_CROP_PIXEL_FORMAT_PACKED_COMPLEX,     /* UYVY, YVYU */
+	VIVOE_CROP_PIXEL_FORMAT_PLANAR,             /* I420, YV12 */
+	VIVOE_CROP_PIXEL_FORMAT_SEMI_PLANAR         /* NV12, NV21 */
 } VivoeCropPixelFormat;
 
 typedef struct _GstVivoeCropImageDetails GstVivoeCropImageDetails;
@@ -49,25 +49,26 @@ typedef struct _GstVivoeCropClass GstVivoeCropClass;
 
 struct _GstVivoeCrop
 {
-  GstVideoFilter parent;
+	GstVideoFilter parent;
 
-  /*< private >*/
-  gint prop_left;
-  gint prop_right;
-  gint prop_top;
-  gint prop_bottom;
-  gboolean need_update;
+	/*< private >*/
+	gint videoformatindex;
+	gint prop_left;
+	gint prop_right;
+	gint prop_top;
+	gint prop_bottom;
+	gboolean need_update;
 
-  GstVideoInfo in_info;
-  GstVideoInfo out_info;
+	GstVideoInfo in_info;
+	GstVideoInfo out_info;
 
-  gint crop_left;
-  gint crop_right;
-  gint crop_top;
-  gint crop_bottom;
+	gint crop_left;
+	gint crop_right;
+	gint crop_top;
+	gint crop_bottom;
 
-  VivoeCropPixelFormat  packing;
-  gint macro_y_off;
+	VivoeCropPixelFormat  packing;
+	gint macro_y_off;
 };
 
 struct _GstVivoeCropClass
@@ -76,6 +77,9 @@ struct _GstVivoeCropClass
 };
 
 GType gst_video_crop_get_type (void);
+
+void
+gst_vivoe_crop_set_videoformatindex (GObject * object,  const gint value);
 
 gboolean vivoecrop_init (void) ;
 G_END_DECLS
