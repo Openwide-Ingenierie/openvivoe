@@ -253,6 +253,11 @@ int init_stream_SP( int videoFormatIndex ){
 		return EXIT_FAILURE;
 	}
 
+	/*
+	 * In order tp DEBUG gstreamer 
+	 */
+	GST_DEBUG_BIN_TO_DOT_FILE( GST_BIN (pipeline) , GST_DEBUG_GRAPH_SHOW_ALL , "pipeline" );
+
 	/* Reference all data relevant to the stream */
 	stream_data 	*data 		= malloc(sizeof(stream_data));
 
@@ -334,7 +339,7 @@ int init_stream_SU( GstCaps *caps, struct channelTable_entry *channel_entry)
 	/*
 	 * In order tp DEBUG gstreamer 
 	 */
-	GST_DEBUG_BIN_TO_DOT_FILE( GST_BIN (pipeline) , GST_DEBUG_GRAPH_SHOW_ALL, "pipeline");
+	//GST_DEBUG_BIN_TO_DOT_FILE( GST_BIN (pipeline) , GST_DEBUG_GRAPH_SHOW_ALL, "pipeline");
 
 
 	/* Reference all data relevant to the stream */

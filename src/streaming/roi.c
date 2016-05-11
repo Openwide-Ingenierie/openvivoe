@@ -48,19 +48,10 @@ static gboolean SP_roi_mp4_config_update (gpointer stream_datas,  struct videoFo
 	GstStructure 	*video_caps;
 
 	/*
-	 * get the parser from the MPEG-4 pipeline and rtppayloader element
-	 * */
-	GstElement *rtpmp4vpay = gst_bin_get_by_name( GST_BIN ( data->pipeline ), RTPMP4PAY_NAME ) ;
-
-	if ( !rtpmp4vpay ){
-		g_printerr ("Failed to adapt MPEG-4 pipeline for ROI\n");
-		return FALSE;
-	}
-
-	/*
 	 * detect the new video caps 
 	 */
- 	video_caps = type_detection_for_roi( GST_BIN(data->pipeline), rtpmp4vpay , data->udp_elem ) ;
+	printf("1111111111\n");
+ 	video_caps = type_detection_for_roi( GST_BIN(data->pipeline), data->udp_elem ) ;
 	
 	if ( !video_caps ){
 		g_printerr ("Failed to adapt MPEG-4 pipeline for ROI\n");
@@ -209,13 +200,15 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , st
 
 	gst_vivoe_crop_update (G_OBJECT ( vivoecrop ), scalable );
 
+	/* get the videoFormat_entry corresponding to our index */
+	struct videoFormatTable_entry *videoFormat_entry = videoFormatTable_getEntry( channel_entry->channelVideoFormatIndex ) ;
+
+
 	if ( scalable )
 	{
 		GstCaps *new_caps;
 		g_object_get ( G_OBJECT( vivoecaps  ) , "caps" , &new_caps , NULL ) ;
 
-		/* get the videoFormat_entry corresponding to our index */
-		struct videoFormatTable_entry *videoFormat_entry = videoFormatTable_getEntry( channel_entry->channelVideoFormatIndex ) ;
 
 		new_caps = gst_caps_make_writable ( new_caps );
 	
@@ -231,7 +224,7 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , st
 				);
 	}
 
-#if 0
+
 	if ( ! strcmp( channel_entry->channelVideoFormat , MPEG4_NAME ) ){
 		/*
 		 * call handle mpeg config update
@@ -239,7 +232,6 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , st
 		if ( !SP_roi_mp4_config_update (stream_datas, videoFormat_entry ))
 			return FALSE;
 	}
-#endif 
 
 	return TRUE;
 

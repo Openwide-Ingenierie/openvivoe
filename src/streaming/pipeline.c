@@ -397,7 +397,8 @@ GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
 			return NULL;
 		}
 	}
-	else{
+	else
+	{
 		/* we link the elements together */
 		if ( !gst_element_link_log (last , udpsink))
 			return NULL;

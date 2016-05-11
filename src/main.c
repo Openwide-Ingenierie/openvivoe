@@ -113,7 +113,6 @@ gboolean vivoe_gstreamer_initiation(int   argc,  char *argv[]){
 	/*
 	 * register vivoecrop plugin
 	 */
-	
 	if (  (! vivoecrop_init ()) || (! vivoecaps_init ()) )
 		g_error("Failed to load OpenVivoe's private gstreamer's modules");
 	else

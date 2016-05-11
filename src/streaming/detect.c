@@ -43,10 +43,12 @@ static void cb_typefound ( 	GstElement  			*typefind,
 {
 	GstCaps **found_caps_var = found_caps;
 	*found_caps_var			= gst_caps_copy(caps);
+	printf("3333333\n");
 	/* since we connect to a signal in the pipeline thread context, we need
 	 * to set an idle handler to exit the main loop in the mainloop context.
 	 * Normally, your app should not need to worry about such things. */
 	g_idle_add (idle_exit_loop, main_loop);
+
 }
 
 /**
@@ -140,13 +142,12 @@ GstElement *type_detection_element_for_roi( GstBin *pipeline ) {
 	if(typefind == NULL)
 		return NULL;
 	
-	/* Connect typefind element to handler */
-	g_signal_connect (typefind, "have-type", G_CALLBACK (cb_typefound), &found_caps);
-	
 	if ( ! gst_bin_add (pipeline, typefind)){
 		g_printerr("could not add %s in pipeline\n", TYPEFIND_ROI_NAME);
 		return NULL;
 	}
+	
+	gst_element_set_state (GST_ELEMENT (typefind), GST_STATE_NULL);	
 
 	return typefind ;
 
@@ -155,31 +156,21 @@ GstElement *type_detection_element_for_roi( GstBin *pipeline ) {
 /**
  * \brief this function just detect the caps between an element and a sink already in pipeline and already link to each other
  */
-GstStructure* type_detection_for_roi(GstBin *pipeline, GstElement *input , GstElement *sink ){
+GstStructure* type_detection_for_roi(GstBin *pipeline, GstElement *sink ){
 
-	GstElement 	*typefind;
 	GstCaps 	*found_caps;
 
-	/*
-	 * stop pipeline if it was running 
-	 */
-	gst_element_set_state (GST_ELEMENT (pipeline), GST_STATE_NULL);
-
-	/* 
-	 * Start by unlink the input and the sink element
-	 */
-	gst_element_unlink ( input , sink );
-
-	/* Create typefind element */
-	typefind = gst_element_factory_make_log ("typefind", NULL);	
-
-	if(typefind == NULL)
+	/* retrieve typefind roi element for pipeline */
+	GstElement *typefind_roi = gst_bin_get_by_name ( pipeline , TYPEFIND_ROI_NAME ) ;
+	if ( !typefind_roi )
 		return NULL;
-	
+
+
 	/* Connect typefind element to handler */
-	g_signal_connect (typefind, "have-type", G_CALLBACK (cb_typefound), &found_caps);
-	gst_bin_add (GST_BIN (pipeline), typefind );
-	gst_element_link_many (input, typefind, sink, NULL);
+	g_signal_connect (typefind_roi, "have-type", G_CALLBACK (cb_typefound), &found_caps);
+	/* run the main loop so the typefind can be performed */
+	gst_element_set_state (GST_ELEMENT (pipeline), GST_STATE_NULL);	
+	gst_element_link (typefind_roi, sink);
 	gst_element_set_state (GST_ELEMENT (pipeline), GST_STATE_PLAYING);
 
 	/* run the main loop until type is found so we execute callback function */
@@ -188,25 +179,17 @@ GstStructure* type_detection_for_roi(GstBin *pipeline, GstElement *input , GstEl
 		was_running = TRUE; /* save the fact that we have quit the main loop */
 	}
 
-	/* run the main loop so the typefind can be performed */
 	g_main_loop_run (main_loop);
 	
 	if( internal_error )
 		return NULL;
 
 	/* Video type found */	
-  	gst_element_set_state (GST_ELEMENT (pipeline), GST_STATE_NULL);
+  	gst_element_set_state (GST_ELEMENT (typefind_roi), GST_STATE_NULL);
 
-	/*Remove typefind and fakesink from pipeline */
-	gst_element_unlink_many( input, typefind, sink, NULL);
-	gst_bin_remove(GST_BIN(pipeline), typefind);
+	/* unlink typefind and sink */
+	gst_element_unlink (typefind_roi, sink);
 
-
-	/* 
-	 * Re-link the input element and the sink
-	 */
-	if ( ! gst_element_link (input , sink ) )
-		return NULL ;
 
 	/* Get video Caps */
 	GstCaps 		*detected 		= found_caps;
@@ -214,4 +197,5 @@ GstStructure* type_detection_for_roi(GstBin *pipeline, GstElement *input , GstEl
 	GstStructure 	*str_detected 	= gst_caps_get_structure(detected, 0);
 
 	return str_detected;
+
 }
