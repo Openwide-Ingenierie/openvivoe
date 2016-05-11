@@ -64,12 +64,14 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
+#include "../../../../include/mibParameters.h"
+#include "../../../../include/videoFormatInfo/videoFormatTable.h"
+
 #include "../../../../include/streaming/plugin/plugin.h"
 #include "../../../../include/streaming/plugin/vivoecrop/gstvivoecrop.h"
 #include "../../../../include/streaming/plugin/vivoecrop/gstaspectratiocrop.h"
 
-#include "../../../../include/mibParameters.h"
-#include "../../../../include/videoFormatInfo/videoFormatTable.h"
+
 
 #include <string.h>
 
@@ -79,7 +81,6 @@ GST_DEBUG_CATEGORY_STATIC (gst_vivoe_crop_debug_category);
 enum
 {
   PROP_0,
-  PROP_VIDEOFORMATINDEX,
   PROP_LEFT,
   PROP_RIGHT,
   PROP_TOP,
@@ -175,42 +176,16 @@ gst_vivoe_crop_src_event (GstBaseTransform * trans, GstEvent * event)
 static void
 gst_vivoe_crop_class_init (GstVivoeCropClass * klass)
 {
-#if 0
-	GObjectClass *gobject_class;	
-#endif //if 0
 
 	GstElementClass *element_class;
 	GstBaseTransformClass *basetransform_class;
 	GstVideoFilterClass *vfilter_class;
 
-#if 0
-	gobject_class = (GObjectClass *) klass;
-#endif //if 0
+
 	element_class = (GstElementClass *) klass;
 	basetransform_class = (GstBaseTransformClass *) klass;
 	vfilter_class = (GstVideoFilterClass *) klass;
 
-#if 0
-	gobject_class->set_property = gst_vivoe_crop_set_property;
-	gobject_class->get_property = gst_vivoe_crop_get_property;
-
-	g_object_class_install_property (gobject_class, PROP_LEFT,
-			g_param_spec_int ("left", "Left",
-				"Pixels to crop at left (-1 to auto-crop)", -1, G_MAXINT, 0,
-				G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
-	g_object_class_install_property (gobject_class, PROP_RIGHT,
-			g_param_spec_int ("right", "Right",
-				"Pixels to crop at right (-1 to auto-crop)", -1, G_MAXINT, 0,
-				G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
-	g_object_class_install_property (gobject_class, PROP_TOP,
-			g_param_spec_int ("top", "Top",
-				"Pixels to crop at top (-1 to auto-crop)", -1, G_MAXINT, 0,
-				G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
-	g_object_class_install_property (gobject_class, PROP_BOTTOM,
-			g_param_spec_int ("bottom", "Bottom",
-				"Pixels to crop at bottom (-1 to auto-crop)", -1, G_MAXINT, 0,
-				G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
-#endif 
 	gst_element_class_add_static_pad_template (element_class, &sink_template);
 	gst_element_class_add_static_pad_template (element_class, &src_template);
 	gst_element_class_set_static_metadata (element_class, "vivoecrop",
@@ -234,7 +209,6 @@ gst_vivoe_crop_init (GstVivoeCrop * vcrop)
 	vcrop->crop_left 			= 0;
 	vcrop->crop_top 			= 0;
 	vcrop->crop_bottom 		= 0;
-	vcrop->videoformatindex 	= 0;
 }
 
 #define ROUND_DOWN_2(n)  ((n)&(~1))
@@ -815,6 +789,8 @@ gst_vivoe_crop_get_property (GObject * object, guint prop_id, GValue * value,
 
 }
 #endif 
+#if 0
+
 /**
  * \brief this function has been defined to be able to set the property videoformatindex from the code but not from cmdline
  * \param object the plugin that will be modified
@@ -854,13 +830,11 @@ gst_vivoe_crop_get_videoformatindex (GObject * object, int *value){
 	GST_OBJECT_UNLOCK (vivoe_crop);	
 
 }
+#endif 
 
 static void 
-gst_vivoe_crop_get_roi_values_from_MIB( GstVivoeCrop * vcrop , 	gint *top , gint *left , gint *bottom , gint *right, gboolean scalable ){
+gst_vivoe_crop_get_roi_values_from_MIB( struct videoFormatTable_entry *videoFormat_entry , gint *top , gint *left , gint *bottom , gint *right, gboolean scalable ){
 
-
-	/* get the videoFormat_entry corresponding to our index */
-	struct videoFormatTable_entry *videoFormat_entry = videoFormatTable_getEntry( vcrop->videoformatindex ) ;
 
 	/* 
 	 * If values are negative (which could happen if a bad value is set to ROI resolution, and top, then set parameters to zero
@@ -892,8 +866,7 @@ gst_vivoe_crop_get_roi_values_from_MIB( GstVivoeCrop * vcrop , 	gint *top , gint
 	
 } 
 
-void
-gst_vivoe_crop_update (GObject * object, gboolean scalable)
+void  gst_vivoe_crop_update (GObject * object, struct videoFormatTable_entry *videoFormat_entry , gboolean scalable )
 {
 	GstVivoeCrop *vivoe_crop;
 
@@ -909,7 +882,7 @@ gst_vivoe_crop_update (GObject * object, gboolean scalable)
 	/*
 	 * Compute the correct values top, left, bottom and right from values from the MIB
 	 */
-	gst_vivoe_crop_get_roi_values_from_MIB( vivoe_crop , &top , &left , &bottom , &right, scalable ); 
+	gst_vivoe_crop_get_roi_values_from_MIB( videoFormat_entry , &top , &left , &bottom , &right, scalable ); 
 
 	gst_vivoe_crop_set_crop (vivoe_crop, top ,
 			&vivoe_crop->prop_top);

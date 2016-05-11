@@ -160,7 +160,7 @@ gboolean handle_roi( GstElement *pipeline, struct videoFormatTable_entry *video_
 	/*
 	 * set the index on vivoecrop element
 	 */
-	gst_vivoe_crop_set_videoformatindex ( G_OBJECT ( vivoecrop ) , video_stream_info->videoFormatIndex );
+//	gst_vivoe_crop_set_videoformatindex ( G_OBJECT ( vivoecrop ) , video_stream_info->videoFormatIndex );
 
 	return TRUE;
 
@@ -198,11 +198,10 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , st
 	if ( vivoecaps )
 		scalable = TRUE ;
 
-	gst_vivoe_crop_update (G_OBJECT ( vivoecrop ), scalable );
-
 	/* get the videoFormat_entry corresponding to our index */
 	struct videoFormatTable_entry *videoFormat_entry = videoFormatTable_getEntry( channel_entry->channelVideoFormatIndex ) ;
 
+	gst_vivoe_crop_update (G_OBJECT ( vivoecrop ), videoFormat_entry , scalable );
 
 	if ( scalable )
 	{

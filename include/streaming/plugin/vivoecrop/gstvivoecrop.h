@@ -22,6 +22,7 @@
 
 #include <gst/video/gstvideofilter.h>
 #include "../../../../include/mibParameters.h"
+#include "../../../../include/videoFormatInfo/videoFormatTable.h"
 
 G_BEGIN_DECLS
 
@@ -53,7 +54,6 @@ struct _GstVivoeCrop
 	GstVideoFilter parent;
 
 	/*< private >*/
-	gint videoformatindex;
 	gint prop_left;
 	gint prop_right;
 	gint prop_top;
@@ -81,9 +81,8 @@ GType gst_video_crop_get_type (void);
 
 void
 gst_vivoe_crop_set_videoformatindex (GObject * object,  const gint value);
-void
-gst_vivoe_crop_get_videoformatindex (GObject * object, int *value);
-void gst_vivoe_crop_update (GObject * object , gboolean scalable );
+void gst_vivoe_crop_get_videoformatindex (GObject * object, int *value);
+void gst_vivoe_crop_update (GObject * object, struct videoFormatTable_entry *videoFormat_entry , gboolean scalable ) ;
 
 gboolean vivoecrop_init (void) ;
 G_END_DECLS
