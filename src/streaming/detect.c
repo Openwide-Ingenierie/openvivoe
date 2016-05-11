@@ -43,7 +43,6 @@ static void cb_typefound ( 	GstElement  			*typefind,
 {
 	GstCaps **found_caps_var = found_caps;
 	*found_caps_var			= gst_caps_copy(caps);
-	printf("3333333\n");
 	/* since we connect to a signal in the pipeline thread context, we need
 	 * to set an idle handler to exit the main loop in the mainloop context.
 	 * Normally, your app should not need to worry about such things. */
@@ -96,7 +95,6 @@ static GstStructure* type_detection_with_sink(GstBin *pipeline, GstElement *inpu
 
 	/* Get video Caps */
 	GstCaps 		*detected 		= found_caps;
-	//printf("%s\n", gst_caps_to_string(detected));
 	GstStructure 	*str_detected 	= gst_caps_get_structure(detected, 0);
 
 	return str_detected;
@@ -134,7 +132,6 @@ GstStructure* type_detection(GstBin *pipeline, GstElement *input_video , GstElem
 GstElement *type_detection_element_for_roi( GstBin *pipeline ) {
 
 	GstElement 	*typefind;
-	GstCaps 	*found_caps;
 
 	/* Create typefind element */
 	typefind = gst_element_factory_make_log ("typefind", TYPEFIND_ROI_NAME );	
@@ -147,7 +144,7 @@ GstElement *type_detection_element_for_roi( GstBin *pipeline ) {
 		return NULL;
 	}
 	
-	gst_element_set_state (GST_ELEMENT (typefind), GST_STATE_NULL);	
+	//gst_element_set_state (GST_ELEMENT (typefind), GST_STATE_NULL);	
 
 	return typefind ;
 
@@ -156,7 +153,7 @@ GstElement *type_detection_element_for_roi( GstBin *pipeline ) {
 /**
  * \brief this function just detect the caps between an element and a sink already in pipeline and already link to each other
  */
-GstStructure* type_detection_for_roi(GstBin *pipeline, GstElement *sink ){
+GstStructure* type_detection_for_roi(GstBin *pipeline , GstElement *sink ){
 
 	GstCaps 	*found_caps;
 
@@ -193,7 +190,6 @@ GstStructure* type_detection_for_roi(GstBin *pipeline, GstElement *sink ){
 
 	/* Get video Caps */
 	GstCaps 		*detected 		= found_caps;
-//	printf("%s\n", gst_caps_to_string(detected));
 	GstStructure 	*str_detected 	= gst_caps_get_structure(detected, 0);
 
 	return str_detected;

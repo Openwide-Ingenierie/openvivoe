@@ -50,8 +50,8 @@ static gboolean SP_roi_mp4_config_update (gpointer stream_datas,  struct videoFo
 	/*
 	 * detect the new video caps 
 	 */
-	printf("1111111111\n");
- 	video_caps = type_detection_for_roi( GST_BIN(data->pipeline), data->udp_elem ) ;
+
+ 	video_caps = type_detection_for_roi( GST_BIN(data->pipeline) , data->udp_elem ) ;
 	
 	if ( !video_caps ){
 		g_printerr ("Failed to adapt MPEG-4 pipeline for ROI\n");

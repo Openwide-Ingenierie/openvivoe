@@ -233,12 +233,12 @@ static gboolean create_branch_in_pipeline( GstElement *pipeline , GstElement *in
 	/* retrieve tee source pad template (after linking it to input element*/
 	tee_src_pad_template = gst_element_class_get_pad_template(GST_ELEMENT_GET_CLASS(tee), "src_%u");
 	tee_branch1_sink_pad = gst_element_request_pad(tee, tee_src_pad_template, NULL, NULL );
-	g_print("Obtained a request for pad %s for audio branch.\n", gst_pad_get_name(tee_branch1_sink_pad));
+	
 	/* get sink pad from branch 1 */
 	branch1_src_pad = gst_element_get_static_pad( branch1 , "sink");
 
 	tee_branch2_sink_pad = gst_element_request_pad(tee, tee_src_pad_template, NULL, NULL );
-	g_print("Obtained a request for pad %s for video branch.\n", gst_pad_get_name(tee_branch2_sink_pad));
+
 	/* get sink pad from branch 2 */
 	branch2_src_pad = gst_element_get_static_pad(branch2, "sink");
 
@@ -392,10 +392,12 @@ GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
 	 */
 
 	if ( video_stream_info->videoFormatType == roi ){
+
 		if ( !create_branch_in_pipeline( pipeline , last , udpsink , typefind_roi ) ){
 			g_printerr("Failed to create pipeline\n");
 			return NULL;
 		}
+		
 	}
 	else
 	{
@@ -403,6 +405,7 @@ GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
 		if ( !gst_element_link_log (last , udpsink))
 			return NULL;
 	}
+
 
 	last = udpsink;
 
