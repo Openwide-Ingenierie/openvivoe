@@ -64,9 +64,9 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 	GstStructure *video_caps;
 
 	if (caps == NULL){
+
 		/* Media stream Type detection */
 		video_caps = type_detection(GST_BIN(pipeline), input, NULL);
-
 		if ( video_caps == NULL )
 			return NULL;
 
@@ -86,16 +86,7 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 	/* 
 	 * Handle the ROI 
 	 */
-	if ( !handle_roi ( pipeline ,  video_info ,  video_caps ) )
-		return NULL;
-
-	if ( !input)
-		return NULL; 
-
-	video_caps = type_detection(GST_BIN(pipeline), input, NULL);
-
-	if ( !input )
-		return NULL;
+	handle_roi ( pipeline ,  video_info ,  video_caps ) ;
 
  	/* in case RAW video type has been detected */
 	if ( gst_structure_has_name( video_caps, "video/x-raw") ){
@@ -116,7 +107,8 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 		 * We do not have to add it again 
 		 */
 		if ( caps == NULL ){
-		parser 	= gst_element_factory_make_log ("mpeg4videoparse", MPEG4PARSER_NAME );
+
+			parser 	= gst_element_factory_make_log ("mpeg4videoparse", MPEG4PARSER_NAME );
 			if ( !parser )
 				return NULL;
 
@@ -177,6 +169,10 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 	gst_bin_add(GST_BIN (pipeline), rtp);
 
 	if (caps == NULL ){
+		printf("1\n");
+		printf("%s\n", GST_ELEMENT_NAME (input ));
+		type_detection(GST_BIN(pipeline), input,NULL);
+		printf("2\n");
 		
 		/* Filters out non VIVOE videos, and link input to RTP if video has a valid format*/
 		if (!filter_VIVOE(type_detection(GST_BIN(pipeline), input,NULL),input, rtp))
@@ -191,6 +187,7 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 
 		/*Fill the MIB a second time after creating payload*/
 		fill_entry(video_caps, video_info, stream_datas);
+
 	}else{
 		
 		/* link input to rtp payloader */

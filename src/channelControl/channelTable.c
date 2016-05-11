@@ -890,7 +890,7 @@ channelTable_handler(
                 /* or possibly 'netsnmp_check_vb_int_range' */
 				/* get the corresponding videoFormatTable to get the maximum value of the top parameter */
 				/* originTop + channelVertRest cannot be greater than MaxVertRes, otherwise we are outside the frame */
-                ret = netsnmp_check_vb_int_range ( request->requestvb , 0 , videoFormat_entry->videoFormatMaxVertRes - table_entry->channelVertRes  );
+                ret = netsnmp_check_vb_int_range ( request->requestvb , 0 , videoFormat_entry->videoFormatMaxVertRes /*- table_entry->channelVertRes */ );
 				if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;
@@ -899,7 +899,7 @@ channelTable_handler(
             case COLUMN_CHANNELROIORIGINLEFT:
 				/* get the corresponding videoFormatTable to get the maximum value of the left parameter */
 				/* originLeft+ channelHorzRest cannot be greater than MaxHorzRes, otherwise we are outside the frame */
-                ret = netsnmp_check_vb_int_range ( request->requestvb , 0 , videoFormat_entry->videoFormatMaxHorzRes - table_entry->channelHorzRes );
+                ret = netsnmp_check_vb_int_range ( request->requestvb , 0 , videoFormat_entry->videoFormatMaxHorzRes /*- table_entry->channelHorzRes */);
                 if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;

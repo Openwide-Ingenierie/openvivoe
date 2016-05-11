@@ -156,19 +156,9 @@ gboolean handle_roi( GstElement *pipeline, struct videoFormatTable_entry *video_
 	 * iterates though the bin source to find the element vivoecaps
 	 */
 	vivoecaps = get_element_from_bin( pipeline, GST_TYPE_VIVOE_CAPS );	
-		/*
-		 * then the ROI is scalable
-		 */
-	if ( vivoecaps ){
-
-		/* set the caps to the vivoecaps element */
-		GstCaps *caps_filter = gst_caps_new_full ( gst_structure_copy ( video_caps ) , NULL );
-		g_object_set ( 	G_OBJECT ( vivoecaps ) , 
-				"caps" 	, caps_filter,
-				NULL
-				);
-
-	}
+	/*
+	 * then the ROI is scalable
+	 */
 
 	/* 
 	 * Set the ROI parameter into the videoFormat Entry 
@@ -209,7 +199,7 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , st
 	 * check that the ROI want from non-scalable to scalable. 
 	 */
 	GstElement *vivoecrop = get_element_from_bin( pipeline, GST_TYPE_VIVOE_CROP );
-	GstElement *vivoecaps = get_element_from_bin( pipeline, GST_TYPE_VIVOE_CAPS );
+	GstElement *vivoecaps = get_element_from_bin( pipeline, GST_TYPE_VIVOE_CAPS );	
 
 	if ( !vivoecrop)
 		return FALSE;
@@ -217,19 +207,18 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , st
 	if ( vivoecaps )
 		scalable = TRUE ;
 
-	gst_vivoe_crop_update (G_OBJECT ( vivoecrop ), scalable);
+	gst_vivoe_crop_update (G_OBJECT ( vivoecrop ), scalable );
 
 	if ( scalable )
 	{
 		GstCaps *new_caps;
 		g_object_get ( G_OBJECT( vivoecaps  ) , "caps" , &new_caps , NULL ) ;
 
-		new_caps = gst_caps_make_writable ( new_caps );
-
 		/* get the videoFormat_entry corresponding to our index */
 		struct videoFormatTable_entry *videoFormat_entry = videoFormatTable_getEntry( channel_entry->channelVideoFormatIndex ) ;
 
-
+		new_caps = gst_caps_make_writable ( new_caps );
+	
 		gst_caps_set_simple (  new_caps , 
 				"height" , G_TYPE_INT	,  videoFormat_entry->videoFormatRoiVertRes 	,
 				"width" , G_TYPE_INT	,  videoFormat_entry->videoFormatRoiHorzRes 	,
@@ -241,6 +230,16 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , st
 				NULL
 				);
 	}
+
+#if 0
+	if ( ! strcmp( channel_entry->channelVideoFormat , MPEG4_NAME ) ){
+		/*
+		 * call handle mpeg config update
+		 */
+		if ( !SP_roi_mp4_config_update (stream_datas, videoFormat_entry ))
+			return FALSE;
+	}
+#endif 
 
 	return TRUE;
 

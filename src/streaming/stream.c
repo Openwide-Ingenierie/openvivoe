@@ -191,7 +191,7 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 	}
 	else{
 
-		gchar 		*cmdline 			= init_sources_from_conf( videoFormatIndex );
+		gchar 		*cmdline = init_sources_from_conf( videoFormatIndex );
 		/* check if everything went ok */	
 		if (cmdline == NULL)
 			return NULL;
