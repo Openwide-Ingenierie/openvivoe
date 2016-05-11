@@ -372,7 +372,7 @@ GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
 			channel_entry_index
 			);
 
-	if (last == NULL){
+	if (udpsink == NULL){
 		g_printerr("Failed to create pipeline\n");
 		return NULL;
 	}
@@ -384,13 +384,23 @@ GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
 		return NULL;
 	}
 
-	/* we link the elements together */
-/*	if ( !gst_element_link_log (input, udpsink))
-	    return NULL;*/
-	/* create the branch from RTP elment, branch 1 is UDP element, branch 2 is typefind_roi element */
-	if ( !create_branch_in_pipeline( pipeline , last , udpsink , typefind_roi ) ){
-		g_printerr("Failed to create pipeline\n");
-		return NULL;
+	/* 
+	 * If the videoFormat is a ROI, create the branch from RTP elment, branch 1 is UDP element, branch 2 is typefind_roi element
+	 * rtp and updsink will be link there.
+	 * Otherwise juist link udp source to payloader.
+	 *
+	 */
+
+	if ( video_stream_info->videoFormatType == roi ){
+		if ( !create_branch_in_pipeline( pipeline , last , udpsink , typefind_roi ) ){
+			g_printerr("Failed to create pipeline\n");
+			return NULL;
+		}
+	}
+	else{
+		/* we link the elements together */
+		if ( !gst_element_link_log (last , udpsink))
+			return NULL;
 	}
 
 	last = udpsink;
