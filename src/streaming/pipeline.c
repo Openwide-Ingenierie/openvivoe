@@ -169,10 +169,6 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 	gst_bin_add(GST_BIN (pipeline), rtp);
 
 	if (caps == NULL ){
-		printf("1\n");
-		printf("%s\n", GST_ELEMENT_NAME (input ));
-		type_detection(GST_BIN(pipeline), input,NULL);
-		printf("2\n");
 		
 		/* Filters out non VIVOE videos, and link input to RTP if video has a valid format*/
 		if (!filter_VIVOE(type_detection(GST_BIN(pipeline), input,NULL),input, rtp))
@@ -206,6 +202,58 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 	/* Finally return*/
 	return rtp;
 }
+
+/**
+ * \brief Create a branch from input, to branch1 and branch2. In this case it is used to add a typefind element for ROI management and the udpsrc 
+ * \param pipeline the pipeline associated to this SP
+ * \param input last element added in pipeline from which we want to branch
+ * \param branch1 the next element in branch 1
+ * \param branch2 the next element in branch 2
+ * \return TRUE on succes, FALSE on FAILURE
+ */
+static gboolean create_branch_in_pipeline( GstElement *pipeline , GstElement *input , GstElement *branch1 , GstElement *branch2){
+
+	GstPadTemplate *tee_src_pad_template;
+	GstPad *tee_branch1_sink_pad, *tee_branch2_sink_pad;
+	GstPad *branch1_src_pad, *branch2_src_pad;
+
+	/*
+	 * Create the tee element, use to create the branchs in pipeline
+	 */
+	GstElement *tee = gst_element_factory_make_log( "tee", TEE_NAME ); 
+
+	/* add it in pipeline */
+	if ( !gst_bin_add ( GST_BIN(pipeline), tee) ){
+		g_printerr("Failed to add %s element in pipeline\n", TEE_NAME );
+		return FALSE;
+	}
+	if ( ! gst_element_link_log ( input , tee))
+		return FALSE;
+	
+	/* retrieve tee source pad template (after linking it to input element*/
+	tee_src_pad_template = gst_element_class_get_pad_template(GST_ELEMENT_GET_CLASS(tee), "src_%u");
+	tee_branch1_sink_pad = gst_element_request_pad(tee, tee_src_pad_template, NULL, NULL );
+	g_print("Obtained a request for pad %s for audio branch.\n", gst_pad_get_name(tee_branch1_sink_pad));
+	/* get sink pad from branch 1 */
+	branch1_src_pad = gst_element_get_static_pad( branch1 , "sink");
+
+	tee_branch2_sink_pad = gst_element_request_pad(tee, tee_src_pad_template, NULL, NULL );
+	g_print("Obtained a request for pad %s for video branch.\n", gst_pad_get_name(tee_branch2_sink_pad));
+	/* get sink pad from branch 2 */
+	branch2_src_pad = gst_element_get_static_pad(branch2, "sink");
+
+	if(gst_pad_link(tee_branch1_sink_pad, branch1_src_pad) != GST_PAD_LINK_OK || gst_pad_link(tee_branch2_sink_pad, branch2_src_pad) != GST_PAD_LINK_OK) {
+		g_printerr("%s could not be linked to %s and %s\n", TEE_NAME , GST_ELEMENT_NAME(branch1) ,  GST_ELEMENT_NAME(branch2) );
+		return FALSE;
+	}
+
+	gst_object_unref(branch1_src_pad);
+	gst_object_unref(branch2_src_pad);
+
+	return TRUE;
+
+}
+
 
 /**
  * \brief set the paramemetrs to the element udpsink added in SP's pipeline
@@ -254,7 +302,6 @@ static GstElement* addUDP( 	GstElement *pipeline, 	GstBus *bus,
 
 	set_udpsink_param(udpsink, channel_entry_index);
 
-	
 	/* add udpsink to pipeline */
 	if ( !gst_bin_add(GST_BIN (pipeline), udpsink )){
 		g_printerr("Unable to add %s to pipeline", gst_element_get_name(udpsink));
@@ -315,17 +362,27 @@ GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
 		return NULL;
 	}
 
-	/* Add UDP element */
-	last = addUDP( 	pipeline, 	  		bus,
-					bus_watch_id, 		last, 
-					channel_entry_index
-				);
+/*
+ * This is where we add the last element of pipeline. But in order to handle properly ROI for MPEG-4 video, 
+ * we must give the possibility to perforpm typefind after the RTP element. A solution, is to unlink RTP and UDP element, add and perform
+ * the typefing, and lik RTP and UDP again. This is not very efficient. Then, another solution is have beeen imagined: we will place a tee element
+ * before the udp element. A tee has the power to split date to multiple pads. So after the type there will be two branches in our pipeline:
+ * _ one with the udp element as usuall. 
+ * _ one with a typefind element. But this typefind, on contrary to others used should never been removed from the pipeline.
+ */
+
+
+	last = addUDP( 	pipeline, 	bus,
+			bus_watch_id, 		last, 
+			channel_entry_index
+			);
 
 	if (last == NULL){
 		g_printerr("Failed to create pipeline\n");
 		return NULL;
 	}
 
+	
 	data->udp_elem = last;
 	/* Before returning, free the entry created at the begging*/
 	free(video_stream_info);
