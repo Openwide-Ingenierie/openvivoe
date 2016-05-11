@@ -308,10 +308,6 @@ static GstElement* addUDP( 	GstElement *pipeline, 	GstBus *bus,
 		return NULL;
 	}
 
-	/* we link the elements together */
-	if ( !gst_element_link_log (input, udpsink))
-	    return NULL;
-
 	return udpsink;
 }
 
@@ -325,7 +321,7 @@ static GstElement* addUDP( 	GstElement *pipeline, 	GstBus *bus,
 GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
 											GstElement* input,
 											long videoChannelIndex){
-	GstElement 		*last;
+	GstElement 		*last, *udpsink;
 	stream_data 	*data 	=  stream_datas;
 	/* create the empty videoFormatTable_entry structure to intiate the MIB */
 	struct videoFormatTable_entry * video_stream_info;
@@ -371,8 +367,7 @@ GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
  * _ one with a typefind element. But this typefind, on contrary to others used should never been removed from the pipeline.
  */
 
-
-	last = addUDP( 	pipeline, 	bus,
+	udpsink = addUDP( 	pipeline, 	bus,
 			bus_watch_id, 		last, 
 			channel_entry_index
 			);
@@ -382,7 +377,24 @@ GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
 		return NULL;
 	}
 
-	
+	GstElement *typefind_roi = type_detection_element_for_roi(GST_BIN( pipeline) );
+
+	if ( !typefind_roi ){
+		g_printerr("Failed to create pipeline\n");
+		return NULL;
+	}
+
+	/* we link the elements together */
+/*	if ( !gst_element_link_log (input, udpsink))
+	    return NULL;*/
+	/* create the branch from RTP elment, branch 1 is UDP element, branch 2 is typefind_roi element */
+	if ( !create_branch_in_pipeline( pipeline , last , udpsink , typefind_roi ) ){
+		g_printerr("Failed to create pipeline\n");
+		return NULL;
+	}
+
+	last = udpsink;
+
 	data->udp_elem = last;
 	/* Before returning, free the entry created at the begging*/
 	free(video_stream_info);

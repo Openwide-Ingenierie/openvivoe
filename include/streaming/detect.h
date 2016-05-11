@@ -9,6 +9,7 @@
 
 GstStructure* type_detection(GstBin *pipeline, GstElement *input_video, GstElement *sink);
 GstStructure* type_detection_for_roi(GstBin *pipeline, GstElement *input , GstElement *sink ) ;
+GstElement *type_detection_element_for_roi( GstBin *pipeline ) ;
 
 
 #endif /* DETECT_H */

@@ -123,6 +123,35 @@ GstStructure* type_detection(GstBin *pipeline, GstElement *input_video , GstElem
 	return str_detected;
 }
 
+
+/**
+ * \brief create the typefind element to use to insert after tee element
+ * \paramp pipeline the pipeline in which the typefindroi element should be added 
+ * \return the typefind element created
+ */
+GstElement *type_detection_element_for_roi( GstBin *pipeline ) {
+
+	GstElement 	*typefind;
+	GstCaps 	*found_caps;
+
+	/* Create typefind element */
+	typefind = gst_element_factory_make_log ("typefind", TYPEFIND_ROI_NAME );	
+
+	if(typefind == NULL)
+		return NULL;
+	
+	/* Connect typefind element to handler */
+	g_signal_connect (typefind, "have-type", G_CALLBACK (cb_typefound), &found_caps);
+	
+	if ( ! gst_bin_add (pipeline, typefind)){
+		g_printerr("could not add %s in pipeline\n", TYPEFIND_ROI_NAME);
+		return NULL;
+	}
+
+	return typefind ;
+
+}
+
 /**
  * \brief this function just detect the caps between an element and a sink already in pipeline and already link to each other
  */
@@ -135,7 +164,6 @@ GstStructure* type_detection_for_roi(GstBin *pipeline, GstElement *input , GstEl
 	 * stop pipeline if it was running 
 	 */
 	gst_element_set_state (GST_ELEMENT (pipeline), GST_STATE_NULL);
-
 
 	/* 
 	 * Start by unlink the input and the sink element

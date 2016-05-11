@@ -35,6 +35,8 @@
 
 #define RTPJ2KPAY_NAME 			"rtpj2kpay"
 
+#define TEE_NAME 				"tee"
+
 #define UDPSINK_NAME 			"udpsink"
 
 #define UDPSRC_NAME 			"udpsrc"
@@ -51,6 +53,8 @@
  * Elements created in detect.c
  */
 #define SINK_TYPEFIND_NAME 		"sink-typefind"
+
+#define TYPEFIND_ROI_NAME 		"typefind_roi"
 
 /*
  * Elements created in roi.c
