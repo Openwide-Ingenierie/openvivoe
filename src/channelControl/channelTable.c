@@ -537,7 +537,7 @@ static gboolean roi_requests_handler( struct channelTable_entry * table_entry , 
 	 * Now update pipeline
 	 * If an error occurs, we just reset the old roi parameters' values of channel and videoFormat_entry
 	 */
-	if ( ! update_pipeline_SP_non_scalable_roi_changes( table_entry->stream_datas ,  table_entry ) )
+	if ( ! update_pipeline_SP_on_roi_changes( table_entry->stream_datas ,  table_entry ) )
 		return FALSE;
 	else
 		return channelSatus_requests_handler(  table_entry ) ;

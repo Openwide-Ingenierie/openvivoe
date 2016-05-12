@@ -241,7 +241,7 @@ gboolean handle_roi( GstElement *pipeline, struct videoFormatTable_entry *video_
  * \param channel_entry the corresponding channel entry
  * \return TRUE on succes, FALSE on failure such as wrong values given in the MIB
  */
-gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , struct channelTable_entry *channel_entry){
+gboolean update_pipeline_SP_on_roi_changes( gpointer stream_datas , struct channelTable_entry *channel_entry ){
 
 	stream_data *data 		= stream_datas;
 	GstElement 	*pipeline 	= data->pipeline;
@@ -258,8 +258,8 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , st
 	 * We should not chceck the values entered by the user. As an example, this is not where we should 
 	 * check that the ROI want from non-scalable to scalable. 
 	 */
-	GstElement *vivoecrop = get_element_from_bin( pipeline, GST_TYPE_VIVOE_CROP );
-	GstElement *vivoecaps = get_element_from_bin( pipeline, GST_TYPE_VIVOE_CAPS );	
+	GstElement *vivoecrop = get_element_from_bin( pipeline , GST_TYPE_VIVOE_CROP );
+	GstElement *vivoecaps = get_element_from_bin( pipeline , GST_TYPE_VIVOE_CAPS );	
 
 	if ( !vivoecrop)
 		return FALSE;
@@ -277,7 +277,6 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , st
 		GstCaps *new_caps;
 		g_object_get ( G_OBJECT( vivoecaps  ) , "caps" , &new_caps , NULL ) ;
 
-
 		new_caps = gst_caps_make_writable ( new_caps );
 	
 		gst_caps_set_simple (  new_caps , 
@@ -292,10 +291,9 @@ gboolean update_pipeline_SP_non_scalable_roi_changes( gpointer stream_datas , st
 				);
 	}
 
-
 	if ( ! strcmp( channel_entry->channelVideoFormat , MPEG4_NAME ) ){
 		/*
-		 * call handle mpeg config update
+		 * call handle MPEG4 config update
 		 */
 		if ( !SP_roi_mp4_config_update (stream_datas, videoFormat_entry ))
 			return FALSE;
