@@ -86,7 +86,7 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 	/* 
 	 * Handle the ROI 
 	 */
-	handle_roi ( pipeline ,  video_info ,  video_caps ) ;
+	handle_roi ( pipeline ,  video_info ) ;
 
  	/* in case RAW video type has been detected */
 	if ( gst_structure_has_name( video_caps, "video/x-raw") ){

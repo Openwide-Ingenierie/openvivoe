@@ -154,7 +154,7 @@ GstElement *get_element_from_bin( GstElement *pipeline  , GType type){
  * \param video_caps the caps of the input vidoe
  * \return input if no element added, other it returns the last element added in pipeline
  */
-gboolean handle_roi( GstElement *pipeline, struct videoFormatTable_entry *video_stream_info , GstStructure *video_caps ) {
+gboolean handle_roi( GstElement *pipeline, struct videoFormatTable_entry *video_stream_info ) {
 
 	GstElement 	*vivoecrop 	= NULL;
 	GstElement 	*vivoecaps 	= NULL;
