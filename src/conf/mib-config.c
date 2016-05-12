@@ -846,7 +846,6 @@ void set_default_IP_from_conf(int index, const char* new_default_ip){
 	close_mib_configuration_file(gkf);
 
 }
-#if 0
 
 /** 
  * \brief register into the structure roi_data the MIB ROI parameters' values extract from the configuration file
@@ -854,21 +853,23 @@ void set_default_IP_from_conf(int index, const char* new_default_ip){
  * \param roi_datas the roi_data structure to fill
  * \return TRUE if ROI values are valid, FALSE otherwise
  */
-gboolean get_roi_parameters_for_sources (GKeyFile* gkf, int index, roi_data *roi_datas){
+gboolean 
+get_roi_parameters_for_sources ( 
+		int index, 						gboolean scalable, 
+		long *roi_width_ptr , 			long *roi_height_ptr ,
+	   	long *roi_top_ptr, 				long *roi_left_ptr, 
+		long *roi_extent_bottom_ptr,   	long *roi_extent_right_ptr ){
 
 	/* Define the error pointer we will be using to check for errors in the configuration file */
-    GError 		*error 	= NULL;
+	GError 		*error 	= NULL;
 
 	/* Declaration of an array of gstring (gchar**) that will contain the name of the different groups
 	 * declared in the configuration file
 	 */
 	gchar 		**groups;
 
-	/* the gst_source cmdline */
-	gchar * cmdline;
-
 	/*
-	 * the roi parameters retreive from the configuration file
+	 * the roi parameters to retrieve from the configuration file
 	 */
 	long 		roi_width;
 	long 		roi_height;
@@ -876,130 +877,78 @@ gboolean get_roi_parameters_for_sources (GKeyFile* gkf, int index, roi_data *roi
 	long 		roi_left;
 	long 		roi_extent_bottom;
 	long 		roi_extent_right;
-	gboolean 	scalable = FALSE;
 
 	/*first we load the different Groups of the configuration file
 	 * second parameter "gchar* length" is optional*/
-	groups 		= g_key_file_get_groups(gkf, NULL);
-	cmdline 	= get_source_cmdline(gkf, index );
-	scalable 	= vivoe_roi ( cmdline ) ;
+	groups 		= g_key_file_get_groups(gkf_conf_file, NULL);
 
-	if ( !scalable  ){
 
-		roi_width 			= 0;
-		roi_height 			= 0;
-		roi_top 			= 0;
-		roi_left 			= 0;
-		roi_extent_bottom 	= 0;
-		roi_extent_right 	= 0;
+	char *source_prefix = "source_";
+	char *source_name = (char*) malloc( strlen(source_prefix)+2 * sizeof(char));
+	/* Build the name that the group should have */
+	sprintf(source_name, "%s%d", source_prefix, index);
+
+	roi_width 			= get_key_value_int(gkf_conf_file,(const gchar* const*) groups , source_name , ROI_WIDTH, 			error, TRUE );
+	roi_height 			= get_key_value_int(gkf_conf_file,(const gchar* const*) groups , source_name , ROI_HEIGHT, 			error, TRUE );
+	roi_top 			= get_key_value_int(gkf_conf_file,(const gchar* const*) groups , source_name , ROI_ORIGIN_TOP ,		error, TRUE );
+	roi_left 			= get_key_value_int(gkf_conf_file,(const gchar* const*) groups , source_name , ROI_ORIGIN_LEFT,		error, TRUE );
+	roi_extent_bottom 	= get_key_value_int(gkf_conf_file,(const gchar* const*) groups , source_name , ROI_EXTENT_BOTTOM, 	error, TRUE );
+	roi_extent_right 	= get_key_value_int(gkf_conf_file,(const gchar* const*) groups , source_name , ROI_EXTENT_RIGHT, 	error, TRUE );
+
+	/*
+	 * check if values given in configuration file are correct
+	 */
+
+	/* 
+	 * if origin parameters set, but no ROI resolution specified 
+	 */
+	if ( ( roi_top != -1 || roi_left != -1 ) && ( roi_width == -1 && roi_height ==-1) ){
+
+		g_printerr ( "ERROR: [source_%d] ROI's origin specified but no ROI resolution found\n", index );
 		return FALSE;
-
-	}else{
-
-		char *source_prefix = "source_";
-		char *source_name = (char*) malloc( strlen(source_prefix)+2 * sizeof(char));
-		/* Build the name that the group should have */
-		sprintf(source_name, "%s%d", source_prefix, index);
-
-		roi_width 			= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_WIDTH, 		error, TRUE );
-		roi_height 			= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_HEIGHT, 		error, TRUE );
-		roi_top 			= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_ORIGIN_TOP , 	error, TRUE );
-		roi_left 			= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_ORIGIN_LEFT, 	error, TRUE );
-		roi_extent_bottom 	= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_EXTENT_BOTTOM, error, TRUE );
-		roi_extent_right 	= get_key_value_int(gkf,(const gchar* const*) groups , source_name , ROI_EXTENT_RIGHT, 	error, TRUE );
-
-		/*
-		 * check if values given in configuration file are correct
-		 */
-
-		/* 
-		 * if origin parameters set, but no ROI resolution specified 
-		 */
-		if ( ( roi_top != -1 || roi_left != -1 ) && ( roi_width == -1 && roi_height ==-1) ){
-
-				g_printerr ( "ERROR: [source_%d] ROI's origin specified but no ROI resolution found\n", index );
-				return FALSE;
-
-		}
-
-		if  ( scalable )
-		{
-
-			/* if extent object are set but not origin object */
-			if ( (roi_extent_bottom != -1 || roi_extent_right != -1) && (roi_top == -1 && roi_left==-1)  ){
-				g_printerr ( " ERROR: [source_%d] scalable ROI cannot have %s and %s set if %s and %s are not set too", index, ROI_EXTENT_BOTTOM , ROI_EXTENT_RIGHT , ROI_ORIGIN_TOP , ROI_ORIGIN_LEFT );
-				return FALSE;
-			}
-
-		}
-
-		if ( roi_width == -1 )
-			roi_width = 0 ;
-		if ( roi_height == -1 )
-			roi_height = 0 ;
-		if (roi_top  == -1 )
-			roi_top = 0 ;
-		if ( roi_left == -1 )
-			roi_left = 0 ;
-		if ( roi_extent_bottom == -1 )
-			roi_extent_bottom = 0 ;
-		if ( roi_extent_right == -1 )
-			roi_extent_right = 0 ;
-
-		/*
-		 * save those values to roi_datas
-		 */
-		roi_datas->roi_width 			= roi_width;
-		roi_datas->roi_height 			= roi_height;
-		roi_datas->roi_top 				= roi_top;
-		roi_datas->roi_left 			= roi_left;
-		roi_datas->roi_extent_bottom 	= roi_extent_bottom;
-		roi_datas->roi_extent_right 	= roi_extent_right;
-		roi_datas->scalable 			= scalable;
-		/*
-		 * Now we are going to parse the gst_source command line to save in the roi data:
-		 * _ the pipeline's part that stands before the element vivoe-roi
-		 * _the pipeline's part the stands after the element vivoe-roi , or NULL if no pipeline is found after vivoe-roi elements
-		 */
-
-		/*
-		 * first retrieve from cmdline, the pipeline before "vivoe-roi" 
-		 */
-		gchar *to_not_parse = g_strrstr ( cmdline , VIVOE_ROI_NAME ) ;
-		gchar *gst_before_roi_elt = g_strndup (cmdline , strlen( cmdline ) - strlen( to_not_parse ) - strlen( "! " ) );
-		/* if to_parse variable is NULL, then there is a problem in configuration file, return FALSE */
-		if (! gst_before_roi_elt ){
-			g_printerr("In configuration file no pipeline was found be \"%s\" element\n", VIVOE_ROI_NAME);
-			return FALSE;
-		}
-
-		/*
-		 * Then retrieve from cmdline, the pipeline after "vivoe-roi" 
-		 */
-
-		/* 
-		 * The string variable to_not_parse obtained before is a pointer to vivoe-roi and the rest of the pipeline.
-		 * In this string, we get the first occurence of the "!" that should be just before the next element to parse 
-		 */
-		gchar *	gst_after_roi_elt = (strstr ( to_not_parse , "!" )) +1 ; /* add +1 to discard "!" present at the begining of the string */
-
-		if ( gst_before_roi_elt )
-			roi_datas->gst_before_roi_elt 	= g_strdup ( gst_before_roi_elt );
-		else
-			roi_datas->gst_before_roi_elt 	= NULL ;
-
-		if ( g_strrstr ( to_not_parse , "!" ))
-			roi_datas->gst_after_roi_elt 	= g_strdup ( gst_after_roi_elt ); 
-		else
-			roi_datas->gst_after_roi_elt 	= NULL ;
-
-		free( gst_before_roi_elt ) ;
-		free(source_name);
-		return TRUE;
 
 	}
 
+	if  ( scalable )
+	{
+
+		/* if extent object are set but not origin object */
+		if ( (roi_extent_bottom != -1 || roi_extent_right != -1) && (roi_top == -1 && roi_left==-1)  ){
+			g_printerr ( " ERROR: [source_%d] scalable ROI cannot have %s and %s set if %s and %s are not set too", index, ROI_EXTENT_BOTTOM , ROI_EXTENT_RIGHT , ROI_ORIGIN_TOP , ROI_ORIGIN_LEFT );
+			return FALSE;
+		}
+
+	}
+
+	if ( roi_width == -1 )
+		roi_width = 0 ;
+	if ( roi_height == -1 )
+		roi_height = 0 ;
+	if (roi_top  == -1 )
+		roi_top = 0 ;
+	if ( roi_left == -1 )
+		roi_left = 0 ;
+	if ( roi_extent_bottom == -1 )
+		roi_extent_bottom = 0 ;
+	if ( roi_extent_right == -1 )
+		roi_extent_right = 0 ;
+
+	/*
+	 * save those values to roi_datas
+	 */
+	*roi_width_ptr			= roi_width;
+	*roi_height_ptr 		= roi_height;
+	*roi_top_ptr 			= roi_top;
+	*roi_left_ptr 			= roi_left;
+	*roi_extent_bottom_ptr 	= roi_extent_bottom;
+	*roi_extent_right_ptr 	= roi_extent_right;
+
+	free(source_name);
+
+	return TRUE;
+
 }
+#if 0
 /**
  * \brief definition of the roi structure table that will contains the roi data
  */

@@ -33,6 +33,41 @@
 #include "../../include/streaming/stream_registration.h"
 #include "../../include/streaming/stream.h"
 
+static gboolean set_roi_values_videoFormat_entry( struct videoFormatTable_entry* videoFormat_entry , gboolean scalable ){
+
+	long 		roi_width;
+	long 		roi_height;
+	long 		roi_top;
+	long 		roi_left;
+	long 		roi_extent_bottom;
+	long 		roi_extent_right;
+
+	if ( get_roi_parameters_for_sources ( 
+			videoFormat_entry->videoFormatIndex , 	scalable, 
+			&roi_width, 							&roi_height,
+			&roi_top, 								&roi_left, 
+			&roi_extent_bottom,   					&roi_extent_right ) ){
+
+		/* if they are all set to 0 return FALSE so we don't lose time on settinf default values to vivoecrop and vivoeroi */
+		if ( ! (roi_width && roi_height && roi_top && roi_extent_bottom && roi_extent_right ))
+			return FALSE;
+
+		/* copy the data in the videoFormat_entry */
+		videoFormat_entry->videoFormatRoiHorzRes 		= roi_width; 
+		videoFormat_entry->videoFormatRoiVertRes 		= roi_height; 
+		videoFormat_entry->videoFormatRoiOriginTop 		= roi_top; 
+		videoFormat_entry->videoFormatRoiOriginLeft 	= roi_left; 
+		videoFormat_entry->videoFormatRoiExtentBottom 	= roi_extent_bottom; 
+		videoFormat_entry->videoFormatRoiExtentRight 	= roi_extent_right; 
+
+		return TRUE;
+
+	}
+	else
+		return FALSE;
+
+}
+
 /**
  * \brief update the "config" propoerty stored in rtp_data of the given stream_data using a typefind
  * \param the steam_data we will use to detect caps and we will update
@@ -121,8 +156,9 @@ GstElement *get_element_from_bin( GstElement *pipeline  , GType type){
  */
 gboolean handle_roi( GstElement *pipeline, struct videoFormatTable_entry *video_stream_info , GstStructure *video_caps ) {
 
-	GstElement 	*vivoecrop = NULL;
-	GstElement 	*vivoecaps = NULL;
+	GstElement 	*vivoecrop 	= NULL;
+	GstElement 	*vivoecaps 	= NULL;
+	gboolean scalable  		= FALSE ;
 
 	/* 
 	 * iterates though the bin source to find the element vivoecrop
@@ -146,7 +182,9 @@ gboolean handle_roi( GstElement *pipeline, struct videoFormatTable_entry *video_
 	/* 
 	 * iterates though the bin source to find the element vivoecaps
 	 */
-	vivoecaps = get_element_from_bin( pipeline, GST_TYPE_VIVOE_CAPS );	
+	vivoecaps = get_element_from_bin( pipeline, GST_TYPE_VIVOE_CAPS );
+	if ( vivoecaps ) 
+		scalable = TRUE ;
 	/*
 	 * then the ROI is scalable
 	 */
@@ -155,12 +193,31 @@ gboolean handle_roi( GstElement *pipeline, struct videoFormatTable_entry *video_
 	 * Set the ROI parameter into the videoFormat Entry 
 	 * This will initialize the ROI parameters to 0 if they were not specified in the configuration file
 	 */
-//	set_roi_values_videoFormat_entry( video_stream_info , roi_datas);
+	if (set_roi_values_videoFormat_entry( video_stream_info, scalable ) ){
+		
+		/* Set the parameters to crop element */
+		gst_vivoe_crop_update (G_OBJECT ( vivoecrop ), video_stream_info , scalable );		
 
-	/*
-	 * set the index on vivoecrop element
-	 */
-//	gst_vivoe_crop_set_videoformatindex ( G_OBJECT ( vivoecrop ) , video_stream_info->videoFormatIndex );
+		/* Set parameters to roi element */
+		GstCaps *new_caps;
+		g_object_get ( G_OBJECT( vivoecaps  ) , "caps" , &new_caps , NULL ) ;
+
+
+		new_caps = gst_caps_make_writable ( new_caps );
+
+		gst_caps_set_simple (  new_caps , 
+				"height" , G_TYPE_INT	,  video_stream_info->videoFormatRoiVertRes 	,
+				"width" , G_TYPE_INT	,  video_stream_info->videoFormatRoiHorzRes 	,
+				NULL);
+
+		/* set the caps to the capsfilter */
+		g_object_set ( 	G_OBJECT ( vivoecaps ) , 
+				"caps" 	, new_caps ,
+				NULL
+				);
+
+	}
+
 
 	return TRUE;
 
