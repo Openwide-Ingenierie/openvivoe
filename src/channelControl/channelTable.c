@@ -105,9 +105,10 @@ static void add_in_channel_SU(struct channelTable_entry *new_entry){
 static void pop_from_channel_SU( struct channelTable_entry *table_entry){
 	struct channelTable_entry *iterator = channelTable_SU_head;
 	/* check if we want to pop the head */
-	if ( table_entry == channelTable_SU_head )
-		channelTable_SU_head = NULL;
+	if ( table_entry == channelTable_SU_head ){
+		channelTable_SU_head = NULL; /* then pop head, set it to NULL */
 		return;
+	}
 	while (table_entry!= NULL && iterator->next_SU != table_entry)
 		iterator = iterator->next_SU;
 	/* the entry to pop is next_SU */
