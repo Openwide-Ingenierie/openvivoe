@@ -373,36 +373,6 @@ static gchar *get_vivoe_element_with_property ( gchar *cmdline, gchar *vivoe_ele
 }
 
 /**
- * \brief specifies if the cmdline contains a VIVOE ROI element 
- * \param the cmdline to analyze
- * \return TRUE if the cmdline contains a ROI element 
- */
-static gboolean get_vivoe_element ( gchar *cmdline, gchar *vivoe_element_name ) {
-
-	if ( cmdline == NULL )
-		return FALSE;
-
-	gchar **splitted;
-
-	/* parse entirely the command line with "!" and spaces "!"*/
-	splitted = g_strsplit_set( cmdline , " !", -1);
-
-	/* check if the gst element mention contains the  searched element */
-	if (g_strv_contains ((const gchar * const *) splitted, vivoe_element_name )){
-		/* free splitted */
-		g_strfreev(splitted);
-
-		return TRUE;
-	}
-
-	/* free splitted */
-	g_strfreev(splitted);
-
-	return FALSE;
-
-}
-
-/**
  * \brief specify if the cmdline is a redirection, if so returns the "name" parameter
  * \param the cmdline to analyze
  * \return the "name" argument or null if no name argument or if cmdline is not a redirection
@@ -422,19 +392,6 @@ static gchar *vivoe_redirect(gchar *cmdline){
 	return return_value;
 
 }
-
-#if 0
-/**
-* \brief specify if the cmdline contains the element vivoe-roi to specify that the channel is a ROI
- * \param the cmdline to analyze
- * \return the type of roi in a string ( scalable or non_scalable) if the channel is a ROI or NULL
- */
-static gboolean vivoe_roi(gchar *cmdline){
-
-	return get_vivoe_element ( cmdline, VIVOE_ROI_NAME );
-
-}
-#endif 
 
 /**
  * \brief check if the group contains the given key, get the corresponding char value or display appropriate error to the user
@@ -587,11 +544,8 @@ gchar *init_sources_from_conf(int index){
 	/* Define the error pointer we will be using to check for errors in the configuration file */
     GError 		*error 	= NULL;
 
-	/* a location to store the path of the openned configuration file */
-	gchar* gkf_path = NULL;
-
 	 /* Declaration of a pointer that will contain our configuration file*/
-	//GKeyFile 	*gkf 	= open_mib_configuration_file(error, &gkf_path);
+
 	/* Declaration of an array of gstring (gchar**) that will contain the name of the different groups
 	 * declared in the configuration file
 	 */
@@ -948,47 +902,110 @@ get_roi_parameters_for_sources (
 	return TRUE;
 
 }
-#if 0
-/**
- * \brief definition of the roi structure table that will contains the roi data
- */
-roi_str roi_table ;
 
 /**
- * \brief create the mapping to link redirection between service provider and service user
- * \param gkf a openned GKeyFile
- * \return TRUE on success, FALSE on FAILURE
+ * \brief 
+ * \param 
+ * \return 
  */
-static gboolean init_roi_data(GKeyFile* gkf ){
-	
-	int index_source; 
+gboolean get_roi_parameters_for_sink(int index , gboolean scalable, 
+		long *roi_width_ptr , 			long *roi_height_ptr ,
+	   	long *roi_top_ptr, 				long *roi_left_ptr, 
+		long *roi_extent_bottom_ptr,   	long *roi_extent_right_ptr ){
+	/* Define the error pointer we will be using to check for errors in the configuration file */
+    GError 		*error 	= NULL;
 
-	/* malloc the roi_table */	
-	roi_table.roi_datas = (roi_data**) malloc ( sizeof ( roi_data* ));
+	/* a location to store the path of the openned configuration file */
+	gchar* gkf_path = NULL;
 
-	int size = 0 ;
+	 /* Declaration of a pointer that will contain our configuration file*/
+	GKeyFile 	*gkf 	= open_mib_configuration_file(error, &gkf_path);
 
-	/* get redirection data for service provider */
-	for ( index_source = 1 ; index_source <=  videoFormatNumber._value.int_val ; index_source++){
+	/* Declaration of an array of gstring (gchar**) that will contain the name of the different groups
+	 * declared in the configuration file
+	 */
+	gchar 		**groups;
 
-		roi_table.roi_datas[size] 		= (roi_data*) malloc ( sizeof ( roi_data ) ) ;		
+	/*
+	 * the roi parameters to retrieve from the configuration file
+	 */
+	long 		roi_width;
+	long 		roi_height;
+	long 		roi_top;
+	long 		roi_left;
+	long 		roi_extent_bottom;
+	long 		roi_extent_right;
 
-		if ( get_roi_parameters_for_sources (gkf, index_source , roi_table.roi_datas[size] ) ){
+	/*first we load the different Groups of the configuration file
+	 * second parameter "gchar* length" is optional*/
+	groups 		= g_key_file_get_groups(gkf, NULL);
 
-				roi_table.roi_datas[size]->video_SP_index 	= index_source ;
-				roi_table.size ++;
+	char *sink_prefix = "sink_";
+	char *sink_name = (char*) malloc( strlen(sink_prefix)+2 * sizeof(char));
+	/* Build the name that the group should have */
+	sprintf(sink_name, "%s%d", sink_prefix, index);
 
-		}else
+	roi_width 			= get_key_value_int(gkf,(const gchar* const*) groups , sink_name , ROI_WIDTH, 			error, TRUE );
+	roi_height 			= get_key_value_int(gkf,(const gchar* const*) groups , sink_name , ROI_HEIGHT, 			error, TRUE );
+	roi_top 			= get_key_value_int(gkf,(const gchar* const*) groups , sink_name , ROI_ORIGIN_TOP ,		error, TRUE );
+	roi_left 			= get_key_value_int(gkf,(const gchar* const*) groups , sink_name , ROI_ORIGIN_LEFT,		error, TRUE );
+	roi_extent_bottom 	= get_key_value_int(gkf,(const gchar* const*) groups , sink_name , ROI_EXTENT_BOTTOM, 	error, TRUE );
+	roi_extent_right 	= get_key_value_int(gkf,(const gchar* const*) groups , sink_name , ROI_EXTENT_RIGHT, 	error, TRUE );
 
-			return FALSE;
+	/*
+	 * check if values given in configuration file are correct
+	 */
+
+	/* 
+	 * if origin parameters set, but no ROI resolution specified 
+	 */
+	if ( ( roi_top != -1 || roi_left != -1 ) && ( roi_width == -1 && roi_height ==-1) ){
+
+		g_printerr ( "ERROR: [sink_%d] ROI's origin specified but no ROI resolution found\n", index );
+		return FALSE;
 
 	}
+
+	if  ( scalable )
+	{
+
+		/* if extent object are set but not origin object */
+		if ( (roi_extent_bottom != -1 || roi_extent_right != -1) && (roi_top == -1 && roi_left==-1)  ){
+			g_printerr ( " ERROR: [sink_%d] scalable ROI cannot have %s and %s set if %s and %s are not set too", index, ROI_EXTENT_BOTTOM , ROI_EXTENT_RIGHT , ROI_ORIGIN_TOP , ROI_ORIGIN_LEFT );
+			return FALSE;
+		}
+
+	}
+
+	if ( roi_width == -1 )
+		roi_width = 0 ;
+	if ( roi_height == -1 )
+		roi_height = 0 ;
+	if (roi_top  == -1 )
+		roi_top = 0 ;
+	if ( roi_left == -1 )
+		roi_left = 0 ;
+	if ( roi_extent_bottom == -1 )
+		roi_extent_bottom = 0 ;
+	if ( roi_extent_right == -1 )
+		roi_extent_right = 0 ;
+
+	/*
+	 * save those values to roi_datas
+	 */
+	*roi_width_ptr			= roi_width;
+	*roi_height_ptr 		= roi_height;
+	*roi_top_ptr 			= roi_top;
+	*roi_left_ptr 			= roi_left;
+	*roi_extent_bottom_ptr 	= roi_extent_bottom;
+	*roi_extent_right_ptr 	= roi_extent_right;
+
+	free(sink_name);
 
 	return TRUE;
 
 }
 
-#endif
 
 /**
  * \brief definition of the redirection structure that will contains the redirection data
