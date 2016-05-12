@@ -204,8 +204,14 @@ gboolean handle_roi( GstElement *pipeline, struct videoFormatTable_entry *video_
 			 * Set parameters to roi element
 			 * As we are after a scaling element we can built a caps that is a RAW video
 			 */
-			GstCaps *new_caps  = gst_caps_new_empty_simple("video/x-raw");
-
+			GstPad *vivoecrop_src_pad 	= gst_element_get_static_pad( vivoecrop , "src");
+			GstCaps *new_caps;
+			if ( vivoecrop_src_pad) 
+				new_caps  			=	gst_caps_copy (gst_pad_get_pad_template_caps (vivoecrop_src_pad));
+			else{
+				g_printerr("Faile to get vivoecrop source pad template\n");
+				return FALSE;
+			}
 
 			gst_caps_set_simple (  new_caps , 
 					"height" , G_TYPE_INT	,  video_stream_info->videoFormatRoiVertRes	,
