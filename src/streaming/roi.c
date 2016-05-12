@@ -200,16 +200,17 @@ gboolean handle_roi( GstElement *pipeline, struct videoFormatTable_entry *video_
 
 		if ( scalable ){
 
-			/* Set parameters to roi element */
-			GstCaps *new_caps;
+			/* 
+			 * Set parameters to roi element
+			 * As we are after a scaling element we can built a caps that is a RAW video
+			 */
+			GstCaps *new_caps  = gst_caps_new_empty_simple("video/x-raw");
 
-			new_caps = gst_caps_new_full ( gst_structure_copy( video_caps) , NULL );
 
 			gst_caps_set_simple (  new_caps , 
 					"height" , G_TYPE_INT	,  video_stream_info->videoFormatRoiVertRes	,
 					"width" , G_TYPE_INT	,  video_stream_info->videoFormatRoiHorzRes	,
 					NULL);
-
 
 			/* set the caps to the capsfilter */
 			g_object_set ( 	G_OBJECT ( vivoecaps ) , 
