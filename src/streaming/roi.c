@@ -198,26 +198,31 @@ gboolean handle_roi( GstElement *pipeline, struct videoFormatTable_entry *video_
 		/* Set the parameters to crop element */
 		gst_vivoe_crop_update (G_OBJECT ( vivoecrop ), video_stream_info , scalable );		
 
-		/* Set parameters to roi element */
-		GstCaps *new_caps;
-		g_object_get ( G_OBJECT( vivoecaps  ) , "caps" , &new_caps , NULL ) ;
+		if ( scalable ){
+
+			/* Set parameters to roi element */
+			GstCaps *new_caps;
+
+			new_caps = gst_caps_new_full ( gst_structure_copy( video_caps) , NULL );
+
+			gst_caps_set_simple (  new_caps , 
+					"height" , G_TYPE_INT	,  video_stream_info->videoFormatRoiVertRes	,
+					"width" , G_TYPE_INT	,  video_stream_info->videoFormatRoiHorzRes	,
+					NULL);
 
 
-		new_caps = gst_caps_make_writable ( new_caps );
+			/* set the caps to the capsfilter */
+			g_object_set ( 	G_OBJECT ( vivoecaps ) , 
+					"caps" 	, new_caps ,
+					NULL
+					);
 
-		gst_caps_set_simple (  new_caps , 
-				"height" , G_TYPE_INT	,  video_stream_info->videoFormatRoiVertRes 	,
-				"width" , G_TYPE_INT	,  video_stream_info->videoFormatRoiHorzRes 	,
-				NULL);
+			GstCaps *new_caps_bis;
+			g_object_get ( G_OBJECT( vivoecaps  ) , "caps" , &new_caps_bis , NULL ) ;
 
-		/* set the caps to the capsfilter */
-		g_object_set ( 	G_OBJECT ( vivoecaps ) , 
-				"caps" 	, new_caps ,
-				NULL
-				);
-
+		}
 	}
-
+	
 
 	return TRUE;
 

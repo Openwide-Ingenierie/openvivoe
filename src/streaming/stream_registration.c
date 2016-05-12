@@ -240,9 +240,9 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 				video_info->videoFormatFps,				 										video_info->videoFormatColorimetry,
 				video_info->videoFormatInterlaced, 												video_info->videoFormatCompressionFactor,
 				video_info->videoFormatCompressionRate, 										channelHorzRes,
-				channelVertRes, 																0,
-				0, 																				0,
-				0,																				data->rtp_datas->rtp_type,
+				channelVertRes, 																video_info->videoFormatRoiOriginTop,
+				video_info->videoFormatRoiOriginLeft, 											video_info->videoFormatRoiExtentBottom,
+				video_info->videoFormatRoiExtentRight,											data->rtp_datas->rtp_type,
 				0/*IP*/, 																		0 /* packet delay*/,
 				default_SAP_interval,															video_info->videoFormatIndex, /*defaultVideoFormatIndex*/
 				0/*default receive IP*/, 														data);
