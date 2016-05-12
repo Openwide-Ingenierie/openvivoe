@@ -33,7 +33,7 @@
 #include "../../include/streaming/stream_registration.h"
 #include "../../include/streaming/stream.h"
 
-static gboolean set_roi_values_videoFormat_entry( struct videoFormatTable_entry* videoFormat_entry , gboolean scalable ){
+static gboolean get_roi_values_from_conf( struct videoFormatTable_entry* videoFormat_entry , gboolean scalable ){
 
 	long 		roi_width;
 	long 		roi_height;
@@ -146,6 +146,44 @@ GstElement *get_element_from_bin( GstElement *pipeline  , GType type){
 
 }
 
+static gboolean 
+set_parameters_to_roi_elements ( struct videoFormatTable_entry *video_stream_info , 	GstElement 	*vivoecrop, GstElement 	*vivoecaps, gboolean scalable ){
+
+	/* Set the parameters to crop element */
+		gst_vivoe_crop_update (G_OBJECT ( vivoecrop ), video_stream_info , scalable );		
+
+		if ( scalable ){
+
+			/* 
+			 * Set parameters to roi element
+			 * As we are after a scaling element we can built a caps that is a RAW video
+			 */
+			GstPad *vivoecrop_src_pad 	= gst_element_get_static_pad( vivoecrop , "src");
+			GstCaps *new_caps;
+			if ( vivoecrop_src_pad) 
+				new_caps  			=	gst_caps_copy (gst_pad_get_pad_template_caps (vivoecrop_src_pad));
+			else{
+				g_printerr("Faile to get vivoecrop source pad template\n");
+				return FALSE;
+			}
+
+			gst_caps_set_simple (  new_caps , 
+					"height" , G_TYPE_INT	,  video_stream_info->videoFormatRoiVertRes	,
+					"width" , G_TYPE_INT	,  video_stream_info->videoFormatRoiHorzRes	,
+					NULL);
+
+			/* set the caps to the capsfilter */
+			g_object_set ( 	G_OBJECT ( vivoecaps ) , 
+					"caps" 	, new_caps ,
+					NULL
+					);
+
+			GstCaps *new_caps_bis;
+			g_object_get ( G_OBJECT( vivoecaps  ) , "caps" , &new_caps_bis , NULL ) ;
+
+		}
+}
+
 /**
  * \brief handle the ROI on starting: add element if needed, parse the gst_source cmdline after vivoe-roi element and add the result to pipeline
  * \param pipeline the corresponding pipeline to adapt
@@ -154,7 +192,7 @@ GstElement *get_element_from_bin( GstElement *pipeline  , GType type){
  * \param video_caps the caps of the input vidoe
  * \return input if no element added, other it returns the last element added in pipeline
  */
-gboolean handle_roi( GstElement *pipeline, struct videoFormatTable_entry *video_stream_info ) {
+gboolean handle_roi( GstElement *pipeline, struct videoFormatTable_entry *video_stream_info , gboolean service_user ) {
 
 	GstElement 	*vivoecrop 	= NULL;
 	GstElement 	*vivoecaps 	= NULL;
@@ -193,45 +231,13 @@ gboolean handle_roi( GstElement *pipeline, struct videoFormatTable_entry *video_
 	 * Set the ROI parameter into the videoFormat Entry 
 	 * This will initialize the ROI parameters to 0 if they were not specified in the configuration file
 	 */
-	if (set_roi_values_videoFormat_entry( video_stream_info, scalable ) ){
-		
-		/* Set the parameters to crop element */
-		gst_vivoe_crop_update (G_OBJECT ( vivoecrop ), video_stream_info , scalable );		
-
-		if ( scalable ){
-
-			/* 
-			 * Set parameters to roi element
-			 * As we are after a scaling element we can built a caps that is a RAW video
-			 */
-			GstPad *vivoecrop_src_pad 	= gst_element_get_static_pad( vivoecrop , "src");
-			GstCaps *new_caps;
-			if ( vivoecrop_src_pad) 
-				new_caps  			=	gst_caps_copy (gst_pad_get_pad_template_caps (vivoecrop_src_pad));
-			else{
-				g_printerr("Faile to get vivoecrop source pad template\n");
-				return FALSE;
-			}
-
-			gst_caps_set_simple (  new_caps , 
-					"height" , G_TYPE_INT	,  video_stream_info->videoFormatRoiVertRes	,
-					"width" , G_TYPE_INT	,  video_stream_info->videoFormatRoiHorzRes	,
-					NULL);
-
-			/* set the caps to the capsfilter */
-			g_object_set ( 	G_OBJECT ( vivoecaps ) , 
-					"caps" 	, new_caps ,
-					NULL
-					);
-
-			GstCaps *new_caps_bis;
-			g_object_get ( G_OBJECT( vivoecaps  ) , "caps" , &new_caps_bis , NULL ) ;
-
-		}
+	if ( get_roi_values_from_conf( video_stream_info, scalable ) ){
+		set_parameters_to_roi_elements ( video_stream_info , vivoecrop, vivoecaps, scalable );
+		return TRUE;
 	}
-	
+	else
+		return FALSE;
 
-	return TRUE;
 
 }
 
