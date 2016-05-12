@@ -122,6 +122,12 @@ int open_vivoe_daemon (char* deamon_name) {
 	init_videoFormatNumber();
 	init_videoFormatTable();
 
+	/* 
+	 * Now that streams for SP/SU have been loaded, close configuration file 
+	 */
+	close_mib_configuration_file( gkf_conf_file );
+
+
 	/* openvivoe-demon will be used to read openvivoe-demon.conf files. */
 	init_snmp(basename(deamon_name));
 

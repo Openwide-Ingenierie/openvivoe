@@ -189,6 +189,11 @@ extern redirection_str redirection;
  */
 GMainLoop 	*main_loop;
 
+/**
+ * \brief A GKeyFile global to keep the oppened configuration file while we need it 
+ */
+GKeyFile 	*gkf_conf_file;
+
 /** 
  * \brief a boolean to save the fact that a Gstreamer occured before starting runnig the Main Loop (for example: v4l2src, no such device )
  */

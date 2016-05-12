@@ -97,6 +97,7 @@
 
 /*functions' definitions*/
 int 		init_mib_content(); /*check the groups, key and values of the MIB's parameters*/
+void 		close_mib_configuration_file(GKeyFile *gkf) ; /* close the openned configuration file */
 gchar 		*init_sources_from_conf(int index); /* get the command line used to initiate the streams */
 gchar 		*init_sink_from_conf(int index); /* get the command line used to sink the streams in ServiceUsers */
 gchar 		*get_desc_from_conf(int index); /* get the channelUserDesc associated to the stream */

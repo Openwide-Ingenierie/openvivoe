@@ -54,6 +54,7 @@ const gchar* maintenance_group[MAINTENANCE_GROUP_SIZE]= { 	"deviceUserDesc", 			
  * \return the GKeyFile if it has been successfully openned, NULL otherwise 
  */
 static GKeyFile * open_mib_configuration_file(GError* error, gchar** gkf_path){
+
 	GKeyFile* gkf;
 
     /*defined the paths from were we should retrieve our configuration files */
@@ -71,7 +72,9 @@ static GKeyFile * open_mib_configuration_file(GError* error, gchar** gkf_path){
         fprintf (stderr, "Could not read config file %s\n%s\n",CONFIG_FILE,error->message);
         return NULL;
     }
+
 	return gkf;
+
 }
 
 /**
@@ -370,7 +373,7 @@ static gchar *get_vivoe_element_with_property ( gchar *cmdline, gchar *vivoe_ele
 }
 
 /**
- * \briefspecifies if the cmdline contains a VIVOE ROI element 
+ * \brief specifies if the cmdline contains a VIVOE ROI element 
  * \param the cmdline to analyze
  * \return TRUE if the cmdline contains a ROI element 
  */
@@ -504,7 +507,6 @@ static int get_key_value_int(GKeyFile* gkf, const gchar* const* groups ,char *gr
 		return -1;
 	}
 
-
 	return key_value;
 }
 
@@ -589,7 +591,7 @@ gchar *init_sources_from_conf(int index){
 	gchar* gkf_path = NULL;
 
 	 /* Declaration of a pointer that will contain our configuration file*/
-	GKeyFile 	*gkf 	= open_mib_configuration_file(error, &gkf_path);
+	//GKeyFile 	*gkf 	= open_mib_configuration_file(error, &gkf_path);
 	/* Declaration of an array of gstring (gchar**) that will contain the name of the different groups
 	 * declared in the configuration file
 	 */
@@ -602,17 +604,17 @@ gchar *init_sources_from_conf(int index){
 
 	/*first we load the different Groups of the configuration file
 	 * second parameter "gchar* length" is optional*/
-	groups = g_key_file_get_groups(gkf, NULL);
+	groups = g_key_file_get_groups(gkf_conf_file, NULL);
 
 	char *source_prefix = "source_";
 	char *source_name = (char*) malloc( strlen(source_prefix)+2 * sizeof(char));
 	/* Build the name that the group should have */
 	sprintf(source_name, "%s%d", source_prefix, index);
 
-	cmdline = get_key_value_char(gkf,(const gchar* const*) groups , source_name ,GST_SOURCE_CMDLINE , error);
+	cmdline = get_key_value_char(gkf_conf_file,(const gchar* const*) groups , source_name ,GST_SOURCE_CMDLINE , error);
 
 	free(source_name);
-	close_mib_configuration_file(gkf);
+	//close_mib_configuration_file(gkf);
 	return cmdline;
 }
 
@@ -1120,22 +1122,22 @@ int init_mib_content(){
 	gchar* gkf_path = NULL;
 
 	/* Declaration of a pointer that will contain our configuration file*/
-    GKeyFile* gkf = open_mib_configuration_file(error, &gkf_path);
-	
+     gkf_conf_file =  open_mib_configuration_file(error, &gkf_path);
+
 	/* check if the MIB groups are present if so we know that GROUP_NAME_DEVICEINFO and FROUP_NAME_CHANNELCONTROL are indeed present*/
-	groups = check_mib_group(gkf, error);
+	groups = check_mib_group(gkf_conf_file, error);
 	
 	if ( groups == NULL)
 		return EXIT_FAILURE;
 
 	/* Defined what separator will be used in the list when the parameter can have several values (for a table for example)*/
-    g_key_file_set_list_separator (gkf, (gchar) ';');
+    g_key_file_set_list_separator (gkf_conf_file, (gchar) ';');
  
-	if ( !init_deviceInfo(gkf, GROUP_NAME_DEVICEINFO , error))
+	if ( !init_deviceInfo(gkf_conf_file, GROUP_NAME_DEVICEINFO , error))
 		return EXIT_FAILURE;
-	if ( !init_channelNumber_param(gkf, groups , error))
+	if ( !init_channelNumber_param(gkf_conf_file, groups , error))
 		return EXIT_FAILURE;
-	if ( !init_videoFormatNumber_param(gkf, groups, error) )
+	if ( !init_videoFormatNumber_param(gkf_conf_file, groups, error) )
 		return EXIT_FAILURE;
 
 	/* free the memory allocated for the array of strings groups */
@@ -1145,14 +1147,18 @@ int init_mib_content(){
 	init_mib_global_parameter();
 
 	/* parse gstreamer's command line to see if there will be redirection */
-	init_redirection_data( gkf );
+	init_redirection_data( gkf_conf_file );
 
 	/* init gstreamer's command line to see if there will be roi */
 #if 0
-	if ( ! init_roi_data( gkf ) )
+	if ( ! init_roi_data( gkf_conf_file ) )
 		return EXIT_FAILURE;
 #endif 
-	close_mib_configuration_file( gkf );
+
+	/*
+	 * Save the openned GKeyFile in a global variable so we can acces it as we want while creating the stream
+	 */
+	//close_mib_configuration_file( gkf_conf_file );
 
 	return EXIT_SUCCESS;
 }
