@@ -723,7 +723,6 @@ gst_vivoe_crop_set_crop (GstVivoeCrop * vcrop, gint new_value, gint * prop)
 static void 
 gst_vivoe_crop_get_roi_values_from_MIB( struct videoFormatTable_entry *videoFormat_entry , gint *top , gint *left , gint *bottom , gint *right, gboolean scalable ){
 
-
 	/* 
 	 * If values are negative (which could happen if a bad value is set to ROI resolution, and top, then set parameters to zero
 	 */
@@ -737,7 +736,7 @@ gst_vivoe_crop_get_roi_values_from_MIB( struct videoFormatTable_entry *videoForm
 
 	if ( scalable )
 	{
-		*bottom = videoFormat_entry->videoFormatMaxVertRes - ( videoFormat_entry->videoFormatRoiOriginTop 	+ videoFormat_entry->videoFormatRoiExtentBottom  ) ;
+		*bottom = videoFormat_entry->videoFormatMaxVertRes - ( videoFormat_entry->videoFormatRoiOriginTop 	+ videoFormat_entry->videoFormatRoiExtentBottom ) ;
 		*right 	= videoFormat_entry->videoFormatMaxHorzRes - ( videoFormat_entry->videoFormatRoiOriginLeft	+ videoFormat_entry->videoFormatRoiExtentRight  ) ;
 	}
 	else

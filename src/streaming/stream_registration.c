@@ -83,7 +83,6 @@ gchar* map_sampling_to_colorimetry_j2k(const gchar *sampling){
 	else 
 		return "";
 }
-
 /* 
  * This function tries to save a maximum of information (in the form of capabilities) 
  * of a video stream. As each new element in pipeline may be used to gathered new relevant information 

@@ -884,14 +884,20 @@ GstElement* create_pipeline_serviceUser( gpointer 					stream_datas,
 						bus_watch_id,  		first,
 						video_stream_info,	data, 	
 						caps);
+
+	/*
+	 * Gather a maximum of information from caps into the MIB
+	 */
+
+	fill_entry ( gst_caps_get_structure ( caps , 0 ), video_stream_info, data);
+	last = addSink_SU( pipeline, bus, bus_watch_id, last, channel_entry, cmdline, redirect , caps );
+	fill_entry ( gst_caps_get_structure ( caps , 0 ), video_stream_info, data);
+
 	/*
 	 * Fill the channel Table with parameters from the video_format_table , copy them
 	 */
 	channelTable_fill_entry(channel_entry, video_stream_info);
 
-	last = addSink_SU( pipeline, bus, bus_watch_id, last, channel_entry, cmdline, redirect , caps );
-
-	
 	/* 
 	 * Then, after sink has been added, handle the ROI
 	 * To do so, we need to copy to the videoFormat the value of channelRoiOrigin and channelRoiExtent parameters
