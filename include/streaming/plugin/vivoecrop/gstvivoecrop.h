@@ -26,6 +26,7 @@
 
 G_BEGIN_DECLS
 
+
 #define GST_TYPE_VIVOE_CROP \
 	(gst_vivoe_crop_get_type())
 #define GST_VIVOE_CROP(obj) \
@@ -77,7 +78,7 @@ struct _GstVivoeCropClass
   GstVideoFilterClass parent_class;
 };
 
-GType gst_video_crop_get_type (void);
+GType gst_vivoe_crop_get_type ( void );
 
 void
 gst_vivoe_crop_set_videoformatindex (GObject * object,  const gint value);
