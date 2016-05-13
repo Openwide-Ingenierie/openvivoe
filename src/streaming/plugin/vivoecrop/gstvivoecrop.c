@@ -863,7 +863,7 @@ gst_vivoe_crop_get_roi_values_from_MIB( struct videoFormatTable_entry *videoForm
 
 	if ( *right < 0 || *right >= ( videoFormat_entry->videoFormatMaxHorzRes - videoFormat_entry->videoFormatRoiOriginLeft)  )
 		*right = 0 ;
-	
+
 } 
 
 void  gst_vivoe_crop_update (GObject * object, struct videoFormatTable_entry *videoFormat_entry , gboolean scalable )

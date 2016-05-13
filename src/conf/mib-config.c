@@ -940,17 +940,17 @@ gboolean get_roi_parameters_for_sink(int index , gboolean scalable,
 	 * second parameter "gchar* length" is optional*/
 	groups 		= g_key_file_get_groups(gkf, NULL);
 
-	char *sink_prefix = "sink_";
-	char *sink_name = (char*) malloc( strlen(sink_prefix)+2 * sizeof(char));
+	char *receiver_prefix = "receiver_";
+	char *receiver_name = (char*) malloc( strlen(receiver_prefix)+2 * sizeof(char));
 	/* Build the name that the group should have */
-	sprintf(sink_name, "%s%d", sink_prefix, index);
+	sprintf(receiver_name, "%s%d", receiver_prefix, index);
 
-	roi_width 			= get_key_value_int(gkf,(const gchar* const*) groups , sink_name , ROI_WIDTH, 			error, TRUE );
-	roi_height 			= get_key_value_int(gkf,(const gchar* const*) groups , sink_name , ROI_HEIGHT, 			error, TRUE );
-	roi_top 			= get_key_value_int(gkf,(const gchar* const*) groups , sink_name , ROI_ORIGIN_TOP ,		error, TRUE );
-	roi_left 			= get_key_value_int(gkf,(const gchar* const*) groups , sink_name , ROI_ORIGIN_LEFT,		error, TRUE );
-	roi_extent_bottom 	= get_key_value_int(gkf,(const gchar* const*) groups , sink_name , ROI_EXTENT_BOTTOM, 	error, TRUE );
-	roi_extent_right 	= get_key_value_int(gkf,(const gchar* const*) groups , sink_name , ROI_EXTENT_RIGHT, 	error, TRUE );
+	roi_width 			= get_key_value_int(gkf,(const gchar* const*) groups , receiver_name , ROI_WIDTH, 			error, TRUE );
+	roi_height 			= get_key_value_int(gkf,(const gchar* const*) groups , receiver_name , ROI_HEIGHT, 			error, TRUE );
+	roi_top 			= get_key_value_int(gkf,(const gchar* const*) groups , receiver_name , ROI_ORIGIN_TOP ,		error, TRUE );
+	roi_left 			= get_key_value_int(gkf,(const gchar* const*) groups , receiver_name , ROI_ORIGIN_LEFT,		error, TRUE );
+	roi_extent_bottom 	= get_key_value_int(gkf,(const gchar* const*) groups , receiver_name , ROI_EXTENT_BOTTOM, 	error, TRUE );
+	roi_extent_right 	= get_key_value_int(gkf,(const gchar* const*) groups , receiver_name , ROI_EXTENT_RIGHT, 	error, TRUE );
 
 	/*
 	 * check if values given in configuration file are correct
@@ -961,7 +961,7 @@ gboolean get_roi_parameters_for_sink(int index , gboolean scalable,
 	 */
 	if ( ( roi_top != -1 || roi_left != -1 ) && ( roi_width == -1 && roi_height ==-1) ){
 
-		g_printerr ( "ERROR: [sink_%d] ROI's origin specified but no ROI resolution found\n", index );
+		g_printerr ( "ERROR: [receiver_%d] ROI's origin specified but no ROI resolution found\n", index );
 		return FALSE;
 
 	}
@@ -971,7 +971,7 @@ gboolean get_roi_parameters_for_sink(int index , gboolean scalable,
 
 		/* if extent object are set but not origin object */
 		if ( (roi_extent_bottom != -1 || roi_extent_right != -1) && (roi_top == -1 && roi_left==-1)  ){
-			g_printerr ( " ERROR: [sink_%d] scalable ROI cannot have %s and %s set if %s and %s are not set too", index, ROI_EXTENT_BOTTOM , ROI_EXTENT_RIGHT , ROI_ORIGIN_TOP , ROI_ORIGIN_LEFT );
+			g_printerr ( " ERROR: [receiver_%d] scalable ROI cannot have %s and %s set if %s and %s are not set too", index, ROI_EXTENT_BOTTOM , ROI_EXTENT_RIGHT , ROI_ORIGIN_TOP , ROI_ORIGIN_LEFT );
 			return FALSE;
 		}
 
@@ -1000,7 +1000,7 @@ gboolean get_roi_parameters_for_sink(int index , gboolean scalable,
 	*roi_extent_bottom_ptr 	= roi_extent_bottom;
 	*roi_extent_right_ptr 	= roi_extent_right;
 
-	free(sink_name);
+	free(receiver_name);
 
 	return TRUE;
 

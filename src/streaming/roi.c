@@ -33,7 +33,7 @@
 #include "../../include/streaming/stream_registration.h"
 #include "../../include/streaming/stream.h"
 
-static gboolean get_roi_values_from_conf( struct videoFormatTable_entry* videoFormat_entry , gboolean scalable ){
+static gboolean get_roi_values_from_conf( struct videoFormatTable_entry* videoFormat_entry , gboolean scalable , struct channelTable_entry *channel_entry){
 
 	long 		roi_width;
 	long 		roi_height;
@@ -42,29 +42,67 @@ static gboolean get_roi_values_from_conf( struct videoFormatTable_entry* videoFo
 	long 		roi_extent_bottom;
 	long 		roi_extent_right;
 
-	if ( get_roi_parameters_for_sources ( 
-			videoFormat_entry->videoFormatIndex , 	scalable, 
-			&roi_width, 							&roi_height,
-			&roi_top, 								&roi_left, 
-			&roi_extent_bottom,   					&roi_extent_right ) ){
+	/*
+	 * If channel_entry is  not NULL, this is a SU ROI so look for sink ROI parameters
+	 */
+	if ( channel_entry ){
 
-		/* if they are all set to 0 return FALSE so we don't lose time on settinf default values to vivoecrop and vivoeroi */
-		if ( ! (roi_width && roi_height && roi_top && roi_extent_bottom && roi_extent_right ))
+			if ( get_roi_parameters_for_sink ( 
+					channel_entry->channelIndex, 	scalable, 
+					&roi_width, 					&roi_height,
+					&roi_top, 						&roi_left, 
+					&roi_extent_bottom,   			&roi_extent_right ) ){
+
+			/* if they are all set to 0 return FALSE so we don't lose time on settinf default values to vivoecrop and vivoeroi */
+			if ( ! (roi_width && roi_height && roi_top && roi_extent_bottom && roi_extent_right ))
+				return FALSE;
+
+			/* 
+			 * save those parameters into the videoFormat_entry 
+			 */
+			videoFormat_entry->videoFormatRoiHorzRes 		= roi_width; 
+			videoFormat_entry->videoFormatRoiVertRes 		= roi_height; 
+			videoFormat_entry->videoFormatRoiOriginTop 		= roi_top; 
+			videoFormat_entry->videoFormatRoiOriginLeft 	= roi_left; 
+			videoFormat_entry->videoFormatRoiExtentBottom 	= roi_extent_bottom; 
+			videoFormat_entry->videoFormatRoiExtentRight 	= roi_extent_right; 
+
+			return TRUE;
+
+		}
+		else
 			return FALSE;
 
-		/* copy the data in the videoFormat_entry */
-		videoFormat_entry->videoFormatRoiHorzRes 		= roi_width; 
-		videoFormat_entry->videoFormatRoiVertRes 		= roi_height; 
-		videoFormat_entry->videoFormatRoiOriginTop 		= roi_top; 
-		videoFormat_entry->videoFormatRoiOriginLeft 	= roi_left; 
-		videoFormat_entry->videoFormatRoiExtentBottom 	= roi_extent_bottom; 
-		videoFormat_entry->videoFormatRoiExtentRight 	= roi_extent_right; 
+	}else{
+		/*
+		 * If channel_entry is NULL, we are a SP ROI, so we look into configuration file for [source_x] groups 
+		 */
 
-		return TRUE;
+		if ( get_roi_parameters_for_sources ( 
+					videoFormat_entry->videoFormatIndex , 	scalable, 
+					&roi_width, 							&roi_height,
+					&roi_top, 								&roi_left, 
+					&roi_extent_bottom,   					&roi_extent_right ) ){
+
+			/* if they are all set to 0 return FALSE so we don't lose time on settinf default values to vivoecrop and vivoeroi */
+			if ( ! (roi_width && roi_height && roi_top && roi_extent_bottom && roi_extent_right ))
+				return FALSE;
+
+			/* copy the data in the videoFormat_entry */
+			videoFormat_entry->videoFormatRoiHorzRes 		= roi_width; 
+			videoFormat_entry->videoFormatRoiVertRes 		= roi_height; 
+			videoFormat_entry->videoFormatRoiOriginTop 		= roi_top; 
+			videoFormat_entry->videoFormatRoiOriginLeft 	= roi_left; 
+			videoFormat_entry->videoFormatRoiExtentBottom 	= roi_extent_bottom; 
+			videoFormat_entry->videoFormatRoiExtentRight 	= roi_extent_right; 
+
+			return TRUE;
+
+		}
+		else
+			return FALSE;
 
 	}
-	else
-		return FALSE;
 
 }
 
@@ -147,7 +185,7 @@ GstElement *get_element_from_bin( GstElement *pipeline  , GType type){
 }
 
 static gboolean 
-set_parameters_to_roi_elements ( struct videoFormatTable_entry *video_stream_info , 	GstElement 	*vivoecrop, GstElement 	*vivoecaps, gboolean scalable ){
+set_parameters_to_roi_elements ( struct videoFormatTable_entry *video_stream_info ,	GstElement 	*vivoecrop, GstElement 	*vivoecaps, gboolean scalable ){
 
 	/* Set the parameters to crop element */
 		gst_vivoe_crop_update (G_OBJECT ( vivoecrop ), video_stream_info , scalable );		
@@ -182,6 +220,8 @@ set_parameters_to_roi_elements ( struct videoFormatTable_entry *video_stream_inf
 			g_object_get ( G_OBJECT( vivoecaps  ) , "caps" , &new_caps_bis , NULL ) ;
 
 		}
+
+		return TRUE ;
 }
 
 /**
@@ -192,11 +232,11 @@ set_parameters_to_roi_elements ( struct videoFormatTable_entry *video_stream_inf
  * \param video_caps the caps of the input vidoe
  * \return input if no element added, other it returns the last element added in pipeline
  */
-gboolean handle_roi( GstElement *pipeline, struct videoFormatTable_entry *video_stream_info , gboolean service_user ) {
+gboolean handle_roi( GstElement *pipeline, struct videoFormatTable_entry *video_stream_info , struct channelTable_entry *channel_entry ) {
 
 	GstElement 	*vivoecrop 	= NULL;
 	GstElement 	*vivoecaps 	= NULL;
-	gboolean scalable  		= FALSE ;
+	gboolean 	scalable  	= FALSE ;
 
 	/* 
 	 * iterates though the bin source to find the element vivoecrop
@@ -231,13 +271,12 @@ gboolean handle_roi( GstElement *pipeline, struct videoFormatTable_entry *video_
 	 * Set the ROI parameter into the videoFormat Entry 
 	 * This will initialize the ROI parameters to 0 if they were not specified in the configuration file
 	 */
-	if ( get_roi_values_from_conf( video_stream_info, scalable ) ){
+	if ( get_roi_values_from_conf( video_stream_info, scalable , channel_entry ) ){
 		set_parameters_to_roi_elements ( video_stream_info , vivoecrop, vivoecaps, scalable );
 		return TRUE;
 	}
 	else
 		return FALSE;
-
 
 }
 

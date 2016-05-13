@@ -86,7 +86,7 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 	/* 
 	 * Handle the ROI 
 	 */
-	handle_roi ( pipeline ,  video_info ) ;
+	handle_roi ( pipeline ,  video_info , NULL ) ;
 
  	/* in case RAW video type has been detected */
 	if ( gst_structure_has_name( video_caps, "video/x-raw") ){
@@ -884,10 +884,20 @@ GstElement* create_pipeline_serviceUser( gpointer 					stream_datas,
 						bus_watch_id,  		first,
 						video_stream_info,	data, 	
 						caps);
-
+	/*
+	 * Fill the channel Table with parameters from the video_format_table , copy them
+	 */
 	channelTable_fill_entry(channel_entry, video_stream_info);
 
 	last = addSink_SU( pipeline, bus, bus_watch_id, last, channel_entry, cmdline, redirect , caps );
+
+	
+	/* 
+	 * Then, after sink has been added, handle the ROI
+	 * To do so, we need to copy to the videoFormat the value of channelRoiOrigin and channelRoiExtent parameters
+	 */
+	update_videoFormat_entry_roi_from_channelTable_entry ( video_stream_info , channel_entry );
+	handle_roi ( pipeline , video_stream_info, channel_entry );
 
 	return last;
 
