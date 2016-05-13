@@ -530,19 +530,33 @@ gboolean channelSatus_requests_handler( struct channelTable_entry * table_entry 
  */
 static gboolean roi_requests_handler( struct channelTable_entry * table_entry , struct videoFormatTable_entry *videoFormat_entry ){
 
+
+	struct videoFormatTable_entry *video_stream_info = NULL ;
+
+	/*
+	 * If we are a Service User, we are going to buld a "fake" videoFormat entry 
+	 */
+	if ( table_entry->channelType == serviceUser )
+		video_stream_info = SNMP_MALLOC_TYPEDEF(struct videoFormatTable_entry);
+	else
+		video_stream_info = videoFormat_entry; /* otherwise use the entry given into parameters */
+
 	/* update a copy of the videoFormat associated videoFormat in consequences */
-	update_videoFormat_entry_roi_from_channelTable_entry ( videoFormat_entry , table_entry );
+	 update_videoFormat_entry_roi_from_channelTable_entry ( video_stream_info , table_entry );
 
 	/* 
 	 * Now update pipeline
-	 * If an error occurs, we just reset the old roi parameters' values of channel and videoFormat_entry
+	 * If an error occurs, we just reset the old roi parameters' values of channel and video_stream_info
 	 */
-	if ( ! update_pipeline_SP_on_roi_changes( table_entry->stream_datas ,  table_entry ) )
+	if ( ! update_pipeline_SP_on_roi_changes( table_entry->stream_datas ,  table_entry , video_stream_info ) )
 		return FALSE;
-	else
-		return channelSatus_requests_handler(  table_entry ) ;
-
-	return TRUE;
+	else{
+		/* If this is a SP we need to re-send a new SDP file, so we call the channelStatus request handler */
+		if ( table_entry->channelType != serviceUser )
+			return channelSatus_requests_handler(  table_entry ) ; /* this is to build a new SDP file and send it right away */
+		/* if not just return TRUE */
+		return TRUE;
+	}
 
 }
 
@@ -891,7 +905,8 @@ channelTable_handler(
                 /* or possibly 'netsnmp_check_vb_int_range' */
 				/* get the corresponding videoFormatTable to get the maximum value of the top parameter */
 				/* originTop + channelVertRest cannot be greater than MaxVertRes, otherwise we are outside the frame */
-                ret = netsnmp_check_vb_int_range ( request->requestvb , 0 , videoFormat_entry->videoFormatMaxVertRes /*- table_entry->channelVertRes */ );
+				if ( table_entry->channelType != serviceUser )
+	                ret = netsnmp_check_vb_int_range ( request->requestvb , 0 , videoFormat_entry->videoFormatMaxVertRes /*- table_entry->channelVertRes */ );
 				if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;
@@ -900,7 +915,8 @@ channelTable_handler(
             case COLUMN_CHANNELROIORIGINLEFT:
 				/* get the corresponding videoFormatTable to get the maximum value of the left parameter */
 				/* originLeft+ channelHorzRest cannot be greater than MaxHorzRes, otherwise we are outside the frame */
-                ret = netsnmp_check_vb_int_range ( request->requestvb , 0 , videoFormat_entry->videoFormatMaxHorzRes /*- table_entry->channelHorzRes */);
+				if ( table_entry->channelType != serviceUser )
+                	ret = netsnmp_check_vb_int_range ( request->requestvb , 0 , videoFormat_entry->videoFormatMaxHorzRes /*- table_entry->channelHorzRes */);
                 if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;

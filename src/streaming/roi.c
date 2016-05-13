@@ -286,7 +286,7 @@ gboolean handle_roi( GstElement *pipeline, struct videoFormatTable_entry *video_
  * \param channel_entry the corresponding channel entry
  * \return TRUE on succes, FALSE on failure such as wrong values given in the MIB
  */
-gboolean update_pipeline_SP_on_roi_changes( gpointer stream_datas , struct channelTable_entry *channel_entry ){
+gboolean update_pipeline_SP_on_roi_changes( gpointer stream_datas , struct channelTable_entry *channel_entry , struct videoFormatTable_entry *videoFormat_entry){
 
 	stream_data *data 		= stream_datas;
 	GstElement 	*pipeline 	= data->pipeline;
@@ -313,7 +313,7 @@ gboolean update_pipeline_SP_on_roi_changes( gpointer stream_datas , struct chann
 		scalable = TRUE ;
 
 	/* get the videoFormat_entry corresponding to our index */
-	struct videoFormatTable_entry *videoFormat_entry = videoFormatTable_getEntry( channel_entry->channelVideoFormatIndex ) ;
+	//struct videoFormatTable_entry *videoFormat_entry = videoFormatTable_getEntry( channel_entry->channelVideoFormatIndex ) ;
 
 	gst_vivoe_crop_update (G_OBJECT ( vivoecrop ), videoFormat_entry , scalable );
 
@@ -336,7 +336,7 @@ gboolean update_pipeline_SP_on_roi_changes( gpointer stream_datas , struct chann
 				);
 	}
 
-	if ( ! strcmp( channel_entry->channelVideoFormat , MPEG4_NAME ) ){
+	if (  (! strcmp( channel_entry->channelVideoFormat , MPEG4_NAME )) && channel_entry->channelType != serviceUser ){
 		/*
 		 * call handle MPEG4 config update
 		 */
