@@ -882,7 +882,6 @@ channelTable_handler(
                 /* or possibly 'netsnmp_check_vb_int_range' */
                 ret = netsnmp_check_vb_int( request->requestvb );
                 if ( ret != SNMP_ERR_NOERROR ) {
-
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;
                 }
@@ -895,7 +894,7 @@ channelTable_handler(
                 }
                 break;
             case COLUMN_CHANNELVERTRES:
-                ret = netsnmp_check_vb_int( request->requestvb);				
+                ret = netsnmp_check_vb_int( request->requestvb);
                 if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;
@@ -906,7 +905,9 @@ channelTable_handler(
 				/* get the corresponding videoFormatTable to get the maximum value of the top parameter */
 				/* originTop + channelVertRest cannot be greater than MaxVertRes, otherwise we are outside the frame */
 				if ( table_entry->channelType != serviceUser )
-	                ret = netsnmp_check_vb_int_range ( request->requestvb , 0 , videoFormat_entry->videoFormatMaxVertRes /*- table_entry->channelVertRes */ );
+	                ret = netsnmp_check_vb_int_range ( request->requestvb , 0 , videoFormat_entry->videoFormatMaxVertRes  );
+				else
+					ret = netsnmp_check_vb_int_range ( request->requestvb , 0 , table_entry->sdp_height  );
 				if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;
@@ -916,7 +917,10 @@ channelTable_handler(
 				/* get the corresponding videoFormatTable to get the maximum value of the left parameter */
 				/* originLeft+ channelHorzRest cannot be greater than MaxHorzRes, otherwise we are outside the frame */
 				if ( table_entry->channelType != serviceUser )
-                	ret = netsnmp_check_vb_int_range ( request->requestvb , 0 , videoFormat_entry->videoFormatMaxHorzRes /*- table_entry->channelHorzRes */);
+                	ret = netsnmp_check_vb_int_range ( request->requestvb , 0 , videoFormat_entry->videoFormatMaxHorzRes );
+				else
+					ret = netsnmp_check_vb_int_range ( request->requestvb , 0 , table_entry->sdp_width);
+
                 if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;

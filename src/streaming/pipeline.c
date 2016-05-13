@@ -669,14 +669,14 @@ static GstElement *handle_redirection_SU_pipeline ( GstElement *pipeline, GstCap
 		input = capsfilter;
 	}
 
-	/* 
+	/*
 	 * Run a new typefind to update caps in order to succeed to run a last typefind in the pipeline of the SP of the 
 	 * redirection. Update caps in consequence
 	 */
 	video_caps = type_detection(GST_BIN(pipeline), input, NULL);
 	gst_caps_append_structure( caps , gst_structure_copy ( video_caps ) );
 	gst_caps_remove_structure ( caps, 0 ) ;
-	
+
 	return input;
 
 }
@@ -688,19 +688,19 @@ static GstElement *handle_redirection_SU_pipeline ( GstElement *pipeline, GstCap
  * \return the last element added in pipeline, should be the created bin or input
  */
 static GstElement *parse_conf_for_redirection( GstElement *pipeline, GstElement *input, redirect_data *redirect){
-	
+
 	gchar *full_pipeline = NULL;
 	gchar *sink_suffix = g_strrstr(redirect->gst_sink, "!");
 	gchar *sink_remaning_pipeline = NULL;
 
-	if ( sink_suffix ) 
+	if ( sink_suffix )
 		sink_remaning_pipeline 	= g_strndup (redirect->gst_sink , strlen(redirect->gst_sink) - strlen(g_strrstr(redirect->gst_sink, "!")));
 
 	gchar *source_remaining_pipeline 	= strchr(redirect->gst_source, '!');
 	GstElement *bin;
 	GError *error = NULL;
 
-	/* 
+	/*
 	 * Concatenate gst_sink to gst_source to simulate a gstreamer pipeline (add + 1 to source_remaining_pipeline to delete the remaining '!'
 	 */
 	/* if there is no remaining pipeline neither for source and sink */
@@ -713,9 +713,9 @@ static GstElement *parse_conf_for_redirection( GstElement *pipeline, GstElement 
 	else if ( !source_remaining_pipeline ){
 		full_pipeline = sink_remaning_pipeline;
 	}
-	/* if there are remaining pipelines for both */	
+	/* if there are remaining pipelines for both */
 	else
-		full_pipeline =  g_strconcat(sink_remaning_pipeline, source_remaining_pipeline , NULL) ; 
+		full_pipeline =  g_strconcat(sink_remaning_pipeline, source_remaining_pipeline , NULL) ;
 
 	if ( full_pipeline != NULL  ) {
 		bin = gst_parse_bin_from_description ( full_pipeline,
@@ -724,7 +724,7 @@ static GstElement *parse_conf_for_redirection( GstElement *pipeline, GstElement 
 
 		if ( error != NULL){
 			g_printerr("Failed to parse: %s\n",error->message);
-			return NULL;	
+			return NULL;
 		}
 
 	}else
@@ -764,8 +764,8 @@ static GstElement *parse_conf_for_redirection( GstElement *pipeline, GstElement 
  * \return GstElement* the last element added to the pipeline (appsink or a displayer like x(v)imagesink)
  */
 static GstElement* addSink_SU( 	GstElement 					*pipeline, 		GstBus 		*bus,
-								guint 						bus_watch_id, 	GstElement 	*input, 	
-								struct channelTable_entry 	*channel_entry, gchar 		*cmdline, 
+								guint 						bus_watch_id, 	GstElement 	*input,
+								struct channelTable_entry 	*channel_entry, gchar 		*cmdline,
 								redirect_data 				*redirect, 		GstCaps 	*caps
 								){
 
@@ -780,7 +780,7 @@ static GstElement* addSink_SU( 	GstElement 					*pipeline, 		GstBus 		*bus,
 		sink  = gst_parse_bin_from_description (cmdline,
 												TRUE,
 												&error);
-		g_object_set(sink, "name", "gst_sink", NULL);		
+		g_object_set(sink, "name", "gst_sink", NULL);
 
 	}
 	else /* redirection case */
@@ -788,7 +788,7 @@ static GstElement* addSink_SU( 	GstElement 					*pipeline, 		GstBus 		*bus,
 
 		/* add app sink */
 		sink = gst_element_factory_make_log( "appsink" , APPSINK_NAME );
-		
+
 		if ( !sink)
 			return NULL;
 
@@ -826,7 +826,7 @@ static GstElement* addSink_SU( 	GstElement 					*pipeline, 		GstBus 		*bus,
 		return NULL;
 	}
 
-	
+
 	/* we link the elements together */
 	if ( !gst_element_link_log (input, sink))
 	    return NULL;
@@ -858,7 +858,7 @@ GstElement* create_pipeline_serviceUser( gpointer 					stream_datas,
 		g_printerr("Failed to create temporary empty entry for the table\n");
 		return NULL;
 	}
-	
+
 	GstElement 	*pipeline 		= data->pipeline;
 	GstBus 		*bus 			= data->bus;
     guint 		bus_watch_id 	= data->bus_watch_id;
@@ -867,7 +867,7 @@ GstElement* create_pipeline_serviceUser( gpointer 					stream_datas,
 	GstElement *first, *last;
 
 	first =  addUDP_SU( pipeline, 		bus,
-						bus_watch_id, 	caps, 
+						bus_watch_id, 	caps,
 						channel_entry);
 
 	data->udp_elem = first;
@@ -878,11 +878,11 @@ GstElement* create_pipeline_serviceUser( gpointer 					stream_datas,
 
 	/* one element in pipeline: first is last, and last is first */
 	last = first;
-	
+
 	/* Add RTP depayloader element */
 	last = addRTP_SU( 	pipeline, 			bus,
 						bus_watch_id,  		first,
-						video_stream_info,	data, 	
+						video_stream_info,	data,
 						caps);
 
 	/*
@@ -898,12 +898,20 @@ GstElement* create_pipeline_serviceUser( gpointer 					stream_datas,
 	 */
 	channelTable_fill_entry(channel_entry, video_stream_info);
 
-	/* 
+	/*
 	 * Then, after sink has been added, handle the ROI
 	 * To do so, we need to copy to the videoFormat the value of channelRoiOrigin and channelRoiExtent parameters
 	 */
 	update_videoFormat_entry_roi_from_channelTable_entry ( video_stream_info , channel_entry );
 	handle_roi ( pipeline , video_stream_info, channel_entry );
+
+	/*
+	 * As we are a Service User, we are registering the resolution of the VIDEO contained in SDP
+	 * This will help us later, when the user will change the ROI or Resolution parameters of the channel
+	 * to prevent from Gstreamer's errors
+	 */
+	channel_entry->sdp_height 	= video_stream_info->videoFormatMaxVertRes;
+	channel_entry->sdp_width 	= video_stream_info->videoFormatMaxHorzRes;
 
 	return last;
 

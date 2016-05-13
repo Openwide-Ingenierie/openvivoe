@@ -94,10 +94,16 @@ struct channelTable_entry {
     in_addr_t channelDefaultReceiveIpAddress;
     in_addr_t old_channelDefaultReceiveIpAddress;
 
-	
 	gpointer stream_datas; /* a stream assoicated to the channel */
 	sap_data *sap_datas; /* the SAP/SDP announcement associated to the stream and the channel */
 
+	/*
+	 * These are tow variable used to save the SDP resolution.
+	 * They will be used when the users tries to modifies the ROI origin and extent parameters or channel resolution parameters
+	 * to be sure that this won't set wrong values to vivoecrop and vivoecaps element
+	 */
+	long sdp_width;
+	long sdp_height;
 
     /* Illustrate using a simple linked list */
     int   valid;
@@ -124,7 +130,7 @@ struct channelTable_entry * channelTable_createEntry(
 												    char* 		channelVideoFormat,
 												    char* 		channelVideoSampling,
 												    long 		channelVideoBitDepth,
-													long 		channelFps,	
+													long 		channelFps,
 													char* 		channelColorimetry,
 												    long 		channelInterlaced,
 												    long 		channelCompressionFactor,
