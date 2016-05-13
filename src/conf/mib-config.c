@@ -1006,7 +1006,6 @@ gboolean get_roi_parameters_for_sink(int index , gboolean scalable,
 
 }
 
-
 /**
  * \brief definition of the redirection structure that will contains the redirection data
  */

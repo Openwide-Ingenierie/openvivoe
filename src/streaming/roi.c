@@ -312,9 +312,6 @@ gboolean update_pipeline_SP_on_roi_changes( gpointer stream_datas , struct chann
 	if ( vivoecaps )
 		scalable = TRUE ;
 
-	/* get the videoFormat_entry corresponding to our index */
-	//struct videoFormatTable_entry *videoFormat_entry = videoFormatTable_getEntry( channel_entry->channelVideoFormatIndex ) ;
-
 	gst_vivoe_crop_update (G_OBJECT ( vivoecrop ), videoFormat_entry , scalable );
 
 	if ( scalable )
