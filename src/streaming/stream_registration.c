@@ -80,15 +80,16 @@ gchar* map_sampling_to_colorimetry_j2k(const gchar *sampling){
 		return colo_YUV;
 	else if ( !strcmp(sampling ,samping_GRAY ))
 		return colo_GRAY;
-	else 
+	else
 		return "";
+
 }
-/* 
- * This function tries to save a maximum of information (in the form of capabilities) 
- * of a video stream. As each new element in pipeline may be used to gathered new relevant information 
+/*
+ * This function tries to save a maximum of information (in the form of capabilities)
+ * of a video stream. As each new element in pipeline may be used to gathered new relevant information
  * to initiate the MIB, we should use this function to gathered information on the video stream
  * each time we add a element to the Gstreamer pipeline. Therefor a videoFormatTable_entry should be passed in parameters.
- * This entry should be the same for a given stream, for each time we pass through this function. 
+ * This entry should be the same for a given stream, for each time we pass through this function.
  */
 void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *video_info, gpointer stream_datas){
 	stream_data *data 			= stream_datas;
@@ -107,22 +108,22 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
 	}
 	/* case of J2K type video */
 	if( gst_structure_has_field(source_str_caps, "colorspace")){
-		gchar* colorspace 							= (char*) g_value_dup_string (gst_structure_get_value(source_str_caps, "colorspace"));	
+		gchar* colorspace 							= (char*) g_value_dup_string (gst_structure_get_value(source_str_caps, "colorspace"));
 		video_info->videoFormatSampling 			= g_strdup(map_colorimetry_to_sampling_j2k(colorspace));
 	}else if( video_info->videoFormatSampling==NULL ){
 		video_info->videoFormatSampling				= "";
 	}
-	/*videoFormatBitDepth*/	
+	/*videoFormatBitDepth*/
 	if( gst_structure_has_field(source_str_caps, "depth")){
 		video_info->videoFormatBitDepth 			=  strtol ( (char* ) g_value_dup_string ( gst_structure_get_value(source_str_caps, "depth")), NULL , 10 ); /* the string is converted into long int, basis 10 */
 	}
-	/*videoFormatFps*/	
+	/*videoFormatFps*/
 	if( gst_structure_has_field(source_str_caps, "framerate")){
 		int numerator 								= gst_value_get_fraction_numerator(gst_structure_get_value(source_str_caps, "framerate"));
 		int denominator 							= gst_value_get_fraction_denominator(gst_structure_get_value(source_str_caps, "framerate"));
 		video_info->videoFormatFps 					= (long) (numerator/denominator);
 	}
-	/*videoFormatColorimetry*/	
+	/*videoFormatColorimetry*/
 	if( gst_structure_has_field(source_str_caps, "colorimetry")){
 		video_info->videoFormatColorimetry 			= (char*)g_value_dup_string (gst_structure_get_value(source_str_caps, "colorimetry"));
 	}else if( video_info->videoFormatColorimetry==NULL ){
@@ -144,11 +145,11 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
 			video_info->videoFormatMaxVertRes		= (long) g_value_get_int( gst_structure_get_value(source_str_caps, "height"));
 		else
 			video_info->videoFormatMaxVertRes		= strtol ( (char* ) g_value_dup_string ( gst_structure_get_value(source_str_caps, "height")), NULL , 10 ); /* the string is converted into long int, basis 10 */
-	}	
+	}
 	/*videoFormatMaxHorzRes*/
 	if( gst_structure_has_field(source_str_caps, "width")){
 		if (G_VALUE_HOLDS_INT(gst_structure_get_value(source_str_caps, "width")))
-			video_info->videoFormatMaxHorzRes		= (long) g_value_get_int( gst_structure_get_value(source_str_caps, "width"));			
+			video_info->videoFormatMaxHorzRes		= (long) g_value_get_int( gst_structure_get_value(source_str_caps, "width"));
 		else
 			video_info->videoFormatMaxHorzRes		= strtol ( (char* ) g_value_dup_string ( gst_structure_get_value(source_str_caps, "width")), NULL , 10 ); /* the string is converted into long int, basis 10 */
 	}

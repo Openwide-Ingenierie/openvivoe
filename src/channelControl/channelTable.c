@@ -245,7 +245,7 @@ struct channelTable_entry *	channelTable_create_empty_entry(int index,long chann
 /**
  * \brief fill an entry in the ChannelTable 
  * \param entry the entry in channelTable to update
- * \param  videoFormatIndex the VF that will be used to get the parameters 
+ * \param  videoFormatIndex the VF that will be used to get the parameters
  * \return TRUE if we succeed to update the parameters
  */
 gboolean channelTable_fill_entry(struct channelTable_entry * entry, struct videoFormatTable_entry *videoFormatentry){
@@ -270,13 +270,15 @@ gboolean channelTable_fill_entry(struct channelTable_entry * entry, struct video
 /**
  * \brief replace the content of the videoFormat_entry with the content of the channelTable_entry
  * \param entry the entry in channelTable to update
- * \param  videoFormatIndex the VF that will be used to get the parameters 
+ * \param  videoFormatIndex the VF that will be used to get the parameters
  * \return TRUE if we succeed to update the parameters
  */
-gboolean update_videoFormat_entry_roi_from_channelTable_entry ( struct videoFormatTable_entry *videoFormat_entry , struct channelTable_entry *channel_entry ) 
+gboolean update_videoFormat_entry_roi_from_channelTable_entry ( struct videoFormatTable_entry *videoFormat_entry , struct channelTable_entry *channel_entry )
 {
-	
+
 	/* only the ROI parameters of the videoFormat_entry can be modifies, otherwise nothing could */
+	videoFormat_entry->videoFormatMaxHorzRes 		= channel_entry->sdp_width; 				/* Set Res from SDP, usefull to vivoecrop */
+	videoFormat_entry->videoFormatMaxVertRes 		= channel_entry->sdp_height; 				/* Set Res from SDP, usefull to vivoecrop */
 	videoFormat_entry->videoFormatRoiHorzRes 		= channel_entry->channelHorzRes ;
 	videoFormat_entry->videoFormatRoiVertRes 		= channel_entry->channelVertRes ;
 	videoFormat_entry->videoFormatRoiOriginTop 		= channel_entry->channelRoiOriginTop ;
@@ -292,12 +294,12 @@ gboolean update_videoFormat_entry_roi_from_channelTable_entry ( struct videoForm
 /**
  * \brief update the content of the channelTable_entry with the new caps receive
  * \param entry the entry in channelTable to update
- * \param  videoFormatIndex the VF that will be used to get the parameters 
+ * \param  videoFormatIndex the VF that will be used to get the parameters
  * \return TRUE if we succeed to update the parameters
  */
-void update_channelTable_entry_roi_from_caps ( struct channelTable_entry *channel_entry , GstCaps *caps ) 
+void update_channelTable_entry_roi_from_caps ( struct channelTable_entry *channel_entry , GstCaps *caps )
 {
-	
+
 	/* only the ROI parameters of the videoFormat_entry can be modifies, otherwise nothing could */
 	GstStructure *caps_str = gst_caps_get_structure	(caps , 0) ;
 
@@ -324,10 +326,10 @@ void update_channelTable_entry_roi_from_caps ( struct channelTable_entry *channe
 	temp = g_value_get_string( gst_structure_get_value(caps_str , "roiright")) ;
 	if ( temp )
 		channel_entry->channelRoiExtentRight = (long) strtol( temp , NULL, 10) ;
-	
-	/* 
-	 * This function is only used on the Service Users side, so there is no need to update the corresponding 
-	 * videoFormat_entry (as it does not exist anyway ) 
+
+	/*
+	 * This function is only used on the Service Users side, so there is no need to update the corresponding
+	 * videoFormat_entry (as it does not exist anyway )
 	 */
 
 }
@@ -349,12 +351,12 @@ gboolean channelTable_updateEntry(struct channelTable_entry * entry, int videoFo
 
 	   /* update the stream data */
 		entry->stream_datas 								= videoFormatentry->stream_datas;
-		
+
 		/* check if streaming was in play state */
 		struct videoFormatTable_entry * stream_entry 		= videoFormatTable_getEntry(videoFormatNumberIndex);
 
 		if( stream_entry->videoFormatStatus == enable )
-			stop_streaming(entry->stream_datas , entry->channelVideoFormatIndex );	
+			stop_streaming(entry->stream_datas , entry->channelVideoFormatIndex );
 
 		stream_data *data 									= entry->stream_datas;
 		/* transform IP from long to char * */
@@ -362,7 +364,7 @@ gboolean channelTable_updateEntry(struct channelTable_entry * entry, int videoFo
 
 		return TRUE;
 }
-/** 
+/**
  * \brief retrieve the entry in the channelTable corresponding to the index given in parameter
  * \param index the index of the entry we want
  * \return channelTable_entry*  a pointer on that entry
@@ -378,7 +380,7 @@ struct channelTable_entry * channelTable_getEntry(int index){
 	return iterator;
 }
 
-/** 
+/**
  * \brief retrieve the entry in the channelTable corresponding to the VF index given in parameter
  * \param index the index of the entry we want
  * \return channelTable_entry*  a pointer on that entry
@@ -502,7 +504,7 @@ gboolean channelSatus_requests_handler( struct channelTable_entry * table_entry 
 				return TRUE;
 			}
 			else if ( table_entry->channelStatus 	== channelStop)
-				return stop_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex );	
+				return stop_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex );
 			break;
 		case serviceUser:
 			if ( table_entry->channelStatus 		== channelStart){
@@ -524,7 +526,7 @@ gboolean channelSatus_requests_handler( struct channelTable_entry * table_entry 
 }
 
 /**
- * \brief handles the call of function according 
+ * \brief handles the call of function according
  * \param table_entry the table entry on which the request applies
  * \return TRUE on success, FALSE on failure
  */
@@ -534,7 +536,7 @@ static gboolean roi_requests_handler( struct channelTable_entry * table_entry , 
 	struct videoFormatTable_entry *video_stream_info = NULL ;
 
 	/*
-	 * If we are a Service User, we are going to buld a "fake" videoFormat entry 
+	 * If we are a Service User, we are going to buld a "fake" videoFormat entry
 	 */
 	if ( table_entry->channelType == serviceUser )
 		video_stream_info = SNMP_MALLOC_TYPEDEF(struct videoFormatTable_entry);
@@ -544,7 +546,7 @@ static gboolean roi_requests_handler( struct channelTable_entry * table_entry , 
 	/* update a copy of the videoFormat associated videoFormat in consequences */
 	 update_videoFormat_entry_roi_from_channelTable_entry ( video_stream_info , table_entry );
 
-	/* 
+	/*
 	 * Now update pipeline
 	 * If an error occurs, we just reset the old roi parameters' values of channel and video_stream_info
 	 */
@@ -583,7 +585,7 @@ channelTable_handler(
 	/*
 	 * As we may need it for several parameters of the channel Table
 	 * I think it is better to get the corresponding videoFormat here.
-	 * Event if in some cases it will be useless 
+	 * Event if in some cases it will be useless
 	 */
 	struct videoFormatTable_entry *videoFormat_entry ;
 
@@ -591,7 +593,7 @@ channelTable_handler(
 
     switch (reqinfo->mode) {
 
-		/* 
+		/*
          * Read-support (also covers GetNext requests)
          */
 
@@ -832,7 +834,6 @@ channelTable_handler(
         }
         break;
 
-	
         /*
          * Write-support
          */
@@ -843,7 +844,7 @@ channelTable_handler(
             table_info  =     netsnmp_extract_table_info(      request);
 
 			videoFormat_entry =  ( struct videoFormatTable_entry *) videoFormatTable_getEntry( table_entry->channelVideoFormatIndex ) ;
-			
+
 			/* check if the index we are trying to modify is in the table, if no, return */
 			if ( index_out_of_range( reginfo,
                      			   	reqinfo,

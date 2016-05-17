@@ -184,44 +184,45 @@ GstElement *get_element_from_bin( GstElement *pipeline  , GType type){
 
 }
 
-static gboolean 
+static gboolean
 set_parameters_to_roi_elements ( struct videoFormatTable_entry *video_stream_info ,	GstElement 	*vivoecrop, GstElement 	*vivoecaps, gboolean scalable ){
 
 	/* Set the parameters to crop element */
-		gst_vivoe_crop_update (G_OBJECT ( vivoecrop ), video_stream_info , scalable );		
+	gst_vivoe_crop_update (G_OBJECT ( vivoecrop ), video_stream_info , scalable );
 
-		if ( scalable ){
+	if ( scalable ){
 
-			/* 
-			 * Set parameters to roi element
-			 * As we are after a scaling element we can built a caps that is a RAW video
-			 */
-			GstPad *vivoecrop_src_pad 	= gst_element_get_static_pad( vivoecrop , "src");
-			GstCaps *new_caps;
-			if ( vivoecrop_src_pad) 
-				new_caps  			=	gst_caps_copy (gst_pad_get_pad_template_caps (vivoecrop_src_pad));
-			else{
-				g_printerr("Faile to get vivoecrop source pad template\n");
-				return FALSE;
-			}
-
-			gst_caps_set_simple (  new_caps , 
-					"height" , G_TYPE_INT	,  video_stream_info->videoFormatRoiVertRes	,
-					"width" , G_TYPE_INT	,  video_stream_info->videoFormatRoiHorzRes	,
-					NULL);
-
-			/* set the caps to the capsfilter */
-			g_object_set ( 	G_OBJECT ( vivoecaps ) , 
-					"caps" 	, new_caps ,
-					NULL
-					);
-
-			GstCaps *new_caps_bis;
-			g_object_get ( G_OBJECT( vivoecaps  ) , "caps" , &new_caps_bis , NULL ) ;
-
+		/*
+		 * Set parameters to roi element
+		 * As we are after a scaling element we can built a caps that is a RAW video
+		 */
+		GstPad *vivoecrop_src_pad 	= gst_element_get_static_pad( vivoecrop , "src");
+		GstCaps *new_caps;
+		if ( vivoecrop_src_pad)
+			new_caps  			=	gst_caps_copy (gst_pad_get_pad_template_caps (vivoecrop_src_pad));
+		else{
+			g_printerr("Faile to get vivoecrop source pad template\n");
+			return FALSE;
 		}
 
-		return TRUE ;
+		gst_caps_set_simple (  new_caps ,
+				"height" , G_TYPE_INT	,  video_stream_info->videoFormatRoiVertRes	,
+				"width" , G_TYPE_INT	,  video_stream_info->videoFormatRoiHorzRes	,
+				NULL);
+
+		/* set the caps to the capsfilter */
+		g_object_set ( 	G_OBJECT ( vivoecaps ) ,
+				"caps" 	, new_caps ,
+				NULL
+				);
+
+		GstCaps *new_caps_bis;
+		g_object_get ( G_OBJECT( vivoecaps  ) , "caps" , &new_caps_bis , NULL ) ;
+
+	}
+
+	return TRUE ;
+
 }
 
 /**
@@ -238,10 +239,10 @@ gboolean handle_roi( GstElement *pipeline, struct videoFormatTable_entry *video_
 	GstElement 	*vivoecaps 	= NULL;
 	gboolean 	scalable  	= FALSE ;
 
-	/* 
+	/*
 	 * iterates though the bin source to find the element vivoecrop
 	 */
-	vivoecrop = get_element_from_bin( pipeline, GST_TYPE_VIVOE_CROP );	
+	vivoecrop = get_element_from_bin( pipeline, GST_TYPE_VIVOE_CROP );
 	if ( !vivoecrop ){
 		/*
 		 * then this is not a ROI channel , set the type to videoChannel and exit function */
@@ -249,26 +250,26 @@ gboolean handle_roi( GstElement *pipeline, struct videoFormatTable_entry *video_
 		return FALSE;
 	}
 
-	/* 
+	/*
 	 * If we get here, it means that the element vivoecrop has been found in the pipeline, so this videoFormat is a roi
 	 */
 	video_stream_info->videoFormatType = roi;
-	
-	/* 
+
+	/*
 	 * Check if roi is scalable
 	 */
-	/* 
+	/*
 	 * iterates though the bin source to find the element vivoecaps
 	 */
 	vivoecaps = get_element_from_bin( pipeline, GST_TYPE_VIVOE_CAPS );
-	if ( vivoecaps ) 
+	if ( vivoecaps )
 		scalable = TRUE ;
 	/*
 	 * then the ROI is scalable
 	 */
 
-	/* 
-	 * Set the ROI parameter into the videoFormat Entry 
+	/*
+	 * Set the ROI parameter into the videoFormat Entry
 	 * This will initialize the ROI parameters to 0 if they were not specified in the configuration file
 	 */
 	if ( get_roi_values_from_conf( video_stream_info, scalable , channel_entry ) ){
@@ -293,18 +294,18 @@ gboolean update_pipeline_SP_on_roi_changes( gpointer stream_datas , struct chann
 	gboolean 	scalable 	= FALSE;
 
 	/*
-	 * return if the stream data or pipeline have not been initialize 
+	 * return if the stream data or pipeline have not been initialize
 	 */
 	if ( !data || !pipeline )
 		return FALSE;
 
-	/* 
+	/*
 	 * The values in the table should already been updated. Here we just handle the pipeline here.
-	 * We should not chceck the values entered by the user. As an example, this is not where we should 
-	 * check that the ROI want from non-scalable to scalable. 
+	 * We should not chceck the values entered by the user. As an example, this is not where we should
+	 * check that the ROI want from non-scalable to scalable.
 	 */
 	GstElement *vivoecrop = get_element_from_bin( pipeline , GST_TYPE_VIVOE_CROP );
-	GstElement *vivoecaps = get_element_from_bin( pipeline , GST_TYPE_VIVOE_CAPS );	
+	GstElement *vivoecaps = get_element_from_bin( pipeline , GST_TYPE_VIVOE_CAPS );
 
 	if ( !vivoecrop)
 		return FALSE;
@@ -312,26 +313,7 @@ gboolean update_pipeline_SP_on_roi_changes( gpointer stream_datas , struct chann
 	if ( vivoecaps )
 		scalable = TRUE ;
 
-	gst_vivoe_crop_update (G_OBJECT ( vivoecrop ), videoFormat_entry , scalable );
-
-	if ( scalable )
-	{
-		GstCaps *new_caps;
-		g_object_get ( G_OBJECT( vivoecaps  ) , "caps" , &new_caps , NULL ) ;
-
-		new_caps = gst_caps_make_writable ( new_caps );
-	
-		gst_caps_set_simple (  new_caps , 
-				"height" , G_TYPE_INT	,  videoFormat_entry->videoFormatRoiVertRes 	,
-				"width" , G_TYPE_INT	,  videoFormat_entry->videoFormatRoiHorzRes 	,
-				NULL);
-
-		/* set the caps to the capsfilter */
-		g_object_set ( 	G_OBJECT ( vivoecaps ) , 
-				"caps" 	, new_caps ,
-				NULL
-				);
-	}
+	set_parameters_to_roi_elements ( videoFormat_entry , vivoecrop, vivoecaps, scalable );
 
 	if (  (! strcmp( channel_entry->channelVideoFormat , MPEG4_NAME )) && channel_entry->channelType != serviceUser ){
 		/*

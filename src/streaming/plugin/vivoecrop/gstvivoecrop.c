@@ -720,10 +720,10 @@ gst_vivoe_crop_set_crop (GstVivoeCrop * vcrop, gint new_value, gint * prop)
 }
 
 
-static void 
+static void
 gst_vivoe_crop_get_roi_values_from_MIB( struct videoFormatTable_entry *videoFormat_entry , gint *top , gint *left , gint *bottom , gint *right, gboolean scalable ){
 
-	/* 
+	/*
 	 * If values are negative (which could happen if a bad value is set to ROI resolution, and top, then set parameters to zero
 	 */
 	*top 	=  videoFormat_entry->videoFormatRoiOriginTop ;
@@ -740,9 +740,9 @@ gst_vivoe_crop_get_roi_values_from_MIB( struct videoFormatTable_entry *videoForm
 		*right 	= videoFormat_entry->videoFormatMaxHorzRes - ( videoFormat_entry->videoFormatRoiOriginLeft	+ videoFormat_entry->videoFormatRoiExtentRight  ) ;
 	}
 	else
-	{ 
+	{
 		*bottom	= videoFormat_entry->videoFormatMaxVertRes - ( videoFormat_entry->videoFormatRoiOriginTop 	+ videoFormat_entry->videoFormatRoiVertRes  ) ;
-		*right 	= videoFormat_entry->videoFormatMaxHorzRes - ( videoFormat_entry->videoFormatRoiOriginLeft	+ videoFormat_entry->videoFormatRoiHorzRes  ) ;			
+		*right 	= videoFormat_entry->videoFormatMaxHorzRes - ( videoFormat_entry->videoFormatRoiOriginLeft	+ videoFormat_entry->videoFormatRoiHorzRes  ) ;
 	}
 
 	if ( *bottom < 0 || *bottom >= (videoFormat_entry->videoFormatMaxVertRes - videoFormat_entry->videoFormatRoiOriginTop) )
@@ -751,7 +751,7 @@ gst_vivoe_crop_get_roi_values_from_MIB( struct videoFormatTable_entry *videoForm
 	if ( *right < 0 || *right >= ( videoFormat_entry->videoFormatMaxHorzRes - videoFormat_entry->videoFormatRoiOriginLeft)  )
 		*right = 0 ;
 
-} 
+}
 
 void  gst_vivoe_crop_update (GObject * object, struct videoFormatTable_entry *videoFormat_entry , gboolean scalable )
 {
@@ -811,11 +811,11 @@ vivoecrop_init (void)
 			GST_VERSION_MINOR,
 			"vivoecrop",
 			"The Vivoe's gstreamer cropping module",
-			plugin_init, 
+			plugin_init,
 			VERSION,
-			"LGPL", 
+			"LGPL",
 			PACKAGE_NAME,
-			SOURCE,	
+			SOURCE,
 			GST_PACKAGE_ORIGIN
 			);
 
