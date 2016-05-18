@@ -366,7 +366,64 @@ gboolean channelTable_updateEntry(struct channelTable_entry * entry, int videoFo
 		set_udpsink_param(data->udp_elem, entry->channelIndex);
 
 		return TRUE;
+
+
+       /* get the correspondante entry in the table of VideoFormat */
+       struct videoFormatTable_entry *videoFormatentry         = videoFormatTable_getEntry( videoFormatNumberIndex );
+       if ( videoFormatentry == NULL)
+               return FALSE;
+
+	   channelTable_fill_entry( entry, videoFormatentry );
+
+	   /* update the stream data */
+		entry->stream_datas 								= videoFormatentry->stream_datas;
+
+		if( entry->channelStatus == channelStart && videoFormatentry->videoFormatStatus != enable )
+			start_streaming(entry->stream_datas , entry->channelVideoFormatIndex );
+		else if ( entry->channelStatus == channelStop && videoFormatentry->videoFormatStatus != disable )
+			stop_streaming( entry->stream_datas , entry->channelVideoFormatIndex );
+
+		stream_data *data 									= entry->stream_datas;
+		/* transform IP from long to char * */
+		set_udpsink_param(data->udp_elem, entry->channelIndex);
+
+		return TRUE;
+
 }
+
+#if 0
+/**
+ * \brief update an entry in the ChannelTable when changing its videoFormat
+ * \param entry the entry in channelTable to update
+ * \param videoFormatIndex the new videoFormatIndex to use for this channel
+ * \return TRUE if we succeed to update the parameters
+ */
+gboolean channelTable_updateEntry(struct channelTable_entry * entry, int videoFormatNumberIndex){
+
+       /* get the correspondante entry in the table of VideoFormat */
+       struct videoFormatTable_entry *videoFormatentry         = videoFormatTable_getEntry( videoFormatNumberIndex );
+       if ( videoFormatentry == NULL)
+               return FALSE;
+
+	   channelTable_fill_entry( entry, videoFormatentry );
+
+	   /* update the stream data */
+		entry->stream_datas 								= videoFormatentry->stream_datas;
+
+		/* check if streaming was in play state */
+		struct videoFormatTable_entry * stream_entry 		= videoFormatTable_getEntry(videoFormatNumberIndex);
+
+		if( stream_entry->videoFormatStatus == enable )
+			stop_streaming(entry->stream_datas , entry->channelVideoFormatIndex );
+
+		stream_data *data 									= entry->stream_datas;
+		/* transform IP from long to char * */
+		set_udpsink_param(data->udp_elem, entry->channelIndex);
+
+		return TRUE;
+}
+#endif
+
 /**
  * \brief retrieve the entry in the channelTable corresponding to the index given in parameter
  * \param index the index of the entry we want
