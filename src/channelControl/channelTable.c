@@ -38,8 +38,8 @@ init_channelTable(void)
 }
 
 
-/** 
- * \brief Initialize the channelTable table by defining its contents and how it's structured 
+/**
+ * \brief Initialize the channelTable table by defining its contents and how it's structured
  */
 void
 initialize_table_channelTable(void)
@@ -64,15 +64,15 @@ initialize_table_channelTable(void)
                            0 /* to terminate the list of parameters*/);
     table_info->min_column = COLUMN_CHANNELTYPE;
     table_info->max_column = COLUMN_CHANNELDEFAULTRECEIVEIPADDRESS;
-    
+
     iinfo = SNMP_MALLOC_TYPEDEF( netsnmp_iterator_info );
     iinfo->get_first_data_point = channelTable_get_first_data_point;
     iinfo->get_next_data_point  = channelTable_get_next_data_point;
     iinfo->table_reginfo        = table_info;
-    
+
     netsnmp_register_table_iterator( reg, iinfo );
 	/* check if the device is a serviceProvider or a ServiceUser
-	 * If it is a serviceUser or both, then create an empty entry 
+	 * If it is a serviceUser or both, then create an empty entry
 	 */
 	long default_receive_IP = 0; /* a variable to retreive the default receive IP entered by the user in configuration file */
 	char *ip; /* the receive IP in a string form */
@@ -100,7 +100,7 @@ static void add_in_channel_SU(struct channelTable_entry *new_entry){
 /**
  * \brief pops an entry  channelTable_SU
  * \param new_entry the entry to add into the table
- * \param entry_index the index of the entry to pop 
+ * \param entry_index the index of the entry to pop
  */
 static void pop_from_channel_SU( struct channelTable_entry *table_entry){
 	struct channelTable_entry *iterator = channelTable_SU_head;
@@ -116,7 +116,7 @@ static void pop_from_channel_SU( struct channelTable_entry *table_entry){
 		iterator->next_SU =	iterator->next_SU->next_SU;
 	else /* it means we are trying to pop the last element of the table */
 		iterator->next_SU = NULL;
-	/* we don't free the memory because the entry remains in the classic channelTable */	
+	/* we don't free the memory because the entry remains in the classic channelTable */
 }
 
 
@@ -170,11 +170,11 @@ struct channelTable_entry *
 	entry->channelVideoFormat 	 			= strdup(channelVideoFormat);
 	entry->channelVideoFormat_len			= MIN(strlen(channelVideoFormat), DisplayString16);
 	entry->channelVideoSampling 			= strdup(channelVideoSampling);
-	entry->channelVideoSampling_len			= MIN(strlen(channelVideoSampling), DisplayString16);	
+	entry->channelVideoSampling_len			= MIN(strlen(channelVideoSampling), DisplayString16);
 	entry->channelVideoBitDepth 			= channelVideoBitDepth;
 	entry->channelFps 						= channelFps;
 	entry->channelColorimetry 				= strdup(channelColorimetry);
-	entry->channelColorimetry_len 			= MIN(strlen(channelColorimetry), DisplayString16);	
+	entry->channelColorimetry_len 			= MIN(strlen(channelColorimetry), DisplayString16);
 	entry->channelInterlaced 				= channelInterlaced;
 	entry->channelCompressionFactor 		= channelCompressionFactor;
 	entry->channelCompressionRate 			= channelCompressionRate;
@@ -209,7 +209,7 @@ struct channelTable_entry *
  */
 struct channelTable_entry *	channelTable_create_empty_entry(int index,long channel_type, char *channelUserDesc , long videoFormatNumber ,  long default_IP_address, gpointer stream_datas ){
 
-	struct channelTable_entry *ServiceUser_entry = 
+	struct channelTable_entry *ServiceUser_entry =
 			channelTable_createEntry(
     	      				index, /* Appen one channel to the list, its index is just the number of channel incremented by one */
 							channel_type,
@@ -243,12 +243,13 @@ struct channelTable_entry *	channelTable_create_empty_entry(int index,long chann
 }
 
 /**
- * \brief fill an entry in the ChannelTable 
+ * \brief fill an entry in the ChannelTable
  * \param entry the entry in channelTable to update
  * \param  videoFormatIndex the VF that will be used to get the parameters
  * \return TRUE if we succeed to update the parameters
  */
 gboolean channelTable_fill_entry(struct channelTable_entry * entry, struct videoFormatTable_entry *videoFormatentry){
+
         /* fill ChannelTable_entry parameter with the ones from videoFormatentry */
 		entry->channelVideoFormat 							= strdup(videoFormatentry->videoFormatBase);
 		entry->channelVideoFormat_len 						= MIN(strlen(videoFormatentry->videoFormatBase), 		DisplayString16);
@@ -264,6 +265,7 @@ gboolean channelTable_fill_entry(struct channelTable_entry * entry, struct video
 		entry->channelHorzRes 								= videoFormatentry->videoFormatMaxHorzRes;
 		entry->channelVertRes 								= videoFormatentry->videoFormatMaxVertRes;
 		entry->channelRtpPt 								= videoFormatentry->videoFormatRtpPt;
+
 		return TRUE;
 }
 
@@ -342,7 +344,8 @@ void update_channelTable_entry_roi_from_caps ( struct channelTable_entry *channe
  */
 gboolean channelTable_updateEntry(struct channelTable_entry * entry, int videoFormatNumberIndex){
 
-       /* get the correspondante entry in the table of VideoFormat */
+
+	   /* get the correspondante entry in the table of VideoFormat */
        struct videoFormatTable_entry *videoFormatentry         = videoFormatTable_getEntry( videoFormatNumberIndex );
        if ( videoFormatentry == NULL)
                return FALSE;
@@ -945,7 +948,7 @@ channelTable_handler(
                 break;
             case COLUMN_CHANNELRECEIVEIPADDRESS:
                 /* or possibly 'netsnmp_check_vb_int_range' */
-                ret = netsnmp_check_vb_type( request->requestvb, ASN_IPADDRESS );				
+                ret = netsnmp_check_vb_type( request->requestvb, ASN_IPADDRESS );
                 if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;
@@ -969,7 +972,7 @@ channelTable_handler(
                 break;
             case COLUMN_CHANNELDEFAULTVIDEOFORMATINDEX:
                 /* or possibly 'netsnmp_check_vb_int_range' */
-                ret = netsnmp_check_vb_int_range( request->requestvb, 1, videoFormatNumber._value.int_val );				
+                ret = netsnmp_check_vb_int_range( request->requestvb, 1, videoFormatNumber._value.int_val );
                 if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;
@@ -977,7 +980,7 @@ channelTable_handler(
                 break;
             case COLUMN_CHANNELDEFAULTRECEIVEIPADDRESS:
                 /* or possibly 'netsnmp_check_vb_int_range' */
-                ret = netsnmp_check_vb_type( request->requestvb, ASN_IPADDRESS );				
+                ret = netsnmp_check_vb_type( request->requestvb, ASN_IPADDRESS );
                 if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;
@@ -998,7 +1001,7 @@ channelTable_handler(
             table_info  =     netsnmp_extract_table_info(      request);
 
 			videoFormat_entry =  ( struct videoFormatTable_entry *) videoFormatTable_getEntry( table_entry->channelVideoFormatIndex ) ;
-    
+
             switch (table_info->colnum) {
 				case COLUMN_CHANNELUSERDESC:
 					if ( deviceInfo.parameters[num_DeviceMode]._value.int_val	!= maintenanceMode){

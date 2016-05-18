@@ -140,7 +140,7 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 		GstElement *capsfilter = gst_element_factory_make_log("capsfilter", CAPSFITER_J2K_NAME ) ;
 
 		GstCaps *caps_jpeg2000 = gst_caps_new_empty_simple("image/x-jpc");
-	
+
 		/* Put the source in the pipeline */
 		g_object_set (capsfilter, "caps",caps_jpeg2000 , NULL);
 
@@ -158,7 +158,7 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 		if ( !rtp )
 			return NULL;
 	}
- 	/* in case the video type detected is unknown */	
+ 	/* in case the video type detected is unknown */
 	else
 	{
 		g_printerr("unknow type of video stream\n");
@@ -169,7 +169,7 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 	gst_bin_add(GST_BIN (pipeline), rtp);
 
 	if (caps == NULL ){
-		
+
 		/* Filters out non VIVOE videos, and link input to RTP if video has a valid format*/
 		if (!filter_VIVOE(type_detection(GST_BIN(pipeline), input,NULL),input, rtp))
 			return NULL;
@@ -178,20 +178,20 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 		/* Media stream Type detection */
 		video_caps = type_detection(GST_BIN(pipeline), rtp, NULL);
 
-		if ( video_caps == NULL) 
-			return NULL; 
+		if ( video_caps == NULL)
+			return NULL;
 
 		/*Fill the MIB a second time after creating payload*/
 		fill_entry(video_caps, video_info, stream_datas);
 
 	}else{
-		
+
 		/* link input to rtp payloader */
 		if ( !gst_element_link_log(input, rtp))
-		   return NULL;	
+		   return NULL;
 
 		input = rtp ;
-		
+
 		video_caps = type_detection(GST_BIN(pipeline), input ,NULL);
 
 		/*Fill the MIB a second time after creating payload, this is needed to get rtp_data needed to build SDP files */
@@ -220,7 +220,7 @@ static gboolean create_branch_in_pipeline( GstElement *pipeline , GstElement *in
 	/*
 	 * Create the tee element, use to create the branchs in pipeline
 	 */
-	GstElement *tee = gst_element_factory_make_log( "tee", TEE_NAME ); 
+	GstElement *tee = gst_element_factory_make_log( "tee", TEE_NAME );
 
 	/* add it in pipeline */
 	if ( !gst_bin_add ( GST_BIN(pipeline), tee) ){
@@ -229,11 +229,11 @@ static gboolean create_branch_in_pipeline( GstElement *pipeline , GstElement *in
 	}
 	if ( ! gst_element_link_log ( input , tee))
 		return FALSE;
-	
+
 	/* retrieve tee source pad template (after linking it to input element*/
 	tee_src_pad_template = gst_element_class_get_pad_template(GST_ELEMENT_GET_CLASS(tee), "src_%u");
 	tee_branch1_sink_pad = gst_element_request_pad(tee, tee_src_pad_template, NULL, NULL );
-	
+
 	/* get sink pad from branch 1 */
 	branch1_src_pad = gst_element_get_static_pad( branch1 , "sink");
 
@@ -287,12 +287,12 @@ void set_udpsink_param( GstElement *udpsink, long channel_entry_index){
  * \return last element added in pipeline, so udpsink if everything goes well
  */
 static GstElement* addUDP( 	GstElement *pipeline, 	GstBus *bus,
-							guint bus_watch_id, 	GstElement *input, 		
+							guint bus_watch_id, 	GstElement *input,
 							long channel_entry_index){
 
 	/*Create element that will be add to the pipeline */
 	GstElement *udpsink;
-		
+
 	/* Create the UDP sink */
     udpsink = gst_element_factory_make_log ("udpsink", UDPSINK_NAME );
 
@@ -340,9 +340,9 @@ GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
    	/* Add RTP element */
  	last = addRTP( 	pipeline, 	  		bus,
 					bus_watch_id, 		input,
-		  			video_stream_info, 	stream_datas, 
+		  			video_stream_info, 	stream_datas,
 					NULL);
-	
+
 	if(last == NULL){
 		g_printerr("Failed to create pipeline\n");
 		return NULL;
@@ -359,16 +359,16 @@ GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
 	}
 
 /*
- * This is where we add the last element of pipeline. But in order to handle properly ROI for MPEG-4 video, 
+ * This is where we add the last element of pipeline. But in order to handle properly ROI for MPEG-4 video,
  * we must give the possibility to perforpm typefind after the RTP element. A solution, is to unlink RTP and UDP element, add and perform
  * the typefing, and lik RTP and UDP again. This is not very efficient. Then, another solution is have beeen imagined: we will place a tee element
  * before the udp element. A tee has the power to split date to multiple pads. So after the type there will be two branches in our pipeline:
- * _ one with the udp element as usuall. 
+ * _ one with the udp element as usuall.
  * _ one with a typefind element. But this typefind, on contrary to others used should never been removed from the pipeline.
  */
 
 	udpsink = addUDP( 	pipeline, 	bus,
-			bus_watch_id, 		last, 
+			bus_watch_id, 		last,
 			channel_entry_index
 			);
 
@@ -384,7 +384,7 @@ GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
 		return NULL;
 	}
 
-	/* 
+	/*
 	 * If the videoFormat is a ROI, create the branch from RTP elment, branch 1 is UDP element, branch 2 is typefind_roi element
 	 * rtp and updsink will be link there.
 	 * Otherwise juist link udp source to payloader.
@@ -397,7 +397,7 @@ GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
 			g_printerr("Failed to create pipeline\n");
 			return NULL;
 		}
-		
+
 	}
 	else
 	{
@@ -425,11 +425,11 @@ GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
 GstElement *append_SP_pipeline_for_redirection(GstCaps *caps, long videoFormatIndex ){
 
 	GstElement 		*last;
-	
-	
+
+
 	/* get the entry in videoFormatTable that corresponds to the mapping */
 	struct videoFormatTable_entry* videoFormat_entry = videoFormatTable_getEntry(videoFormatIndex);
-	
+
 	stream_data 	*data 	=  videoFormat_entry->stream_datas;
 
 	if ( data == NULL ){
@@ -438,10 +438,10 @@ GstElement *append_SP_pipeline_for_redirection(GstCaps *caps, long videoFormatIn
 	}
 
 
-	/* Now build the corresponding pipeline according to the caps*/ 
+	/* Now build the corresponding pipeline according to the caps*/
 	/*
 	 * As it was convenient, the last element added in a redirection's service provider's pipeline has been stored in
-	 * data->udp_elem, so the input element to pass to the addRTP function is the last element added in pipeline ( the bin made from the 
+	 * data->udp_elem, so the input element to pass to the addRTP function is the last element added in pipeline ( the bin made from the
 	 * gst_source commmand line given by the user in vivoe-mib.conf configuration file */
 
 	last = addRTP(data->pipeline , data->bus , data->bus_watch_id , data->udp_elem  , videoFormat_entry , data , caps);
@@ -453,12 +453,12 @@ GstElement *append_SP_pipeline_for_redirection(GstCaps *caps, long videoFormatIn
 	/* get the index of the channel corresponding to the videoFormatIndex */
 	struct channelTable_entry *channel_entry = channelTable_get_from_VF_index(videoFormatIndex);
 
-	/* fill the channel Table */	
+	/* fill the channel Table */
 	channelTable_fill_entry ( channel_entry , videoFormat_entry );
 
 	/* Add UDP element */
 	last = addUDP(  data->pipeline, 	data->bus,
-					data->bus_watch_id, last, 	 		
+					data->bus_watch_id, last,
 					channel_entry->channelIndex
 				);
 
@@ -488,7 +488,7 @@ void set_udpsrc_param( GstElement *udpsrc, struct channelTable_entry * channel_e
     g_object_set(   G_OBJECT(udpsrc),
                 	"multicast-group", 	inet_ntoa( multicast_group ),
                     "port", 			DEFAULT_MULTICAST_PORT,
-					"caps", 			caps, 
+					"caps", 			caps,
                     NULL);
 
 }
@@ -508,7 +508,7 @@ static GstElement* addUDP_SU( 	GstElement *pipeline, 	GstBus *bus,
 
 	/*Create element that will be add to the pipeline */
 	GstElement *udpsrc;
-		
+
 	/* Create the UDP sink */
     udpsrc = gst_element_factory_make_log ("udpsrc", UDPSRC_NAME );
 
@@ -533,10 +533,10 @@ static GstElement* addUDP_SU( 	GstElement *pipeline, 	GstBus *bus,
  * \param bus the bus the channel
  * \param bus_watch_id an id watch on the bus
  * \param input the gstelement to link in input
- * \param video_info a videoFormatTable_entry to store detected caps 
+ * \param video_info a videoFormatTable_entry to store detected caps
  * \param stream_data the stream_data associated to the pipeline
  * \param caps the input video caps
- * \return GstElement the last element added in pipeline 
+ * \return GstElement the last element added in pipeline
  */
 static GstElement* addRTP_SU( 	GstElement *pipeline, 						GstBus *bus,
 								guint bus_watch_id,							GstElement* input,
@@ -553,7 +553,7 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 						GstBus *bus,
 	fill_entry(video_caps, video_info, stream_datas);
 
 	if ( gst_structure_has_field( video_caps, "encoding-name")){
-		/* For Raw video */		
+		/* For Raw video */
 		if ( strcmp( RAW_NAME,encoding) == 0 ){
 			rtp 	= gst_element_factory_make_log ("rtpvrawdepay" , RTPRAWDEPAY_NAME );
 			/* Check if everything went ok */
@@ -567,8 +567,8 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 						GstBus *bus,
 			if( rtp == NULL)
 				return NULL;
 
-		} 	
-		/* For J2K video */		
+		}
+		/* For J2K video */
 		else if ( strcmp( J2K_NAME , encoding) == 0 ){
 			rtp 	= gst_element_factory_make_log ("rtpj2kdepay" , RTPJ2KDEPAY_NAME );
 			/* Check if everything went ok */
@@ -595,7 +595,7 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 						GstBus *bus,
 
 }
 
-/* 
+/*
  * \brief called when the appsink notifies us that there is a new buffer ready for processing in case of a redirection
  * \param GstElement elt the appsink element from SU pipeline
  * \param GstElement pipeline the pipeline from which we should retrieve appsrc ( SP's pipeline )
@@ -613,7 +613,7 @@ static GstFlowReturn
 
 	/* get appsource an push new sample */
 	appsource = gst_bin_get_by_name (GST_BIN (pipeline_SP), APPSRC_NAME );
-	ret = gst_app_src_push_sample (GST_APP_SRC (appsource), sample); 
+	ret = gst_app_src_push_sample (GST_APP_SRC (appsource), sample);
 	gst_object_unref (appsource);
 
 	/* we don't need the appsink sample anymore */
@@ -655,7 +655,7 @@ static GstElement *handle_redirection_SU_pipeline ( GstElement *pipeline, GstCap
 		GstElement *capsfilter = gst_element_factory_make_log("capsfilter", CAPSFITER_J2K_NAME );
 
 		GstCaps *caps_jpeg2000 = gst_caps_new_empty_simple("image/x-jpc");
-	
+
 		/* Put the source in the pipeline */
 		g_object_set (capsfilter, "caps",caps_jpeg2000 , NULL);
 
