@@ -47,25 +47,25 @@ static gboolean get_roi_values_from_conf( struct videoFormatTable_entry* videoFo
 	 */
 	if ( channel_entry ){
 
-			if ( get_roi_parameters_for_sink ( 
-					channel_entry->channelIndex, 	scalable, 
+			if ( get_roi_parameters_for_sink (
+					channel_entry->channelIndex, 	scalable,
 					&roi_width, 					&roi_height,
-					&roi_top, 						&roi_left, 
+					&roi_top, 						&roi_left,
 					&roi_extent_bottom,   			&roi_extent_right ) ){
 
 			/* if they are all set to 0 return FALSE so we don't lose time on settinf default values to vivoecrop and vivoeroi */
 			if ( ! (roi_width && roi_height && roi_top && roi_extent_bottom && roi_extent_right ))
 				return FALSE;
 
-			/* 
-			 * save those parameters into the videoFormat_entry 
+			/*
+			 * save those parameters into the videoFormat_entry
 			 */
-			videoFormat_entry->videoFormatRoiHorzRes 		= roi_width; 
-			videoFormat_entry->videoFormatRoiVertRes 		= roi_height; 
-			videoFormat_entry->videoFormatRoiOriginTop 		= roi_top; 
-			videoFormat_entry->videoFormatRoiOriginLeft 	= roi_left; 
-			videoFormat_entry->videoFormatRoiExtentBottom 	= roi_extent_bottom; 
-			videoFormat_entry->videoFormatRoiExtentRight 	= roi_extent_right; 
+			videoFormat_entry->videoFormatRoiHorzRes 		= roi_width;
+			videoFormat_entry->videoFormatRoiVertRes 		= roi_height;
+			videoFormat_entry->videoFormatRoiOriginTop 		= roi_top;
+			videoFormat_entry->videoFormatRoiOriginLeft 	= roi_left;
+			videoFormat_entry->videoFormatRoiExtentBottom 	= roi_extent_bottom;
+			videoFormat_entry->videoFormatRoiExtentRight 	= roi_extent_right;
 
 			return TRUE;
 
@@ -75,13 +75,13 @@ static gboolean get_roi_values_from_conf( struct videoFormatTable_entry* videoFo
 
 	}else{
 		/*
-		 * If channel_entry is NULL, we are a SP ROI, so we look into configuration file for [source_x] groups 
+		 * If channel_entry is NULL, we are a SP ROI, so we look into configuration file for [source_x] groups
 		 */
 
-		if ( get_roi_parameters_for_sources ( 
-					videoFormat_entry->videoFormatIndex , 	scalable, 
+		if ( get_roi_parameters_for_sources (
+					videoFormat_entry->videoFormatIndex , 	scalable,
 					&roi_width, 							&roi_height,
-					&roi_top, 								&roi_left, 
+					&roi_top, 								&roi_left,
 					&roi_extent_bottom,   					&roi_extent_right ) ){
 
 			/* if they are all set to 0 return FALSE so we don't lose time on settinf default values to vivoecrop and vivoeroi */
@@ -89,12 +89,12 @@ static gboolean get_roi_values_from_conf( struct videoFormatTable_entry* videoFo
 				return FALSE;
 
 			/* copy the data in the videoFormat_entry */
-			videoFormat_entry->videoFormatRoiHorzRes 		= roi_width; 
-			videoFormat_entry->videoFormatRoiVertRes 		= roi_height; 
-			videoFormat_entry->videoFormatRoiOriginTop 		= roi_top; 
-			videoFormat_entry->videoFormatRoiOriginLeft 	= roi_left; 
-			videoFormat_entry->videoFormatRoiExtentBottom 	= roi_extent_bottom; 
-			videoFormat_entry->videoFormatRoiExtentRight 	= roi_extent_right; 
+			videoFormat_entry->videoFormatRoiHorzRes 		= roi_width;
+			videoFormat_entry->videoFormatRoiVertRes 		= roi_height;
+			videoFormat_entry->videoFormatRoiOriginTop 		= roi_top;
+			videoFormat_entry->videoFormatRoiOriginLeft 	= roi_left;
+			videoFormat_entry->videoFormatRoiExtentBottom 	= roi_extent_bottom;
+			videoFormat_entry->videoFormatRoiExtentRight 	= roi_extent_right;
 
 			return TRUE;
 
@@ -113,26 +113,26 @@ static gboolean get_roi_values_from_conf( struct videoFormatTable_entry* videoFo
  * \return  TRUE on succes, FALSE on failure ( as caps not found for example )
  */
 static gboolean SP_roi_mp4_config_update (gpointer stream_datas,  struct videoFormatTable_entry * videoFormat_entry ) {
-	
+
 	/* get the stream_data from the channel */
-	stream_data 	*data 			= stream_datas; 
+	stream_data 	*data 			= stream_datas;
 
 	/* A structure to save the new detected caps */
 	GstStructure 	*video_caps;
 
 	/*
-	 * detect the new video caps 
+	 * detect the new video caps
 	 */
 
  	video_caps = type_detection_for_roi( GST_BIN(data->pipeline) , data->udp_elem ) ;
-	
+
 	if ( !video_caps ){
 		g_printerr ("Failed to adapt MPEG-4 pipeline for ROI\n");
 		return FALSE;
 	}
 
 	/*
-	 * fill rtp data and other mib parameters in needed 
+	 * fill rtp data and other mib parameters in needed
 	 */
 	fill_entry(video_caps, videoFormat_entry , stream_datas);
 
