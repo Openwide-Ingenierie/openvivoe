@@ -186,15 +186,10 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
  * \brief Fill the MIB from information the we success to extract from the pipeline
  * \param video_info an entry structure containing the parameters to create e new entry in the table
  * \param stream_datas the data associated to the stream, to save the index of the video format added
- * \param ip a location to store the IP computed in order to gives it as a parameter for updsink
  * \return EXIT_SUCCESS (0) or EXIT_FAILURE (1)
  */
 int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer stream_datas, long *channel_entry_index ){
 	stream_data *data 			= stream_datas;
-	/* Check if entry already exits;
-	 *  _ if yes, do not add a new entry, but set it status to enable if it is not already enable
-	 *  _ if no, increase viodeFormatNumber, and  add a new entry in the table
-	 */
 
 	/* Then we are sure that we can create a new entry */
 		videoFormatTable_createEntry( 	video_info->videoFormatIndex, 						video_info->videoFormatType,

@@ -243,10 +243,10 @@ int init_stream_SP( int videoFormatIndex ){
 
 	/* Initialization of elements needed */
     GstElement 	*pipeline;
-    GstElement 	*last;	
+    GstElement 	*last;
     GstBus 		*bus;
     guint 		bus_watch_id;
-	
+
 	/* Create the pipeline */
 	pipeline  = gst_pipeline_new ("pipeline");
 	if(pipeline  == NULL){
@@ -255,7 +255,7 @@ int init_stream_SP( int videoFormatIndex ){
 	}
 
 	/*
-	 * In order tp DEBUG gstreamer 
+	 * In order tp DEBUG gstreamer
 	 */
 	GST_DEBUG_BIN_TO_DOT_FILE( GST_BIN (pipeline) , GST_DEBUG_GRAPH_SHOW_ALL , "pipeline" );
 
@@ -266,8 +266,8 @@ int init_stream_SP( int videoFormatIndex ){
 	/* this will be free in the delete_stream function */
 	rtp_data 	*rtp_datas 		= malloc(sizeof(rtp_data));
 	data->rtp_datas 			= rtp_datas;
-	
-	data->pipeline 		= pipeline;	
+
+	data->pipeline 		= pipeline;
 	/* we add a message handler */
 	bus = gst_pipeline_get_bus ( GST_PIPELINE(pipeline));
     bus_watch_id = gst_bus_add_watch (bus, bus_call, main_loop);
@@ -282,14 +282,14 @@ int init_stream_SP( int videoFormatIndex ){
 		g_printerr ( "Failed to create videosource\n");
 		return EXIT_FAILURE;
 	}
-	
-	gboolean redirection = FALSE; 
+
+	gboolean redirection = FALSE;
 	/* if this is a redirection */
-	if ( !strcmp(GST_ELEMENT_NAME(last), APPSRC_NAME) ){ 
+	if ( !strcmp(GST_ELEMENT_NAME(last), APPSRC_NAME) ){
 		init_redirection( data, videoFormatIndex );
 		/* for convenience we store the last element added in pipeline here, even if it is not it purpose , this will be used to retrieve the last element of the pipeline later
 		 * in append_SP_pipeline_for_redirection */
-		data->udp_elem = last ; 
+		data->udp_elem = last ;
 		redirection = TRUE;
 	}
 	else
@@ -301,7 +301,7 @@ int init_stream_SP( int videoFormatIndex ){
 		return EXIT_FAILURE;
 	}
 
-	if ( ! redirection ){	
+	if ( ! redirection ){
 		/* set pipeline to PAUSED state will open /dev/video0, so it will not be done in start_streaming */
 		gst_element_set_state (data->pipeline, GST_STATE_PAUSED);
 		/* if we are in the defaultStartUp Mode, launch the last VF register in the table */
@@ -318,12 +318,12 @@ int init_stream_SP( int videoFormatIndex ){
  * \brief initiate a pipeline to display received stream
  * \param stream_datas a structure in which we will save the pipeline and the bus elements
  * \param caps the GstCaps made from the SDP file received with the stream
- * \param channel_entry the serviceUser corresponding channel 
+ * \param channel_entry the serviceUser corresponding channel
  * \return EXIT_SUCCESS or EXIT_FAILURE
  */
 int init_stream_SU( GstCaps *caps, struct channelTable_entry *channel_entry)
 {
-    
+
   /* Initialization of elements needed */
     GstElement 	*pipeline;
     GstBus 		*bus;
@@ -338,7 +338,7 @@ int init_stream_SU( GstCaps *caps, struct channelTable_entry *channel_entry)
 	}
 
 	/*
-	 * In order tp DEBUG gstreamer 
+	 * In order tp DEBUG gstreamer
 	 */
 	//GST_DEBUG_BIN_TO_DOT_FILE( GST_BIN (pipeline) , GST_DEBUG_GRAPH_SHOW_ALL, "pipeline");
 
@@ -350,8 +350,8 @@ int init_stream_SU( GstCaps *caps, struct channelTable_entry *channel_entry)
 	/* this will be free in the delete_stream function */
 	rtp_data 	*rtp_datas 		= malloc(sizeof(rtp_data));
 	data->rtp_datas 			= rtp_datas;
-	
-	data->pipeline 		= pipeline;	
+
+	data->pipeline 		= pipeline;
 	/* we add a message handler */
 	bus = gst_pipeline_get_bus ( GST_PIPELINE(pipeline));
     bus_watch_id = gst_bus_add_watch (bus, bus_call, main_loop);
@@ -362,15 +362,15 @@ int init_stream_SU( GstCaps *caps, struct channelTable_entry *channel_entry)
 
 	gchar 		*cmdline 	= init_sink_from_conf( channel_entry->channelIndex );
 
-	/* check if everything went ok */	
+	/* check if everything went ok */
 	if (cmdline == NULL )
 		return EXIT_FAILURE;
 
 	/* declare a variable where we will store the corresponding potential entry of redirect_channels */
-	redirect_data *redirection_data;	
-	
+	redirect_data *redirection_data;
+
 	long videoFormatIndex = -1 ;
-	/* 
+	/*
 	 * check if this is a redirection, if so the mapping of the videoFormatIndex of the source to which redirect the stream will be 
 	 * stored in videoFormatIndex
 	 */
@@ -385,22 +385,22 @@ int init_stream_SU( GstCaps *caps, struct channelTable_entry *channel_entry)
 
 	/* Create pipeline  - save videoFormatIndex into stream_data data*/
 	last = create_pipeline_serviceUser( data, caps, channel_entry, cmdline, redirection_data );
-	
+
 	/* Check if everything went ok*/
 	if (last == NULL){
 		g_printerr ( "Failed to create pipeline\n");
 		return EXIT_FAILURE;
 	}
-	
+
 	gst_element_set_state (data->pipeline, GST_STATE_PAUSED);
 	channel_entry->stream_datas = data;
 
-	/* 
+	/*
 	 * If this is a redirection, now that we know the video caps of the stream,
-	 * we need to add the rtp depayloader to the pipeline of the source that will 
-	 * redirect the steam: this is done in append_SP_pipeline_for_redirection() 
+	 * we need to add the rtp depayloader to the pipeline of the source that will
+	 * redirect the steam: this is done in append_SP_pipeline_for_redirection()
 	 * of pipeline.c.
-	 * Also, we need to call handle_SP_default_StartUp_mode() to handle the default start up 
+	 * Also, we need to call handle_SP_default_StartUp_mode() to handle the default start up
 	 * on this source after is pipeline has been completed.
 	 */
 	if ( redirection_data ){
@@ -408,7 +408,7 @@ int init_stream_SU( GstCaps *caps, struct channelTable_entry *channel_entry)
 			return EXIT_FAILURE;
 		handle_SP_default_StartUp_mode( videoFormatIndex ) ;
 	}
-	
+
    	return EXIT_SUCCESS;
 
 }
@@ -445,7 +445,7 @@ int stop_streaming( gpointer stream_datas, long channelVideoFormatIndex ){
 	/* Out of the main loop, clean up nicely */
 	g_print ("Returned, stopping playback\n");
 	gst_element_set_state (data->pipeline, GST_STATE_NULL);
-	if ( stream_entry != NULL)	
+	if ( stream_entry != NULL)
 		stream_entry->videoFormatStatus = disable;
 	return 0;
 }

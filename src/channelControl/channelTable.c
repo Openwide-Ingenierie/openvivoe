@@ -342,21 +342,26 @@ void update_channelTable_entry_roi_from_caps ( struct channelTable_entry *channe
  * \param videoFormatIndex the new videoFormatIndex to use for this channel
  * \return TRUE if we succeed to update the parameters
  */
-gboolean channelTable_updateEntry(struct channelTable_entry * entry, int videoFormatNumberIndex){
+gboolean channelTable_updateEntry(struct channelTable_entry * entry ){
 
 
-	   /* get the correspondante entry in the table of VideoFormat */
-       struct videoFormatTable_entry *videoFormatentry         = videoFormatTable_getEntry( videoFormatNumberIndex );
-       if ( videoFormatentry == NULL)
+	   /* get the correspondant entry in the table of VideoFormat */
+       struct videoFormatTable_entry *videoFormatEntry         = videoFormatTable_getEntry(  entry->channelVideoFormatIndex );
+       if ( videoFormatEntry == NULL)
                return FALSE;
 
-	   if ( videoFormatentry->videoFormatStatus == enable )
+	   /* get the correspondant entry in the table of VideoFormat */
+       struct videoFormatTable_entry *videoFormatEntry_old         = videoFormatTable_getEntry( entry->old_channelVideoFormatIndex );
+       if ( videoFormatEntry_old == NULL)
+               return FALSE;
+
+	   if ( videoFormatEntry->videoFormatStatus == enable || videoFormatEntry_old->videoFormatStatus == enable )
 		   return FALSE;
 
-	   channelTable_fill_entry( entry, videoFormatentry );
+	   channelTable_fill_entry( entry, videoFormatEntry );
 
 	   /* update the stream data */
-		entry->stream_datas 								= videoFormatentry->stream_datas;
+		entry->stream_datas 								= videoFormatEntry->stream_datas;
 
 		stream_data *data 									= entry->stream_datas;
 		/* transform IP from long to char * */
@@ -1115,7 +1120,11 @@ channelTable_handler(
 				case COLUMN_CHANNELVIDEOFORMATINDEX:
 					table_entry->old_channelVideoFormatIndex 		= table_entry->channelVideoFormatIndex;
 					table_entry->channelVideoFormatIndex     		= *request->requestvb->val.integer;
-					channelTable_updateEntry(table_entry, table_entry->channelVideoFormatIndex);
+					if ( ! channelTable_updateEntry(table_entry ) )
+					{
+					   	netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_GENERR  );
+						return SNMP_ERR_NOERROR;
+					}
 					break;
 				case COLUMN_CHANNELCOMPRESSIONRATE:
 					table_entry->old_channelCompressionRate 		= table_entry->channelCompressionRate;
@@ -1215,11 +1224,11 @@ channelTable_handler(
             table_info  =     netsnmp_extract_table_info(      request);
 
 			videoFormat_entry =  ( struct videoFormatTable_entry *) videoFormatTable_getEntry( table_entry->channelVideoFormatIndex ) ;
-    
+
             switch (table_info->colnum) {
             case COLUMN_CHANNELUSERDESC:
                 strcpy( table_entry->channelUserDesc,
-                        table_entry->old_channelUserDesc); 
+                        table_entry->old_channelUserDesc);
                 table_entry->channelUserDesc_len =
                         table_entry->old_channelUserDesc_len;
                 break;
@@ -1246,9 +1255,9 @@ channelTable_handler(
             case COLUMN_CHANNELROIORIGINTOP:
                 table_entry->channelRoiOriginTop     			= table_entry->old_channelRoiOriginTop;
                 table_entry->old_channelRoiOriginTop 			= 0;
-				/* 
-				 *  If we go there, then something went wrong on the ROI changes. We may want to reset the ROI parameters in 
-				 *  the videoFormatTable for them to be identical to the ROI parameters in channelTable 
+				/*
+				 *  If we go there, then something went wrong on the ROI changes. We may want to reset the ROI parameters in
+				 *  the videoFormatTable for them to be identical to the ROI parameters in channelTable
 				 */
 				update_videoFormat_entry_roi_from_channelTable_entry ( videoFormat_entry , table_entry );
                 break;
@@ -1260,12 +1269,12 @@ channelTable_handler(
             case COLUMN_CHANNELROIEXTENTBOTTOM:
                 table_entry->channelRoiExtentBottom     		= table_entry->old_channelRoiExtentBottom;
                 table_entry->old_channelRoiExtentBottom 		= 0;
-				update_videoFormat_entry_roi_from_channelTable_entry ( videoFormat_entry , table_entry );				
+				update_videoFormat_entry_roi_from_channelTable_entry ( videoFormat_entry , table_entry );
                 break;
             case COLUMN_CHANNELROIEXTENTRIGHT:
                 table_entry->channelRoiExtentRight     			= table_entry->old_channelRoiExtentRight;
                 table_entry->old_channelRoiExtentRight 			= 0;
-				update_videoFormat_entry_roi_from_channelTable_entry ( videoFormat_entry , table_entry );			
+				update_videoFormat_entry_roi_from_channelTable_entry ( videoFormat_entry , table_entry );
                 break;
             case COLUMN_CHANNELRECEIVEIPADDRESS:
                 table_entry->channelReceiveIpAddress     		= table_entry->old_channelReceiveIpAddress;
