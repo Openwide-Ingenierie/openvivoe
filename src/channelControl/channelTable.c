@@ -80,7 +80,7 @@ initialize_table_channelTable(void)
 	if( deviceInfo.parameters[num_DeviceType]._value.int_val != device_SP ){
 		for(int i=0; i<channelNumber._value.int_val; i++){
 			/* get the default IP address to use for defaultStartUp mode if it has been entered in the configuration file */
-			ip 				= get_default_IP_from_conf(i+1);
+			ip = get_default_IP_from_conf(i+1);
 			if ( ip )
 				default_receive_IP 	= inet_addr(get_default_IP_from_conf(i+1));
 			channelTable_create_empty_entry(i+1, serviceUser,"" ,0, default_receive_IP,  NULL ); /* create a channel with "0" as videoFormatIndex */
@@ -350,38 +350,13 @@ gboolean channelTable_updateEntry(struct channelTable_entry * entry, int videoFo
        if ( videoFormatentry == NULL)
                return FALSE;
 
-	   channelTable_fill_entry( entry, videoFormatentry );
-
-	   /* update the stream data */
-		entry->stream_datas 								= videoFormatentry->stream_datas;
-
-		/* check if streaming was in play state */
-		struct videoFormatTable_entry * stream_entry 		= videoFormatTable_getEntry(videoFormatNumberIndex);
-
-		if( stream_entry->videoFormatStatus == enable )
-			stop_streaming(entry->stream_datas , entry->channelVideoFormatIndex );
-
-		stream_data *data 									= entry->stream_datas;
-		/* transform IP from long to char * */
-		set_udpsink_param(data->udp_elem, entry->channelIndex);
-
-		return TRUE;
-
-
-       /* get the correspondante entry in the table of VideoFormat */
-       struct videoFormatTable_entry *videoFormatentry         = videoFormatTable_getEntry( videoFormatNumberIndex );
-       if ( videoFormatentry == NULL)
-               return FALSE;
+	   if ( videoFormatentry->videoFormatStatus == enable )
+		   return FALSE;
 
 	   channelTable_fill_entry( entry, videoFormatentry );
 
 	   /* update the stream data */
 		entry->stream_datas 								= videoFormatentry->stream_datas;
-
-		if( entry->channelStatus == channelStart && videoFormatentry->videoFormatStatus != enable )
-			start_streaming(entry->stream_datas , entry->channelVideoFormatIndex );
-		else if ( entry->channelStatus == channelStop && videoFormatentry->videoFormatStatus != disable )
-			stop_streaming( entry->stream_datas , entry->channelVideoFormatIndex );
 
 		stream_data *data 									= entry->stream_datas;
 		/* transform IP from long to char * */

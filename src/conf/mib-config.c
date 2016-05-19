@@ -252,7 +252,7 @@ static int init_deviceInfo(GKeyFile* gkf, gchar* group_name, GError* error){
 parameter channelNumber = {"nb_screens", INTEGER, 0};
 
 /**
- * \brief intialize the global variable paramer channelNumber 
+ * \brief intialize the global variable paramer channelNumber
  * \param gkf the GkeyFile configuration File vivoe_mib.conf
  * \param group_name the name of the group in which the value of channelNumber should be found
  * \param error a object to store errors when they occurs
@@ -260,7 +260,7 @@ parameter channelNumber = {"nb_screens", INTEGER, 0};
  */
 static gboolean init_channelNumber_param(GKeyFile* gkf, gchar **groups, GError* error){
 
-	/* set maintenance flag for videoForamatNumber */
+	/* set maintenance flag for channelNumber */
 	set_maintenencef_flag( &channelNumber );
 
 	char *receiver_prefix = "receiver_";
@@ -286,7 +286,7 @@ parameter videoFormatNumber = {"videoFormatNumber", INTEGER, 0, {0} };
 parameter channelReset 		= {"channelReset", 		INTEGER, 0, {0} };
 
 /**
- * \brief intialize the global variable paramer videoFormatNumber 
+ * \brief intialize the global variable paramer videoFormatNumber
  * \param gkf the GkeyFile configuration File vivoe_mib.conf
  * \param group_name the name of the group in which the value of videoFormatNumber should be found
  * \param error a object to store errors when they occurs
@@ -317,14 +317,14 @@ static gboolean init_videoFormatNumber_param(GKeyFile *gkf, gchar **groups, GErr
 }
 
 /**
- * \brief initalize global variable which value cannot be found in vivoe_mib.conf 
+ * \brief initalize global variable which value cannot be found in vivoe_mib.conf
  * \param void
  */
 static void init_mib_global_parameter(){
 
 	/* set maintenance flag for videoForamatNumber */
 	set_maintenencef_flag( &channelReset );
-	
+
 }
 
 /**

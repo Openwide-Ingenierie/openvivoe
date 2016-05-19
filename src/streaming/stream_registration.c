@@ -22,7 +22,7 @@
 #include "../../include/streaming/stream.h"
 #include "../../include/announcement/sap.h"
 
-/* 
+/*
  * \brief This function compares two entries in the videoFormatTable if those entries are equal: return TRUE, otherwise return FALSE
  * \param origin first entry to compare
  * \param new second entry to compare
@@ -38,7 +38,7 @@ static gboolean compare_entries(struct videoFormatTable_entry* origin, struct vi
 			( origin->videoFormatCompressionFactor 	== 	new->videoFormatCompressionFactor 	) 	&&
 			( origin->videoFormatCompressionRate 	== 	new->videoFormatCompressionRate 	) 	&&
 			( origin->videoFormatMaxHorzRes 		== 	new->videoFormatMaxHorzRes 			) 	&&
-			( origin->videoFormatMaxVertRes 		== 	new->videoFormatMaxVertRes 			) 		
+			( origin->videoFormatMaxVertRes 		== 	new->videoFormatMaxVertRes 			)
 	   		);
 }
 
@@ -72,7 +72,7 @@ gchar* map_sampling_to_colorimetry_j2k(const gchar *sampling){
 
 	/* compare values that can be in the colorimetry field to the actual value in caps */
 	/* the values that can takes the colorimetry field can be found by launching the following command
-	 * "gst-inspect-1.0 openjpegenc" 
+	 * "gst-inspect-1.0 openjpegenc"
 	 */
 	if ( !strcmp(sampling ,sampling_RGB ))
 		return colo_RGB;
@@ -172,7 +172,7 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
 	/* ONLY FOR MPEG-4 videos - relevant information to build SDP messages */
 
 	/* profile-level-id */
-	if( gst_structure_has_field(source_str_caps, "profile-level-id")){	
+	if( gst_structure_has_field(source_str_caps, "profile-level-id")){
 		data->rtp_datas->profile_level_id		= (char*) g_value_dup_string (gst_structure_get_value(source_str_caps, "profile-level-id"));
 	}
 
@@ -190,14 +190,66 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
  * \return EXIT_SUCCESS (0) or EXIT_FAILURE (1)
  */
 int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer stream_datas, long *channel_entry_index ){
-	stream_data *data 			= stream_datas;	
+	stream_data *data 			= stream_datas;
 	/* Check if entry already exits;
 	 *  _ if yes, do not add a new entry, but set it status to enable if it is not already enable
 	 *  _ if no, increase viodeFormatNumber, and  add a new entry in the table
 	 */
 
+	/* Then we are sure that we can create a new entry */
+		videoFormatTable_createEntry( 	video_info->videoFormatIndex, 						video_info->videoFormatType,
+				disable, 																	video_info->videoFormatBase,
+				video_info->videoFormatSampling, 											video_info->videoFormatBitDepth,
+				video_info->videoFormatFps,				 									video_info->videoFormatColorimetry,
+				video_info->videoFormatInterlaced, 											video_info->videoFormatCompressionFactor,
+				video_info->videoFormatCompressionRate, 									video_info->videoFormatMaxHorzRes,
+				video_info->videoFormatMaxVertRes, 											video_info->videoFormatRoiHorzRes,
+				video_info->videoFormatRoiVertRes, 											video_info->videoFormatRoiOriginTop,
+				video_info->videoFormatRoiOriginLeft,										video_info->videoFormatRoiExtentBottom,
+				video_info->videoFormatRoiExtentRight, 										data->rtp_datas->rtp_type,
+				data);
 
+		char *channelUserDesc = get_desc_from_conf(video_info->videoFormatIndex);
+		if (channelUserDesc == NULL)
+			channelUserDesc="";
 
+		/* initialize channel resolution to roi resolution if this is a roi or to video resoltion if there is no ROI */
+		int channelHorzRes;
+		int channelVertRes;
+		if ( video_info->videoFormatRoiHorzRes && video_info->videoFormatRoiVertRes ){
+
+			channelHorzRes = video_info->videoFormatRoiHorzRes;
+			channelVertRes = video_info->videoFormatRoiVertRes;
+
+		}else{
+
+			channelHorzRes = video_info->videoFormatMaxHorzRes;
+			channelVertRes = video_info->videoFormatMaxVertRes;
+
+		}
+
+		/* At the  same time we copy all of those parameters into video channel */
+		channelTable_createEntry( 	channelNumber._value.int_val+1, 							video_info->videoFormatType,
+				channelUserDesc, 																channelStop,
+				video_info->videoFormatIndex, 													video_info->videoFormatBase,
+				video_info->videoFormatSampling, 												video_info->videoFormatBitDepth,
+				video_info->videoFormatFps,				 										video_info->videoFormatColorimetry,
+				video_info->videoFormatInterlaced, 												video_info->videoFormatCompressionFactor,
+				video_info->videoFormatCompressionRate, 										channelHorzRes,
+				channelVertRes, 																video_info->videoFormatRoiOriginTop,
+				video_info->videoFormatRoiOriginLeft, 											video_info->videoFormatRoiExtentBottom,
+				video_info->videoFormatRoiExtentRight,											data->rtp_datas->rtp_type,
+				0/*IP*/, 																		0 /* packet delay*/,
+				default_SAP_interval,															video_info->videoFormatIndex, /*defaultVideoFormatIndex*/
+				0/*default receive IP*/, 														data);
+
+		*channel_entry_index = channelNumber._value.int_val+1;
+		/* increase channelNumber as we added an entry */
+		channelNumber._value.int_val++;
+
+	return EXIT_SUCCESS;
+
+#if 0
 	if(videoFormatTable_head == NULL){
 
 		/* Then we are sure that we can create a new entry */
@@ -249,7 +301,7 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 
 		*channel_entry_index = channelNumber._value.int_val+1;
 		/* increase channelNumber as we added an entry */
-		channelNumber._value.int_val++;	
+		channelNumber._value.int_val++;
 
 	}else{
 		/* if the table of video format is not empty for this device, check if this format is already in the table
@@ -299,7 +351,7 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 			channelVertRes = video_info->videoFormatRoiVertRes;
 
 		}else{
-		
+
 			channelHorzRes = video_info->videoFormatMaxHorzRes;
 			channelVertRes = video_info->videoFormatMaxVertRes;
 
@@ -329,5 +381,7 @@ int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer s
 	/* No malloc was done anyway it should not been deleted  */
 	}
 	return EXIT_SUCCESS;
+#endif
+
 }
 

@@ -156,19 +156,18 @@ static void init_redirection( gpointer stream_datas, long videoFormatIndex ){
 
 	channelTable_create_empty_entry( channelNumber._value.int_val+1 , videoChannel , channelUserDesc , videoFormatIndex , 0 , data );
 	/* increase channelNumber as we added an entry */
-	channelNumber._value.int_val++;	
+	channelNumber._value.int_val++;
 
 }
 
 /**
  * \brief get the command line to use to get the source from configuration file
- * \param pipeline the pipeline to wich adding the bin made from the cmd line description 
+ * \param pipeline the pipeline to wich adding the bin made from the cmd line description
  * return GstElement* the last element added in the pipeline: the bin made
  */
 static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 	GError 		*error 				= NULL; /* an Object to save errors when they occurs */
 	GstElement 	*bin 				= NULL; /* to return last element of pipeline */
-
 
 	/* check if it is a redirection */
 	redirect_data *redirection_data = SP_is_redirection( videoFormatIndex );
@@ -179,7 +178,7 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 		bin = gst_element_factory_make_log( "appsrc", APPSRC_NAME);
 		if ( !bin )
 	   		return NULL;
-		
+
 		/* save the pipeline value in the redirection data */
 		redirection_data->pipeline_SP = pipeline;
 
@@ -192,7 +191,8 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 	else{
 
 		gchar 		*cmdline = init_sources_from_conf( videoFormatIndex );
-		/* check if everything went ok */	
+
+		/* check if everything went ok */
 		if (cmdline == NULL)
 			return NULL;
 
@@ -209,7 +209,7 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 
 	if ( error != NULL){
 		g_printerr("Failed to parse: %s\n",error->message);
-	   	return NULL;	
+	   	return NULL;
 	}
 
 	/* add bin in pipeline */
@@ -220,6 +220,7 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 
 int handle_SP_default_StartUp_mode(long videoFormatIndex ){
 	struct channelTable_entry *entry 	= channelTable_get_from_VF_index(videoFormatIndex);
+
 	if (entry == NULL ){
 		g_printerr("ERROR: try to start a source that has no channel associated\n");
 		return EXIT_FAILURE;
