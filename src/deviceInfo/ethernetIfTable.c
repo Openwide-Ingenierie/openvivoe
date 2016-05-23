@@ -119,12 +119,15 @@ static void initialize_table_ethernetIfTable(void)
 
     netsnmp_register_table_iterator( reg, iinfo );
 
-    /* Initialise the contents of the table here */
+    /*
+	 * Initialise the contents of the table here
+	 * get the IP addresses and characteristics of the system for each interfaces and store it in the ethernetIfTable
+	 */
    for(int i = 0; i < deviceInfo.parameters[num_ethernetIFnumber]._value.int_val; i++)
 		init_ethernet(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i]);
 }
 
-/** 
+/**
  * \brief Initializes the ethernetIfTable module
  */
 void
@@ -197,7 +200,7 @@ ethernetIfTable_get_first_data_point(void **my_loop_context,
                                     put_index_data,  mydata );
 }
 
-/** 
+/**
  * \brief calls appropriate handler for this parameter
  * \param handler the specific handler for this item
  * \param reqinfo the SNMP request

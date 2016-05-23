@@ -135,7 +135,7 @@ static int init_deviceInfo(GKeyFile* gkf, gchar* group_name, GError* error){
 	/*Declaration of a  gsize variable, that will be used to get the size of the list associated to some keys*/
      gsize length;
 
-	
+
     /* This is a boolean used to check if everything went ok, otherwise the function will return EXIT_FAILURE
      * This will allow to print all the synthax errors to the user before exiting the program
      */
@@ -169,7 +169,7 @@ static int init_deviceInfo(GKeyFile* gkf, gchar* group_name, GError* error){
     parameter deviceMode                    = {"deviceMode",                    INTEGER,    1};
     parameter deviceReset                   = {"deviceReset",                   INTEGER,    0};
     parameter ethernetInterface             = {"ethernetInterface",             T_STRING,   1};
-    parameter ethernetIfNumber       	    = {"ethernetIfNumber",             	INTEGER,    1};
+    parameter ethernetIfNumber       	    = {"ethernetIfNumber",             	STRING, 	1};
 
 
     parameter deviceInfo_parameters[DEVICEINFO_NUM_PARAM] = {  deviceDesc,            deviceManufacturer,
@@ -179,12 +179,12 @@ static int init_deviceInfo(GKeyFile* gkf, gchar* group_name, GError* error){
                                                                deviceType,            deviceUserDesc,
                                                                deviceNatoStockNumber, deviceMode,
                                                                deviceReset, 		  ethernetInterface,
-															   ethernetIfNumber	
+															   ethernetIfNumber
 															};
 
-   
+
     /* Get the value of all parameter that are present into the configuration file*/
-    for(int  i=0; i<DEVICEINFO_NUM_PARAM - 1; i++) {
+    for(int  i=0; i < DEVICEINFO_NUM_PARAM - 1; i++) {
 		/* set maintenance flag for each parameter */
 		set_maintenencef_flag( &deviceInfo_parameters[i] );
 
@@ -316,6 +316,32 @@ static gboolean init_videoFormatNumber_param(GKeyFile *gkf, gchar **groups, GErr
 
 }
 
+/* static definition and initiation of ethernetIpAssignment value */
+parameter ethernetIpAssignment          = {"ethernetIpAssignment", STRING, 1 };
+/**
+ * \brief intialize the global variable value ethernetIpAssignment
+ * \param gkf the GkeyFile configuration File vivoe_mib.conf
+ * \param group_name the name of the group in which the value of ethernetIpAssignment should be found
+ * \param error a object to store errors when they occurs
+ * \return TRUE on success, FALSE on FAILURE
+ */
+static gboolean init_ethernetIpAssignment_param(GKeyFile *gkf, gchar *group_name, GError *error){
+
+	ethernetIpAssignment._value.string_val = (char*) g_key_file_get_string(gkf, group_name , (const gchar*) ethernetIpAssignment._name, &error);
+	if(error != NULL){
+		fprintf(stderr, "Invalid format for %s: %s\n", (const gchar*) ethernetIpAssignment._name, error->message);
+		error = NULL; /* resetting the error pointer*/
+	}
+
+	if ( strcmp( ethernetIpAssignment._value.string_val , "default") || strcmp ( ethernetIpAssignment._value.string_val , "VIVOE" )  )
+		return FALSE;
+	else
+		return TRUE;
+
+}
+
+
+
 /**
  * \brief initalize global variable which value cannot be found in vivoe_mib.conf
  * \param void
@@ -355,7 +381,7 @@ static gchar *get_vivoe_element_with_property ( gchar *cmdline, gchar *vivoe_ele
 			strcat ( property_name , "=");
 			if ( !property_name )
 				return "";
-			property_name = g_strdup( g_strrstr ( splitted[i] , property_name ) );	
+			property_name = g_strdup( g_strrstr ( splitted[i] , property_name ) );
 			g_strstrip( property_name );
 
 			/* free splitted */
@@ -381,7 +407,7 @@ static gchar *vivoe_redirect(gchar *cmdline){
 
 	gchar *return_value = get_vivoe_element_with_property ( cmdline, VIVOE_REDIRECT_NAME, VIVOE_REDIRECT_PROPERTY_NAME );
 
-	/* 
+	/*
 	 * For vivoe-redirect the element should have a propoerty, otherwise, it is an error, so if vivoe-redirect has been
 	 * found with no name=... property, return NULL
 	 */
@@ -397,9 +423,9 @@ static gchar *vivoe_redirect(gchar *cmdline){
  * \brief check if the group contains the given key, get the corresponding char value or display appropriate error to the user
  * \param gkf the GKeyFile openned
  * \param groups the names of groups present in configuration file
- * \param group_name the group's name in which we are interested 
+ * \param group_name the group's name in which we are interested
  * \param key_name the name of the key we are loooking for
- * \param error a variable to store errors 
+ * \param error a variable to store errors
  * \return gchar* the value of the found key or NULL is the key has not been found
  */
 static gchar *get_key_value_char(GKeyFile* gkf, const gchar* const* groups ,char *group_name, const gchar *key_name, GError* error){
@@ -433,9 +459,9 @@ static gchar *get_key_value_char(GKeyFile* gkf, const gchar* const* groups ,char
  * \brief check if the group contains the given key, get the corresponding integer value or display appropriate error to the user
  * \param gkf the GKeyFile openned
  * \param groups the names of groups present in configuration file
- * \param group_name the group's name in which we are interested 
+ * \param group_name the group's name in which we are interested
  * \param key_name the name of the key we are loooking for
- * \param error a variable to store errors 
+ * \param error a variable to store errors
  * \param optional specify if the key is optional and should be present or optional
  * \return the integer value or -1 if an error occurs
  */
@@ -472,9 +498,9 @@ static int get_key_value_int(GKeyFile* gkf, const gchar* const* groups ,char *gr
  * \brief check if the group contains the given key, set the corresponding value or display appropriate error to the user, save the new version of conf file
  * \param gkf the GKeyFile openned
  * \param groups the names of groups present in configuration file
- * \param group_name the group's name in which we are interested 
+ * \param group_name the group's name in which we are interested
  * \param key_name the name of the key we are looking for
- * \param error a variable to store errors 
+ * \param error a variable to store errors
  * \return gchar* the value of the found key or NULL is the key has not been found
  */
 gboolean set_key_value(GKeyFile* gkf, const gchar* const* groups ,char *group_name, gchar* gkf_path,  const gchar *key_name,const gchar *new_value, GError* error){
@@ -482,14 +508,14 @@ gboolean set_key_value(GKeyFile* gkf, const gchar* const* groups ,char *group_na
 	if( !(g_strv_contains((const gchar* const*) groups, group_name )))
 		fprintf (stderr, "Group %s not found in configuration file\nIt should be written in the form [%s]\n",group_name,group_name );
 	if(g_key_file_has_key(gkf,group_name,key_name , &error)){
-		g_key_file_set_string(gkf,group_name ,key_name ,new_value );	
+		g_key_file_set_string(gkf,group_name ,key_name ,new_value );
 		g_key_file_save_to_file(gkf, gkf_path , &error);
 		if(error != NULL){
 			g_printerr("ERROR: failed to write to configuration file %s: %s\n",CONFIG_FILE , error->message);
 			return FALSE;
 		}
 	}
-	else{ 
+	else{
 		g_printerr("ERROR: key not found %s for group: %s\n",key_name ,group_name );
 		return FALSE;
 	}
@@ -573,7 +599,7 @@ gchar *init_sources_from_conf(int index){
 }
 
 /**
- * \brief get the command line entered by the user in configuration file to use as a sink for the received stream 
+ * \brief get the command line entered by the user in configuration file to use as a sink for the received stream
  * \param index the index of the initiated stream
  * \return gchar* the gst_sink command line found in a string form or NULL if no ones has been found
  */
@@ -649,8 +675,8 @@ gchar *init_sink_from_conf(int index){
 }
 
 
-/** 
- * \brief returned the channel User Description enter by the user to described the channel 
+/**
+ * \brief returned the channel User Description enter by the user to described the channel
  * \param the corresponding number of the source to refer it in the configuration file
  */
 gchar* get_desc_from_conf(int index){
@@ -690,8 +716,8 @@ gchar* get_desc_from_conf(int index){
 }
 
 
-/** 
- * \brief save the value of ChannelUserDesc enter by the user in configuration file 
+/**
+ * \brief save the value of ChannelUserDesc enter by the user in configuration file
  * \param index the corresponding number of the source to refer it in the configuration file
  * \param new_default_ip the new value of DefaultReceiveIPaddress
  */
@@ -1075,14 +1101,14 @@ static gboolean init_redirection_data(GKeyFile* gkf ){
  * \return error messages for the parameters that are not Valid, and initialize the other
  */
 int init_mib_content(){
- 
+
 	/* Define the error pointer we will be using to check for errors in the configuration file */
     GError* error = NULL;
     /* Declaration of an array of gstring (gchar**) that will contain the name of the different groups
      * declared in the configuration file
      */
     gchar** groups;
-	
+
 	/* a location to store the path of the openned configuration file */
 	gchar* gkf_path = NULL;
 
@@ -1091,13 +1117,13 @@ int init_mib_content(){
 
 	/* check if the MIB groups are present if so we know that GROUP_NAME_DEVICEINFO and FROUP_NAME_CHANNELCONTROL are indeed present*/
 	groups = check_mib_group(gkf_conf_file, error);
-	
+
 	if ( groups == NULL)
 		return EXIT_FAILURE;
 
 	/* Defined what separator will be used in the list when the parameter can have several values (for a table for example)*/
     g_key_file_set_list_separator (gkf_conf_file, (gchar) ';');
- 
+
 	if ( !init_deviceInfo(gkf_conf_file, GROUP_NAME_DEVICEINFO , error))
 		return EXIT_FAILURE;
 	if ( !init_channelNumber_param(gkf_conf_file, groups , error))
@@ -1113,17 +1139,6 @@ int init_mib_content(){
 
 	/* parse gstreamer's command line to see if there will be redirection */
 	init_redirection_data( gkf_conf_file );
-
-	/* init gstreamer's command line to see if there will be roi */
-#if 0
-	if ( ! init_roi_data( gkf_conf_file ) )
-		return EXIT_FAILURE;
-#endif 
-
-	/*
-	 * Save the openned GKeyFile in a global variable so we can acces it as we want while creating the stream
-	 */
-	//close_mib_configuration_file( gkf_conf_file );
 
 	return EXIT_SUCCESS;
 }

@@ -136,10 +136,15 @@ typedef struct {
 #define DEVICEINFO_NUM_PARAM 				(num_ethernetIFnumber + 1)
 
 MIB_group deviceInfo;
+
+/**
+ * \brief this is used to specify which IP assignment scheme OpenVivoe will use
+ */
+parameter ethernetIpAssignment;
 /* --------------------------------- end Group DeviceInfo --------------------------------- */
 
 /* --------------------------------- Group videoFormatInfo -------------------------------- */
-/* Initiation of videoFormatNumber to 0, it will be automatically updated each 
+/* Initiation of videoFormatNumber to 0, it will be automatically updated each
  * time a new videoFormat is detected on the display
  */
 extern parameter videoFormatNumber; /*initialize in viodeFormatNumber.c*/
@@ -163,7 +168,7 @@ extern parameter channelNumber;
 /* --------------------------------- end Group channelControl ----------------------------- */
 
 /**
- * \brief a structure to register the information relative to redirection 
+ * \brief a structure to register the information relative to redirection
  */
 typedef struct {
 	long 		channel_SU_index;
@@ -184,22 +189,22 @@ typedef struct {
 
 extern redirection_str redirection;
 
-/** 
+/**
  * \brief The main loop of the program, because to be able to acces it everywhere in the program
  */
 GMainLoop 	*main_loop;
 
 /**
- * \brief A GKeyFile global to keep the oppened configuration file while we need it 
+ * \brief A GKeyFile global to keep the oppened configuration file while we need it
  */
 GKeyFile 	*gkf_conf_file;
 
-/** 
+/**
  * \brief a boolean to save the fact that a Gstreamer occured before starting runnig the Main Loop (for example: v4l2src, no such device )
  */
 extern gboolean 	internal_error;
 
-/** 
+/**
  * \brief a boolean to save the fact the main loop was runnig: this is mostly to be able to perform typefind even when the MainLoop is already started
  */
 extern gboolean 	was_running;
