@@ -48,10 +48,10 @@ const gchar* maintenance_group[MAINTENANCE_GROUP_SIZE]= { 	"deviceUserDesc", 			
 }
 
 /**
- * \brief open the vivoe-mib.conf configuration file 
+ * \brief open the vivoe-mib.conf configuration file
  * \param error the Gerror to store error when they happened
  * \gkf_path a set of path into which search for the path
- * \return the GKeyFile if it has been successfully openned, NULL otherwise 
+ * \return the GKeyFile if it has been successfully openned, NULL otherwise
  */
 static GKeyFile * open_mib_configuration_file(GError* error, gchar** gkf_path){
 
@@ -757,8 +757,8 @@ void set_desc_to_conf(int index, const char* new_desc){
 	close_mib_configuration_file(gkf);
 }
 
-/** 
- * \brief returned the DefaultIPaddress enter by the user to use for SU in defaultStartUPMode 
+/**
+ * \brief returned the DefaultIPaddress enter by the user to use for SU in defaultStartUPMode
  * \param the corresponding number of the source to refer it in the configuration file
  * \return the value of the defaultReceiveIp key or NULL if not found
  */
@@ -834,6 +834,68 @@ void set_default_IP_from_conf(int index, const char* new_default_ip){
 }
 
 /**
+ * \brief returned the assignedIP saved in the configuration file
+ * \return the value of the assigned key or NULL if not found
+ */
+gchar *get_static_assigned_IP_from_conf(){
+	/* Define the error pointer we will be using to check for errors in the configuration file */
+    GError 		*error 	= NULL;
+
+	/* a location to store the path of the openned configuration file */
+	gchar* gkf_path = NULL;
+
+	 /* Declaration of a pointer that will contain our configuration file*/
+	GKeyFile 	*gkf 	= open_mib_configuration_file(error, &gkf_path);
+
+	/* Declaration of an array of gstring (gchar**) that will contain the name of the different groups
+	 * declared in the configuration file
+	 */
+	gchar 		**groups;
+
+	/*
+	 * the default receive IP retreive from the configuration file
+	 */
+	gchar 		*assigned_ip;
+
+	/*first we load the different Groups of the configuration file
+	 * second parameter "gchar* length" is optional*/
+	groups = g_key_file_get_groups(gkf, NULL);
+
+	assigned_ip = get_key_value_char(gkf,(const gchar* const*) groups , GROUP_NAME_DEVICEINFO , KEY_NAME_ASSIGNED_IP , error);
+
+	free(receiver_name);
+	close_mib_configuration_file(gkf);
+	return assigned_ip;
+
+}
+
+/**
+ * \brief save the value of the key "assignedIP" set by the manager in MIB into the configuration file
+ * \param new_ip the new value of assignedIP
+ */
+void set_static_assigned_IP_to_conf( const char* new_ip ){
+	/* Define the error pointer we will be using to check for errors in the configuration file */
+    GError 		*error 	= NULL;
+
+	/* a location to store the path of the openned configuration file */
+	gchar* gkf_path = NULL;
+
+	/* Declaration of a pointer that will contain our configuration file*/
+	GKeyFile 	*gkf 	= open_mib_configuration_file(error, &gkf_path);
+
+	/* Declaration of an array of gstring (gchar**) that will contain the name of the different groups
+	 * declared in the configuration file
+	 */
+	gchar 		**groups;
+
+	set_key_value(gkf,(const gchar* const*) groups , GROUP_NAME_DEVICEINFO , gkf_path , KEY_NAME_ASSIGNED_IP , new_ip , error);
+
+	free(receiver_name);
+	close_mib_configuration_file(gkf);
+
+}
+
+/**
  * \brief register into the structure roi_data the MIB ROI parameters' values extract from the configuration file
  * \param index the source index from which we should be looking for ROI parameters
  * \param roi_datas the roi_data structure to fill
@@ -843,7 +905,7 @@ gboolean
 get_roi_parameters_for_sources (
 		int index, 						gboolean scalable,
 		long *roi_width_ptr , 			long *roi_height_ptr ,
-	   	long *roi_top_ptr, 				long *roi_left_ptr, 
+	   	long *roi_top_ptr, 				long *roi_left_ptr,
 		long *roi_extent_bottom_ptr,   	long *roi_extent_right_ptr ){
 
 	/* Define the error pointer we will be using to check for errors in the configuration file */
@@ -885,8 +947,8 @@ get_roi_parameters_for_sources (
 	 * check if values given in configuration file are correct
 	 */
 
-	/* 
-	 * if origin parameters set, but no ROI resolution specified 
+	/*
+	 * if origin parameters set, but no ROI resolution specified
 	 */
 	if ( ( roi_top != -1 || roi_left != -1 ) && ( roi_width == -1 && roi_height ==-1) ){
 
@@ -936,13 +998,13 @@ get_roi_parameters_for_sources (
 }
 
 /**
- * \brief 
- * \param 
- * \return 
+ * \brief
+ * \param
+ * \return
  */
-gboolean get_roi_parameters_for_sink(int index , gboolean scalable, 
+gboolean get_roi_parameters_for_sink(int index , gboolean scalable,
 		long *roi_width_ptr , 			long *roi_height_ptr ,
-	   	long *roi_top_ptr, 				long *roi_left_ptr, 
+	   	long *roi_top_ptr, 				long *roi_left_ptr,
 		long *roi_extent_bottom_ptr,   	long *roi_extent_right_ptr ){
 	/* Define the error pointer we will be using to check for errors in the configuration file */
     GError 		*error 	= NULL;
@@ -988,8 +1050,8 @@ gboolean get_roi_parameters_for_sink(int index , gboolean scalable,
 	 * check if values given in configuration file are correct
 	 */
 
-	/* 
-	 * if origin parameters set, but no ROI resolution specified 
+	/*
+	 * if origin parameters set, but no ROI resolution specified
 	 */
 	if ( ( roi_top != -1 || roi_left != -1 ) && ( roi_width == -1 && roi_height ==-1) ){
 
@@ -1049,10 +1111,10 @@ redirection_str redirection;
  * \return TRUE on success, FALSE on FAILURE
  */
 static gboolean init_redirection_data(GKeyFile* gkf ){
-	
+
 	gchar *cmdline, *name_source, *name_receiver;
-	int index_source, index_receiver; 
-	
+	int index_source, index_receiver;
+
 	int i = 0 ;
 	int i_old = i ;
 
@@ -1084,9 +1146,9 @@ static gboolean init_redirection_data(GKeyFile* gkf ){
 				}
 
 			}
-			/* 
+			/*
 			 * if redirect_channels[i] is still NULL, we do not have found a corresponding channel:
-			 * --> exit with an error 
+			 * --> exit with an error
 			 */
 			if ( &redirection.redirect_channels[i_old] == NULL ){
 				g_printerr("redirection of source_%d with name \"%s\" does not have corresponding redirection's receiver\n", index_source, name_source);

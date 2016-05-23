@@ -24,6 +24,10 @@
 #define GROUP_NAME_SOURCE				"source_"
 #define GROUP_NAME_RECEIVER				"receiver_"
 
+/**
+ * \brief the key name for the static IP assigned by the manager
+ */
+#define KEY_NAME_ASSIGNED_IP			"assignedIP"
 
 /**
  * \brief the names of the keys that could be found in the configuration file under group [source_x]
@@ -114,6 +118,8 @@ gchar 		*get_desc_from_conf(int index); /* get the channelUserDesc associated to
 void 		set_desc_to_conf(int index, const char* new_desc); /* save the new channelUserDesc in configuration file */
 gchar 		*get_default_IP_from_conf(int index); /* get the defaultReceiveIP for the defaultStartUp mode for Service User */
 void 		set_default_IP_from_conf(int index, const char* new_default_ip); /* set the defaultReceiveIP for the defaultStartUp mode for Service User */
+gchar *get_static_assigned_IP_from_conf() ;
+void set_static_assigned_IP_to_conf( const char* new_ip ) ;
 
 #endif /* MIB_CONF_H */
 
