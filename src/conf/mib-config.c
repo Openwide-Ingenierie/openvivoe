@@ -329,12 +329,18 @@ static gboolean init_ethernetIpAssignment_param(GKeyFile *gkf, gchar *group_name
 
 	ethernetIpAssignment._value.string_val = (char*) g_key_file_get_string(gkf, group_name , (const gchar*) ethernetIpAssignment._name, &error);
 	if(error != NULL){
-		fprintf(stderr, "Invalid format for %s: %s\n", (const gchar*) ethernetIpAssignment._name, error->message);
+		g_printerr("Invalid format for %s: %s\n", (const gchar*) ethernetIpAssignment._name, error->message);
 		error = NULL; /* resetting the error pointer*/
 	}
 
-	if ( strcmp( ethernetIpAssignment._value.string_val , "default") || strcmp ( ethernetIpAssignment._value.string_val , "VIVOE" )  )
+	if ( 	strcmp( ethernetIpAssignment._value.string_val , KEY_ETHERNET_IP_ASSIGNMENT_DEFAULT )
+		   	&& strcmp ( ethernetIpAssignment._value.string_val , KEY_ETHERNET_IP_ASSIGNMENT_VIVOE	)  ){
+		g_printerr("Invalid key value for %s, can only be set to %s or %s\n",
+			   	(const gchar*) ethernetIpAssignment._name ,
+			   	KEY_ETHERNET_IP_ASSIGNMENT_DEFAULT ,
+				KEY_ETHERNET_IP_ASSIGNMENT_VIVOE  );
 		return FALSE;
+	}
 	else
 		return TRUE;
 
@@ -1129,6 +1135,8 @@ int init_mib_content(){
 	if ( !init_channelNumber_param(gkf_conf_file, groups , error))
 		return EXIT_FAILURE;
 	if ( !init_videoFormatNumber_param(gkf_conf_file, groups, error) )
+		return EXIT_FAILURE;
+	if ( !init_ethernetIpAssignment_param(gkf_conf_file, GROUP_NAME_DEVICEINFO, error))
 		return EXIT_FAILURE;
 
 	/* free the memory allocated for the array of strings groups */

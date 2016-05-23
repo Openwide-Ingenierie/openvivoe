@@ -40,7 +40,7 @@ static gboolean get_interface_info(const char* iface, struct ifreq* ifr, int par
 	fd = socket(AF_INET, SOCK_DGRAM, 0);
     /* IPv4 */
     ifr->ifr_addr.sa_family = AF_INET;
-	
+
 	memset(ifr, 0, sizeof(*ifr));
     /* Specify network interface */
     strncpy(ifr->ifr_name, iface, IFNAMSIZ-1);
@@ -52,6 +52,7 @@ static gboolean get_interface_info(const char* iface, struct ifreq* ifr, int par
 	}
 	return TRUE;
 }
+#if 0
 
 /** \brief List all network interface using IPv4
  *  \param if_names the array of string to store the result
@@ -74,7 +75,7 @@ static gboolean list_interfaces(char*** if_names, int* if_num){
 	/* listing interfaces */
 	g_print("Listing network interfaces using IPv4...\n");
 	names 	= (char**) 	malloc(sizeof(char*));
-	/* iterate through interfaces */ 
+	/* iterate through interfaces */
 	for (iterator = ifap; iterator; iterator = iterator->ifa_next) {
 		/* get only IPv4 interface */
         if (iterator->ifa_addr->sa_family==AF_INET)
@@ -108,7 +109,7 @@ gboolean select_interfaces(char*** if_used){
 	int length;
 	gboolean valid = FALSE;
 	list_interfaces(&if_names, &if_num);
-	
+
 	/* Ask to the user which network interfaces he wants VIVOE to use */
 	g_print("Which network interface you want VIVOE to use?\n");
 	for(i = 0; i < if_num; i++){
@@ -136,10 +137,10 @@ gboolean select_interfaces(char*** if_used){
 	}else
 		return TRUE;
 }
-
-/* define the number of ioctl calls to make */ 
-#define calls_num 		5		
-/** 
+#endif
+/* define the number of ioctl calls to make */
+#define calls_num 		5
+/**
  * \brief Retrieve parameters of ethernet interface and initiate the MIB with it
  * \param iface the interface name from which retirev
  * \return TRUE if entry could be created, FALSE otherwise
@@ -155,7 +156,7 @@ gboolean init_ethernet(const char* iface){
 	in_addr_t 	ethernetIfIpAddress 						= 0;
 	in_addr_t 	ethernetIfSubnetMask 						= 0;
 	in_addr_t 	ethernetIfIpAddressConflict 				= 0;
-	/* A array with the different call to ioctl to make */ 
+	/* A array with the different call to ioctl to make */
 	int ioctl_call[calls_num] = {SIOCGIFINDEX,SIOCGIFMTU, SIOCGIFHWADDR, SIOCGIFADDR, SIOCGIFNETMASK };
 	int i; /* loop variable */
 	/* Get interface IP Address */
@@ -163,10 +164,10 @@ gboolean init_ethernet(const char* iface){
 		if( get_interface_info(iface, &ifr, ioctl_call[i])){
 			switch(ioctl_call[i]){
 				case SIOCGIFINDEX:
-					ethernetIfIndex 		= (ifr.ifr_ifindex);					
+					ethernetIfIndex 		= (ifr.ifr_ifindex);
 					break;
 				case SIOCGIFMTU:
-					ethernetIfSpeed 		= (ifr.ifr_mtu);		
+					ethernetIfSpeed 		= (ifr.ifr_mtu);
 					break;
 				case SIOCGIFHWADDR:
 					memcpy(ethernetIfMacAddress , (unsigned char*) ifr.ifr_hwaddr.sa_data, ethernetIfMacAddress_len);
@@ -198,4 +199,4 @@ gboolean init_ethernet(const char* iface){
 			                     ethernetIfSubnetMask,
 			                     ethernetIfIpAddressConflict);
 	return TRUE;
-} 
+}
