@@ -12,9 +12,10 @@
 #include <glib-2.0/glib.h>
 #include "../../include/mibParameters.h"
 #include "../../include/deviceInfo/ethernetIfTable.h"
+#include "../../include/ip_assignment.h"
 #include "../../include/handler.h"
 
-/** 
+/**
  * \brief get the last element of the Table
  * \return ethernetIfTableEntry*  a pointer the last entry in the table
  */
@@ -72,8 +73,8 @@ struct ethernetIfTableEntry * ethernetIfTableEntry_create(  long  ethernetIfInde
 	}
     return entry;
 }
-/** 
- * \brief  delete an entry in ethernetIfTable
+/**
+ * \brief Delete an entry in ethernetIfTable
  */
 void ethernetIfTableEntry_delete(){
 	struct ethernetIfTableEntry *iterator = ethernetIfTable_head;
@@ -85,8 +86,22 @@ void ethernetIfTableEntry_delete(){
 	}
 }
 
+/**
+ * \brief specify if we are using default IP scheme assignment or VIVOE's scheme
+ * \return TRUE if it is the system's default IP assignment or FALSE if it VIVOE's one
+ */
+static gboolean openvivoe_uses_default_IP_assignment_scheme(){
 
-/** 
+	if ( ! strcmp ( ethernetIpAssignment._value.string_val,KEY_ETHERNET_IP_ASSIGNMENT_DEFAULT) )
+		return TRUE;
+	else
+		return FALSE;
+
+}
+
+
+
+/**
  * \brief Initialize the ethernetIfTable table by defining its contents and how it's structured
  */
 static void initialize_table_ethernetIfTable(void)
@@ -123,8 +138,12 @@ static void initialize_table_ethernetIfTable(void)
 	 * Initialise the contents of the table here
 	 * get the IP addresses and characteristics of the system for each interfaces and store it in the ethernetIfTable
 	 */
-   for(int i = 0; i < deviceInfo.parameters[num_ethernetIFnumber]._value.int_val; i++)
-		init_ethernet(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i]);
+	for(int i = 0; i < deviceInfo.parameters[num_ethernetIFnumber]._value.int_val; i++){
+		if ( openvivoe_uses_default_IP_assignment_scheme() )
+			init_ethernet(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i]);
+		else
+			assign_default_ip (deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i] );
+	}
 }
 
 /**

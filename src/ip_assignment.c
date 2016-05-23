@@ -28,6 +28,8 @@
 
 /* header file */
 #include "../include/deviceInfo/ethernetIfTable.h"
+#include "../include/ip_assignment.h"
+
 
 /**
  * \brief set the static IP given in parameter to the network interface
@@ -55,15 +57,8 @@ static gboolean set_static_ip( const gchar *interface, const gchar *ip){
 	/* get IP, store it in a u_int32t integer */
 	sai.sin_addr.s_addr = inet_addr(ip);
 
-	memcpy ( (struct sockaddr_in *)&ifr.ifr_addr , &sai, sizeof(struct sockaddr_in));
-
-#if 0
-	p = (char *) &sai;
-	memcpy( (((char *)&ifr + ifreq_offsetof(ifr_addr) )),
-			p, sizeof(struct sockaddr));
-#endif
-
 	/* set addresse sai to ifreq */
+	memcpy ( (struct sockaddr_in *)&ifr.ifr_addr , &sai, sizeof(struct sockaddr_in));
 
 	if ( ioctl(sockfd, SIOCSIFADDR, &ifr) < 0 ){
 		g_printerr("ERROR when trying to set static IP %s on %s: %s\n", ip, interface, strerror ( errno ));
@@ -95,10 +90,19 @@ static gboolean set_static_ip( const gchar *interface, const gchar *ip){
 }
 
 /**
+ * \brief assgined default static IP 192.168.204.254
+ * \param interface the name of the ethernet interface we are working on
+ */
+gboolean assign_default_ip( const gchar *interface){
+
+	return set_static_ip( interface , DEFAULT_STATIC_IP );
+
+}
+
+/**
  * \brief detect if there is IP any conflict in the VIVEO network
  */
-static gboolean detect_confilct(){}
+static gboolean detect_confilct(){
 
 
-
-
+}

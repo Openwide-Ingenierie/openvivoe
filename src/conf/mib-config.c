@@ -317,7 +317,7 @@ static gboolean init_videoFormatNumber_param(GKeyFile *gkf, gchar **groups, GErr
 }
 
 /* static definition and initiation of ethernetIpAssignment value */
-parameter ethernetIpAssignment          = {"ethernetIpAssignment", STRING, 1 };
+parameter ethernetIpAssignment = {"ethernetIpAssignment", STRING, 1 };
 /**
  * \brief intialize the global variable value ethernetIpAssignment
  * \param gkf the GkeyFile configuration File vivoe_mib.conf
@@ -798,8 +798,8 @@ gchar *get_default_IP_from_conf(int index){
 	return default_receive_ip;
 }
 
-/** 
- * \brief save the value of DefaultReceiveIPaddress enter by the user to use for SU in defaultStartUPMode in configuration file 
+/**
+ * \brief save the value of DefaultReceiveIPaddress enter by the user to use for SU in defaultStartUPMode in configuration file
  * \param index the corresponding number of the source to refer it in the configuration file
  * \param new_default_ip the new value of DefaultReceiveIPaddress
  */
@@ -833,15 +833,15 @@ void set_default_IP_from_conf(int index, const char* new_default_ip){
 
 }
 
-/** 
+/**
  * \brief register into the structure roi_data the MIB ROI parameters' values extract from the configuration file
  * \param index the source index from which we should be looking for ROI parameters
  * \param roi_datas the roi_data structure to fill
  * \return TRUE if ROI values are valid, FALSE otherwise
  */
-gboolean 
-get_roi_parameters_for_sources ( 
-		int index, 						gboolean scalable, 
+gboolean
+get_roi_parameters_for_sources (
+		int index, 						gboolean scalable,
 		long *roi_width_ptr , 			long *roi_height_ptr ,
 	   	long *roi_top_ptr, 				long *roi_left_ptr, 
 		long *roi_extent_bottom_ptr,   	long *roi_extent_right_ptr ){

@@ -141,6 +141,19 @@ MIB_group deviceInfo;
  * \brief this is used to specify which IP assignment scheme OpenVivoe will use
  */
 parameter ethernetIpAssignment;
+
+
+/**
+ * \brief the key values that should be found in the configuration for the value of ethernetIpAssignment : first key "default"
+ */
+#define KEY_ETHERNET_IP_ASSIGNMENT_DEFAULT 		"default"
+
+/**
+ * \brief the key values that should be found in the configuration for the value of ethernetIpAssignment : second key "VIVOE"
+ */
+#define KEY_ETHERNET_IP_ASSIGNMENT_VIVOE 		"VIVOE"
+
+
 /* --------------------------------- end Group DeviceInfo --------------------------------- */
 
 /* --------------------------------- Group videoFormatInfo -------------------------------- */

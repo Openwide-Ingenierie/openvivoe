@@ -24,15 +24,6 @@
 #define GROUP_NAME_SOURCE				"source_"
 #define GROUP_NAME_RECEIVER				"receiver_"
 
-/**
- * \brief the key values that should be found in the configuration for the value of ethernetIpAssignment : first key "default"
- */
-#define KEY_ETHERNET_IP_ASSIGNMENT_DEFAULT 		"default"
-
-/**
- * \brief the key values that should be found in the configuration for the value of ethernetIpAssignment : second key "VIVOE"
- */
-#define KEY_ETHERNET_IP_ASSIGNMENT_VIVOE 		"VIVOE"
 
 /**
  * \brief the names of the keys that could be found in the configuration file under group [source_x]

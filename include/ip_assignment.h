@@ -11,8 +11,9 @@
 /**
  * \brief the default static IP that shoud be assgigned to a device
  */
-#define DEAFULT_STATIC_IP 	"192.168.204.254"
+#define DEFAULT_STATIC_IP 	"192.168.204.254"
 
+gboolean assign_default_ip( const gchar *interface) ;
 
 #endif /* IP_ASSIGNMENT_H */
 

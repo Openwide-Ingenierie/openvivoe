@@ -16,8 +16,8 @@
  * \param TRUE on success, FALSE on failure
  */
 gboolean gst_element_link_log(	GstElement *element1 ,  GstElement *element2 ){
-	
-	/* link element1 to element2 payloader */
+
+		/* link element1 to element2 payloader */
 	if ( !gst_element_link(element1,element2 )){
 		send_deviceError_trap( );
 		g_warning("failed to link %s to %s\n", GST_ELEMENT_NAME(element1), GST_ELEMENT_NAME(element2));
@@ -33,10 +33,10 @@ gboolean gst_element_link_log(	GstElement *element1 ,  GstElement *element2 ){
  * \param TRUE on success, FALSE on failure
  */
 GstElement *gst_element_factory_make_log( const gchar *element,  const gchar *name ){
-	
+
 	/* make an elment */
 	GstElement *return_elt =	gst_element_factory_make( element , name );
-	
+
 	/* check if everything went ok, if not, display an error message */
 	if ( !return_elt ){
 		if ( element && name )
