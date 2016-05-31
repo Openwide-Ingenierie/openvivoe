@@ -21,7 +21,7 @@
 #include "../../include/log.h"
 #include "../../include/videoFormatInfo/videoFormatTable.h"
 #include "../../include/channelControl/channelTable.h"
-#include "../../include/deviceError.h"
+#include "../../include/trap/deviceError.h"
 #include "../../include/streaming/name.h"
 #include "../../include/streaming/pipeline.h"
 #include "../../include/streaming/detect.h"
@@ -55,11 +55,11 @@ static gboolean bus_call (  GstBus     *bus,
 								   GError *error;
 								   gst_message_parse_error (msg, &error, &debug);
 								   g_free (debug);
-									/* 
-									 * Send the TRAP message 
+									/*
+									 * Send the TRAP message
 									 */
 									send_deviceError_trap() ;
-								   g_printerr ("Error: %s\n", error->message);
+								   g_critical ("Error: %s\n", error->message);
 								   g_error_free (error);
 								   internal_error = TRUE;
 								   g_main_loop_quit (loop);
@@ -71,11 +71,11 @@ static gboolean bus_call (  GstBus     *bus,
 								   GError *error;
 								   gst_message_parse_warning (msg, &error, &debug);
 								   g_free (debug);
-									/* 
-									 * Send the TRAP message 
+									/*
+									 * Send the TRAP message
 									 */
 									send_deviceError_trap() ;
-								   g_printerr ("Error: %s\n", error->message);
+								   g_critical ("Error: %s\n", error->message);
 								   g_error_free (error);
 								   internal_error = TRUE;
 								   g_main_loop_quit (loop);
@@ -91,13 +91,13 @@ static gboolean bus_call (  GstBus     *bus,
 
 /**
  * \brief specify if a SP is a redirection (check if it is in the redirection_channel array)
- * \param videoFormatIndex the index of the videoFormat to check 
- * \return the corresponding redirect_data if found or NULL 
+ * \param videoFormatIndex the index of the videoFormat to check
+ * \return the corresponding redirect_data if found or NULL
  */
 static redirect_data *SP_is_redirection(long videoFormatIndex){
 
 	int i = 0;
-	for ( i = 0;  i< redirection.size; i ++ ){	
+	for ( i = 0;  i< redirection.size; i ++ ){
 		if ( redirection.redirect_channels[i]->video_SP_index == videoFormatIndex ) /* if found, then returns */
 			return redirection.redirect_channels[i];
 	}
@@ -208,7 +208,7 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 	}
 
 	if ( error != NULL){
-		g_printerr("Failed to parse: %s\n",error->message);
+		g_critical("Failed to parse: %s\n",error->message);
 	   	return NULL;
 	}
 
@@ -222,7 +222,7 @@ int handle_SP_default_StartUp_mode(long videoFormatIndex ){
 	struct channelTable_entry *entry 	= channelTable_get_from_VF_index(videoFormatIndex);
 
 	if (entry == NULL ){
-		g_printerr("ERROR: try to start a source that has no channel associated\n");
+		g_critical("try to start a source that has no channel associated\n");
 		return EXIT_FAILURE;
 	}
 	entry->channelStatus 				= channelStart;
@@ -250,7 +250,7 @@ int init_stream_SP( int videoFormatIndex ){
 	/* Create the pipeline */
 	pipeline  = gst_pipeline_new ("pipeline");
 	if(pipeline  == NULL){
-		g_printerr ( "error cannot create: %s\n","pipeline" );
+		g_critical ( "error cannot create: %s\n","pipeline" );
 		return EXIT_FAILURE;
 	}
 
@@ -279,7 +279,7 @@ int init_stream_SP( int videoFormatIndex ){
 	last = get_source(pipeline, videoFormatIndex);
 
 	if (last == NULL ){
-		g_printerr ( "Failed to create videosource\n");
+		g_critical ( "Failed to create videosource\n");
 		return EXIT_FAILURE;
 	}
 
@@ -297,7 +297,7 @@ int init_stream_SP( int videoFormatIndex ){
 
 	/* Check if everything went ok*/
 	if (last == NULL){
-		g_printerr ( "Failed to create pipeline\n");
+		g_critical ( "Failed to create pipeline\n");
 		return EXIT_FAILURE;
 	}
 
@@ -333,7 +333,7 @@ int init_stream_SU( GstCaps *caps, struct channelTable_entry *channel_entry)
 	/* Create the pipeline */
 	pipeline  = gst_pipeline_new ("pipeline");
 	if(pipeline  == NULL){
-		g_printerr ( "error cannot create: %s\n","pipeline" );
+		g_critical ( "error cannot create: %s\n","pipeline" );
 		return EXIT_FAILURE;
 	}
 
@@ -379,7 +379,7 @@ int init_stream_SU( GstCaps *caps, struct channelTable_entry *channel_entry)
 
 	/* check is the mapping have been done succesfully */
 	if ( redirection_data  && videoFormatIndex == -1 ){
-			g_printerr("ERROR: no source was found to redirect the stream of service Users's channel: %ld\n", channel_entry->channelIndex);
+			g_critical("no source was found to redirect the stream of service Users's channel: %ld\n", channel_entry->channelIndex);
 			return EXIT_FAILURE;
 	}
 
@@ -388,7 +388,7 @@ int init_stream_SU( GstCaps *caps, struct channelTable_entry *channel_entry)
 
 	/* Check if everything went ok*/
 	if (last == NULL){
-		g_printerr ( "Failed to create pipeline\n");
+		g_critical ( "Failed to create pipeline\n");
 		return EXIT_FAILURE;
 	}
 

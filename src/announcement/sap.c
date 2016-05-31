@@ -82,7 +82,7 @@
  * Total: 								24 bytes
  */
 #define SAP_header_size 			24
-#define SAP_header_OS_position		4	
+#define SAP_header_OS_position		4
 
 
 /**
@@ -96,7 +96,7 @@
 struct {
 	struct sockaddr_in 	multicast_addr;
 	int 				udp_socket_fd;
-	int 				udp_socket_fd_rec;	
+	int 				udp_socket_fd_rec;
 }sap_socket;
 
 /**
@@ -108,20 +108,20 @@ void init_sap_multicast(){
 	sap_socket.multicast_addr.sin_family 	= AF_INET;
 	sap_socket.multicast_addr.sin_port 		= htons(9875);
 	inet_aton("224.2.127.254", &sap_socket.multicast_addr.sin_addr);
-	
+
 	/* open UDP socket */
 	int udp_socket_fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if ( udp_socket_fd == -1 ) {
-		g_printerr(" Failed to create UDP socket to send SAP/SDP announcement: %s\n",strerror(errno));
+		g_critical("Failed to create UDP socket to send SAP/SDP announcement: %s\n",strerror(errno));
 	}
 	/* save value of socket into global structure */
 	sap_socket.udp_socket_fd = udp_socket_fd;
-	
+
 	/* open UDP socket */
 	udp_socket_fd = socket(AF_INET,SOCK_DGRAM  , IPPROTO_UDP);
 	fcntl(udp_socket_fd, F_SETFL, O_NONBLOCK);
 	if ( udp_socket_fd == -1 ) {
-		g_printerr(" Failed to create UDP socket to send SAP/SDP announcement: %s\n",strerror(errno));
+		g_critical("Failed to create UDP socket to send SAP/SDP announcement: %s\n",strerror(errno));
 	}
 	/* save value of socket into global structure */
 	sap_socket.udp_socket_fd_rec = udp_socket_fd;
@@ -134,10 +134,10 @@ void init_sap_multicast(){
 		   			(struct sockaddr *)&(sap_socket.multicast_addr),
 					//sizeof(sap_socket.multicast_addr) );
 					sizeof( struct sockaddr_in));
-	
+
 	/* check for binding errors */
 	if ( status < 0 )
-		g_printerr("Failed to bind socket: %s\n", strerror(errno));
+		g_error("Failed to bind socket: %s\n", strerror(errno));
 	struct ip_mreq 		imreq;
 	/* set content of struct saddr and imreq to zero */
 	memset(&imreq, 0, sizeof(struct ip_mreq));
@@ -189,7 +189,7 @@ static const in_addr_t build_OS(void){
 static gboolean build_SAP_header(char *header, int session_version, gboolean deletion){
 	char returnv[SAP_header_size];
 	int offset 						= 0; /* an offset use to concatenate the arrays */
-	
+
 	if(deletion)
 		returnv[0] 	= SAP_header_deletion;
 	else
@@ -221,12 +221,12 @@ static char*  build_SAP_msg(struct channelTable_entry * entry, int *sap_msg_leng
 	GstSDPMessage *msg;
 	/* create a new SDP message */
 	if (gst_sdp_message_new(&msg)){
-		g_printerr("Failed to create SDP message\n");
+		g_critical("Failed to create SDP message\n");
 		return FALSE;
 	}
-	
-	/* 
-	 * build the SDP message 
+
+	/*
+	 * build the SDP message
 	 */
 	create_SDP(msg, entry);
 
@@ -253,7 +253,7 @@ static char*  build_SAP_msg(struct channelTable_entry * entry, int *sap_msg_leng
 
 /**
  * \brief get SDP message from payload
- * \param udp_payload the datagram received 
+ * \param udp_payload the datagram received
  * \return  char* the SDP message as a byte string
  */
 static char* SAP_depay(char* udp_payload){
@@ -274,7 +274,7 @@ gboolean prepare_socket(struct channelTable_entry * entry ){
 	entry->sap_datas->udp_payload =  build_SAP_msg(entry, &(entry->sap_datas->udp_payload_length), FALSE); /* build SAP announcement message (not deletion message) */
 		/* for(int i = 0; i<entry->sap_datas->udp_payload_length ; i++)
 			printf("%02X\t%d\n", entry->sap_datas->udp_payload[i], i); */
-		return TRUE;		
+		return TRUE;
 }
 
 
@@ -313,7 +313,7 @@ gboolean send_announcement(gpointer entry){
 	/* check if the number of bytes send is -1, if so an error as occured */
 	if ( nb_bytes == -1 )
 	{
-    	g_printerr("Failed to send SAP/SDP announcement: %s",strerror(errno));
+    	g_critical("Failed to send SAP/SDP announcement: %s",strerror(errno));
 		return FALSE;
 	}
 	return TRUE;
@@ -334,17 +334,17 @@ gboolean receive_announcement(){
 
 	if (status == -1)
 	{
-		g_printerr("Failed to receive: %s\n", strerror(errno));
+		g_critical("Failed to receive: %s\n", strerror(errno));
 		return TRUE;
 	}
 	else if ( status == sizeof(udp_payload ))
 	{
-		g_printerr("WARNING: datagram too large for buffer: truncated");
+		g_warning("datagram too large for buffer: truncated");
 		return TRUE;
 	}
 	else
 	{
-		/* compare the payloed read on the socket with the payload read before 
+		/* compare the payloed read on the socket with the payload read before
 		 * if there different, save the new payload into the sap_dat of the channel
 		 */
 		/* check if it is the one we should be listening to */
@@ -360,7 +360,7 @@ gboolean receive_announcement(){
 		struct channelTable_entry* iterator = channelTable_SU_head;
 		while (iterator != NULL ){
 			if (iterator->channelReceiveIpAddress == multicast_addr){
-				/* Now we are sure that this is our SAP/SDP annoucement */	
+				/* Now we are sure that this is our SAP/SDP annoucement */
 				/* check if the SAP message is a deletion message */
 				if( udp_payload[0] == SAP_header_deletion ){
 					delete_steaming_data(iterator); /* delet streaming has it is stopped */
@@ -371,15 +371,15 @@ gboolean receive_announcement(){
 					/*
 					 * If pipeline is not created yet, create it and start to display the stream
 					 */
-					if ( data == NULL ){ 
+					if ( data == NULL ){
 						if ( !init_stream_SU ( caps, iterator ) )
 							start_streaming ( iterator->stream_datas, iterator->channelVideoFormatIndex );
 						/* init the video channelUserDesc field */
-						iterator->channelUserDesc 		= strdup( (const char*) channel_desc);	
+						iterator->channelUserDesc 		= strdup( (const char*) channel_desc);
 						iterator->channelUserDesc_len 	= strlen(channel_desc);
 					}
 					/*
-					 * otherwise, replace udpsrc element's caps with the caps extracted from SDP file 
+					 * otherwise, replace udpsrc element's caps with the caps extracted from SDP file
 					 */
 					else{
 						GstCaps *current_caps;

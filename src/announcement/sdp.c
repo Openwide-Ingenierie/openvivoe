@@ -36,7 +36,7 @@
  * \return 	the string representation of our interlaced_mode
  */
 static const char* interlace_mode_to_string(int interlaced_mode_val){
-	const char * enum_names []=  { NULL, "interlaced" , "progressive" , "none" , NULL };	
+	const char * enum_names []=  { NULL, "interlaced" , "progressive" , "none" , NULL };
 	return enum_names[interlaced_mode_val];
 }
 
@@ -104,7 +104,7 @@ static gchar *create_j2k_media(struct channelTable_entry * channel_entry, GstSDP
  * \return FALSE (as it is an error ;) )
  */
 static gboolean error_function(){
-	g_printerr("ERROR:Problem SDP file\n");
+	g_critical("Problem in SDP file\n");
 		return FALSE;
 }
 
@@ -136,28 +136,28 @@ static gboolean create_fmtp_media(struct channelTable_entry * channel_entry, Gst
 	/* if the channel is a ROI, then add roiTop and roiLeft paramerters */
 	if ( channel_entry->channelType == roi ){
 
-		/* 
+		/*
 		 * The roi parameters to add to the ftmp SDP's line
-		 * Adding a space ' ' at the beginning of this line hase been done on purpose, 
+		 * Adding a space ' ' at the beginning of this line hase been done on purpose,
 		 * as we will concatenate it to the existing fmtp line
 		 */
 		gchar *roi_params = g_strdup_printf ("; roiTop=%ld; roiLeft=%ld",
 										channel_entry->channelRoiOriginTop,
 										channel_entry->channelRoiOriginLeft);
-		
+
 		/*
 		 * if this is a scalable ROI
 		 */
 	   if ( channel_entry->channelRoiExtentBottom != 0 || channel_entry->channelRoiExtentRight != 0 ){
-			gchar *roi_extent_params =  g_strdup_printf("; roiBottom=%ld; roiRight=%ld", 
-					channel_entry->channelRoiExtentBottom,		
+			gchar *roi_extent_params =  g_strdup_printf("; roiBottom=%ld; roiRight=%ld",
+					channel_entry->channelRoiExtentBottom,
 					channel_entry->channelRoiExtentRight ) ;
 			roi_params = (gchar *) realloc ( roi_params , strlen( roi_params ) + strlen ( roi_extent_params ) + 1 );
 			strcat ( roi_params , roi_extent_params ) ;
 			free(roi_extent_params);
 	   }
 
-		/* extent ftmp buffer size so we can concatenate roi_params string to it */ 
+		/* extent ftmp buffer size so we can concatenate roi_params string to it */
 		fmtp = (gchar *) realloc ( fmtp , strlen( fmtp ) + strlen ( roi_params ) + 1 );
 		strcat ( fmtp , roi_params ) ;
 		free(roi_params);
@@ -165,7 +165,7 @@ static gboolean create_fmtp_media(struct channelTable_entry * channel_entry, Gst
 	}
 
 	if( gst_sdp_media_add_attribute (media, "fmtp", fmtp)!= GST_SDP_OK ){
-		g_printerr("ERROR: problem in media creation for SDP file\n");
+		g_critical("problem in media creation for SDP file\n");
 		return error_function();
 	}
 
@@ -186,7 +186,7 @@ gboolean create_SDP(GstSDPMessage 	*msg, struct channelTable_entry * channel_ent
 	 * v=0
 	 */
 	if (gst_sdp_message_set_version(msg, "0")){
-		g_printerr("Failed to set version in SDP message\n");
+		g_warning("Failed to set version in SDP message\n");
 		return FALSE;
 	}
 	/* origine:
@@ -240,7 +240,7 @@ gboolean create_SDP(GstSDPMessage 	*msg, struct channelTable_entry * channel_ent
 	multicast_addr.s_addr = ip;
 	gst_sdp_message_set_connection (msg, network_type, address_type,  inet_ntoa(multicast_addr) , address_ttl, 0);
 
-	
+
 	/* time : shall be set yo 0 0 in VIVOE to describe an unbound session
 	 *
 	 * t=<start time> <stop time>
@@ -259,7 +259,7 @@ gboolean create_SDP(GstSDPMessage 	*msg, struct channelTable_entry * channel_ent
 		return error_function();
 	if ( gst_sdp_media_set_proto ( media,transport_proto )!= GST_SDP_OK)
 		return error_function();
-	
+
 	if( gst_sdp_media_add_format(media, g_strdup_printf ("%ld", data->rtp_datas->rtp_type))!= GST_SDP_OK)
 		return error_function();
 
@@ -293,13 +293,13 @@ GstCaps* get_SDP(unsigned char *array, int sdp_msg_size, in_addr_t *multicast_ad
 	GstSDPMessage *msg;
 	/* create a new SDP message */
 	if (gst_sdp_message_new(&msg)){
-		g_printerr("Failed to create SDP message\n");
+		g_critical("Failed to create SDP message\n");
 		return NULL;
 	}
-	
+
 	/* parse the octet string to fill the SDP msg structure */
 	if( gst_sdp_message_parse_buffer (array, sdp_msg_size, msg) != GST_SDP_OK){
-		g_printerr("Failed to parse SDP message\n");
+		g_critical("Failed to parse SDP message\n");
 		return NULL;
 	}
 	/* get the multicast address of the incoming SDP message */
@@ -308,13 +308,13 @@ GstCaps* get_SDP(unsigned char *array, int sdp_msg_size, in_addr_t *multicast_ad
 
 	*multicast_addr =  inet_addr(connection->address);
 	/* check if the multicast group is indeed, the one we should receive */
-	
+
 	const	GstSDPMedia *media;
 	if (gst_sdp_message_medias_len (msg) > 1 ){
-		g_printerr("ERROR: more than one media in SDP message\n");
+		g_critical("more than one media in SDP message\n");
 		return NULL;
 	}
-	
+
 	/* get session description */
 	strcpy(channel_desc , gst_sdp_message_get_session_name(msg));
 
@@ -329,7 +329,7 @@ GstCaps* get_SDP(unsigned char *array, int sdp_msg_size, in_addr_t *multicast_ad
 	g_value_init (&res, GST_TYPE_FRACTION);
 	int framerate_num = strtol(gst_sdp_media_get_attribute_val (media, "framerate"), NULL, 10);
 	gst_value_set_fraction(&res,  framerate_num, 1 );
-	
+
 	gst_caps_set_value ( caps,
                   		 "framerate",
                    		&res );

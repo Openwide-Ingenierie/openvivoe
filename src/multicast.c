@@ -27,7 +27,7 @@
 #include "../include/mibParameters.h"
 
 
-/** 
+/**
  * \brief Retrieve system IP address on a specific interface
  * \param iface The network interface to use to retrieve the IP
  * \param ifr a structure to store the interface information
@@ -44,7 +44,7 @@ static gboolean get_ip(const char* iface, struct ifreq* ifr){
 
 	/* ioctl */
 	if(ioctl(fd, SIOCGIFADDR, ifr) < 0) {
-		g_printerr("ERROR: get_ip(): ioctl failed with error message \"%s\"\n", strerror(errno));
+		g_error("get_ip(): ioctl failed with error message \"%s\"\n", strerror(errno));
 		return FALSE;
 	}
 
@@ -64,7 +64,7 @@ static uint8_t get_device_id(char* addr){
 	return (int_addr&mask);
 }
 
-/** 
+/**
  * \brief Build Multicast address for streaming in VIVOE protocol
  * \param multicast_addr the string to store the computed multicast address
  * \param multicast_iface the interface from which retirevinf the IP address
@@ -80,7 +80,7 @@ long define_vivoe_multicast(const char* multicast_iface, const short int multica
 	unsigned long multicast_pref = ntohl(inet_addr("239.192.0.0"));
 	unsigned long channel 		= (long) (multicast_channel << 8);
 	unsigned long result = -1; /* the multicast_addr in a binary form */
-		
+
 	if( get_ip(multicast_iface, &ifr)){
 
 		device_ip = inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr);
@@ -89,13 +89,13 @@ long define_vivoe_multicast(const char* multicast_iface, const short int multica
 
 	} else{
 
-		g_printerr("ERROR: Failed to retrieve IP on %s\n", multicast_iface);
+		g_error("ERROR: Failed to retrieve IP on %s\n", multicast_iface);
 
 	}
 
 	if(result < 0){
 
-		g_printerr("Failed to generate multicast IP for udpsink, using default address: %s\n", DEFAULT_MULTICAST_ADDR );
+		g_critical("Failed to generate multicast IP for udpsink, using default address: %s\n", DEFAULT_MULTICAST_ADDR );
 		return ntohl(inet_addr( DEFAULT_MULTICAST_ADDR ));
 
 	}

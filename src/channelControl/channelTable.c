@@ -538,7 +538,7 @@ gboolean channelSatus_requests_handler( struct channelTable_entry * table_entry 
 				send_announcement ( table_entry ); /* send the announcement once, so it is received shorlty be all Service Users */
 				g_timeout_add(table_entry->channelSapMessageInterval,send_announcement, table_entry );
 				if ( !start_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex)){
-					g_printerr( "ERROR: failed to start streaming\n");
+					g_warning( "failed to start streaming\n");
 					return FALSE;
 				}
 				return TRUE;
@@ -558,7 +558,7 @@ gboolean channelSatus_requests_handler( struct channelTable_entry * table_entry 
 			break;
 		default:
 			/* this is a really really bad error, we should never get there */
-			g_printerr("Unknown channel Type\n");
+			g_warning("Unknown channel Type\n");
 			return FALSE;
 			break;
 	}

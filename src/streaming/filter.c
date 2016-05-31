@@ -26,7 +26,7 @@
  * \return TRUE if key "encoding" is set to no-filter or FALSE
  */
 static gboolean no_filter_encoding(const gchar * const * encoding){
-	return (g_strv_contains(encoding, KEY_NO_FILTER_VALUE )); 
+	return (g_strv_contains(encoding, KEY_NO_FILTER_VALUE ));
 }
 
 /*
@@ -35,33 +35,33 @@ static gboolean no_filter_encoding(const gchar * const * encoding){
  * \return TRUE if key "encoding" is set to no-filter or FALSE
  */
 static gboolean no_filter_resolution(const gchar * const * resolution){
-	return (g_strv_contains(resolution, KEY_NO_FILTER_VALUE )); 
+	return (g_strv_contains(resolution, KEY_NO_FILTER_VALUE ));
 }
 
 /*
- * return TRUE if all encoding are used 
+ * return TRUE if all encoding are used
  */
 static gboolean all_encodings(const gchar * const * encoding){
 	return (g_strv_contains(encoding, "all") ||
-			( g_strv_contains(encoding, "RGB") && 
-			  g_strv_contains(encoding, "YUV") && 
+			( g_strv_contains(encoding, "RGB") &&
+			  g_strv_contains(encoding, "YUV") &&
 			  g_strv_contains(encoding, "Monochrome")));
 }
 
 /*
- * return TRUE if all resolutions are used 
+ * return TRUE if all resolutions are used
  */
 static gboolean all_resolutions(const gchar * const * resolution){
 	return (g_strv_contains(resolution, "all") ||
-				( 	g_strv_contains(resolution, "576i") 	&& 
-			  		g_strv_contains(resolution, "720p") 	&& 
-			  		g_strv_contains(resolution, "1080i") 	&& 
+				( 	g_strv_contains(resolution, "576i") 	&&
+			  		g_strv_contains(resolution, "720p") 	&&
+			  		g_strv_contains(resolution, "1080i") 	&&
 			  		g_strv_contains(resolution, "1080p") ));
 }
 
 
 /*
- * This function build the default GValue for widths 
+ * This function build the default GValue for widths
  * iparameters taken are the indexes of desired min and max width
  */
 /* local define for the array of widths */
@@ -86,7 +86,7 @@ static GValue build_list(int* int_array, gchar** char_array, int length_array ){
 		}
 	}
 	else{
-		g_printerr("problem while building list\n");
+		g_critical("problem while building list\n");
 	}
 	return resolution;
 }
@@ -98,11 +98,11 @@ static void set_filter_field( 	GstStructure* gst,
 								gchar** char_array,
 								int length_array
 							   	){
-	GValue set = G_VALUE_INIT;			
+	GValue set = G_VALUE_INIT;
 	/* if Value is NULL, we are initializing a list of values */
 	g_value_init (&set,GST_TYPE_LIST);
 	set = build_list(int_array, char_array,length_array);
-	
+
 	gst_structure_set_value(gst,
                         	field,
 							&set);
@@ -129,9 +129,9 @@ static void copy(char* array1[], int length1, int offset, char* array2[], int le
 #define length_YUV 			5
 #define length_Mono			3
 /* define lenght for the Arrays of resolutions */
-#define length_width_576 	4	
+#define length_width_576 	4
 #define length_height_576 	2
-#define length_width 		6	
+#define length_width 		6
 #define length_height 		4
 /* define number of interlace-mode used */
 #define num_inter_mode 		2
@@ -145,7 +145,7 @@ static GstStructure* build_RAW_filter(GKeyFile* gkf){
 	const gchar * const * 		encoding 	= (const gchar * const *)	get_raw_encoding(gkf);
 	const gchar * const * 		resolution 	= (const gchar * const *)	get_raw_res(gkf);
 	GstStructure* 				raw_filter 	= gst_structure_new_from_string ("video/x-raw");
-	
+
 	/* Define the array used to build the filter */
 	char* RGB[length_RGB] 					= { "RGB", 		"RGBA", 	 "BGR", 	"BGRA" };
 	char* YUV[length_YUV] 					= { "AYUV", 	"UYVY", 	 "I420", 	"Y41B", 	"UYVP" };
@@ -153,10 +153,10 @@ static GstStructure* build_RAW_filter(GKeyFile* gkf){
 	int length 								= length_RGB + length_YUV + length_Mono;
 	int offset 								= 0;
 	char* formats[length];
-	
+
 	if ( !no_filter_encoding(encoding)){
 
-		/* Add encoding part */ 
+		/* Add encoding part */
 		if( all_encodings(encoding) ){
 			/* Build array of full formats */
 			copy(formats, length, 0, 						RGB, 		length_RGB);
@@ -166,14 +166,14 @@ static GstStructure* build_RAW_filter(GKeyFile* gkf){
 		}else{
 			length = 0 ;
 			if( g_strv_contains(encoding, "RGB") ){
-				length += 	length_RGB;			
+				length += 	length_RGB;
 				copy(formats, length, offset, RGB, length_RGB);
 				offset += 	length_RGB;
 			}
 			if( g_strv_contains(encoding, "YUV") ){
-				length += length_YUV;						
+				length += length_YUV;
 				copy(formats, length, offset, YUV, length_YUV );
-				offset += length_YUV;						
+				offset += length_YUV;
 			}
 			if( g_strv_contains(encoding, "Monochrome") ){
 				length += length_Mono;
@@ -221,7 +221,7 @@ static GstStructure* build_RAW_filter(GKeyFile* gkf){
 			copy(interlace_mode, num_inter_mode, 0, interlaced, 1 );
 			offset_im++;
 			copy(interlace_mode, num_inter_mode, offset_im, progressive, 1 );
-			set_filter_field(raw_filter,"interlace-mode",NULL, interlace_mode, num_inter_mode);		
+			set_filter_field(raw_filter,"interlace-mode",NULL, interlace_mode, num_inter_mode);
 		}else{
 			if( g_strv_contains(resolution,"576i") ){
 				memcpy(width, width_small, length_width_576 * sizeof(int));
@@ -267,7 +267,7 @@ static GstStructure* build_RAW_filter(GKeyFile* gkf){
 	}
 
 //	set_filter_field(raw_filter, "framerate", GST_VIDEO_FPS_RANGE);
-//	printf("%s\n", gst_structure_to_string (raw_filter) );	
+//	printf("%s\n", gst_structure_to_string (raw_filter) );
 	free(width);
 	free(height);
 	return raw_filter;
@@ -317,7 +317,7 @@ static GstStructure* build_MPEG4_filter(GKeyFile* gkf){
 			copy(interlace_mode, num_inter_mode, 0, interlaced, 1 );
 			offset_im++;
 			copy(interlace_mode, num_inter_mode, offset_im, progressive, 1 );
-			set_filter_field(mpeg_filter,"interlace-mode",NULL, interlace_mode, num_inter_mode);		
+			set_filter_field(mpeg_filter,"interlace-mode",NULL, interlace_mode, num_inter_mode);
 		}else{
 			if( g_strv_contains(resolution,"576i") ){
 				memcpy(width, width_small, length_width_576 * sizeof(int));
@@ -414,7 +414,7 @@ static GstStructure* build_J2K_filter(GKeyFile* gkf){
 			copy(interlace_mode, num_inter_mode, 0, interlaced, 1 );
 			offset_im++;
 			copy(interlace_mode, num_inter_mode, offset_im, progressive, 1 );
-			set_filter_field(j2k_filter,"interlace-mode",NULL, interlace_mode, num_inter_mode);		
+			set_filter_field(j2k_filter,"interlace-mode",NULL, interlace_mode, num_inter_mode);
 		}else{
 			if( g_strv_contains(resolution,"576i") ){
 				memcpy(width, width_small, length_width_576 * sizeof(int));
@@ -476,10 +476,10 @@ static GstStructure* build_J2K_filter(GKeyFile* gkf){
 gboolean filter_VIVOE(GstStructure* input_caps_str, GstElement* input, GstElement* output){
 	GstStructure 	*raw_filter 	= NULL;
 	GstStructure 	*mpeg_filter 	= NULL;
- 	GstStructure 	*j2k_filter 	= NULL; 
+ 	GstStructure 	*j2k_filter 	= NULL;
 	GstCaps 		*vivoe_filter 	= NULL; /* the final filter to use to filters out non stream video */
-	
-	/* this function does the following: 
+
+	/* this function does the following:
 	 * _ open configuration file
 	 * _ read and build filters (RAW, MPEG, J2k) from configuration file
 	 *  _close configuration file
@@ -505,8 +505,8 @@ gboolean filter_VIVOE(GstStructure* input_caps_str, GstElement* input, GstElemen
 										mpeg_filter,
 										j2k_filter,
 										NULL);
-	/* When building a new caps from a Structure, the structure is not copied, instead the caps own the structure 
-	 * it is not wan we want there, so we built a copy the structure before building the input_caps */ 
+	/* When building a new caps from a Structure, the structure is not copied, instead the caps own the structure
+	 * it is not wan we want there, so we built a copy the structure before building the input_caps */
 	GstCaps *input_caps = gst_caps_new_full(gst_structure_copy(input_caps_str), NULL);
 
 	if(	gst_caps_can_intersect(input_caps, vivoe_filter)){

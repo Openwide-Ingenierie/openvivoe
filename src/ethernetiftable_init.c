@@ -47,7 +47,7 @@ static gboolean get_interface_info(const char* iface, struct ifreq* ifr, int par
 
 	/* ioctl - retrieve parameter from interface*/
 	if( ioctl(fd, param, ifr) < 0) {
-		g_printerr("ERROR: get_ip(): ioctl failed with error message \"%s\"\n", strerror(errno));
+		g_critical("ERROR: get_ip(): ioctl failed with error message \"%s\"\n", strerror(errno));
 		return FALSE;
 	}
 	return TRUE;
@@ -69,7 +69,7 @@ static gboolean list_interfaces(char*** if_names, int* if_num){
 	/* set the number of interfaces found to 0 */
 	*if_num = 0;
     if( getifaddrs(&ifap) < 0){
-		g_printerr("ERROR: Failed to get system's network interfaces\n");
+		g_critical("ERROR: Failed to get system's network interfaces\n");
 		return FALSE;
 	}
 	/* listing interfaces */
@@ -92,7 +92,7 @@ static gboolean list_interfaces(char*** if_names, int* if_num){
 		return TRUE;
 	}
 	else{
-		g_printerr("No compatible network interfaces have been found.\n");
+		g_critical("No compatible network interfaces have been found.\n");
 		return FALSE;
 	}
 }
@@ -118,7 +118,7 @@ gboolean select_interfaces(char*** if_used){
 	g_print("Your choice [default: all]:\n");
 	length = scanf("%s", choice);
 	if(length == 0){
-		g_printerr("Not a valid choice\n");
+		g_critical("Not a valid choice\n");
 		return FALSE;
 	}
 	if(	! strcmp(choice, "all")){
@@ -132,7 +132,7 @@ gboolean select_interfaces(char*** if_used){
 		}
 	}
 	if( !valid){
-		g_printerr("Invalid input \n");
+		g_critical("Invalid input \n");
 		return FALSE;
 	}else
 		return TRUE;
@@ -180,11 +180,11 @@ gboolean init_ethernet(const char* iface){
 					break;
 				default:
 					/* this is a really bad error, we should never get there */
-					g_printerr("ERROR: unknown ioctl call\n");
+					g_critical("unknown ioctl call\n");
 					return FALSE;
 			}
 		}else{
-			g_printerr("ERROR: Failed to retrieve parameters of %s\n", iface);
+			g_critical("Failed to retrieve parameters of %s\n", iface);
 			return FALSE;
 		}
 	}
