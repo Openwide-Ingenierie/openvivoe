@@ -193,7 +193,7 @@ static int init_deviceInfo(GKeyFile* gkf, gchar* group_name, GError* error){
                     case INTEGER:
                             deviceInfo_parameters[i]._value.int_val = (int) g_key_file_get_integer(gkf, group_name, (const gchar*) deviceInfo_parameters[i]._name, &error);
                             if(error != NULL){
-                                fprintf(stderr, "Invalid format for %s: %s\n", (const gchar*) deviceInfo_parameters[i]._name, error->message);
+                                g_warning("Invalid format for %s: %s\n", (const gchar*) deviceInfo_parameters[i]._name, error->message);
                                 error = NULL; /* resetting the error pointer*/
                                 error_occured = TRUE; /*set the error boolean to*/
                             }
@@ -201,7 +201,7 @@ static int init_deviceInfo(GKeyFile* gkf, gchar* group_name, GError* error){
                     case STRING:
                             deviceInfo_parameters[i]._value.string_val = (char*) g_key_file_get_string(gkf, group_name, (const gchar*) deviceInfo_parameters[i]._name, &error);
                             if(error != NULL){
-                                fprintf(stderr, "Invalid format for %s: %s\n", (const gchar*) deviceInfo_parameters[i]._name, error->message);
+                                g_warning("Invalid format for %s: %s\n", (const gchar*) deviceInfo_parameters[i]._name, error->message);
                                 error = NULL; /* resetting the error pointer*/
                                 error_occured = TRUE; /*set the error boolean to*/
                             }
@@ -209,7 +209,7 @@ static int init_deviceInfo(GKeyFile* gkf, gchar* group_name, GError* error){
                     case T_INTEGER:
                             deviceInfo_parameters[i]._value.array_int_val = (int*) g_key_file_get_integer_list(gkf, group_name, (const gchar*) deviceInfo_parameters[i]._name, &length,  &error);
                             if(error != NULL){
-                                fprintf(stderr, "Invalid format for %s: %s\n", (const gchar*) deviceInfo_parameters[i]._name, error->message);
+                                g_warning("Invalid format for %s: %s\n", (const gchar*) deviceInfo_parameters[i]._name, error->message);
                                 error = NULL; /* resetting the error pointer*/
                                 error_occured = TRUE; /*set the error boolean to*/
                             }
@@ -217,7 +217,7 @@ static int init_deviceInfo(GKeyFile* gkf, gchar* group_name, GError* error){
                     case T_STRING: /* only case here is ethernetInterface, from that we should compute ethernetIfNumber */
                             deviceInfo_parameters[i]._value.array_string_val =  (char**) g_key_file_get_string_list(gkf, group_name, (const gchar*) deviceInfo_parameters[i]._name, &length, &error);
                             if(error != NULL){
-                                fprintf(stderr, "Invalid format for %s: %s\n", (const gchar*) deviceInfo_parameters[i]._name, error->message);
+                                g_warning("Invalid format for %s: %s\n", (const gchar*) deviceInfo_parameters[i]._name, error->message);
                                 error = NULL; /* resetting the error pointer*/
                                 error_occured = TRUE; /*set the error boolean to*/
                             }
@@ -229,7 +229,7 @@ static int init_deviceInfo(GKeyFile* gkf, gchar* group_name, GError* error){
         }else{
             /*if the parameter is mandatory, print an error message to the user, and exit the program*/
             if(!deviceInfo_parameters[i]._optional){
-                fprintf(stderr, "Parameter %s mandatory and not found: %s\n", (const gchar*)deviceInfo_parameters[i]._name, error->message);
+                g_warning("Parameter %s mandatory and not found: %s\n", (const gchar*)deviceInfo_parameters[i]._name, error->message);
                 return EXIT_FAILURE;
             }
             /*if the parameter is optional, do not do anything special, just keep running!*/
@@ -329,13 +329,13 @@ static gboolean init_ethernetIpAssignment_param(GKeyFile *gkf, gchar *group_name
 
 	ethernetIpAssignment._value.string_val = (char*) g_key_file_get_string(gkf, group_name , (const gchar*) ethernetIpAssignment._name, &error);
 	if(error != NULL){
-		g_printerr("Invalid format for %s: %s\n", (const gchar*) ethernetIpAssignment._name, error->message);
+		g_warning("Invalid format for %s: %s\n", (const gchar*) ethernetIpAssignment._name, error->message);
 		error = NULL; /* resetting the error pointer*/
 	}
 
 	if ( 	strcmp( ethernetIpAssignment._value.string_val , KEY_ETHERNET_IP_ASSIGNMENT_DEFAULT )
 		   	&& strcmp ( ethernetIpAssignment._value.string_val , KEY_ETHERNET_IP_ASSIGNMENT_VIVOE	)  ){
-		g_printerr("Invalid key value for %s, can only be set to %s or %s\n",
+		g_warning("Invalid key value for %s, can only be set to %s or %s\n",
 			   	(const gchar*) ethernetIpAssignment._name ,
 			   	KEY_ETHERNET_IP_ASSIGNMENT_DEFAULT ,
 				KEY_ETHERNET_IP_ASSIGNMENT_VIVOE  );
@@ -446,15 +446,15 @@ static gchar *get_key_value_char(GKeyFile* gkf, const gchar* const* groups ,char
 	if(g_key_file_has_key(gkf,group_name,key_name, &error)){
 		key_value = (char*) g_key_file_get_string(gkf,group_name , key_name , &error);
 		if(error != NULL)
-			g_printerr("Invalid format for key %s: %s\n", key_name , error->message);
+			g_warning("Invalid format for key %s: %s\n", key_name , error->message);
 	}
 	else {
-		g_printerr("ERROR: key not found %s for group: %s\n", key_name ,group_name );
+		g_warning("key not found %s for group: %s\n", key_name ,group_name );
 		return NULL;
 	}
 
 	if ( !strcmp( key_value, "") ){
-		g_printerr("ERROR: invalid key value for %s in %s\n", key_name ,group_name );
+		g_warning("invalid key value for %s in %s\n", key_name ,group_name );
 		return NULL;
 	}
 
@@ -483,16 +483,16 @@ static int get_key_value_int(GKeyFile* gkf, const gchar* const* groups ,char *gr
 	if(g_key_file_has_key(gkf,group_name,key_name, &error)){
 		key_value = (int) g_key_file_get_integer(gkf,group_name , key_name , &error);
 		if(error != NULL)
-			g_printerr("Invalid format for key %s: %s\n", key_name , error->message);
+			g_warning("Invalid format for key %s: %s\n", key_name , error->message);
 	}
 	else {
 		if ( !optional )
-			g_printerr("ERROR: key not found %s for group: %s\n", key_name ,group_name );
+			g_warning("key not found %s for group: %s\n", key_name ,group_name );
 		return -1;
 	}
 
 	if ( key_value < 0  ){
-		g_printerr("ERROR: invalid key value for %s in %s\n", key_name ,group_name );
+		g_warning("invalid key value for %s in %s\n", key_name ,group_name );
 		return -1;
 	}
 
@@ -517,12 +517,12 @@ gboolean set_key_value(GKeyFile* gkf, const gchar* const* groups ,char *group_na
 		g_key_file_set_string(gkf,group_name ,key_name ,new_value );
 		g_key_file_save_to_file(gkf, gkf_path , &error);
 		if(error != NULL){
-			g_printerr("ERROR: failed to write to configuration file %s: %s\n",CONFIG_FILE , error->message);
+			g_warning("failed to write to configuration file %s: %s\n",CONFIG_FILE , error->message);
 			return FALSE;
 		}
 	}
 	else{
-		g_printerr("ERROR: key not found %s for group: %s\n",key_name ,group_name );
+		g_warning("key not found %s for group: %s\n",key_name ,group_name );
 		return FALSE;
 	}
 
@@ -863,7 +863,6 @@ gchar *get_static_assigned_IP_from_conf(){
 
 	assigned_ip = get_key_value_char(gkf,(const gchar* const*) groups , GROUP_NAME_DEVICEINFO , KEY_NAME_ASSIGNED_IP , error);
 
-	free(receiver_name);
 	close_mib_configuration_file(gkf);
 	return assigned_ip;
 
@@ -888,9 +887,13 @@ void set_static_assigned_IP_to_conf( const char* new_ip ){
 	 */
 	gchar 		**groups;
 
+
+	/*first we load the different Groups of the configuration file
+	 * second parameter "gchar* length" is optional*/
+	groups = g_key_file_get_groups(gkf, NULL);
+
 	set_key_value(gkf,(const gchar* const*) groups , GROUP_NAME_DEVICEINFO , gkf_path , KEY_NAME_ASSIGNED_IP , new_ip , error);
 
-	free(receiver_name);
 	close_mib_configuration_file(gkf);
 
 }
@@ -952,7 +955,7 @@ get_roi_parameters_for_sources (
 	 */
 	if ( ( roi_top != -1 || roi_left != -1 ) && ( roi_width == -1 && roi_height ==-1) ){
 
-		g_printerr ( "ERROR: [source_%d] ROI's origin specified but no ROI resolution found\n", index );
+		g_warning ( "[source_%d] ROI's origin specified but no ROI resolution found\n", index );
 		return FALSE;
 
 	}
@@ -962,7 +965,7 @@ get_roi_parameters_for_sources (
 
 		/* if extent object are set but not origin object */
 		if ( (roi_extent_bottom != -1 || roi_extent_right != -1) && (roi_top == -1 && roi_left==-1)  ){
-			g_printerr ( " ERROR: [source_%d] scalable ROI cannot have %s and %s set if %s and %s are not set too", index, ROI_EXTENT_BOTTOM , ROI_EXTENT_RIGHT , ROI_ORIGIN_TOP , ROI_ORIGIN_LEFT );
+			g_warning ( " [source_%d] scalable ROI cannot have %s and %s set if %s and %s are not set too", index, ROI_EXTENT_BOTTOM , ROI_EXTENT_RIGHT , ROI_ORIGIN_TOP , ROI_ORIGIN_LEFT );
 			return FALSE;
 		}
 
@@ -1055,7 +1058,7 @@ gboolean get_roi_parameters_for_sink(int index , gboolean scalable,
 	 */
 	if ( ( roi_top != -1 || roi_left != -1 ) && ( roi_width == -1 && roi_height ==-1) ){
 
-		g_printerr ( "ERROR: [receiver_%d] ROI's origin specified but no ROI resolution found\n", index );
+		g_warning ( "[receiver_%d] ROI's origin specified but no ROI resolution found\n", index );
 		return FALSE;
 
 	}
@@ -1065,7 +1068,7 @@ gboolean get_roi_parameters_for_sink(int index , gboolean scalable,
 
 		/* if extent object are set but not origin object */
 		if ( (roi_extent_bottom != -1 || roi_extent_right != -1) && (roi_top == -1 && roi_left==-1)  ){
-			g_printerr ( " ERROR: [receiver_%d] scalable ROI cannot have %s and %s set if %s and %s are not set too", index, ROI_EXTENT_BOTTOM , ROI_EXTENT_RIGHT , ROI_ORIGIN_TOP , ROI_ORIGIN_LEFT );
+			g_warning ( "[receiver_%d] scalable ROI cannot have %s and %s set if %s and %s are not set too", index, ROI_EXTENT_BOTTOM , ROI_EXTENT_RIGHT , ROI_ORIGIN_TOP , ROI_ORIGIN_LEFT );
 			return FALSE;
 		}
 
@@ -1151,7 +1154,7 @@ static gboolean init_redirection_data(GKeyFile* gkf ){
 			 * --> exit with an error
 			 */
 			if ( &redirection.redirect_channels[i_old] == NULL ){
-				g_printerr("redirection of source_%d with name \"%s\" does not have corresponding redirection's receiver\n", index_source, name_source);
+				g_warning("redirection of source_%d with name \"%s\" does not have corresponding redirection's receiver\n", index_source, name_source);
 				return FALSE;
 			}
 			i_old = i ;
