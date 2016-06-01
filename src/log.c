@@ -162,6 +162,7 @@ log_handler (const gchar   *log_domain,
 	FILE *stream;
 	const gchar *domains;
 
+
 	if ((log_level & DEFAULT_LEVELS) || (log_level >> G_LOG_LEVEL_USER_SHIFT))
     	goto emit;
 
@@ -175,6 +176,14 @@ emit:
 	stream = mklevel_prefix (level_prefix, log_level);
 
 	gstring = g_string_new (NULL);
+
+	GDateTime *log_time = g_date_time_new_now_local();
+	gchar *log_time_str = g_date_time_format(log_time, "%F %T");
+	g_string_append_printf ( gstring , "[%s]", log_time_str);
+	g_free(log_time_str);
+	g_date_time_unref(log_time);
+
+
 	if (!log_domain)
 		g_string_append (gstring, "** ");
 
