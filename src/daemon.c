@@ -131,7 +131,7 @@ int open_vivoe_daemon (char* deamon_name) {
 	/* openvivoe-demon will be used to read openvivoe-demon.conf files. */
 	init_snmp(basename(deamon_name));
 
-  snmp_log(LOG_INFO,"%s is up and running.\n", basename(deamon_name));
+  snmp_log(LOG_INFO,"%s is up and running.", basename(deamon_name));
   return EXIT_SUCCESS;
 }
 

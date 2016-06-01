@@ -44,7 +44,7 @@ static gboolean get_ip(const char* iface, struct ifreq* ifr){
 
 	/* ioctl */
 	if(ioctl(fd, SIOCGIFADDR, ifr) < 0) {
-		g_error("get_ip(): ioctl failed with error message \"%s\"\n", strerror(errno));
+		g_error("get_ip(): ioctl failed with error message \"%s\"", strerror(errno));
 		return FALSE;
 	}
 
@@ -89,13 +89,13 @@ long define_vivoe_multicast(const char* multicast_iface, const short int multica
 
 	} else{
 
-		g_error("ERROR: Failed to retrieve IP on %s\n", multicast_iface);
+		g_error("ERROR: Failed to retrieve IP on %s", multicast_iface);
 
 	}
 
 	if(result < 0){
 
-		g_critical("Failed to generate multicast IP for udpsink, using default address: %s\n", DEFAULT_MULTICAST_ADDR );
+		g_critical("Failed to generate multicast IP for udpsink, using default address: %s", DEFAULT_MULTICAST_ADDR );
 		return ntohl(inet_addr( DEFAULT_MULTICAST_ADDR ));
 
 	}

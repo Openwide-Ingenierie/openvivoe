@@ -50,7 +50,7 @@ initialize_table_channelTable(void)
     netsnmp_iterator_info           *iinfo;
     netsnmp_table_registration_info *table_info;
 
-    DEBUGMSGTL(("channelTable:init", "initializing table channelTable\n"));
+    DEBUGMSGTL(("channelTable:init", "initializing table channelTable"));
 
     reg = netsnmp_create_handler_registration(
               "channelTable",     channelTable_handler,
@@ -538,7 +538,7 @@ gboolean channelSatus_requests_handler( struct channelTable_entry * table_entry 
 				send_announcement ( table_entry ); /* send the announcement once, so it is received shorlty be all Service Users */
 				g_timeout_add(table_entry->channelSapMessageInterval,send_announcement, table_entry );
 				if ( !start_streaming( table_entry->stream_datas, table_entry->channelVideoFormatIndex)){
-					g_warning( "failed to start streaming\n");
+					g_warning( "failed to start streaming");
 					return FALSE;
 				}
 				return TRUE;
@@ -558,7 +558,7 @@ gboolean channelSatus_requests_handler( struct channelTable_entry * table_entry 
 			break;
 		default:
 			/* this is a really really bad error, we should never get there */
-			g_warning("Unknown channel Type\n");
+			g_warning("Unknown channel Type");
 			return FALSE;
 			break;
 	}
@@ -629,14 +629,13 @@ channelTable_handler(
 	 */
 	struct videoFormatTable_entry *videoFormat_entry ;
 
-    DEBUGMSGTL(("channelTable:handler", "Processing request (%d)\n", reqinfo->mode));
+    DEBUGMSGTL(("channelTable:handler", "Processing request (%d)", reqinfo->mode));
 
     switch (reqinfo->mode) {
 
 		/*
          * Read-support (also covers GetNext requests)
          */
-
 
     case MODE_GET:
         for (request=requests; request; request=request->next) {

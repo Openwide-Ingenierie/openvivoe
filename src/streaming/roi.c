@@ -127,7 +127,7 @@ static gboolean SP_roi_mp4_config_update (gpointer stream_datas,  struct videoFo
  	video_caps = type_detection_for_roi( GST_BIN(data->pipeline) , data->udp_elem ) ;
 
 	if ( !video_caps ){
-		g_critical ("Failed to adapt MPEG-4 pipeline for ROI\n");
+		g_critical ("Failed to adapt MPEG-4 pipeline for ROI");
 		return FALSE;
 	}
 
@@ -169,7 +169,7 @@ GstElement *get_element_from_bin( GstElement *pipeline  , GType type){
 				gst_iterator_resync (iter);
 				break;
 			case GST_ITERATOR_ERROR:
-				g_critical("while iteratin through gst_source bin\n");
+				g_critical("while iteratin through gst_source bin");
 				done = TRUE;
 				break;
 			case GST_ITERATOR_DONE:
@@ -201,7 +201,7 @@ set_parameters_to_roi_elements ( struct videoFormatTable_entry *video_stream_inf
 		if ( vivoecrop_src_pad)
 			new_caps  			=	gst_caps_copy (gst_pad_get_pad_template_caps (vivoecrop_src_pad));
 		else{
-			g_critical("Faile to get vivoecrop source pad template\n");
+			g_critical("Faile to get vivoecrop source pad template");
 			return FALSE;
 		}
 

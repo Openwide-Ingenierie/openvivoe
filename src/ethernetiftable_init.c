@@ -47,7 +47,7 @@ static gboolean get_interface_info(const char* iface, struct ifreq* ifr, int par
 
 	/* ioctl - retrieve parameter from interface*/
 	if( ioctl(fd, param, ifr) < 0) {
-		g_critical("ERROR: get_ip(): ioctl failed with error message \"%s\"\n", strerror(errno));
+		g_critical("ERROR: get_ip(): ioctl failed with error message \"%s\"", strerror(errno));
 		return FALSE;
 	}
 	return TRUE;
@@ -69,11 +69,11 @@ static gboolean list_interfaces(char*** if_names, int* if_num){
 	/* set the number of interfaces found to 0 */
 	*if_num = 0;
     if( getifaddrs(&ifap) < 0){
-		g_critical("ERROR: Failed to get system's network interfaces\n");
+		g_critical("ERROR: Failed to get system's network interfaces");
 		return FALSE;
 	}
 	/* listing interfaces */
-	g_print("Listing network interfaces using IPv4...\n");
+	g_print("Listing network interfaces using IPv4...");
 	names 	= (char**) 	malloc(sizeof(char*));
 	/* iterate through interfaces */
 	for (iterator = ifap; iterator; iterator = iterator->ifa_next) {
@@ -92,7 +92,7 @@ static gboolean list_interfaces(char*** if_names, int* if_num){
 		return TRUE;
 	}
 	else{
-		g_critical("No compatible network interfaces have been found.\n");
+		g_critical("No compatible network interfaces have been found.");
 		return FALSE;
 	}
 }
@@ -111,28 +111,28 @@ gboolean select_interfaces(char*** if_used){
 	list_interfaces(&if_names, &if_num);
 
 	/* Ask to the user which network interfaces he wants VIVOE to use */
-	g_print("Which network interface you want VIVOE to use?\n");
+	g_print("Which network interface you want VIVOE to use?");
 	for(i = 0; i < if_num; i++){
-		g_print("[%d]\t%s\n", i+1, if_names[i]);
+		g_print("[%d]\t%s", i+1, if_names[i]);
 	}
-	g_print("Your choice [default: all]:\n");
+	g_print("Your choice [default: all]:");
 	length = scanf("%s", choice);
 	if(length == 0){
-		g_critical("Not a valid choice\n");
+		g_critical("Not a valid choice");
 		return FALSE;
 	}
 	if(	! strcmp(choice, "all")){
-		g_print("You choose: %s\n", if_names[i]);
+		g_print("You choose: %s", if_names[i]);
 	}else{
 		for(i =0; i<if_num; i++){
 			if( strtol(choice, NULL, 10) == (i+1) ){
-				g_print("You choose: %s\n", if_names[i]);
+				g_print("You choose: %s", if_names[i]);
 				valid = TRUE;
 			}
 		}
 	}
 	if( !valid){
-		g_critical("Invalid input \n");
+		g_critical("Invalid input ");
 		return FALSE;
 	}else
 		return TRUE;
@@ -180,11 +180,11 @@ gboolean init_ethernet(const char* iface){
 					break;
 				default:
 					/* this is a really bad error, we should never get there */
-					g_critical("unknown ioctl call\n");
+					g_critical("unknown ioctl call");
 					return FALSE;
 			}
 		}else{
-			g_critical("Failed to retrieve parameters of %s\n", iface);
+			g_critical("Failed to retrieve parameters of %s", iface);
 			return FALSE;
 		}
 	}

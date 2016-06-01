@@ -140,7 +140,7 @@ GstElement *type_detection_element_for_roi( GstBin *pipeline ) {
 		return NULL;
 
 	if ( ! gst_bin_add (pipeline, typefind)){
-		g_critical("could not add %s in pipeline\n", TYPEFIND_ROI_NAME);
+		g_critical("could not add %s in pipeline", TYPEFIND_ROI_NAME);
 		return NULL;
 	}
 

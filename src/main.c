@@ -5,7 +5,7 @@
  *     - hoel <hvasseur@openwide.fr>
  */
 
-/* 
+/*
  * SubAgent Module
  */
 #include <stdio.h>
@@ -67,7 +67,7 @@ static gboolean stop_program ( gpointer data ){
 	/* channel table */
 	channelTable_delete();
 	/* videoFormatTable */
-	videoFormatTable_delete();	
+	videoFormatTable_delete();
 	/* ethernetIfTable */
 	ethernetIfTableEntry_delete();
 	/* unref and quit main loop */
@@ -116,7 +116,7 @@ gboolean vivoe_gstreamer_initiation(int   argc,  char *argv[]){
 	if (  (! vivoecrop_init ()) || (! vivoecaps_init ()) )
 		g_error("Failed to load OpenVivoe's private gstreamer's modules");
 	else
-		return TRUE;	
+		return TRUE;
 
 }
 
@@ -130,6 +130,8 @@ int main (int   argc,  char *argv[]){
 
 	/* create the GMainLoop*/
 	main_loop = g_main_loop_new (NULL, FALSE);
+
+	g_message("starting the program");
 
 	/* data associated to stream */
 	stop_program_data 			stop_data;
@@ -154,7 +156,7 @@ int main (int   argc,  char *argv[]){
 
 	/* checking for start up mode */
 	if ( deviceInfo.parameters[num_DeviceMode]._value.int_val == defaultStartUp)
-		default_startUp_mode(main_loop);	
+		default_startUp_mode(main_loop);
 
 	/* listen to SAP/SDP announcement */
 	if ( 	deviceInfo.parameters[num_DeviceType]._value.int_val == device_SU
@@ -169,7 +171,7 @@ int main (int   argc,  char *argv[]){
 			g_main_loop_run (main_loop);
 		}
 		else{
-			g_error("An Gstreamer's error occurs\n");
+			g_error("A Gstreamer's error occurs");
 			return EXIT_FAILURE;
 		}
 

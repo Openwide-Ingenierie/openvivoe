@@ -147,7 +147,7 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 		gst_bin_add(GST_BIN(pipeline),capsfilter);
 
 		if ( !gst_element_link_log(input,capsfilter )){
-			g_critical("JPEG2000 format can only be x-jpc\n");
+			g_critical("JPEG2000 format can only be x-jpc");
 			return NULL;
 		}
 
@@ -161,7 +161,7 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
  	/* in case the video type detected is unknown */
 	else
 	{
-		g_critical("unknow type of video stream\n");
+		g_critical("unknow type of video stream");
 		return NULL;
 	}
 
@@ -224,7 +224,7 @@ static gboolean create_branch_in_pipeline( GstElement *pipeline , GstElement *in
 
 	/* add it in pipeline */
 	if ( !gst_bin_add ( GST_BIN(pipeline), tee) ){
-		g_critical("Failed to add %s element in pipeline\n", TEE_NAME );
+		g_critical("Failed to add %s element in pipeline", TEE_NAME );
 		return FALSE;
 	}
 	if ( ! gst_element_link_log ( input , tee))
@@ -243,7 +243,7 @@ static gboolean create_branch_in_pipeline( GstElement *pipeline , GstElement *in
 	branch2_src_pad = gst_element_get_static_pad(branch2, "sink");
 
 	if(gst_pad_link(tee_branch1_sink_pad, branch1_src_pad) != GST_PAD_LINK_OK || gst_pad_link(tee_branch2_sink_pad, branch2_src_pad) != GST_PAD_LINK_OK) {
-		g_critical("%s could not be linked to %s and %s\n", TEE_NAME , GST_ELEMENT_NAME(branch1) ,  GST_ELEMENT_NAME(branch2) );
+		g_critical("%s could not be linked to %s and %s", TEE_NAME , GST_ELEMENT_NAME(branch1) ,  GST_ELEMENT_NAME(branch2) );
 		return FALSE;
 	}
 
@@ -329,7 +329,7 @@ GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
 	video_stream_info->videoFormatIndex = videoChannelIndex;
 
 	if( !video_stream_info){
-		g_critical("Failed to create temporary empty entry for the table\n");
+		g_critical("Failed to create temporary empty entry for the table");
 		return NULL;
 	}
 
@@ -344,7 +344,7 @@ GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
 					NULL);
 
 	if(last == NULL){
-		g_critical("Failed to create pipeline\n");
+		g_critical("Failed to create pipeline");
 		return NULL;
 	}
 
@@ -354,7 +354,7 @@ GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
 	 */
 	long channel_entry_index = 0;
 	if( initialize_videoFormat(video_stream_info, stream_datas,  &channel_entry_index)){
-		g_critical("Failed to add entry in the videoFormatTable or in channelTable\n");
+		g_critical("Failed to add entry in the videoFormatTable or in channelTable");
 		return NULL;
 	}
 
@@ -373,14 +373,14 @@ GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
 			);
 
 	if (udpsink == NULL){
-		g_critical("Failed to create pipeline\n");
+		g_critical("Failed to create pipeline");
 		return NULL;
 	}
 
 	GstElement *typefind_roi = type_detection_element_for_roi(GST_BIN( pipeline) );
 
 	if ( !typefind_roi ){
-		g_critical("Failed to create pipeline\n");
+		g_critical("Failed to create pipeline");
 		return NULL;
 	}
 
@@ -394,7 +394,7 @@ GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
 	if ( video_stream_info->videoFormatType == roi ){
 
 		if ( !create_branch_in_pipeline( pipeline , last , udpsink , typefind_roi ) ){
-			g_critical("Failed to create pipeline\n");
+			g_critical("Failed to create pipeline");
 			return NULL;
 		}
 
@@ -433,7 +433,7 @@ GstElement *append_SP_pipeline_for_redirection(GstCaps *caps, long videoFormatIn
 	stream_data 	*data 	=  videoFormat_entry->stream_datas;
 
 	if ( data == NULL ){
-		g_critical("Failed to append pipeline for redirection\n");
+		g_critical("Failed to append pipeline for redirection");
 		return NULL;
 	}
 
@@ -446,7 +446,7 @@ GstElement *append_SP_pipeline_for_redirection(GstCaps *caps, long videoFormatIn
 
 	last = addRTP(data->pipeline , data->bus , data->bus_watch_id , data->udp_elem  , videoFormat_entry , data , caps);
 	if(last == NULL){
-		g_critical("Failed to append pipeline for redirection\n");
+		g_critical("Failed to append pipeline for redirection");
 		return NULL;
 	}
 
@@ -463,7 +463,7 @@ GstElement *append_SP_pipeline_for_redirection(GstCaps *caps, long videoFormatIn
 				);
 
 	if (last == NULL){
-		g_critical("Failed to create pipeline\n");
+		g_critical("Failed to create pipeline");
 		return NULL;
 	}
 
@@ -577,11 +577,11 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 						GstBus *bus,
 
 		}
 		else {
-			g_critical("unknow type of video stream\n");
+			g_critical("unknow type of video stream");
 			return NULL;
 		}
 	}else{
-		g_critical("encoding format not found\n");
+		g_critical("encoding format not found");
 		return NULL;
 	}
 
@@ -662,7 +662,7 @@ static GstElement *handle_redirection_SU_pipeline ( GstElement *pipeline, GstCap
 		gst_bin_add(GST_BIN(pipeline),capsfilter);
 
 		if ( !gst_element_link_log(input,capsfilter )){
-			g_critical("JPEG2000 format can only be x-jpc\n");
+			g_critical("JPEG2000 format can only be x-jpc");
 			return NULL;
 		}
 
@@ -723,7 +723,7 @@ static GstElement *parse_conf_for_redirection( GstElement *pipeline, GstElement 
 				&error);
 
 		if ( error != NULL){
-			g_critical("Failed to parse: %s\n",error->message);
+			g_critical("Failed to parse: %s",error->message);
 			return NULL;
 		}
 
@@ -816,7 +816,7 @@ static GstElement* addSink_SU( 	GstElement 					*pipeline, 		GstBus 		*bus,
 
 	/* Create the sink */
     if(sink == NULL){
-       g_critical ( "error cannot create element for: %s\n","sink");
+       g_critical ( "error cannot create element for: %s","sink");
 	   return NULL;
     }
 
@@ -855,7 +855,7 @@ GstElement* create_pipeline_serviceUser( gpointer 					stream_datas,
 	struct videoFormatTable_entry *video_stream_info;
 	video_stream_info = SNMP_MALLOC_TYPEDEF(struct videoFormatTable_entry);
 	if( !video_stream_info){
-		g_critical("Failed to create temporary empty entry for the table\n");
+		g_critical("Failed to create temporary empty entry for the table");
 		return NULL;
 	}
 

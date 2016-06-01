@@ -18,7 +18,7 @@ init_channelNumber(void)
 {
     const oid channelNumber_oid[] = { 1,3,6,1,4,1,35990,3,1,3,2 };
 
-  DEBUGMSGTL(("channelNumber", "Initializing\n"));
+  DEBUGMSGTL(("channelNumber", "Initializing"));
 
     netsnmp_register_instance(
         netsnmp_create_handler_registration("channelNumber", handle_channelNumber,

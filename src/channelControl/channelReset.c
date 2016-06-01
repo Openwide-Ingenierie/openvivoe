@@ -18,7 +18,7 @@ init_channelReset(void)
 {
     const oid channelReset_oid[] = { 1,3,6,1,4,1,35990,3,1,3,1 };
 
-  DEBUGMSGTL(("channelReset", "Initializing\n"));
+  DEBUGMSGTL(("channelReset", "Initializing"));
 
   netsnmp_register_instance(
         netsnmp_create_handler_registration("channelReset", handle_channelReset,
