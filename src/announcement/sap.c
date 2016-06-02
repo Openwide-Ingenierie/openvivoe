@@ -104,6 +104,9 @@ struct {
  */
 void init_sap_multicast(){
 	int status = -1;
+
+	g_debug("initializing SAP socket");
+
 	memset(&sap_socket.multicast_addr, 0, sizeof(struct sockaddr_in));
 	sap_socket.multicast_addr.sin_family 	= AF_INET;
 	sap_socket.multicast_addr.sin_port 		= htons(9875);

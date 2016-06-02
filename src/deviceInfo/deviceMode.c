@@ -16,7 +16,7 @@
 void init_deviceMode(void){
     const oid deviceMode_oid[] = { 1,3,6,1,4,1,35990,3,1,1,14 };
 
-  DEBUGMSGTL(("deviceMode", "Initializing\n"));
+  g_debug("deviceMode initializing");
 
     netsnmp_register_instance(
         netsnmp_create_handler_registration("deviceMode", handle_deviceMode,
@@ -25,7 +25,7 @@ void init_deviceMode(void){
         ));
 }
 
-/** 
+/**
  * \brief calls appropriate handler for this parameter
  * \param handler the specific handler for this item
  * \param reqinfo the SNMP request

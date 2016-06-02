@@ -10,7 +10,7 @@
 #include "../../include/mibParameters.h"
 #include "../../include/handler.h"
 
-/** 
+/**
  * \brief Initializes the videoFormatNumber module
  */
 void
@@ -18,7 +18,7 @@ init_videoFormatNumber(void)
 {
     const oid videoFormatNumber_oid[] = { 1,3,6,1,4,1,35990,3,1,2,1 };
 
-  DEBUGMSGTL(("videoFormatNumber", "Initializing\n"));
+  g_debug(("videoFormatNumber initializing"));
 
    	 netsnmp_register_read_only_instance(
         netsnmp_create_handler_registration("videoFormatNumber", handle_videoFormatNumber,
@@ -27,7 +27,7 @@ init_videoFormatNumber(void)
         						));
 }
 
-/** 
+/**
  * \brief calls appropriate handler for this parameter
  * \param handler the specific handler for this item
  * \param reqinfo the SNMP request

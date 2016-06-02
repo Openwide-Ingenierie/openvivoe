@@ -107,6 +107,9 @@ static GstStructure* type_detection_with_sink(GstBin *pipeline, GstElement *inpu
  * \return a pointer to the detected structure, NULL otherwise
  */
 GstStructure* type_detection(GstBin *pipeline, GstElement *input_video , GstElement *sink){
+
+	g_debug("start type detection");
+
 	GstStructure *str_detected;
 	if (sink == NULL){
 		GstElement  *fakesink;
@@ -133,6 +136,8 @@ GstElement *type_detection_element_for_roi( GstBin *pipeline ) {
 
 	GstElement 	*typefind;
 
+	g_debug("start type detection for ROI");
+
 	/* Create typefind element */
 	typefind = gst_element_factory_make_log ("typefind", TYPEFIND_ROI_NAME );
 
@@ -154,6 +159,8 @@ GstElement *type_detection_element_for_roi( GstBin *pipeline ) {
  * \brief this function just detect the caps between an element and a sink already in pipeline and already link to each other
  */
 GstStructure* type_detection_for_roi(GstBin *pipeline , GstElement *sink ){
+
+
 
 	GstCaps 	*found_caps;
 

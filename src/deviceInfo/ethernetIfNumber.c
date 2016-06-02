@@ -18,7 +18,7 @@ void init_ethernetIfNumber(void)
 {
     const oid ethernetIfNumber_oid[] = { 1,3,6,1,4,1,35990,3,1,1,11 };
 
-    DEBUGMSGTL(("ethernetIfNumber", "Initializing\n"));
+    g_debug(("ethernetIfNumber initializing"));
     netsnmp_register_read_only_instance(
         netsnmp_create_handler_registration("ethernetIfNumber", handle_ethernetIfNumber,
                                             ethernetIfNumber_oid, OID_LENGTH(ethernetIfNumber_oid),
@@ -26,7 +26,7 @@ void init_ethernetIfNumber(void)
     );
 }
 
-/** 
+/**
  * \brief calls appropriate handler for this parameter
  * \param handler the specific handler for this item
  * \param reqinfo the SNMP request

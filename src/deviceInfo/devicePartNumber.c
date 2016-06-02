@@ -20,7 +20,7 @@ init_devicePartNumber(void)
 {
     const oid devicePartNumber_oid[] = { 1,3,6,1,4,1,35990,3,1,1,3 };
 
-  DEBUGMSGTL(("devicePartNumber", "Initializing\n"));
+  g_debug("devicePartNumber initializing");
 
     netsnmp_register_read_only_instance(
         netsnmp_create_handler_registration("devicePartNumber", handle_devicePartNumber,
@@ -29,7 +29,7 @@ init_devicePartNumber(void)
         ));
 }
 
-/** 
+/**
  * \brief calls appropriate handler for this parameter
  * \param handler the specific handler for this item
  * \param reqinfo the SNMP request

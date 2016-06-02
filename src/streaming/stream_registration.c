@@ -191,6 +191,8 @@ void fill_entry(GstStructure* source_str_caps, struct videoFormatTable_entry *vi
 int initialize_videoFormat(struct videoFormatTable_entry *video_info, gpointer stream_datas, long *channel_entry_index ){
 	stream_data *data 			= stream_datas;
 
+	g_debug("intialize new videoFormatEntry and new channelEntry in table");
+
 	/* Then we are sure that we can create a new entry */
 		videoFormatTable_createEntry( 	video_info->videoFormatIndex, 						video_info->videoFormatType,
 				disable, 																	video_info->videoFormatBase,

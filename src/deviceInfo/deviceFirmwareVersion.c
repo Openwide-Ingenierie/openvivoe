@@ -14,10 +14,10 @@
  * \brief Initializes the deviceFirmwareVersion module
  */
 void init_deviceFirmwareVersion(void){
- 
+
     const oid deviceFirmwareVersion_oid[] = { 1,3,6,1,4,1,35990,3,1,1,7 };
 
-    DEBUGMSGTL(("deviceFirmwareVersion", "Initializing\n"));
+    g_debug(("deviceFirmwareVersion initializing"));
 
     netsnmp_register_read_only_instance(
         netsnmp_create_handler_registration("deviceFirmwareVersion", handle_deviceFirmwareVersion,
@@ -25,7 +25,7 @@ void init_deviceFirmwareVersion(void){
                                HANDLER_CAN_RONLY
         ));
 }
-/** 
+/**
  * \brief calls appropriate handler for this parameter
  * \param handler the specific handler for this item
  * \param reqinfo the SNMP request

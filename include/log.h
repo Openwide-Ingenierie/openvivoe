@@ -7,8 +7,8 @@
 #ifndef LOG_H
 # define LOG_H
 
+void init_logger();
 gboolean gst_element_link_log(	GstElement *element1 ,  GstElement *element2 );
 GstElement *gst_element_factory_make_log( const gchar *element,  const gchar *name );
 
 #endif /* LOG_H */
-

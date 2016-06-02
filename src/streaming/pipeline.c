@@ -41,7 +41,7 @@
  */
 #define JPEG_FORMAT_NUMBER_SUPPORTED 	3
 static const gchar* J2K_STR_NAMES[JPEG_FORMAT_NUMBER_SUPPORTED] = {"image/x-j2c", "image/x-jpc", "image/jp2"};
-	
+
 /**
  * \brief This function add the RTP element to the pipeline for service provider * \param pipeline the pipeline associated to this SP
  * \param bus the bus the channel
@@ -55,13 +55,15 @@ static const gchar* J2K_STR_NAMES[JPEG_FORMAT_NUMBER_SUPPORTED] = {"image/x-j2c"
  */
 static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 							guint 							bus_watch_id, 	GstElement* input,
-							struct videoFormatTable_entry 	*video_info,	gpointer stream_datas, 	
+							struct videoFormatTable_entry 	*video_info,	gpointer stream_datas,
 							GstCaps 						*caps){
 
 	/*Create element that will be add to the pipeline */
 	GstElement *rtp = NULL;
 	GstElement *parser;
 	GstStructure *video_caps;
+
+	g_debug("addRTP");
 
 	if (caps == NULL){
 
@@ -82,17 +84,19 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 		fill_entry(video_caps, video_info, stream_datas);
 
 	}
-	
-	/* 
-	 * Handle the ROI 
+
+	/*
+	 * Handle the ROI
 	 */
 	handle_roi ( pipeline ,  video_info , NULL ) ;
 
  	/* in case RAW video type has been detected */
 	if ( gst_structure_has_name( video_caps, "video/x-raw") ){
 
+		g_debug("%s video detected: add %s to SP pipeline", RAW_NAME , RTPRAWPAY_NAME);
+
 		/* For Raw video */
-		rtp 	= gst_element_factory_make_log ("rtpvrawpay", RTPRAWPAY_NAME); 
+		rtp 	= gst_element_factory_make_log ("rtpvrawpay", RTPRAWPAY_NAME);
 		if ( !rtp )
 			return NULL;
 
@@ -100,17 +104,19 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 	/* in case MPEG4 video type has been detected */
 	else if  (gst_structure_has_name( video_caps, "video/mpeg")){
 
-		/* 
+		/*
 		 * For MPEG-a videos we need to add a parser before the RTP payloader. However, if caps are NULL i.e. if this pipeline is a Service Provider's pipeline
 		 * used for a redirection, we cannot add the mpeg4 parser here because the parser need to be in the same pipeline as the MPEG-4 encoder, otherwise the typefind
-		 * cannot be performed. So if caps are NULL then it means that the parser has already been added in the SU's pipeline of the Service Users's part of teh redirection. 
-		 * We do not have to add it again 
+		 * cannot be performed. So if caps are NULL then it means that the parser has already been added in the SU's pipeline of the Service Users's part of teh redirection.
+		 * We do not have to add it again
 		 */
 		if ( caps == NULL ){
 
 			parser 	= gst_element_factory_make_log ("mpeg4videoparse", MPEG4PARSER_NAME );
 			if ( !parser )
 				return NULL;
+
+			g_debug("%s video detected: add %s to pipeline", MPEG4_NAME , MPEG4PARSER_NAME);
 
 			gst_bin_add(GST_BIN(pipeline),parser);
 
@@ -120,6 +126,8 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 			input = parser;
 
 		}
+
+		g_debug("%s video detected: add %s to SP pipeline", MPEG4_NAME , RTPMP4PAY_NAME );
 
 		rtp 	= gst_element_factory_make_log ("rtpmp4vpay", RTPMP4PAY_NAME );
 		if ( !rtp )
@@ -144,6 +152,8 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 		/* Put the source in the pipeline */
 		g_object_set (capsfilter, "caps",caps_jpeg2000 , NULL);
 
+		g_debug("%s video detected: add %s to SP pipeline", J2K_NAME , CAPSFITER_J2K_NAME );
+
 		gst_bin_add(GST_BIN(pipeline),capsfilter);
 
 		if ( !gst_element_link_log(input,capsfilter )){
@@ -152,6 +162,8 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 		}
 
 		input = capsfilter;
+
+		g_debug("%s video detected: add %s to SP pipeline", J2K_NAME , RTPJ2KPAY_NAME  );
 
 		/* For J2K video */
 		rtp 	= gst_element_factory_make_log ("rtpj2kpay", RTPJ2KPAY_NAME );
@@ -174,7 +186,7 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 		if (!filter_VIVOE(type_detection(GST_BIN(pipeline), input,NULL),input, rtp))
 			return NULL;
 
-		/* Now that wa have added the RTP payloader to the pipeline, we can get the new caps of the video stream*/
+		/* Now that we have added the RTP payloader to the pipeline, we can get the new caps of the video stream*/
 		/* Media stream Type detection */
 		video_caps = type_detection(GST_BIN(pipeline), rtp, NULL);
 
@@ -204,7 +216,7 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 }
 
 /**
- * \brief Create a branch from input, to branch1 and branch2. In this case it is used to add a typefind element for ROI management and the udpsrc 
+ * \brief Create a branch from input, to branch1 and branch2. In this case it is used to add a typefind element for ROI management and the udpsrc
  * \param pipeline the pipeline associated to this SP
  * \param input last element added in pipeline from which we want to branch
  * \param branch1 the next element in branch 1
@@ -216,6 +228,8 @@ static gboolean create_branch_in_pipeline( GstElement *pipeline , GstElement *in
 	GstPadTemplate *tee_src_pad_template;
 	GstPad *tee_branch1_sink_pad, *tee_branch2_sink_pad;
 	GstPad *branch1_src_pad, *branch2_src_pad;
+
+	g_debug("create a branch in pipeline, using %s",  TEE_NAME );
 
 	/*
 	 * Create the tee element, use to create the branchs in pipeline
@@ -261,12 +275,15 @@ static gboolean create_branch_in_pipeline( GstElement *pipeline , GstElement *in
  * \param channel_entry_index the channel's index of this SP
  */
 void set_udpsink_param( GstElement *udpsink, long channel_entry_index){
+
 	/* compute IP */
 	long ip 			= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0], channel_entry_index);
 
 	/* transform IP from long to char * */
 	struct in_addr ip_addr;
 	ip_addr.s_addr = ip;
+
+	g_debug("set new %s param", UDPSINK_NAME );
 
 	/*Set UDP sink properties */
     g_object_set(   G_OBJECT(udpsink),
@@ -292,6 +309,8 @@ static GstElement* addUDP( 	GstElement *pipeline, 	GstBus *bus,
 
 	/*Create element that will be add to the pipeline */
 	GstElement *udpsink;
+
+	g_debug("add %s in SP pipeline", UDPSINK_NAME);
 
 	/* Create the UDP sink */
     udpsink = gst_element_factory_make_log ("udpsink", UDPSINK_NAME );
@@ -327,6 +346,8 @@ GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
 	struct videoFormatTable_entry * video_stream_info;
 	video_stream_info = SNMP_MALLOC_TYPEDEF(struct videoFormatTable_entry);
 	video_stream_info->videoFormatIndex = videoChannelIndex;
+
+	g_debug("create SP pipeline");
 
 	if( !video_stream_info){
 		g_critical("Failed to create temporary empty entry for the table");
@@ -426,6 +447,7 @@ GstElement *append_SP_pipeline_for_redirection(GstCaps *caps, long videoFormatIn
 
 	GstElement 		*last;
 
+	g_debug("append_SP_pipeline_for_redirection source_%ld", videoFormatIndex );
 
 	/* get the entry in videoFormatTable that corresponds to the mapping */
 	struct videoFormatTable_entry* videoFormat_entry = videoFormatTable_getEntry(videoFormatIndex);
@@ -436,7 +458,6 @@ GstElement *append_SP_pipeline_for_redirection(GstCaps *caps, long videoFormatIn
 		g_critical("Failed to append pipeline for redirection");
 		return NULL;
 	}
-
 
 	/* Now build the corresponding pipeline according to the caps*/
 	/*
@@ -484,6 +505,8 @@ void set_udpsrc_param( GstElement *udpsrc, struct channelTable_entry * channel_e
 	struct in_addr multicast_group;
 	multicast_group.s_addr = channel_entry->channelReceiveIpAddress;
 
+	g_debug("set new %s param", UDPSRC_NAME );
+
 	/*Set UDP sink properties */
     g_object_set(   G_OBJECT(udpsrc),
                 	"multicast-group", 	inet_ntoa( multicast_group ),
@@ -508,6 +531,8 @@ static GstElement* addUDP_SU( 	GstElement *pipeline, 	GstBus *bus,
 
 	/*Create element that will be add to the pipeline */
 	GstElement *udpsrc;
+
+	g_debug("add %s to SU pipeline", UDPSRC_NAME );
 
 	/* Create the UDP sink */
     udpsrc = gst_element_factory_make_log ("udpsrc", UDPSRC_NAME );
@@ -557,13 +582,15 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 						GstBus *bus,
 		if ( strcmp( RAW_NAME,encoding) == 0 ){
 			rtp 	= gst_element_factory_make_log ("rtpvrawdepay" , RTPRAWDEPAY_NAME );
 			/* Check if everything went ok */
+			g_debug("%s video dectect, add %s to SU pipeline", RAW_NAME ,  RTPRAWDEPAY_NAME );
 			if( rtp == NULL)
 				return NULL;
 
 		}else if  ( strcmp( MPEG4_NAME , encoding) == 0 ){
 			/* For MPEG-4 video */
 			rtp 	= gst_element_factory_make_log ("rtpmp4vdepay" , RTPMP4DEPAY_NAME );
-			/* Checek if everything went ok */
+			g_debug("%s video dectect, add %s to SU pipeline", MPEG4_NAME , RTPMP4DEPAY_NAME  );
+			/* Check if everything went ok */
 			if( rtp == NULL)
 				return NULL;
 
@@ -571,6 +598,7 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 						GstBus *bus,
 		/* For J2K video */
 		else if ( strcmp( J2K_NAME , encoding) == 0 ){
 			rtp 	= gst_element_factory_make_log ("rtpj2kdepay" , RTPJ2KDEPAY_NAME );
+			g_debug("%s video dectect, add %s to SU pipeline", J2K_NAME , RTPJ2KDEPAY_NAME  );
 			/* Check if everything went ok */
 			if( rtp == NULL)
 				return NULL;
@@ -633,6 +661,8 @@ static GstElement *handle_redirection_SU_pipeline ( GstElement *pipeline, GstCap
 
 	GstStructure *video_caps = gst_caps_get_structure( caps , 0 );
 
+	g_debug("handle_redirection_SU_pipeline");
+
 	/* in case MPEG4 video type has been detected */
 	if  (gst_structure_has_name( video_caps, "video/mpeg")){
 
@@ -640,6 +670,8 @@ static GstElement *handle_redirection_SU_pipeline ( GstElement *pipeline, GstCap
 		GstElement *parser 	= gst_element_factory_make_log ("mpeg4videoparse", MPEG4PARSER_NAME);
 		if ( !parser )
 			return NULL;
+
+		g_debug("add %s to pipeline", MPEG4PARSER_NAME);
 
 		gst_bin_add(GST_BIN(pipeline),parser);
 
@@ -659,6 +691,8 @@ static GstElement *handle_redirection_SU_pipeline ( GstElement *pipeline, GstCap
 		/* Put the source in the pipeline */
 		g_object_set (capsfilter, "caps",caps_jpeg2000 , NULL);
 
+		g_debug("add %s to pipeline", CAPSFITER_J2K_NAME );
+
 		gst_bin_add(GST_BIN(pipeline),capsfilter);
 
 		if ( !gst_element_link_log(input,capsfilter )){
@@ -670,7 +704,7 @@ static GstElement *handle_redirection_SU_pipeline ( GstElement *pipeline, GstCap
 	}
 
 	/*
-	 * Run a new typefind to update caps in order to succeed to run a last typefind in the pipeline of the SP of the 
+	 * Run a new typefind to update caps in order to succeed to run a last typefind in the pipeline of the SP of the
 	 * redirection. Update caps in consequence
 	 */
 	video_caps = type_detection(GST_BIN(pipeline), input, NULL);
@@ -692,6 +726,8 @@ static GstElement *parse_conf_for_redirection( GstElement *pipeline, GstElement 
 	gchar *full_pipeline = NULL;
 	gchar *sink_suffix = g_strrstr(redirect->gst_sink, "!");
 	gchar *sink_remaning_pipeline = NULL;
+
+	g_info("Parsing configuration file to get redirection data");
 
 	if ( sink_suffix )
 		sink_remaning_pipeline 	= g_strndup (redirect->gst_sink , strlen(redirect->gst_sink) - strlen(g_strrstr(redirect->gst_sink, "!")));
@@ -820,6 +856,8 @@ static GstElement* addSink_SU( 	GstElement 					*pipeline, 		GstBus 		*bus,
 	   return NULL;
     }
 
+	g_debug("add %s to SU pipeline", GST_ELEMENT_NAME(sink));
+
 	/* add sink to pipeline */
 	if ( !gst_bin_add(GST_BIN (pipeline), sink )){
 		g_critical("Unable to add %s to pipeline", gst_element_get_name(sink));
@@ -858,6 +896,8 @@ GstElement* create_pipeline_serviceUser( gpointer 					stream_datas,
 		g_critical("Failed to create temporary empty entry for the table");
 		return NULL;
 	}
+
+	g_debug("Create SU pipeline");
 
 	GstElement 	*pipeline 		= data->pipeline;
 	GstBus 		*bus 			= data->bus;
@@ -908,6 +948,7 @@ GstElement* create_pipeline_serviceUser( gpointer 					stream_datas,
 	 * This will help us later, when the user will change the ROI or Resolution parameters of the channel
 	 * to prevent from Gstreamer's errors
 	 */
+	g_debug("save SDP height and SDP width in channelTable_entry for ROI management");
 	channel_entry->sdp_height 	= video_stream_info->videoFormatMaxVertRes;
 	channel_entry->sdp_width 	= video_stream_info->videoFormatMaxHorzRes;
 

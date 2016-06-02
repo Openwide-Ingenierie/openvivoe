@@ -10,7 +10,7 @@
 #include "../../include/mibParameters.h"
 #include "../../include/handler.h"
 
-/** 
+/**
  * \brief Initializes the deviceNatoStockNumber module
  */
 void
@@ -18,7 +18,7 @@ init_deviceNatoStockNumber(void)
 {
     const oid deviceNatoStockNumber_oid[] = { 1,3,6,1,4,1,35990,3,1,1,13 };
 
-  DEBUGMSGTL(("deviceNatoStockNumber", "Initializing\n"));
+  g_debug("deviceNatoStockNumber initializing");
 
     netsnmp_register_read_only_instance(
                                         netsnmp_create_handler_registration("deviceNatoStockNumber", handle_deviceNatoStockNumber,
@@ -26,7 +26,7 @@ init_deviceNatoStockNumber(void)
                                         HANDLER_CAN_RONLY ));
 }
 
-/** 
+/**
  * \brief calls appropriate handler for this parameter
  * \param handler the specific handler for this item
  * \param reqinfo the SNMP request

@@ -21,7 +21,6 @@
 #include "../../include/log.h"
 #include "../../include/videoFormatInfo/videoFormatTable.h"
 #include "../../include/channelControl/channelTable.h"
-#include "../../include/trap/deviceError.h"
 #include "../../include/streaming/name.h"
 #include "../../include/streaming/pipeline.h"
 #include "../../include/streaming/detect.h"
@@ -46,8 +45,7 @@ static gboolean bus_call (  GstBus     *bus,
 	switch (GST_MESSAGE_TYPE (msg)) {
 
 		case GST_MESSAGE_EOS:
-			g_print ("End of stream");
-			g_main_loop_quit (loop);
+			g_info("End of stream");
 			break;
 
 		case GST_MESSAGE_ERROR:{
@@ -59,7 +57,7 @@ static gboolean bus_call (  GstBus     *bus,
 									 * Send the TRAP message
 									 */
 									send_deviceError_trap() ;
-								   g_critical ("Error: %s", error->message);
+								   g_critical ("Gstreamer Error: %s", error->message);
 								   g_error_free (error);
 								   internal_error = TRUE;
 								   g_main_loop_quit (loop);
@@ -75,7 +73,7 @@ static gboolean bus_call (  GstBus     *bus,
 									 * Send the TRAP message
 									 */
 									send_deviceError_trap() ;
-								   g_critical ("Error: %s", error->message);
+								   g_critical ("Gstreamer Error: %s", error->message);
 								   g_error_free (error);
 								   internal_error = TRUE;
 								   g_main_loop_quit (loop);
@@ -136,6 +134,8 @@ static void init_redirection( gpointer stream_datas, long videoFormatIndex ){
 
 	stream_data *data 			= stream_datas;
 
+	g_debug("init the redirection(s)");
+
 	/* create an empty entry for the redirection */
 	videoFormatTable_createEntry( 	videoFormatIndex, 	videoChannel,
 									disable, 			"",
@@ -169,10 +169,13 @@ static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 	GError 		*error 				= NULL; /* an Object to save errors when they occurs */
 	GstElement 	*bin 				= NULL; /* to return last element of pipeline */
 
+	g_debug("Create the source for source_%ld", videoFormatIndex );
+
 	/* check if it is a redirection */
 	redirect_data *redirection_data = SP_is_redirection( videoFormatIndex );
 
 	if( redirection_data ){
+
 
 		/* if so build the appropriate source */
 		bin = gst_element_factory_make_log( "appsrc", APPSRC_NAME);
@@ -247,6 +250,8 @@ int init_stream_SP( int videoFormatIndex ){
     GstBus 		*bus;
     guint 		bus_watch_id;
 
+	g_debug("create pipeline for SP: source_%d", videoFormatIndex);
+
 	/* Create the pipeline */
 	pipeline  = gst_pipeline_new ("pipeline");
 	if(pipeline  == NULL){
@@ -297,7 +302,7 @@ int init_stream_SP( int videoFormatIndex ){
 
 	/* Check if everything went ok*/
 	if (last == NULL){
-		g_critical ( "Failed to create pipeline");
+		g_critical("Failed to create pipeline");
 		return EXIT_FAILURE;
 	}
 
@@ -329,6 +334,8 @@ int init_stream_SU( GstCaps *caps, struct channelTable_entry *channel_entry)
     GstBus 		*bus;
     guint 		bus_watch_id;
 	GstElement *last;
+
+	g_debug("create pipeline for SU: receiver_%ld", channel_entry->channelVideoFormatIndex);
 
 	/* Create the pipeline */
 	pipeline  = gst_pipeline_new ("pipeline");
@@ -425,7 +432,7 @@ gboolean start_streaming (gpointer stream_datas, long channelVideoFormatIndex ){
 		if ( GST_STATE ( data->pipeline ) == GST_STATE_PLAYING )
 			return TRUE;
 		/* Set the pipeline to "playing" state*/
-		g_print ("Now playing channel: %ld",channelVideoFormatIndex );
+		g_info ("Now playing channel: %ld",channelVideoFormatIndex );
 		gst_element_set_state (data->pipeline, GST_STATE_PLAYING);
 		if ( stream_entry != NULL)
 			stream_entry->videoFormatStatus = enable;
@@ -443,7 +450,7 @@ int stop_streaming( gpointer stream_datas, long channelVideoFormatIndex ){
 	stream_data *data 								= stream_datas;
 	struct videoFormatTable_entry * stream_entry 	= videoFormatTable_getEntry(channelVideoFormatIndex);
 	/* Out of the main loop, clean up nicely */
-	g_print ("Returned, stopping playback");
+	g_info ("Returned, stopping playback");
 	gst_element_set_state (data->pipeline, GST_STATE_NULL);
 	if ( stream_entry != NULL)
 		stream_entry->videoFormatStatus = disable;
@@ -460,7 +467,7 @@ int delete_steaming_data(gpointer channel_entry){
 	stream_data 				*data 	= entry->stream_datas;
 	/* delete pipeline */
 	if (data != NULL ){
-		g_print ("Deleting pipeline");
+		g_info ("Deleting pipeline");
 		gst_element_set_state (data->pipeline, GST_STATE_PAUSED);
 		gst_element_set_state (data->pipeline, GST_STATE_READY);
 		gst_element_set_state (data->pipeline, GST_STATE_NULL);

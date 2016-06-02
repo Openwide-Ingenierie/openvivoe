@@ -19,7 +19,7 @@ init_deviceMibVersion(void)
 {
     const oid deviceMibVersion_oid[] = { 1,3,6,1,4,1,35990,3,1,1,8 };
 
-  DEBUGMSGTL(("deviceMibVersion", "Initializing\n"));
+	g_debug("deviceMibVersion initializing");
 
     netsnmp_register_read_only_instance(
         netsnmp_create_handler_registration("deviceMibVersion", handle_deviceMibVersion,
@@ -28,7 +28,7 @@ init_deviceMibVersion(void)
         ));
 }
 
-/** 
+/**
  * \brief calls appropriate handler for this parameter
  * \param handler the specific handler for this item
  * \param reqinfo the SNMP request

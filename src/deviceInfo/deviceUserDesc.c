@@ -18,14 +18,14 @@ init_deviceUserDesc(void)
 {
     const oid deviceUserDesc_oid[] = { 1,3,6,1,4,1,35990,3,1,1,10 };
 
-    DEBUGMSGTL(("deviceUserDesc", "Initializing\n"));
+    g_debug("deviceUserDesc initializing");
     netsnmp_register_instance(
         netsnmp_create_handler_registration("deviceUserDesc", handle_deviceUserDesc,
                                deviceUserDesc_oid, OID_LENGTH(deviceUserDesc_oid),
                                HANDLER_CAN_RWRITE
         ));
 }
-/** 
+/**
  * \brief calls appropriate handler for this parameter
  * \param handler the specific handler for this item
  * \param reqinfo the SNMP request

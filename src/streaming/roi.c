@@ -239,16 +239,21 @@ gboolean handle_roi( GstElement *pipeline, struct videoFormatTable_entry *video_
 	GstElement 	*vivoecaps 	= NULL;
 	gboolean 	scalable  	= FALSE ;
 
+	g_debug("handle_roi");
+
 	/*
 	 * iterates though the bin source to find the element vivoecrop
 	 */
 	vivoecrop = get_element_from_bin( pipeline, GST_TYPE_VIVOE_CROP );
 	if ( !vivoecrop ){
+		g_debug("This is a not ROI channel");
 		/*
 		 * then this is not a ROI channel , set the type to videoChannel and exit function */
 		video_stream_info->videoFormatType = videoChannel ;
 		return FALSE;
 	}
+
+	g_debug("This is a ROI channel");
 
 	/*
 	 * If we get here, it means that the element vivoecrop has been found in the pipeline, so this videoFormat is a roi

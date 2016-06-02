@@ -110,7 +110,7 @@ struct videoFormatTable_entry * videoFormatTable_getEntry(int index){
 	return iterator;
 }
 
-/** 
+/**
  * \brief delete all entries in the table
  */
 void videoFormatTable_delete(){
@@ -134,7 +134,7 @@ initialize_table_videoFormatTable(void)
     netsnmp_iterator_info           *iinfo;
     netsnmp_table_registration_info *table_info;
 
-    DEBUGMSGTL(("videoFormatTable:init", "initializing table videoFormatTable\n"));
+    g_debug("videoFormatTable:init initializing table videoFormatTable");
 
     reg = netsnmp_create_handler_registration(
               "videoFormatTable",     videoFormatTable_handler,
@@ -148,12 +148,12 @@ initialize_table_videoFormatTable(void)
                            			 0);
     table_info->min_column = COLUMN_VIDEOFORMATTYPE;
     table_info->max_column = COLUMN_VIDEOFORMATRTPPT;
-    
+
     iinfo = SNMP_MALLOC_TYPEDEF( netsnmp_iterator_info );
     iinfo->get_first_data_point = videoFormatTable_get_first_data_point;
     iinfo->get_next_data_point  = videoFormatTable_get_next_data_point;
     iinfo->table_reginfo        = table_info;
-    
+
     netsnmp_register_table_iterator( reg, iinfo );
 
 	/* get all the source configuration for configuration file, init the corresponding streams */
@@ -247,7 +247,7 @@ videoFormatTable_handler(
     netsnmp_table_request_info 			*table_info;
     struct videoFormatTable_entry       *table_entry;
 	int ret = 0 ;
-    DEBUGMSGTL(("videoFormatTable:handler", "Processing request (%d)\n", reqinfo->mode));
+    g_debug("videoFormatTable:handler Processing request (%d)", reqinfo->mode);
 
     switch (reqinfo->mode) {
         /*
@@ -258,7 +258,7 @@ videoFormatTable_handler(
             table_entry = (struct videoFormatTable_entry *)
                               netsnmp_extract_iterator_context(request);
             table_info  =     netsnmp_extract_table_info(      request);
-    
+
             switch (table_info->colnum) {
             case COLUMN_VIDEOFORMATTYPE:
                 if ( !table_entry ) {

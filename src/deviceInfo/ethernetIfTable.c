@@ -11,8 +11,9 @@
 #include <ctype.h>
 #include <glib-2.0/glib.h>
 #include "../../include/mibParameters.h"
+#include "../../include/conf/mib-conf.h"
 #include "../../include/deviceInfo/ethernetIfTable.h"
-#include "../../include/ip_assignment.h"
+#include "../../include/vivoe_ip/ip_assignment.h"
 #include "../../include/handler.h"
 
 /**
@@ -92,7 +93,7 @@ void ethernetIfTableEntry_delete(){
  */
 static gboolean openvivoe_uses_default_IP_assignment_scheme(){
 
-	if ( ! strcmp ( ethernetIpAssignment._value.string_val,KEY_ETHERNET_IP_ASSIGNMENT_DEFAULT) )
+	if ( ! strcmp ( ethernetIpAssignment._value.string_val , KEY_ETHERNET_IP_ASSIGNMENT_DEFAULT) )
 		return TRUE;
 	else
 		return FALSE;
@@ -112,7 +113,7 @@ static void initialize_table_ethernetIfTable(void)
     netsnmp_iterator_info           *iinfo;
     netsnmp_table_registration_info *table_info;
 
-    DEBUGMSGTL(("ethernetIfTable:init", "initializing table ethernetIfTable\n"));
+    g_debug(("ethernetIfTable:init initializing table ethernetIfTable"));
 
     reg = netsnmp_create_handler_registration(
               "ethernetIfTable",     ethernetIfTable_handler,
@@ -139,10 +140,22 @@ static void initialize_table_ethernetIfTable(void)
 	 * get the IP addresses and characteristics of the system for each interfaces and store it in the ethernetIfTable
 	 */
 	for(int i = 0; i < deviceInfo.parameters[num_ethernetIFnumber]._value.int_val; i++){
-		if ( openvivoe_uses_default_IP_assignment_scheme() )
-			init_ethernet(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i]);
-		else
-			assign_default_ip (deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i] );
+
+		/* If we do not use system's default IP scheme assignement */
+		if ( !openvivoe_uses_default_IP_assignment_scheme() ){
+
+			/* check if an IP have already be assigned to the device */
+			const gchar* assigned_ip= get_static_assigned_IP_from_conf();
+
+			if ( !assigned_ip ){
+				/* otherwise set default static IP, as defined in VIVOE's IP assignment scheme */
+				assign_default_ip (deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i] );
+			}
+		}
+
+		/* now fill the ethernetIfTable */
+		init_ethernet(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i]);
+
 	}
 }
 
@@ -219,6 +232,14 @@ ethernetIfTable_get_first_data_point(void **my_loop_context,
                                     put_index_data,  mydata );
 }
 
+
+/**
+ * \brief handles ethernet IP modifications: set static IP, check for conflict, send trap if needed
+ */
+//static gboolean ethernetIfIpAdress_handler () {
+//
+//}
+
 /**
  * \brief calls appropriate handler for this parameter
  * \param handler the specific handler for this item
@@ -238,7 +259,7 @@ ethernetIfTable_handler(
     netsnmp_table_request_info 		*table_info;
     struct ethernetIfTableEntry 	*table_entry;
     int 							ret;
-    DEBUGMSGTL(("ethernetIfTable:handler", "Processing request (%d)\n", reqinfo->mode));
+    g_debug(("ethernetIfTable:handler Processing request (%d)", reqinfo->mode));
 
     switch (reqinfo->mode) {
         /*
@@ -312,7 +333,7 @@ ethernetIfTable_handler(
             table_entry = (struct ethernetIfTableEntry *)
                               netsnmp_extract_iterator_context(request);
             table_info  =     netsnmp_extract_table_info(      request);
-			
+
 			/* check if the index we are trying to modify is in the table, if no, return */
 			if ( index_out_of_range( reginfo,
                      		   	reqinfo,
@@ -326,7 +347,7 @@ ethernetIfTable_handler(
                 if ( ret != SNMP_ERR_NOERROR ) {
                     netsnmp_set_request_error( reqinfo, request, ret );
                     return SNMP_ERR_NOERROR;
-                }	
+                }
 				if ( deviceInfo.parameters[num_DeviceMode]._value.int_val	!= maintenanceMode){
 					ret = SNMP_ERR_RESOURCEUNAVAILABLE;
 					netsnmp_set_request_error(reqinfo, requests, ret );
@@ -406,6 +427,7 @@ ethernetIfTable_handler(
             case COLUMN_ETHERNETIFIPADDRESS:
                 table_entry->old_ethernetIfIpAddress 			= table_entry->ethernetIfIpAddress;
                 table_entry->ethernetIfIpAddress     			= *request->requestvb->val.integer;
+				/* call the hanlder for ethenetIfAdrress modifications */
                 break;
             case COLUMN_ETHERNETIFSUBNETMASK:
                 table_entry->old_ethernetIfSubnetMask 			= table_entry->ethernetIfSubnetMask;

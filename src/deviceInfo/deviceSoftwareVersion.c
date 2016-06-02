@@ -18,7 +18,7 @@ init_deviceSoftwareVersion(void)
 {
     const oid deviceSoftwareVersion_oid[] = { 1,3,6,1,4,1,35990,3,1,1,6 };
 
-  DEBUGMSGTL(("deviceSoftwareVersion", "Initializing\n"));
+  g_debug("deviceSoftwareVersion initializing");
 
    netsnmp_register_read_only_instance(
         netsnmp_create_handler_registration("deviceSoftwareVersion", handle_deviceSoftwareVersion,
@@ -27,7 +27,7 @@ init_deviceSoftwareVersion(void)
         ));
 }
 
-/** 
+/**
  * \brief calls appropriate handler for this parameter
  * \param handler the specific handler for this item
  * \param reqinfo the SNMP request

@@ -28,8 +28,7 @@ void init_deviceType(void)
      * a debugging statement.  Run the agent with -DdeviceType to see
      * the output of this debugging statement.
      */
-    DEBUGMSGTL(("deviceType",
-                "Initializing the deviceType module\n"));
+    g_debug("deviceType initializing");
 
     /*
      * the line below registers our variables defined above as
@@ -43,9 +42,8 @@ void init_deviceType(void)
      * you could change the NULL pointer below to a valid handler
      * function.
      */
-    DEBUGMSGTL(("deviceType",
-                "Initalizing deviceType scalar integer.  Default value = %d\n",
-                deviceInfo.parameters[num_DeviceType]._value.int_val ));
+    g_debug("deviceType Initalizing deviceType scalar integer.  Default value = %d",
+                deviceInfo.parameters[num_DeviceType]._value.int_val );
 
     netsnmp_register_read_only_instance(
         netsnmp_create_handler_registration("deviceType", handle_deviceType,
@@ -57,7 +55,7 @@ void init_deviceType(void)
                 "Done initalizing deviceType module\n"));
 }
 
-/** 
+/**
  * \brief calls appropriate handler for this parameter
  * \param handler the specific handler for this item
  * \param reqinfo the SNMP request

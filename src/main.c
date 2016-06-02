@@ -33,6 +33,7 @@
 #include "../include/streaming/stream_registration.h"
 #include "../include/streaming/stream.h"
 #include "../include/daemon.h"
+#include "../include/log.h"
 
 /**
  * \brief the data needed to pass to functions used to exit the program nicely
@@ -51,6 +52,9 @@ static gboolean stop_program ( gpointer data ){
 	stop_program_data *stop_data = data;
 	GMainLoop *loop = (GMainLoop *) stop_data->loop;
 
+	g_info("Catch signal SIGINT or SIGTERM");
+
+	g_debug("stop SNMP Sub-Agent");
 	/* Stop net snmp subAgent deamon */
 	snmp_shutdown(stop_data->deamon_name);
 	/* delete all streams associated to all channels */
@@ -64,12 +68,15 @@ static gboolean stop_program ( gpointer data ){
 	}
 	free(deviceInfo.parameters);
 	/* free tables */
+	g_debug("free SNMP memory allocation: channelTable, videoFormatTable, ethernetIfTable");
 	/* channel table */
 	channelTable_delete();
 	/* videoFormatTable */
 	videoFormatTable_delete();
 	/* ethernetIfTable */
 	ethernetIfTableEntry_delete();
+
+	g_message("last possible log before exiting the main loop");
 	/* unref and quit main loop */
 	g_main_loop_quit (loop);
 	g_main_loop_unref (loop);
@@ -86,7 +93,13 @@ static gboolean stop_program ( gpointer data ){
  * \param loop the GMainLoop
  */
 static void default_startUp_mode(gpointer loop){
+
+	g_debug("start defaultStartUp mode handling");
+
 	for (int i=1; i<=channelNumber._value.int_val; i++){
+
+		g_debug("starting channel: %d", i);
+
 		struct channelTable_entry * entry 	= channelTable_getEntry(i);
 		if ( entry->channelType == serviceUser && entry->channelDefaultReceiveIpAddress ){
 			entry->channelStatus 			= channelStart;
@@ -108,11 +121,14 @@ gboolean was_running = FALSE;
 
 gboolean vivoe_gstreamer_initiation(int   argc,  char *argv[]){
 
+	g_debug("vivoe_gstreamer_initiation");
+
 	gst_init (&argc, &argv);
 
 	/*
 	 * register vivoecrop plugin
 	 */
+	g_debug("initiation of OpenVivoe's plugins");
 	if (  (! vivoecrop_init ()) || (! vivoecaps_init ()) )
 		g_error("Failed to load OpenVivoe's private gstreamer's modules");
 	else
@@ -128,15 +144,20 @@ gboolean vivoe_gstreamer_initiation(int   argc,  char *argv[]){
  */
 int main (int   argc,  char *argv[]){
 
+	/* init OpenVivoe logger */
+	init_logger();
+
 	/* create the GMainLoop*/
 	main_loop = g_main_loop_new (NULL, FALSE);
 
-	g_message("starting the program");
+	g_info("starting the program");
 
 	/* data associated to stream */
 	stop_program_data 			stop_data;
 	stop_data.deamon_name 		= argv[0];
 	stop_data.loop 				= main_loop;
+
+	g_debug("adding signal handler fot SIGINT/SIGTERM");
 
 	/* Exit the program nicely when kill signals are received */
 	g_unix_signal_add (SIGINT, 	stop_program, &stop_data);
@@ -151,8 +172,10 @@ int main (int   argc,  char *argv[]){
 	if ( open_vivoe_daemon (argv[0]) )
 		return EXIT_FAILURE;
 
+	gint snmp_hanlding_time = 100;
+	g_info("handle SNMP requests every %d ms", snmp_hanlding_time );
 	/* add the idle function that handle SNMP request every 100ms */
-	g_timeout_add (100, handle_snmp_request, NULL);
+	g_timeout_add (snmp_hanlding_time , handle_snmp_request, NULL);
 
 	/* checking for start up mode */
 	if ( deviceInfo.parameters[num_DeviceMode]._value.int_val == defaultStartUp)

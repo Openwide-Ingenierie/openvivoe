@@ -14,14 +14,14 @@
 #include "../../include/handler.h"
 
 
-/** 
+/**
  * \brief Initializes the deviceDesc module
  */
 void init_deviceDesc(void)
 {
     const oid deviceDesc_oid[] = { 1,3,6,1,4,1,35990,3,1,1,1 };
 
-    DEBUGMSGTL(("deviceDesc", "Initializing\n"));
+    g_debug("deviceDesc initializing");
     netsnmp_register_read_only_instance(
                     netsnmp_create_handler_registration(
                             "deviceDesc", handle_deviceDesc,
@@ -29,7 +29,7 @@ void init_deviceDesc(void)
                     HANDLER_CAN_RONLY));
 }
 
-/** 
+/**
  * \brief calls appropriate handler for this parameter
  * \param handler the specific handler for this item
  * \param reqinfo the SNMP request
