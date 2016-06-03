@@ -25,6 +25,7 @@
 #include <sys/time.h>
 #include <net/if_arp.h>
 #include <linux/if_packet.h>
+#include <linux/if_ether.h>
 #include <net/ethernet.h> /* the L2 protocols */
 
 /* to get the network interfaces*/
@@ -35,9 +36,10 @@
 #include "../../include/vivoe_ip/ip_assignment.h"
 
 
-#define ETH_HW_ADDR_LEN 6
-#define IP_ADDR_LEN     4
-#define ETH_BRC_ADRRESS 0xff
+#define IP_ADDR_LEN  			4
+#define ETH_BRD_ADD_BYTE  		0xFF
+#define ETH_PROBE_ADRRESS_BYTE 	0x00
+#define ETH_FRAME_SIZE 			1024
 
 #define DEFAULT_DEVICE "eth0"
 
@@ -47,23 +49,16 @@
 struct  __attribute__((packed)) arp_packet {
 	struct arphdr 		arp_hdr; /* ARP header as defined in kernel */
 	/* extrat fields These are not compiled in the arphdr structure. I don't konw why */
-    uint8_t 	arp_sha[6]; /* Sender Hardware Address */
-    uint8_t 	arp_spa[4]; /* Sender Protocol Address*/
-    uint8_t 	arp_tha[6]; /* Target Hardware Address */
-    uint8_t 	arp_tpa[4]; /* Target Protocol Address */
+	uint8_t 	arp_sha[6]; /* Sender Hardware Address */
+	uint8_t 	arp_spa[4]; /* Sender Protocol Address*/
+	uint8_t 	arp_tha[6]; /* Target Hardware Address */
+	uint8_t 	arp_tpa[4]; /* Target Protocol Address */
 };
-
-#if 0
-
-void die(char *);
-void get_ip_addr(struct in_addr*,char*);
-void get_hw_addr(char*,char*);
-#endif
 
 void build_arp_probe_packet(struct ethernetIfTableEntry *if_entry, struct arp_packet *pkt ){
 
 	/*
-	 * Hardware Address is set to Ethernet 10/100Mbps.
+	 * Hardware Address is set to Ethernet 10/100Mbps
 	 * See if_arp.h for detail
 	 */
 	pkt->arp_hdr.ar_hrd = htons(ARPHRD_ETHER);
@@ -96,91 +91,132 @@ void build_arp_probe_packet(struct ethernetIfTableEntry *if_entry, struct arp_pa
 	/*
 	 * In ARP probe packet, sender IP address is 0
 	 */
-	memcpy( pkt->arp_spa, &(if_entry->ethernetIfIpAddress) , IP_ADDR_LEN );
+	memset( pkt->arp_spa, ETH_PROBE_ADRRESS_BYTE , IP_ADDR_LEN * sizeof (uint8_t) );
 
 	/*
-	 * Set the Target  Address: the broadcast address
+	 * Set the Target Hardware Address: all 0 in ARP Probe
 	 */
-	memset (pkt->arp_tha , ETH_BRC_ADRRESS ,  ETH_HW_ADDR_LEN * sizeof (uint8_t));
+	memset (pkt->arp_tha , ETH_PROBE_ADRRESS_BYTE , ETHER_ADDR_LEN * sizeof (uint8_t));
 
+	/*
+	 * Set the Target IP Address: in a Probe Message this is the IP address being probed i.e. IP address statically assigned to the device
+	 */
+	memset (pkt->arp_tpa , if_entry->ethernetIfIpAddress , IP_ADDR_LEN  * sizeof (uint8_t));
 
 }
-#if 0
-gboolean ip_conflict_detection( struct ethernetIfTableEntry *if_entry ) {
 
-	struct in_addr src_in_addr, targ_in_addr;
-	struct ether_header;
+void build_arp_anouncement_packet(struct ethernetIfTableEntry *if_entry, struct arp_packet *pkt ){
+
+	/*
+	 * Hardware Address is set to Ethernet 10/100Mbps
+	 * See if_arp.h for detail
+	 */
+	pkt->arp_hdr.ar_hrd = htons(ARPHRD_ETHER);
+
+	/*
+	 * Format of protocol address is 0x8000 for IPv4
+	 */
+	pkt->arp_hdr.ar_pro = htons(ETHERTYPE_IP);
+
+	/*
+	 * length of hardware addr
+	 */
+	pkt->arp_hdr.ar_hln = htons(if_entry->ethernetIfMacAddress_len);
+
+	/*
+	 * length of hardware addr
+	 */
+	pkt->arp_hdr.ar_pln = htons(IP_ADDR_LEN);
+
+	/*
+	 * In VIVOE we only sent ARP Request
+	 */
+	pkt->arp_hdr.ar_op = htons(ARPOP_REQUEST);
+
+	/*
+	 * Set ARP Sender Hardware Address
+	 */
+	memcpy( pkt->arp_sha, if_entry->ethernetIfMacAddress , if_entry->ethernetIfMacAddress_len );
+
+	/*
+	 * In ARP anouncment packet, sender IP address
+	 */
+	memset( pkt->arp_spa, if_entry->ethernetIfIpAddress , IP_ADDR_LEN * sizeof (uint8_t) );
+
+	/*
+	 * Set the Target Hardware Address: all 0 in ARP Probe
+	 */
+	memset (pkt->arp_tha , ETH_PROBE_ADRRESS_BYTE , ETHER_ADDR_LEN * sizeof (uint8_t));
+
+	/*
+	 * Set the Target IP Address: in a anouncement Message this is the IP address being used
+	 */
+	memset (pkt->arp_tpa , if_entry->ethernetIfIpAddress , IP_ADDR_LEN  * sizeof (uint8_t));
+
+}
+
+
+gboolean send_arp_packet( struct ethernetIfTableEntry *if_entry , gboolean probe ) {
+
 	struct arp_packet pkt;
-	struct sockaddr sa;
+	struct sockaddr_ll sa;
 	int socket_fd;
+	struct ether_header *eh;
+	int eth_header_length = sizeof( struct ether_header);
+	uint8_t eth_frame[ETH_FRAME_SIZE];
+	int eth_frame_length = 0;
+	int bytes; /* number of bytes send */
 
-	/* opens the socket */
+	/* field Ethernet Header */
+	memset( eh->ether_dhost , ETH_BRD_ADD_BYTE , ETHER_ADDR_LEN ); /* destination eth address */
+	memcpy( eh->ether_shost , if_entry->ethernetIfMacAddress, if_entry->ethernetIfMacAddress_len); /* source ethernet address */
+	eh->ether_type =  ETH_P_ARP; /* Next is ethernet type code (ETH_P_ARP for ARP) */
+
+	/* copy ethernet header in ethernet frame */
+	memcpy(eth_frame, eh, eth_header_length );
+
+	/* Build ARP packet to send */
+	if ( probe )
+		build_arp_probe_packet ( if_entry, &pkt);
+	else
+		build_arp_anouncement_packet ( if_entry, &pkt);
+
+	/* copy ARP packet in ETHERNET payload */
+	memcpy( eth_frame + eth_header_length, &pkt , sizeof( struct arp_packet ));
+
+
+	/* open the socket */
 	socket_fd = socket( AF_INET, SOCK_PACKET, htons(ETH_P_RARP) ) ;
 	if ( socket_fd < 0 ){
-		g_critical("ERROR: ip_confilct_detection: cannot open socket\n");
+		g_critical("send_arp_packet(): cannot open socket\n");
 		return FALSE;
 	}
 
-	// Submit request for a raw socket descriptor.
-	if ((sd = socket (PF_PACKET, SOCK_RAW, htons (ETH_P_ALL))) < 0) {
-		perror ("socket() failed ");
-		exit (EXIT_FAILURE);
+	/* build socket information */
+	sa.sll_ifindex = if_entry->ethernetIfIndex;
+	/* Address length*/
+	sa.sll_halen = ETH_ALEN;
+	/* Destination MAC */
+	memset( sa.sll_addr , ETH_BRD_ADD_BYTE , ETHER_ADDR_LEN );
+
+	/* Send ethernet frame to socket.*/
+	if ((bytes = sendto (socket_fd , eth_frame , ETH_FRAME_SIZE , 0, (struct sockaddr *) &sa, sizeof (sa))) <= 0) {
+		g_critical("send_arp_packet(): failed to sent ARP packet");
+		return FALSE;
 	}
-
-	// Send ethernet frame to socket.
-	if ((bytes = sendto (sd, ether_frame, frame_length, 0, (struct sockaddr *) &device, sizeof (device))) <= 0) {
-		perror ("sendto() failed");
-		exit (EXIT_FAILURE);
-	}
-
-
-
 
 	return TRUE;
+
 }
 
+gboolean ip_conflict_detection(  struct ethernetIfTableEntry *if_entry ){
+	/* send ARP PROBE */
 
-void die(char* str){
-  fprintf(stderr,"%s\n",str);
-  exit(1);
-} ; // die
+	/* wait ANOUNCEMENT_WAIT: if no reply, send it again */
 
-void get_ip_addr( struct in_addr* in_addr, char* str ){
+	/* check if conflict */
 
-  struct hostent *hostp;
+	/* if so, send TRAP, select random IP and restart */
 
-  in_addr->s_addr = inet_addr(str);
-  if ( in_addr->s_addr == -1 ){
-    if( (hostp = gethostbyname(str)))
-      bcopy( hostp->h_addr, in_addr, hostp->h_length ) ;
-    else {
-      fprintf( stderr, "send_arp: unknown host [%s].\n", str ) ;
-      exit(1);
-    }
-  }
-} ; // get_ip_addr
-
-void get_hw_addr( char* buf, char* str ){
-
-  int i;
-  char c,val;
-
-  for ( i=0 ; i < ETH_HW_ADDR_LEN ; i++ ){
-    if( !(c = tolower(*str++))) die("Invalid hardware address");
-    if(isdigit(c)) val = c-'0';
-    else if(c >= 'a' && c <= 'f') val = c-'a'+10;
-    else die("Invalid hardware address");
-
-    *buf = val << 4;
-    if( !(c = tolower(*str++))) die("Invalid hardware address");
-    if(isdigit(c)) val = c-'0';
-    else if(c >= 'a' && c <= 'f') val = c-'a'+10;
-    else die("Invalid hardware address");
-
-    *buf++ |= val;
-
-    if (*str == ':') str++ ;
-  } ; // for loop
-} ; // get_hw_addr
-
-#endif
+	/* otherwise send ARP ANOUNCEMENT */
+}
