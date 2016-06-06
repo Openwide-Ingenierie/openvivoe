@@ -161,16 +161,21 @@ gboolean send_arp_packet( struct ethernetIfTableEntry *if_entry , gboolean probe
 	struct arp_packet pkt;
 	struct sockaddr_ll sa;
 	int socket_fd;
-	struct ether_header *eh;
-	int eth_header_length = sizeof( struct ether_header);
 	uint8_t eth_frame[ETH_FRAME_SIZE];
+	struct ether_header *eh =  (struct ether_header *) eth_frame;
+	int eth_header_length = sizeof( struct ether_header);
 	int eth_frame_length = 0;
 	int bytes; /* number of bytes send */
+
+	if ( !if_entry){
+		g_critical("ethernetIfTableEntry provided is NULL");
+		return FALSE;
+	}
 
 	/* field Ethernet Header */
 	memset( eh->ether_dhost , ETH_BRD_ADD_BYTE , ETHER_ADDR_LEN ); /* destination eth address */
 	memcpy( eh->ether_shost , if_entry->ethernetIfMacAddress, if_entry->ethernetIfMacAddress_len); /* source ethernet address */
-	eh->ether_type =  ETH_P_ARP; /* Next is ethernet type code (ETH_P_ARP for ARP) */
+	eh->ether_type =  htons( ETH_P_ARP ); /* Next is ethernet type code (ETH_P_ARP for ARP) */
 
 	/* copy ethernet header in ethernet frame */
 	memcpy(eth_frame, eh, eth_header_length );
@@ -184,11 +189,10 @@ gboolean send_arp_packet( struct ethernetIfTableEntry *if_entry , gboolean probe
 	/* copy ARP packet in ETHERNET payload */
 	memcpy( eth_frame + eth_header_length, &pkt , sizeof( struct arp_packet ));
 
-
 	/* open the socket */
-	socket_fd = socket( AF_INET, SOCK_PACKET, htons(ETH_P_RARP) ) ;
+	socket_fd = socket( AF_PACKET , SOCK_RAW , IPPROTO_RAW ) ;
 	if ( socket_fd < 0 ){
-		g_critical("send_arp_packet(): cannot open socket\n");
+		g_critical("send_arp_packet(): cannot open socket: %s", strerror(errno));
 		return FALSE;
 	}
 
