@@ -123,7 +123,7 @@ mklevel_prefix (gchar          level_prefix[STRING_BUFFER_SIZE],
 			to_stdout = FALSE;
 			break;
 		case G_LOG_LEVEL_WARNING:
-			strcpy (level_prefix,COLOR_RED"WARNING"COLOR_RED);
+			strcpy (level_prefix,COLOR_RED"WARNING"COLOR_RESET);
 			to_stdout = FALSE;
 			break;
 		case G_LOG_LEVEL_MESSAGE:
