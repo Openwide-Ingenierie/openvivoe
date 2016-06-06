@@ -28,6 +28,7 @@
 #include <linux/if_ether.h>
 #include <net/ethernet.h> /* the L2 protocols */
 #include <netinet/ip.h>       /* IP_MAXPACKET (65535) */
+#include <time.h>
 
 /* to get the network interfaces*/
 #include <ifaddrs.h>
@@ -167,7 +168,7 @@ static void build_arp_anouncement_packet(struct ethernetIfTableEntry *if_entry, 
 }
 
 
-gboolean send_arp_packet( struct ethernetIfTableEntry *if_entry , gboolean probe ) {
+gboolean send_arp_request( struct ethernetIfTableEntry *if_entry , gboolean probe ) {
 
 	struct arp_packet pkt;
 	struct sockaddr_ll sa;
@@ -227,10 +228,11 @@ gboolean send_arp_packet( struct ethernetIfTableEntry *if_entry , gboolean probe
 
 }
 
-gboolean receive_arp_packet( struct ethernetIfTableEntry *if_entry , gboolean probe ) {
+gboolean receive_arp_reply(  ) {
 
 	int sd, status;
 	uint8_t *ether_frame;
+	struct ether_header *eh;
 	struct arp_packet *arp_pkt;
 
 	g_debug("receive_arp_packet()");
@@ -250,8 +252,11 @@ gboolean receive_arp_packet( struct ethernetIfTableEntry *if_entry , gboolean pr
 	 * Keep at it until we get an ARP reply.
 	 */
 	arp_pkt = (struct arp_packet *) (ether_frame + sizeof (struct arp_packet) );
-	while (((((ether_frame[12]) << 8) + ether_frame[13]) != ETH_P_ARP) && (ntohs (arp_pkt->arp_hdr.ar_op) != ARPOP_REPLY)) {
-		if ((status  = recvfrom(sd , ether_frame ,IP_MAXPACKET , 0, NULL, NULL)) /* = recv (sd, ether_frame, IP_MAXPACKET, 0))*/  < 0) {
+	eh 		= (struct  ether_header*) ether_frame;
+
+	while ((ntohs (arp_pkt->arp_hdr.ar_op) != ETH_P_ARP) && (ntohs (arp_pkt->arp_hdr.ar_op) != ARPOP_REPLY)) {
+
+		if ((status  = recvfrom(sd , ether_frame ,IP_MAXPACKET , 0, NULL, NULL)) < 0) {
 			if (errno == EINTR) {
 				g_debug("receive_arp_packet(): we have been interrupted while receiving ARP reponse");
 				memset (ether_frame, 0, IP_MAXPACKET * sizeof (uint8_t));
@@ -261,8 +266,11 @@ gboolean receive_arp_packet( struct ethernetIfTableEntry *if_entry , gboolean pr
 				return FALSE;
 			}
 		}
+
+		/* get received ethernet frame header */
+		memcpy ( eh , ether_frame , sizeof ( struct ether_header ));
 		/* We have received a Ethernet Packet, check if this is our ARP reply */
-		if ( ( ((ether_frame[12]) << 8) + ether_frame[13]) == ETH_P_ARP){
+		if ( ntohs ( eh->ether_type ) == ETH_P_ARP){
 			/* copy ARP packet into arp_pkt */
 			memcpy( arp_pkt, ether_frame + 14, sizeof (struct arp_packet));
 			if ( (ntohs (arp_pkt->arp_hdr.ar_op) == ARPOP_REPLY)){
@@ -283,6 +291,7 @@ gboolean receive_arp_packet( struct ethernetIfTableEntry *if_entry , gboolean pr
 
 
 gboolean ip_conflict_detection(  struct ethernetIfTableEntry *if_entry ){
+
 	/* send ARP PROBE */
 
 	/* wait ANOUNCEMENT_WAIT: if no reply, send it again */
@@ -292,4 +301,5 @@ gboolean ip_conflict_detection(  struct ethernetIfTableEntry *if_entry ){
 	/* if so, send TRAP, select random IP and restart */
 
 	/* otherwise send ARP ANOUNCEMENT */
+
 }
