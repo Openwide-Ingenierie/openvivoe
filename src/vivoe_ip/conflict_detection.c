@@ -27,6 +27,7 @@
 #include <linux/if_packet.h>
 #include <linux/if_ether.h>
 #include <net/ethernet.h> /* the L2 protocols */
+#include <netinet/ip.h>       /* IP_MAXPACKET (65535) */
 
 /* to get the network interfaces*/
 #include <ifaddrs.h>
@@ -38,6 +39,19 @@
 #define IP_ADDR_LEN  			4
 #define ETH_BRD_ADD_BYTE  		0xFF
 #define ETH_PROBE_ADRRESS_BYTE 	0x00
+
+
+/* RFC 5527 values */
+#define PROBE_WAIT 				1 /* second   (initial random delay) */
+#define PROBE_NUM 				3 /* (number of probe packets) */
+#define PROBE_MIN 				1 /* second   (minimum delay until repeated probe) */
+#define PROBE_MAX 				2 /* seconds  (maximum delay until repeated probe) */
+#define ANNOUNCE_WAIT 			2 /* seconds  (delay before announcing) */
+#define ANNOUNCE_NUM 			2 /* (number of Announcement packets) */
+#define ANNOUNCE_INTERVAL 		2 /* seconds  (time between Announcement packets) */
+#define MAX_CONFLICTS 			10 /* (max conflicts before rate-limiting) */
+#define RATE_LIMIT_INTERVAL 	60 /* seconds  (delay between successive attempts) */
+#define DEFEND_INTERVAL 		10 /* seconds  (minimum interval between defensive */
 
 /**
  * \brief ARP header structure
@@ -206,9 +220,67 @@ gboolean send_arp_packet( struct ethernetIfTableEntry *if_entry , gboolean probe
 		return FALSE;
 	}
 
+	/* close the socket */
+	close ( socket_fd ) ;
+
 	return TRUE;
 
 }
+
+gboolean receive_arp_packet( struct ethernetIfTableEntry *if_entry , gboolean probe ) {
+
+	int sd, status;
+	uint8_t *ether_frame;
+	struct arp_packet *arp_pkt;
+
+	g_debug("receive_arp_packet()");
+
+	/* Allocate memory for various arrays. */
+	ether_frame = malloc (IP_MAXPACKET);
+
+	/* Submit request for a raw socket descriptor. */
+	if ((sd = socket (PF_PACKET, SOCK_RAW, htons (ETH_P_ALL))) < 0) {
+		g_critical ("receive_arp_packet(): cannot open socket: %s", strerror(errno));
+		return FALSE;
+	}
+
+	/* Listen for incoming ethernet frame from socket sd.
+	 * We expect an ARP ethernet frame of the form:
+	 * MAC souce (6 bytes) + MAC destination (6 bytes) + ethernet type (2 bytes) + ethernet data (ARP header) (28 bytes)
+	 * Keep at it until we get an ARP reply.
+	 */
+	arp_pkt = (struct arp_packet *) (ether_frame + sizeof (struct arp_packet) );
+	while (((((ether_frame[12]) << 8) + ether_frame[13]) != ETH_P_ARP) && (ntohs (arp_pkt->arp_hdr.ar_op) != ARPOP_REPLY)) {
+		if ((status  = recvfrom(sd , ether_frame ,IP_MAXPACKET , 0, NULL, NULL)) /* = recv (sd, ether_frame, IP_MAXPACKET, 0))*/  < 0) {
+			if (errno == EINTR) {
+				g_debug("receive_arp_packet(): we have been interrupted while receiving ARP reponse");
+				memset (ether_frame, 0, IP_MAXPACKET * sizeof (uint8_t));
+				continue;  /* Something weird happened, but let's try again. */
+			} else {
+				g_critical (" receive_arp_packet() failed");
+				return FALSE;
+			}
+		}
+		/* We have received a Ethernet Packet, check if this is our ARP reply */
+		if ( ( ((ether_frame[12]) << 8) + ether_frame[13]) == ETH_P_ARP){
+			/* copy ARP packet into arp_pkt */
+			memcpy( arp_pkt, ether_frame + 14, sizeof (struct arp_packet));
+			if ( (ntohs (arp_pkt->arp_hdr.ar_op) == ARPOP_REPLY)){
+				/* response has been received, break */
+				break;
+			}
+		}
+
+	}
+
+	/* close the socket */
+	close (sd);
+
+	return TRUE;
+
+}
+
+
 
 gboolean ip_conflict_detection(  struct ethernetIfTableEntry *if_entry ){
 	/* send ARP PROBE */
