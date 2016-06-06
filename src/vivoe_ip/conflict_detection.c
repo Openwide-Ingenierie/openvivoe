@@ -35,13 +35,9 @@
 #include "../../include/vivoe_ip/ip_assignment.h"
 #include "../../include/deviceInfo/ethernetIfTable.h"
 
-
-#define ARP_PACKET_SIZE 		28
 #define IP_ADDR_LEN  			4
 #define ETH_BRD_ADD_BYTE  		0xFF
 #define ETH_PROBE_ADRRESS_BYTE 	0x00
-
-#define DEFAULT_DEVICE "eth0"
 
 /**
  * \brief ARP header structure
@@ -101,7 +97,7 @@ static void build_arp_probe_packet(struct ethernetIfTableEntry *if_entry, struct
 	/*
 	 * Set the Target IP Address: in a Probe Message this is the IP address being probed i.e. IP address statically assigned to the device
 	 */
-	memset (pkt->arp_tpa , if_entry->ethernetIfIpAddress , IP_ADDR_LEN  * sizeof (uint8_t));
+	memcpy (pkt->arp_tpa , &if_entry->ethernetIfIpAddress , IP_ADDR_LEN  * sizeof (uint8_t));
 
 }
 
@@ -121,12 +117,12 @@ static void build_arp_anouncement_packet(struct ethernetIfTableEntry *if_entry, 
 	/*
 	 * length of hardware addr
 	 */
-	pkt->arp_hdr.ar_hln = htons(if_entry->ethernetIfMacAddress_len);
+	pkt->arp_hdr.ar_hln = if_entry->ethernetIfMacAddress_len;
 
 	/*
 	 * length of hardware addr
 	 */
-	pkt->arp_hdr.ar_pln = htons(IP_ADDR_LEN);
+	pkt->arp_hdr.ar_pln = IP_ADDR_LEN;
 
 	/*
 	 * In VIVOE we only sent ARP Request
@@ -151,7 +147,8 @@ static void build_arp_anouncement_packet(struct ethernetIfTableEntry *if_entry, 
 	/*
 	 * Set the Target IP Address: in a anouncement Message this is the IP address being used
 	 */
-	memset (pkt->arp_tpa , if_entry->ethernetIfIpAddress , IP_ADDR_LEN  * sizeof (uint8_t));
+	memcpy (pkt->arp_tpa , &if_entry->ethernetIfIpAddress , IP_ADDR_LEN  * sizeof (uint8_t));
+
 
 }
 
@@ -162,9 +159,9 @@ gboolean send_arp_packet( struct ethernetIfTableEntry *if_entry , gboolean probe
 	struct sockaddr_ll sa;
 	int socket_fd;
 	int eth_header_length = sizeof( struct ether_header);
-	uint8_t *eth_frame	= malloc ( ( eth_header_length + ARP_PACKET_SIZE ) * sizeof ( uint8_t));
+	int eth_frame_length =  ( eth_header_length + sizeof( struct arp_packet ) );
+	uint8_t *eth_frame	= malloc ( eth_frame_length * sizeof ( uint8_t));
 	struct ether_header *eh =  (struct ether_header *) eth_frame;
-	int eth_frame_length = 0;
 	int bytes; /* number of bytes send */
 
 	if ( !if_entry){
@@ -204,7 +201,7 @@ gboolean send_arp_packet( struct ethernetIfTableEntry *if_entry , gboolean probe
 	memset( sa.sll_addr , ETH_BRD_ADD_BYTE , ETHER_ADDR_LEN );
 
 	/* Send ethernet frame to socket.*/
-	if ((bytes = sendto (socket_fd , eth_frame ,  eth_header_length + ARP_PACKET_SIZE , 0, (struct sockaddr *) &sa, sizeof (sa))) <= 0) {
+	if ((bytes = sendto (socket_fd , eth_frame , eth_frame_length , 0, (struct sockaddr *) &sa, sizeof (sa))) <= 0) {
 		g_critical("send_arp_packet(): failed to sent ARP packet");
 		return FALSE;
 	}
