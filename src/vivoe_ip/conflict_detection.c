@@ -32,14 +32,14 @@
 #include <ifaddrs.h>
 
 /* header file */
-#include "../../include/deviceInfo/ethernetIfTable.h"
 #include "../../include/vivoe_ip/ip_assignment.h"
+#include "../../include/deviceInfo/ethernetIfTable.h"
 
 
+#define ARP_PACKET_SIZE 		28
 #define IP_ADDR_LEN  			4
 #define ETH_BRD_ADD_BYTE  		0xFF
 #define ETH_PROBE_ADRRESS_BYTE 	0x00
-#define ETH_FRAME_SIZE 			1024
 
 #define DEFAULT_DEVICE "eth0"
 
@@ -49,10 +49,10 @@
 struct  __attribute__((packed)) arp_packet {
 	struct arphdr 		arp_hdr; /* ARP header as defined in kernel */
 	/* extrat fields These are not compiled in the arphdr structure. I don't konw why */
-	uint8_t 	arp_sha[6]; /* Sender Hardware Address */
-	uint8_t 	arp_spa[4]; /* Sender Protocol Address*/
-	uint8_t 	arp_tha[6]; /* Target Hardware Address */
-	uint8_t 	arp_tpa[4]; /* Target Protocol Address */
+	uint8_t 			arp_sha[6]; /* Sender Hardware Address */
+	uint8_t 			arp_spa[4]; /* Sender Protocol Address*/
+	uint8_t 			arp_tha[6]; /* Target Hardware Address */
+	uint8_t 			arp_tpa[4]; /* Target Protocol Address */
 };
 
 static void build_arp_probe_packet(struct ethernetIfTableEntry *if_entry, struct arp_packet *pkt ){
@@ -71,12 +71,12 @@ static void build_arp_probe_packet(struct ethernetIfTableEntry *if_entry, struct
 	/*
 	 * length of hardware addr
 	 */
-	pkt->arp_hdr.ar_hln = htons(if_entry->ethernetIfMacAddress_len);
+	pkt->arp_hdr.ar_hln = if_entry->ethernetIfMacAddress_len;
 
 	/*
 	 * length of hardware addr
 	 */
-	pkt->arp_hdr.ar_pln = htons(IP_ADDR_LEN);
+	pkt->arp_hdr.ar_pln = IP_ADDR_LEN;
 
 	/*
 	 * In VIVOE we only sent ARP Request
@@ -161,9 +161,9 @@ gboolean send_arp_packet( struct ethernetIfTableEntry *if_entry , gboolean probe
 	struct arp_packet pkt;
 	struct sockaddr_ll sa;
 	int socket_fd;
-	uint8_t eth_frame[ETH_FRAME_SIZE];
-	struct ether_header *eh =  (struct ether_header *) eth_frame;
 	int eth_header_length = sizeof( struct ether_header);
+	uint8_t *eth_frame	= malloc ( ( eth_header_length + ARP_PACKET_SIZE ) * sizeof ( uint8_t));
+	struct ether_header *eh =  (struct ether_header *) eth_frame;
 	int eth_frame_length = 0;
 	int bytes; /* number of bytes send */
 
@@ -199,12 +199,12 @@ gboolean send_arp_packet( struct ethernetIfTableEntry *if_entry , gboolean probe
 	/* build socket information */
 	sa.sll_ifindex = if_entry->ethernetIfIndex;
 	/* Address length*/
-	sa.sll_halen = ETH_ALEN;
+	sa.sll_halen = htons( ETH_ALEN ) ;
 	/* Destination MAC */
 	memset( sa.sll_addr , ETH_BRD_ADD_BYTE , ETHER_ADDR_LEN );
 
 	/* Send ethernet frame to socket.*/
-	if ((bytes = sendto (socket_fd , eth_frame , ETH_FRAME_SIZE , 0, (struct sockaddr *) &sa, sizeof (sa))) <= 0) {
+	if ((bytes = sendto (socket_fd , eth_frame ,  eth_header_length + ARP_PACKET_SIZE , 0, (struct sockaddr *) &sa, sizeof (sa))) <= 0) {
 		g_critical("send_arp_packet(): failed to sent ARP packet");
 		return FALSE;
 	}
