@@ -55,7 +55,7 @@ struct  __attribute__((packed)) arp_packet {
 	uint8_t 	arp_tpa[4]; /* Target Protocol Address */
 };
 
-void build_arp_probe_packet(struct ethernetIfTableEntry *if_entry, struct arp_packet *pkt ){
+static void build_arp_probe_packet(struct ethernetIfTableEntry *if_entry, struct arp_packet *pkt ){
 
 	/*
 	 * Hardware Address is set to Ethernet 10/100Mbps
@@ -105,7 +105,7 @@ void build_arp_probe_packet(struct ethernetIfTableEntry *if_entry, struct arp_pa
 
 }
 
-void build_arp_anouncement_packet(struct ethernetIfTableEntry *if_entry, struct arp_packet *pkt ){
+static void build_arp_anouncement_packet(struct ethernetIfTableEntry *if_entry, struct arp_packet *pkt ){
 
 	/*
 	 * Hardware Address is set to Ethernet 10/100Mbps
