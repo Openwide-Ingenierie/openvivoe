@@ -26,6 +26,7 @@
 #include "../../include/streaming/detect.h"
 #include "../../include/streaming/stream_registration.h"
 #include "../../include/streaming/stream.h"
+#include "../../include/trap/deviceError.h"
 /*
  * Macro for testing purposes
  */
