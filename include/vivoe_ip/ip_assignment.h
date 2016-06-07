@@ -14,14 +14,9 @@
 #define DEFAULT_STATIC_IP 	"192.168.204.254"
 
 /**
- * \brief a structure to store the conflicting tested IP
+ * \brief a global variable to store the conflicting tested IP
  */
-typedef struct tested_ip{
-
-	int nb_ip_tested;
-	struct in_addr table_ip_tested [ RANDOM_MAX_SUFFIX - RANDOM_MIN_SUFFIX ];
-
-}tested_ip;
+struct in_addr table_ip_tested [ RANDOM_MAX_SUFFIX - RANDOM_MIN_SUFFIX ];
 
 gboolean assign_default_ip( const gchar *interface) ;
 struct in_addr random_ip_for_conflict() ;
