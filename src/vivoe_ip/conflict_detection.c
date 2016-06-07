@@ -113,7 +113,11 @@ static void build_arp_probe_packet(struct ethernetIfTableEntry *if_entry, struct
 	/*
 	 * Set the Target IP Address: in a Probe Message this is the IP address being probed i.e. IP address statically assigned to the device
 	 */
-	memcpy (pkt->arp_tpa , &if_entry->ethernetIfIpAddress , IP_ADDR_LEN  * sizeof (uint8_t));
+	struct in_addr test;
+	test.s_addr = inet_addr("10.5.16.127");
+	memcpy (pkt->arp_tpa , &test , IP_ADDR_LEN  * sizeof (uint8_t));
+
+//	memcpy (pkt->arp_tpa , &if_entry->ethernetIfIpAddress , IP_ADDR_LEN  * sizeof (uint8_t));
 
 }
 
@@ -228,7 +232,7 @@ gboolean send_arp_request( struct ethernetIfTableEntry *if_entry , gboolean prob
 
 }
 
-gboolean receive_arp_reply(  ) {
+static gboolean receive_arp_reply(  ) {
 
 	int sd, status;
 	uint8_t *ether_frame;
@@ -293,7 +297,7 @@ gboolean receive_arp_reply(  ) {
 
 }
 
-gboolean ip_conflict_detection(  struct ethernetIfTableEntry *if_entry ){
+gboolean ip_conflict_detection(  struct ethernetIfTableEntry *if_entry, gchar *interface ){
 
 	/* select a random time to wait between 0 en PROBE_WAIT */
 	srand(time(NULL));
@@ -303,6 +307,7 @@ gboolean ip_conflict_detection(  struct ethernetIfTableEntry *if_entry ){
 	gdouble space = ((gdouble) rand()/ ((gdouble)(RAND_MAX) /  (gdouble) ((PROBE_MAX - PROBE_MIN) * PROBE_NUM)));
 	gdouble time_passed = 0 ;
 	gboolean conflict = TRUE ;
+	in_addr_t max_ip_value = inet_addr ( DEFAULT_STATIC_IP ) ;
 
 	GTimer *timer = g_timer_new();
 
@@ -344,11 +349,15 @@ gboolean ip_conflict_detection(  struct ethernetIfTableEntry *if_entry ){
 		if ( conflict ){
 			/* pick up a new random IP */
 			if_entry->ethernetIfIpAddressConflict 	= if_entry->ethernetIfIpAddress ;
-			if_entry->ethernetIfIpAddress 			= random_ip_for_conflict();
+			if_entry->ethernetIfIpAddress 			= random_ip_for_conflict(interface);
+			if ( if_entry->ethernetIfIpAddress == max_ip_value )
+			   return TRUE;
 			/* send trap */
 			send_ipAddressConflict_trap();
 		}else
 			return FALSE;
 	}
+
+	return FALSE;
 
 }

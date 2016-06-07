@@ -143,9 +143,9 @@ gboolean select_interfaces(char*** if_used){
 /**
  * \brief Retrieve parameters of ethernet interface and initiate the MIB with it
  * \param iface the interface name from which retirev
- * \return TRUE if entry could be created, FALSE otherwise
+ * \return the entry created NULL otherwise
  */
-gboolean init_ethernet(const char* iface){
+struct ethernetIfTableEntry *init_ethernet(const char* iface){
 
 	/* the structure to use for retrieving information */
 	struct 		ifreq ifr;
@@ -181,22 +181,22 @@ gboolean init_ethernet(const char* iface){
 				default:
 					/* this is a really bad error, we should never get there */
 					g_critical("unknown ioctl call");
-					return FALSE;
+					return NULL;
 			}
 		}else{
 			g_critical("Failed to retrieve parameters of %s", iface);
-			return FALSE;
+			return NULL;
 		}
 	}
 	/* now we can create an entry in the ethernetIfTable */
 	/* create an null Ip conflict */
 	ethernetIfIpAddressConflict = inet_netof(inet_makeaddr (0 , inet_addr("0.0.0.0")));
-	ethernetIfTableEntry_create( ethernetIfIndex,
+	return ethernetIfTableEntry_create( ethernetIfIndex,
                                  ethernetIfSpeed,
 			                     ethernetIfMacAddress,
             			         ethernetIfMacAddress_len,
 			                     ethernetIfIpAddress,
 			                     ethernetIfSubnetMask,
 			                     ethernetIfIpAddressConflict);
-	return TRUE;
+
 }

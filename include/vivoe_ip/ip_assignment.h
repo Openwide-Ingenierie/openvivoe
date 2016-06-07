@@ -13,9 +13,9 @@
  */
 #define DEFAULT_STATIC_IP 	"192.168.204.254"
 
-
+gboolean set_static_ip( const gchar *interface, const gchar *ip) ;
 gboolean assign_default_ip( const gchar *interface) ;
-in_addr_t random_ip_for_conflict();
+in_addr_t random_ip_for_conflict( gchar *interface) ;
 
 #endif /* IP_ASSIGNMENT_H */
 

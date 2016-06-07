@@ -14,6 +14,7 @@
 #include "../../include/conf/mib-conf.h"
 #include "../../include/deviceInfo/ethernetIfTable.h"
 #include "../../include/vivoe_ip/ip_assignment.h"
+#include "../../include/vivoe_ip/conflict_detection.h"
 #include "../../include/handler.h"
 
 /**
@@ -113,7 +114,7 @@ static void initialize_table_ethernetIfTable(void)
     netsnmp_iterator_info           *iinfo;
     netsnmp_table_registration_info *table_info;
 
-    g_debug(("ethernetIfTable:init initializing table ethernetIfTable"));
+    g_debug(("ethernetIfTable initializing table ethernetIfTable"));
 
     reg = netsnmp_create_handler_registration(
               "ethernetIfTable",     ethernetIfTable_handler,
@@ -150,11 +151,25 @@ static void initialize_table_ethernetIfTable(void)
 			if ( !assigned_ip ){
 				/* otherwise set default static IP, as defined in VIVOE's IP assignment scheme */
 				assign_default_ip (deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i] );
+			}else{
+				/* assigned the IP from conf to the device */
+				set_static_ip( deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i] , assigned_ip ) ;
 			}
-		}
 
-		/* now fill the ethernetIfTable */
-		init_ethernet(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i]);
+			/* now fill the ethernetIfTable */
+			struct ethernetIfTableEntry *new_entry = init_ethernet(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i]);
+
+			/* start conflict detection */
+			if ( ip_conflict_detection( new_entry , deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i]  )){
+				g_critical( "Using default IP %s because no other IP are available", DEFAULT_STATIC_IP );
+				g_critical( "There may have IP conflicts in the VIVOE network");
+			}
+
+		}else{
+			/* now fill the ethernetIfTable */
+			init_ethernet(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i]);
+
+		}
 
 	}
 }
@@ -259,7 +274,7 @@ ethernetIfTable_handler(
     netsnmp_table_request_info 		*table_info;
     struct ethernetIfTableEntry 	*table_entry;
     int 							ret;
-    g_debug(("ethernetIfTable:handler Processing request (%d)", reqinfo->mode));
+    g_debug("ethernetIfTable:handler Processing request (%d)", reqinfo->mode);
 
     switch (reqinfo->mode) {
         /*

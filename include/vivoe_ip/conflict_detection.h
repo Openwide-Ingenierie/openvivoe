@@ -7,7 +7,7 @@
 #ifndef CONFILCT_DETECTION_H
 #define CONFILCT_DETECTION_H
 
-
+gboolean ip_conflict_detection(  struct ethernetIfTableEntry *if_entry, gchar *interface );
 
 #endif /* CONFILCT_DETECTION_H */
 

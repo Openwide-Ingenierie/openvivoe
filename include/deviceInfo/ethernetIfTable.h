@@ -16,7 +16,7 @@ struct ethernetIfTableEntry * ethernetIfTableEntry_create(  long  ethernetIfInde
 
 //gboolean select_interfaces();
 void init_ethernetIfTable(void);
-gboolean init_ethernet(const char* iface);
+struct ethernetIfTableEntry *init_ethernet(const char* iface);
 void MAC_to_byte_array(u_char dest[6], u_char* source);
 void init_ethernetIfTable_content(int entryNumber);
 void initialize_ethernetIfTableEntry();

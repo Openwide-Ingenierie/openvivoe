@@ -43,7 +43,7 @@
  * \param the new static IP to set
  * \return TRUE on SUCCES, FALSE on FAILURE
  */
-static gboolean set_static_ip( const gchar *interface, const gchar *ip){
+gboolean set_static_ip( const gchar *interface, const gchar *ip){
 
 	struct ifreq ifr;
 	struct sockaddr_in sai;
@@ -99,9 +99,10 @@ static int ip_tested = RANDOM_MIN_SUFFIX;
 
 /**
  * \brief gives a random IP selected between 192.168.204.200 and 192.168.204.253
+ * \param interface the name of the ethernet interface we are working on
  * \return a random IP selected between 192.168.204.200 and 192.168.204.253
  */
-in_addr_t random_ip_for_conflict()
+in_addr_t random_ip_for_conflict( gchar *interface)
 {
 
 	struct in_addr 	random_ip;
@@ -110,14 +111,20 @@ in_addr_t random_ip_for_conflict()
 
 	prefix.s_addr = inet_addr ( RANDOM_IP_PREFIX ) ;
 
-	random_suffix = ip_tested;
-	ip_tested ++;
+	if ( ip_tested != RANDOM_MAX_SUFFIX + 1){
+		random_suffix = ip_tested;
+		ip_tested ++;
+	}
+	else{
+		random_suffix = RANDOM_MAX_SUFFIX + 1;
+	}
 
 	/* add suffix to generated IP */
 	random_ip.s_addr = prefix.s_addr + htonl(random_suffix) ;
 
 	/* assigned static IP */
-//	set_static_ip( , DEFAULT_STATIC_IP );
+	g_debug("random_ip_for_conflict(): assigned new IP to device: %s", inet_ntoa(random_ip));
+	set_static_ip( interface , inet_ntoa(random_ip) );
 
 	return random_ip.s_addr;
 }
