@@ -95,11 +95,14 @@ static gboolean set_static_ip( const gchar *interface, const gchar *ip){
 
 }
 
+static int ip_tested = RANDOM_MIN_SUFFIX;
+
 /**
- * \brief assgined default static IP 192.168.204.254
+ * \brief gives a random IP selected between 192.168.204.200 and 192.168.204.253
  * \return a random IP selected between 192.168.204.200 and 192.168.204.253
  */
-struct in_addr random_ip_for_conflict(){
+in_addr_t random_ip_for_conflict()
+{
 
 	struct in_addr 	random_ip;
 	struct in_addr 	prefix; /* 192.168.204.0 */
@@ -107,14 +110,16 @@ struct in_addr random_ip_for_conflict(){
 
 	prefix.s_addr = inet_addr ( RANDOM_IP_PREFIX ) ;
 
-	/* random number generated between 200 and 253 */
-	srand ( time (NULL) );
-	random_suffix = (rand() % (RANDOM_MAX_SUFFIX -RANDOM_MIN_SUFFIX )) + RANDOM_MIN_SUFFIX  ; /* gives a random number  between RANDOM_MAX_SUFFIX and RANDOM_MIN_SUFFIX */
+	random_suffix = ip_tested;
+	ip_tested ++;
 
 	/* add suffix to generated IP */
 	random_ip.s_addr = prefix.s_addr + htonl(random_suffix) ;
-	return random_ip;
 
+	/* assigned static IP */
+//	set_static_ip( , DEFAULT_STATIC_IP );
+
+	return random_ip.s_addr;
 }
 
 /**
