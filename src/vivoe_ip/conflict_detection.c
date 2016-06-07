@@ -34,6 +34,7 @@
 #include <ifaddrs.h>
 
 /* header file */
+#include "../../include/trap/ipAddressConflict.h"
 #include "../../include/vivoe_ip/ip_assignment.h"
 #include "../../include/deviceInfo/ethernetIfTable.h"
 
@@ -301,6 +302,8 @@ gboolean ip_conflict_detection(  struct ethernetIfTableEntry *if_entry ){
 	/* send PROB_NUM ARP PROBE messages between space randomly between PROBE_MIN and PROBE_MAX number*/
 	gdouble space = ((gdouble) rand()/ ((gdouble)(RAND_MAX) /  (gdouble) ((PROBE_MAX - PROBE_MIN) * PROBE_NUM)));
 	gdouble time_passed = 0 ;
+	gboolean conflict = TRUE ;
+
 	GTimer *timer = g_timer_new();
 
 	/* wait probe_wait */
@@ -311,35 +314,41 @@ gboolean ip_conflict_detection(  struct ethernetIfTableEntry *if_entry ){
 	}
 	g_debug("waited");
 
-	/* wait PROBE_MIN */
-	g_debug ("waiting %G second(s)", PROBE_MIN);
-	g_timer_reset( timer );
-	time_passed = g_timer_elapsed ( timer, NULL );
-	while( time_passed  <  (PROBE_MIN) ){
-		time_passed = g_timer_elapsed ( timer, NULL );
-	}
-	g_debug("waited");
-
-	/* send ARP PROBE message PROBE_NUM times with an interval probe_wait */
-	g_debug("send ARP Probe message %d times every %G second(s)", PROBE_NUM, space);
-	for( int i = 1 ; i <= PROBE_NUM ; i ++){
-
+	while ( conflict ){
+		/* wait PROBE_MIN */
+		g_debug ("waiting %d second(s)", PROBE_MIN);
 		g_timer_reset( timer );
 		time_passed = g_timer_elapsed ( timer, NULL );
-		while( time_passed  <  space ){
+		while( time_passed  <  (PROBE_MIN) ){
 			time_passed = g_timer_elapsed ( timer, NULL );
 		}
+		g_debug("waited");
 
-		send_arp_request( if_entry , TRUE );
+		/* send ARP PROBE message PROBE_NUM times with an interval probe_wait */
+		g_debug("send ARP Probe message %d times every %G second(s)", PROBE_NUM, space);
+		for( int i = 1 ; i <= PROBE_NUM ; i ++){
 
+			g_timer_reset( timer );
+			time_passed = g_timer_elapsed ( timer, NULL );
+			while( time_passed  <  space ){
+				time_passed = g_timer_elapsed ( timer, NULL );
+			}
+
+			send_arp_request( if_entry , TRUE );
+
+		}
+
+		conflict = receive_arp_reply( ) ;
+
+		/* if receive_arp_reply return FALSE there is a conflict, else, we are fine with this IP  */
+		if ( conflict ){
+			/* pick up a new random IP */
+			if_entry->ethernetIfIpAddressConflict 	= if_entry->ethernetIfIpAddress ;
+			if_entry->ethernetIfIpAddress 			= random_ip_for_conflict();
+			/* send trap */
+			send_ipAddressConflict_trap();
+		}else
+			return FALSE;
 	}
-
-	/* if receive_arp_reply return FALSE there is a conflict, else, we are fine with this IP  */
-	if ( ! receive_arp_reply( ) ){
-		 /* pick up a new random IP */
-		 /* send trap */
-
-	}else
-		return FALSE;
 
 }
