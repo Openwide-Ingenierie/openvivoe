@@ -67,6 +67,11 @@ struct  __attribute__((packed)) arp_packet {
 	uint8_t 			arp_tpa[4]; /* Target Protocol Address */
 };
 
+/**
+ * \brief buil ARP Probe Message with IP of sender extract from MIB
+ * \param if_entry the MIB entry of teh ethernet interface
+ * \param pkt the ARP packet to fill
+ */
 static void build_arp_probe_packet(struct ethernetIfTableEntry *if_entry, struct arp_packet *pkt ){
 
 	/*
@@ -113,14 +118,15 @@ static void build_arp_probe_packet(struct ethernetIfTableEntry *if_entry, struct
 	/*
 	 * Set the Target IP Address: in a Probe Message this is the IP address being probed i.e. IP address statically assigned to the device
 	 */
-	struct in_addr test;
-	test.s_addr = inet_addr("10.5.16.127");
-	memcpy (pkt->arp_tpa , &test , IP_ADDR_LEN  * sizeof (uint8_t));
-
-//	memcpy (pkt->arp_tpa , &if_entry->ethernetIfIpAddress , IP_ADDR_LEN  * sizeof (uint8_t));
+	memcpy (pkt->arp_tpa , &if_entry->ethernetIfIpAddress , IP_ADDR_LEN  * sizeof (uint8_t));
 
 }
 
+/**
+ * \brief buil ARP ANOUNCEMENT Message with IP of sender extract from MIB
+ * \param if_entry the MIB entry of teh ethernet interface
+ * \param pkt the ARP packet to fill
+ */
 static void build_arp_anouncement_packet(struct ethernetIfTableEntry *if_entry, struct arp_packet *pkt ){
 
 	/*
@@ -171,7 +177,12 @@ static void build_arp_anouncement_packet(struct ethernetIfTableEntry *if_entry, 
 
 }
 
-
+/**
+ * \brief send an ARP request: PROBE msg or ANOUNCE msg
+ * \param if_entry the MIB entry of the ethernet interface
+ * \param probe specify the kind of ARP packet to send TRUE for PROBE, FALSE for ANOUNCE
+ * \return TRUE if the request could be sent, FALSE otherwise
+ */
 gboolean send_arp_request( struct ethernetIfTableEntry *if_entry , gboolean probe ) {
 
 	struct arp_packet pkt;
@@ -232,6 +243,10 @@ gboolean send_arp_request( struct ethernetIfTableEntry *if_entry , gboolean prob
 
 }
 
+/**
+ * \brief receive an ARP message, check if it is our reply
+ * \return TRUE if this is a reply to our previous PROBE message, and s if there is a conflict, FALSE otherwise
+ */
 static gboolean receive_arp_reply(  ) {
 
 	int sd, status;
@@ -297,6 +312,12 @@ static gboolean receive_arp_reply(  ) {
 
 }
 
+/**
+ * \brief detect and resolve IP conflict
+ * \param the ethernet interface entry in the MIB for which we change the IP
+ * \param interface the name of this interface (eth0/enp2s0/lo...)
+ * \return TRUE if conflict could be resolved, FALSE otherwise
+ */
 gboolean ip_conflict_detection(  struct ethernetIfTableEntry *if_entry, gchar *interface ){
 
 	/* select a random time to wait between 0 en PROBE_WAIT */
