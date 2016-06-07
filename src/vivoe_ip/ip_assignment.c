@@ -20,7 +20,9 @@
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <net/if.h>
+#include <sys/types.h>
 #include <arpa/inet.h>
 
 /* to get the network interfaces*/
@@ -29,6 +31,10 @@
 /* header file */
 #include "../../include/deviceInfo/ethernetIfTable.h"
 #include "../../include/vivoe_ip/ip_assignment.h"
+
+#define RANDOM_IP_PREFIX 	"192.168.204.0"
+#define RANDOM_MIN_SUFFIX 	200
+#define RANDOM_MAX_SUFFIX 	253
 
 
 /**
@@ -91,20 +97,34 @@ static gboolean set_static_ip( const gchar *interface, const gchar *ip){
 
 /**
  * \brief assgined default static IP 192.168.204.254
- * \param interface the name of the ethernet interface we are working on
+ * \return a random IP selected between 192.168.204.200 and 192.168.204.253
  */
-gboolean assign_default_ip( const gchar *interface){
+struct in_addr random_ip_for_conflict(){
 
-	return set_static_ip( interface , DEFAULT_STATIC_IP );
+	struct in_addr 	random_ip;
+	struct in_addr 	prefix; /* 192.168.204.0 */
+	int 			random_suffix;
+
+	prefix.s_addr = inet_addr ( RANDOM_IP_PREFIX ) ;
+
+	/* random number generated between 200 and 253 */
+	srand ( time (NULL) );
+	random_suffix = (rand() % (RANDOM_MAX_SUFFIX -RANDOM_MIN_SUFFIX )) + RANDOM_MIN_SUFFIX  ; /* gives a random number  between RANDOM_MAX_SUFFIX and RANDOM_MIN_SUFFIX */
+
+	/* add suffix to generated IP */
+	random_ip.s_addr = prefix.s_addr + htonl(random_suffix) ;
+	return random_ip;
 
 }
 
 /**
- * \brief detect if there is IP any conflict in the VIVEO network
+ * \brief assgined default static IP 192.168.204.254
+ * \param interface the name of the ethernet interface we are working on
  */
-static gboolean detect_confilct( struct ethernetIfTable_entry *if_entry){
+gboolean assign_default_ip( const gchar *interface){
 
+	g_debug( "assign_default_ip()");
 
-
+	return set_static_ip( interface , DEFAULT_STATIC_IP );
 
 }
