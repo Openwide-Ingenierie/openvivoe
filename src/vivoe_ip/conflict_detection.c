@@ -164,7 +164,6 @@ static void build_arp_anouncement_packet(struct ethernetIfTableEntry *if_entry, 
 	 */
 	memcpy (pkt->arp_tpa , &if_entry->ethernetIfIpAddress , IP_ADDR_LEN  * sizeof (uint8_t));
 
-
 }
 
 
@@ -254,6 +253,7 @@ gboolean receive_arp_reply(  ) {
 	arp_pkt = (struct arp_packet *) (ether_frame + sizeof (struct arp_packet) );
 	eh 		= (struct  ether_header*) ether_frame;
 
+	GTimer *timer = g_timer_new();
 	while ((ntohs (arp_pkt->arp_hdr.ar_op) != ETH_P_ARP) && (ntohs (arp_pkt->arp_hdr.ar_op) != ARPOP_REPLY)) {
 
 		if ((status  = recvfrom(sd , ether_frame ,IP_MAXPACKET , 0, NULL, NULL)) < 0) {
@@ -279,6 +279,10 @@ gboolean receive_arp_reply(  ) {
 			}
 		}
 
+		/* check how many time we have wait, if ANNOUNCE_WAIT has been reach then return FALSE : no conflict */
+		if ( g_timer_elapsed ( timer, NULL ) > ANNOUNCE_WAIT )
+			return FALSE;
+
 	}
 
 	/* close the socket */
@@ -288,18 +292,54 @@ gboolean receive_arp_reply(  ) {
 
 }
 
-
-
 gboolean ip_conflict_detection(  struct ethernetIfTableEntry *if_entry ){
 
-	/* send ARP PROBE */
+	/* select a random time to wait between 0 en PROBE_WAIT */
+	srand(time(NULL));
+	/* PROBE_WAIT is given in second, if we want a integer value for microsecond , we should multiply it by 1000000 */
+	gdouble probe_wait =  ((gdouble) rand()/ (gdouble)(RAND_MAX)) * PROBE_WAIT;
+	/* send PROB_NUM ARP PROBE messages between space randomly between PROBE_MIN and PROBE_MAX number*/
+	gdouble space = ((gdouble) rand()/ ((gdouble)(RAND_MAX) /  (gdouble) ((PROBE_MAX - PROBE_MIN) * PROBE_NUM)));
+	gdouble time_passed = 0 ;
+	GTimer *timer = g_timer_new();
 
-	/* wait ANOUNCEMENT_WAIT: if no reply, send it again */
+	/* wait probe_wait */
+	g_debug ("waiting %G second(s)", probe_wait);
+	g_timer_start( timer );
+	while(time_passed < probe_wait){
+		time_passed = g_timer_elapsed ( timer, NULL );
+	}
+	g_debug("waited");
 
-	/* check if conflict */
+	/* wait PROBE_MIN */
+	g_debug ("waiting %G second(s)", PROBE_MIN);
+	g_timer_reset( timer );
+	time_passed = g_timer_elapsed ( timer, NULL );
+	while( time_passed  <  (PROBE_MIN) ){
+		time_passed = g_timer_elapsed ( timer, NULL );
+	}
+	g_debug("waited");
 
-	/* if so, send TRAP, select random IP and restart */
+	/* send ARP PROBE message PROBE_NUM times with an interval probe_wait */
+	g_debug("send ARP Probe message %d times every %G second(s)", PROBE_NUM, space);
+	for( int i = 1 ; i <= PROBE_NUM ; i ++){
 
-	/* otherwise send ARP ANOUNCEMENT */
+		g_timer_reset( timer );
+		time_passed = g_timer_elapsed ( timer, NULL );
+		while( time_passed  <  space ){
+			time_passed = g_timer_elapsed ( timer, NULL );
+		}
+
+		send_arp_request( if_entry , TRUE );
+
+	}
+
+	/* if receive_arp_reply return FALSE there is a conflict, else, we are fine with this IP  */
+	if ( ! receive_arp_reply( ) ){
+		 /* pick up a new random IP */
+		 /* send trap */
+
+	}else
+		return FALSE;
 
 }
