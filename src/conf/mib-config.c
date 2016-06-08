@@ -434,7 +434,7 @@ static gchar *vivoe_redirect(gchar *cmdline){
  * \param error a variable to store errors
  * \return gchar* the value of the found key or NULL is the key has not been found
  */
-static gchar *get_key_value_char(GKeyFile* gkf, const gchar* const* groups ,char *group_name, const gchar *key_name, GError* error){
+static gchar *get_key_value_string(GKeyFile* gkf, const gchar* const* groups ,char *group_name, const gchar *key_name, GError* error){
 
 	gchar *key_value; /* a variable to store the key value */
 
@@ -560,7 +560,7 @@ gchar *get_source_cmdline(GKeyFile 	*gkf, int index){
 	/* Build the name that the group should have */
 	sprintf(source_name, "%s%d", source_prefix, index);
 
-	cmdline = get_key_value_char(gkf,(const gchar* const*) groups , source_name ,GST_SOURCE_CMDLINE , error);
+	cmdline = get_key_value_string(gkf,(const gchar* const*) groups , source_name ,GST_SOURCE_CMDLINE , error);
 
 	free(source_name);
 	return cmdline;
@@ -597,7 +597,7 @@ gchar *init_sources_from_conf(int index){
 	/* Build the name that the group should have */
 	sprintf(source_name, "%s%d", source_prefix, index);
 
-	cmdline = get_key_value_char(gkf_conf_file,(const gchar* const*) groups , source_name ,GST_SOURCE_CMDLINE , error);
+	cmdline = get_key_value_string(gkf_conf_file,(const gchar* const*) groups , source_name ,GST_SOURCE_CMDLINE , error);
 
 	free(source_name);
 	//close_mib_configuration_file(gkf);
@@ -633,7 +633,7 @@ gchar *get_sink_cmdline(GKeyFile 	*gkf, int index){
 	/* Build the name that the group should have */
 	sprintf(receiver_name, "%s%d", receiver_prefix, index);
 
-	cmdline = get_key_value_char(gkf,(const gchar* const*) groups , receiver_name ,GST_SINK_CMDLINE , error);
+	cmdline = get_key_value_string(gkf,(const gchar* const*) groups , receiver_name ,GST_SINK_CMDLINE , error);
 
 	free(receiver_name);
 	return cmdline;
@@ -673,7 +673,7 @@ gchar *init_sink_from_conf(int index){
 	/* Build the name that the group should have */
 	sprintf(receiver_name, "%s%d", receiver_prefix, index);
 
-	cmdline = get_key_value_char(gkf,(const gchar* const*) groups , receiver_name ,GST_SINK_CMDLINE , error);
+	cmdline = get_key_value_string(gkf,(const gchar* const*) groups , receiver_name ,GST_SINK_CMDLINE , error);
 
 	free(receiver_name);
 	close_mib_configuration_file(gkf);
@@ -714,7 +714,7 @@ gchar* get_desc_from_conf(int index){
 	/* Build the name that the group should have */
 	sprintf(source_name, "%s%d", source_prefix, index);
 
-	channelUserDesc = get_key_value_char(gkf,(const gchar* const*) groups , source_name ,KEY_NAME_CHANNEL_DESC , error);
+	channelUserDesc = get_key_value_string(gkf,(const gchar* const*) groups , source_name ,KEY_NAME_CHANNEL_DESC , error);
 
 	free(source_name);
 	close_mib_configuration_file(gkf);
@@ -791,7 +791,7 @@ gchar *get_default_IP_from_conf(int index){
 	/* Build the name that the group should have */
 	sprintf(receiver_name, "%s%d", receiver_prefix, index);
 
-	default_receive_ip = get_key_value_char(gkf,(const gchar* const*) groups ,receiver_name, KEY_NAME_DEFAULT_IP , error);
+	default_receive_ip = get_key_value_string(gkf,(const gchar* const*) groups ,receiver_name, KEY_NAME_DEFAULT_IP , error);
 
 	free(receiver_name);
 	close_mib_configuration_file(gkf);
@@ -861,7 +861,7 @@ gchar *get_static_assigned_IP_from_conf(){
 	 * second parameter "gchar* length" is optional*/
 	groups = g_key_file_get_groups(gkf, NULL);
 
-	assigned_ip = get_key_value_char(gkf,(const gchar* const*) groups , GROUP_NAME_DEVICEINFO , KEY_NAME_ASSIGNED_IP , error);
+	assigned_ip = get_key_value_string(gkf,(const gchar* const*) groups , GROUP_NAME_DEVICEINFO , KEY_NAME_ASSIGNED_IP , error);
 
 	close_mib_configuration_file(gkf);
 	return assigned_ip;
