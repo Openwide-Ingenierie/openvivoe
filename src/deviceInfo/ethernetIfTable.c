@@ -175,7 +175,8 @@ static void initialize_table_ethernetIfTable(void)
 			struct ethernetIfTableEntry *new_entry = init_ethernet(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i]);
 
 			/* start conflict detection - only if there is an assigned IP */
-			if ( !assigned_ip ){
+
+			if ( assigned_ip ){
 
 				if ( ip_conflict_detection( new_entry , deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i]  )){
 					g_critical( "Using default IP %s because no other IP are available", DEFAULT_STATIC_IP );
@@ -368,7 +369,7 @@ ethernetIfTable_handler(
 							 	table_info,
 							deviceInfo.parameters[num_ethernetIFnumber]._value.int_val ) )
 				return SNMP_ERR_NOERROR;
-            switch (table_info->colnum) {
+			switch (table_info->colnum) {
 				case COLUMN_ETHERNETIFIPADDRESS:
 					ret = netsnmp_check_vb_type( request->requestvb, ASN_IPADDRESS );
 					if ( ret != SNMP_ERR_NOERROR ) {
@@ -382,27 +383,27 @@ ethernetIfTable_handler(
 					}
 
 					break;
-            case COLUMN_ETHERNETIFSUBNETMASK:
-                /* or possibly 'netsnmp_check_vb_int_range' */
-                ret = netsnmp_check_vb_type( request->requestvb, ASN_IPADDRESS );
-                if ( ret != SNMP_ERR_NOERROR ) {
-                    netsnmp_set_request_error( reqinfo, request, ret );
-                    return SNMP_ERR_NOERROR;
-                }
-                break;
-            case COLUMN_ETHERNETIFIPADDRESSCONFLICT:
-                /* or possibly 'netsnmp_check_vb_int_range' */
-                ret = netsnmp_check_vb_type( request->requestvb, ASN_IPADDRESS );
-                if ( ret != SNMP_ERR_NOERROR ) {
-                    netsnmp_set_request_error( reqinfo, request, ret );
-                    return SNMP_ERR_NOERROR;
-                }
-                break;
-            default:
-                netsnmp_set_request_error( reqinfo, request,
-                                           SNMP_ERR_NOTWRITABLE );
-                return SNMP_ERR_NOERROR;
-            }
+				case COLUMN_ETHERNETIFSUBNETMASK:
+					/* or possibly 'netsnmp_check_vb_int_range' */
+					ret = netsnmp_check_vb_type( request->requestvb, ASN_IPADDRESS );
+					if ( ret != SNMP_ERR_NOERROR ) {
+						netsnmp_set_request_error( reqinfo, request, ret );
+						return SNMP_ERR_NOERROR;
+					}
+					break;
+				case COLUMN_ETHERNETIFIPADDRESSCONFLICT:
+					/* or possibly 'netsnmp_check_vb_int_range' */
+					ret = netsnmp_check_vb_type( request->requestvb, ASN_IPADDRESS );
+					if ( ret != SNMP_ERR_NOERROR ) {
+						netsnmp_set_request_error( reqinfo, request, ret );
+						return SNMP_ERR_NOERROR;
+					}
+					break;
+				default:
+					netsnmp_set_request_error( reqinfo, request,
+							SNMP_ERR_NOTWRITABLE );
+					return SNMP_ERR_NOERROR;
+			}
         }
         break;
 
