@@ -463,11 +463,11 @@ ethernetIfTable_handler(
 					table_entry->ethernetIfIpAddress     			= *request->requestvb->val.integer;
 					/* call the hanlder for ethenetIfAdrress modifications */
 					/* check for conflict */
-					if ( ! ip_conflict_detection(  table_entry , deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0])){
+					if ( ! ip_conflict_detection(  table_entry , deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[table_entry->ethernetIfIndex - 1 ])){
 						/* if no conflict, save the value */
 						struct in_addr new_ip;
 						new_ip.s_addr = table_entry->ethernetIfIpAddress;
-						set_static_assigned_IP_to_conf ( deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0] , inet_ntoa ( new_ip ));
+						set_static_assigned_IP_to_conf ( deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[ table_entry->ethernetIfIndex - 1 ] , inet_ntoa ( new_ip ));
 					}/* otherwise, a trap will be send to the manager, do not save this conflicting IP */
 					break;
 				case COLUMN_ETHERNETIFSUBNETMASK:
