@@ -159,10 +159,14 @@ static void initialize_table_ethernetIfTable(void)
 			/* now fill the ethernetIfTable */
 			struct ethernetIfTableEntry *new_entry = init_ethernet(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i]);
 
-			/* start conflict detection */
-			if ( ip_conflict_detection( new_entry , deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i]  )){
-				g_critical( "Using default IP %s because no other IP are available", DEFAULT_STATIC_IP );
-				g_critical( "There may have IP conflicts in the VIVOE network");
+			/* start conflict detection - only if there is an assigned IP */
+			if ( !assigned_ip ){
+
+				if ( ip_conflict_detection( new_entry , deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i]  )){
+					g_critical( "Using default IP %s because no other IP are available", DEFAULT_STATIC_IP );
+					g_critical( "There may have IP conflicts in the VIVOE network");
+				}
+
 			}
 
 		}else{
@@ -357,18 +361,31 @@ ethernetIfTable_handler(
 							deviceInfo.parameters[num_ethernetIFnumber]._value.int_val ) )
 				return SNMP_ERR_NOERROR;
             switch (table_info->colnum) {
-            case COLUMN_ETHERNETIFIPADDRESS:
-                ret = netsnmp_check_vb_type( request->requestvb, ASN_IPADDRESS );
-                if ( ret != SNMP_ERR_NOERROR ) {
-                    netsnmp_set_request_error( reqinfo, request, ret );
-                    return SNMP_ERR_NOERROR;
-                }
-				if ( deviceInfo.parameters[num_DeviceMode]._value.int_val	!= maintenanceMode){
-					ret = SNMP_ERR_RESOURCEUNAVAILABLE;
-					netsnmp_set_request_error(reqinfo, requests, ret );
-					return SNMP_ERR_NOERROR;
-				}
-                break;
+				case COLUMN_ETHERNETIFIPADDRESS:
+					ret = netsnmp_check_vb_type( request->requestvb, ASN_IPADDRESS );
+					if ( ret != SNMP_ERR_NOERROR ) {
+						netsnmp_set_request_error( reqinfo, request, ret );
+						return SNMP_ERR_NOERROR;
+					}
+					if ( deviceInfo.parameters[num_DeviceMode]._value.int_val	!= maintenanceMode){
+						ret = SNMP_ERR_RESOURCEUNAVAILABLE;
+						netsnmp_set_request_error(reqinfo, requests, ret );
+						return SNMP_ERR_NOERROR;
+					}
+					/* check if device is configured in VIVOE IP assignment mode */
+					if ( !openvivoe_uses_default_IP_assignment_scheme() ){
+						/* check for conflict */
+						ip_conflict_detection(  table_entry , deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0]); /* the primary interface */
+						/* if no conflict, save the value */
+						struct in_addr new_ip;
+						new_ip.s_addr = table_entry->ethernetIfIpAddress;
+						set_static_assigned_IP_to_conf ( inet_ntoa ( new_ip ));
+					}else{
+						ret = SNMP_ERR_NOACCESS;
+						netsnmp_set_request_error(reqinfo, requests, ret );
+						return SNMP_ERR_NOERROR;
+					}
+					break;
             case COLUMN_ETHERNETIFSUBNETMASK:
                 /* or possibly 'netsnmp_check_vb_int_range' */
                 ret = netsnmp_check_vb_type( request->requestvb, ASN_IPADDRESS );
