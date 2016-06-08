@@ -163,13 +163,13 @@ static void initialize_table_ethernetIfTable(void)
 			/* check if an IP have already be assigned to the device */
 			const gchar* assigned_ip= get_static_assigned_IP_from_conf( deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i]  );
 
-	//		if ( !assigned_ip ){
-	//			/* otherwise set default static IP, as defined in VIVOE's IP assignment scheme */
-	//			assign_default_ip ( deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i] );
-	//		}else{
-	//			/* assigned the IP from conf to the device */
-	//			set_static_ip( deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i] , assigned_ip ) ;
-	//		}
+			if ( !assigned_ip ){
+				/* otherwise set default static IP, as defined in VIVOE's IP assignment scheme */
+				assign_default_ip ( deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i] );
+			}else{
+				/* assigned the IP from conf to the device */
+				set_static_ip( deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i] , assigned_ip ) ;
+			}
 
 			/* now fill the ethernetIfTable */
 			struct ethernetIfTableEntry *new_entry = init_ethernet(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i]);
