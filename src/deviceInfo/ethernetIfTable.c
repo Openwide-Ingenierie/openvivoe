@@ -155,11 +155,11 @@ static void initialize_table_ethernetIfTable(void)
 		if ( !openvivoe_uses_default_IP_assignment_scheme() ){
 
 			/* check if an IP have already be assigned to the device */
-			const gchar* assigned_ip= get_static_assigned_IP_from_conf();
+			const gchar* assigned_ip= get_static_assigned_IP_from_conf( deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i]  );
 
 			if ( !assigned_ip ){
 				/* otherwise set default static IP, as defined in VIVOE's IP assignment scheme */
-				assign_default_ip (deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i] );
+				assign_default_ip ( deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i] );
 			}else{
 				/* assigned the IP from conf to the device */
 				set_static_ip( deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i] , assigned_ip ) ;
@@ -461,7 +461,7 @@ ethernetIfTable_handler(
 						/* if no conflict, save the value */
 						struct in_addr new_ip;
 						new_ip.s_addr = table_entry->ethernetIfIpAddress;
-						set_static_assigned_IP_to_conf ( inet_ntoa ( new_ip ));
+						set_static_assigned_IP_to_conf ( deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0] , inet_ntoa ( new_ip ));
 					}/* otherwise, a trap will be send to the manager, do not save this conflicting IP */
 					break;
 				case COLUMN_ETHERNETIFSUBNETMASK:
