@@ -462,6 +462,44 @@ static gchar *get_key_value_string(GKeyFile* gkf, const gchar* const* groups ,ch
 }
 
 /**
+ * \brief check if the group contains the given locale key, get the corresponding char value or display appropriate error to the user
+ * \param gkf the GKeyFile openned
+ * \param groups the names of groups present in configuration file
+ * \param group_name the group's name in which we are interested
+ * \param key_name the name of the key we are loooking for
+ * \param locale the value of the locale string to look fo
+ * \param error a variable to store errors
+ * \return gchar* the value of the found key or NULL is the key has not been found
+ */
+static gchar *get_key_value_locale_string(GKeyFile* gkf, const gchar* const* groups ,char *group_name, const gchar *key_name, const gchar *locale, GError* error){
+
+	gchar *key_value; /* a variable to store the key value */
+
+	if( !(g_strv_contains(groups, group_name )) ){
+		fprintf (stderr, "Group %s not found in configuration file\nIt should be written in the form [%s]\n", group_name ,group_name);
+		return NULL;
+	}
+
+	if(g_key_file_has_key(gkf,group_name,key_name, &error)){
+		key_value = (char*) g_key_file_get_locale_string(gkf,group_name , key_name, locale , &error);
+		if(error != NULL)
+			g_warning("Invalid format for key %s: %s\n", key_name , error->message);
+	}
+	else {
+		g_warning("key not found %s for group: %s\n", key_name ,group_name );
+		return NULL;
+	}
+
+	if ( !strcmp( key_value, "") ){
+		g_warning("invalid locale key value for %s in %s\n", key_name ,group_name );
+		return NULL;
+	}
+
+	return key_value;
+}
+
+
+/**
  * \brief check if the group contains the given key, get the corresponding integer value or display appropriate error to the user
  * \param gkf the GKeyFile openned
  * \param groups the names of groups present in configuration file
