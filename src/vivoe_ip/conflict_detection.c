@@ -320,6 +320,8 @@ static gboolean receive_arp_reply(  ) {
  */
 gboolean ip_conflict_detection(  struct ethernetIfTableEntry *if_entry, gchar *interface ){
 
+	g_debug ("ip_conflict_detection()" );
+
 	/* select a random time to wait between 0 en PROBE_WAIT */
 	srand(time(NULL));
 	/* PROBE_WAIT is given in second, if we want a integer value for microsecond , we should multiply it by 1000000 */
@@ -338,7 +340,6 @@ gboolean ip_conflict_detection(  struct ethernetIfTableEntry *if_entry, gchar *i
 	while(time_passed < probe_wait){
 		time_passed = g_timer_elapsed ( timer, NULL );
 	}
-	g_debug("waited");
 
 	while ( conflict ){
 		/* wait PROBE_MIN */
@@ -348,7 +349,6 @@ gboolean ip_conflict_detection(  struct ethernetIfTableEntry *if_entry, gchar *i
 		while( time_passed  <  (PROBE_MIN) ){
 			time_passed = g_timer_elapsed ( timer, NULL );
 		}
-		g_debug("waited");
 
 		/* send ARP PROBE message PROBE_NUM times with an interval probe_wait */
 		g_debug("send ARP Probe message %d times every %G second(s)", PROBE_NUM, space);
