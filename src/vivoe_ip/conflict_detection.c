@@ -291,7 +291,8 @@ static gboolean receive_arp_reply(  ) {
 		memcpy ( eh , ether_frame , sizeof ( struct ether_header ));
 		/* We have received a Ethernet Packet, check if this is our ARP reply */
 		if ( ntohs ( eh->ether_type ) == ETH_P_ARP){
-			/* copy ARP packet into arp_pkt */
+			/* check if this is not the old ARP packet */
+			/*copy ARP packet into arp_pkt */
 			memcpy( arp_pkt, ether_frame + 14, sizeof (struct arp_packet));
 			if ( (ntohs (arp_pkt->arp_hdr.ar_op) == ARPOP_REPLY)){
 				/* response has been received, break */
@@ -327,7 +328,7 @@ gboolean ip_conflict_detection(  struct ethernetIfTableEntry *if_entry, gchar *i
 	/* PROBE_WAIT is given in second, if we want a integer value for microsecond , we should multiply it by 1000000 */
 	gdouble probe_wait =  ((gdouble) rand()/ (gdouble)(RAND_MAX)) * PROBE_WAIT;
 	/* send PROB_NUM ARP PROBE messages between space randomly between PROBE_MIN and PROBE_MAX number*/
-	gdouble space = ((gdouble) rand()/ ((gdouble)(RAND_MAX) /  (gdouble) ((PROBE_MAX - PROBE_MIN) * PROBE_NUM)));
+	gdouble space = (((gdouble) rand()/ (gdouble)(RAND_MAX)) /  (gdouble) ((PROBE_MAX - PROBE_MIN) * PROBE_NUM));
 	gdouble time_passed = 0 ;
 	gboolean conflict = TRUE ;
 	in_addr_t max_ip_value = inet_addr ( DEFAULT_STATIC_IP ) ;
