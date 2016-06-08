@@ -439,22 +439,22 @@ static gchar *get_key_value_string(GKeyFile* gkf, const gchar* const* groups ,ch
 	gchar *key_value; /* a variable to store the key value */
 
 	if( !(g_strv_contains(groups, group_name )) ){
-		fprintf (stderr, "Group %s not found in configuration file\nIt should be written in the form [%s]\n", group_name ,group_name);
+		g_critical ("Group %s not found in configuration file - It should be written in the form [%s]", group_name ,group_name);
 		return NULL;
 	}
 
 	if(g_key_file_has_key(gkf,group_name,key_name, &error)){
 		key_value = (char*) g_key_file_get_string(gkf,group_name , key_name , &error);
 		if(error != NULL)
-			g_warning("Invalid format for key %s: %s\n", key_name , error->message);
+			g_warning("Invalid format for key %s: %s", key_name , error->message);
 	}
 	else {
-		g_warning("key not found %s for group: %s\n", key_name ,group_name );
+		g_warning("key not found %s for group: %s", key_name ,group_name );
 		return NULL;
 	}
 
 	if ( !strcmp( key_value, "") ){
-		g_warning("invalid key value for %s in %s\n", key_name ,group_name );
+		g_warning("invalid key value for %s in %s", key_name ,group_name );
 		return NULL;
 	}
 
@@ -476,22 +476,22 @@ static gchar *get_key_value_locale_string(GKeyFile* gkf, const gchar* const* gro
 	gchar *key_value; /* a variable to store the key value */
 
 	if( !(g_strv_contains(groups, group_name )) ){
-		fprintf (stderr, "Group %s not found in configuration file\nIt should be written in the form [%s]\n", group_name ,group_name);
+		 g_critical ("Group %s not found in configuration file - It should be written in the form [%s]", group_name ,group_name);
 		return NULL;
 	}
 
 	if(g_key_file_has_key(gkf,group_name,key_name, &error)){
 		key_value = (char*) g_key_file_get_locale_string(gkf,group_name , key_name, locale , &error);
 		if(error != NULL)
-			g_warning("Invalid format for key %s: %s\n", key_name , error->message);
+			g_warning("Invalid format for key %s: %s", key_name , error->message);
 	}
 	else {
-		g_warning("key not found %s for group: %s\n", key_name ,group_name );
+		g_warning("key not found %s for group: %s", key_name ,group_name );
 		return NULL;
 	}
 
 	if ( !strcmp( key_value, "") ){
-		g_warning("invalid locale key value for %s in %s\n", key_name ,group_name );
+		g_warning("invalid locale key value for %s in %s", key_name ,group_name );
 		return NULL;
 	}
 
@@ -514,23 +514,23 @@ static int get_key_value_int(GKeyFile* gkf, const gchar* const* groups ,char *gr
 	int key_value; /* a variable to store the key value */
 
 	if( !(g_strv_contains(groups, group_name )) ){
-		fprintf (stderr, "Group %s not found in configuration file\nIt should be written in the form [%s]\n", group_name ,group_name);
+		g_critical ("Group %s not found in configuration file - It should be written in the form [%s]", group_name ,group_name);
 		return -1;
 	}
 
 	if(g_key_file_has_key(gkf,group_name,key_name, &error)){
 		key_value = (int) g_key_file_get_integer(gkf,group_name , key_name , &error);
 		if(error != NULL)
-			g_warning("Invalid format for key %s: %s\n", key_name , error->message);
+			g_warning("Invalid format for key %s: %s", key_name , error->message);
 	}
 	else {
 		if ( !optional )
-			g_warning("key not found %s for group: %s\n", key_name ,group_name );
+			g_warning("key not found %s for group: %s", key_name ,group_name );
 		return -1;
 	}
 
 	if ( key_value < 0  ){
-		g_warning("invalid key value for %s in %s\n", key_name ,group_name );
+		g_warning("invalid key value for %s in %s", key_name ,group_name );
 		return -1;
 	}
 
@@ -550,17 +550,17 @@ static int get_key_value_int(GKeyFile* gkf, const gchar* const* groups ,char *gr
 gboolean set_key_value(GKeyFile* gkf, const gchar* const* groups ,char *group_name, gchar* gkf_path,  const gchar *key_name,const gchar *new_value, GError* error){
 
 	if( !(g_strv_contains((const gchar* const*) groups, group_name )))
-		fprintf (stderr, "Group %s not found in configuration file\nIt should be written in the form [%s]\n",group_name,group_name );
+		 g_critical("Group %s not found in configuration file - It should be written in the form [%s]",group_name,group_name );
 	if(g_key_file_has_key(gkf,group_name,key_name , &error)){
 		g_key_file_set_string(gkf,group_name ,key_name ,new_value );
 		g_key_file_save_to_file(gkf, gkf_path , &error);
 		if(error != NULL){
-			g_warning("failed to write to configuration file %s: %s\n",CONFIG_FILE , error->message);
+			g_warning("failed to write to configuration file %s: %s",CONFIG_FILE , error->message);
 			return FALSE;
 		}
 	}
 	else{
-		g_warning("key not found %s for group: %s\n",key_name ,group_name );
+		g_warning("key not found %s for group: %s",key_name ,group_name );
 		return FALSE;
 	}
 
@@ -580,17 +580,17 @@ gboolean set_key_value(GKeyFile* gkf, const gchar* const* groups ,char *group_na
 gboolean set_key_locale_value(GKeyFile* gkf, const gchar* const* groups ,char *group_name, gchar* gkf_path,  const gchar *key_name, const gchar *locale, const gchar *new_value, GError* error){
 
 	if( !(g_strv_contains((const gchar* const*) groups, group_name )))
-		fprintf (stderr, "Group %s not found in configuration file\nIt should be written in the form [%s]\n",group_name,group_name );
+		g_critical ("Group %s not found in configuration file - It should be written in the form [%s]",group_name,group_name );
 	if(g_key_file_has_key(gkf,group_name,key_name , &error)){
 		g_key_file_set_locale_string(gkf,group_name ,key_name , locale ,new_value );
 		g_key_file_save_to_file(gkf, gkf_path , &error);
 		if(error != NULL){
-			g_warning("failed to write to configuration file %s: %s\n",CONFIG_FILE , error->message);
+			g_warning("failed to write to configuration file %s: %s",CONFIG_FILE , error->message);
 			return FALSE;
 		}
 	}
 	else{
-		g_warning("key not found %s for group: %s\n",key_name ,group_name );
+		g_warning("key not found %s for group: %s",key_name ,group_name );
 		return FALSE;
 	}
 
