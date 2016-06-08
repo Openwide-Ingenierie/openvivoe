@@ -462,44 +462,6 @@ static gchar *get_key_value_string(GKeyFile* gkf, const gchar* const* groups ,ch
 }
 
 /**
- * \brief check if the group contains the given locale key, get the corresponding char value or display appropriate error to the user
- * \param gkf the GKeyFile openned
- * \param groups the names of groups present in configuration file
- * \param group_name the group's name in which we are interested
- * \param key_name the name of the key we are loooking for
- * \param locale the value of the locale string to look fo
- * \param error a variable to store errors
- * \return gchar* the value of the found key or NULL is the key has not been found
- */
-static gchar *get_key_value_locale_string(GKeyFile* gkf, const gchar* const* groups ,char *group_name, const gchar *key_name, const gchar *locale, GError* error){
-
-	gchar *key_value; /* a variable to store the key value */
-
-	if( !(g_strv_contains(groups, group_name )) ){
-		 g_critical ("Group %s not found in configuration file - It should be written in the form [%s]", group_name ,group_name);
-		return NULL;
-	}
-
-	if(g_key_file_has_key(gkf,group_name,key_name, &error)){
-		key_value = (char*) g_key_file_get_locale_string(gkf,group_name , key_name, locale , &error);
-		if(error != NULL)
-			g_warning("Invalid format for key %s: %s", key_name , error->message);
-	}
-	else {
-		g_warning("key not found %s for group: %s", key_name ,group_name );
-		return NULL;
-	}
-
-	if ( !strcmp( key_value, "") ){
-		g_warning("invalid locale key value for %s in %s", key_name ,group_name );
-		return NULL;
-	}
-
-	return key_value;
-}
-
-
-/**
  * \brief check if the group contains the given key, get the corresponding integer value or display appropriate error to the user
  * \param gkf the GKeyFile openned
  * \param groups the names of groups present in configuration file
@@ -553,36 +515,6 @@ gboolean set_key_value(GKeyFile* gkf, const gchar* const* groups ,char *group_na
 		 g_critical("Group %s not found in configuration file - It should be written in the form [%s]",group_name,group_name );
 	if(g_key_file_has_key(gkf,group_name,key_name , &error)){
 		g_key_file_set_string(gkf,group_name ,key_name ,new_value );
-		g_key_file_save_to_file(gkf, gkf_path , &error);
-		if(error != NULL){
-			g_warning("failed to write to configuration file %s: %s",CONFIG_FILE , error->message);
-			return FALSE;
-		}
-	}
-	else{
-		g_warning("key not found %s for group: %s",key_name ,group_name );
-		return FALSE;
-	}
-
-	return TRUE;
-
-}
-
-/**
- * \brief check if the group contains the given key, set the corresponding value or display appropriate error to the user, save the new version of conf file
- * \param gkf the GKeyFile openned
- * \param groups the names of groups present in configuration file
- * \param group_name the group's name in which we are interested
- * \param key_name the name of the key we are looking for
- * \param error a variable to store errors
- * \return gchar* the value of the found key or NULL is the key has not been found
- */
-gboolean set_key_locale_value(GKeyFile* gkf, const gchar* const* groups ,char *group_name, gchar* gkf_path,  const gchar *key_name, const gchar *locale, const gchar *new_value, GError* error){
-
-	if( !(g_strv_contains((const gchar* const*) groups, group_name )))
-		g_critical ("Group %s not found in configuration file - It should be written in the form [%s]",group_name,group_name );
-	if(g_key_file_has_key(gkf,group_name,key_name , &error)){
-		g_key_file_set_locale_string(gkf,group_name ,key_name , locale ,new_value );
 		g_key_file_save_to_file(gkf, gkf_path , &error);
 		if(error != NULL){
 			g_warning("failed to write to configuration file %s: %s",CONFIG_FILE , error->message);
@@ -905,7 +837,7 @@ void set_default_IP_from_conf(int index, const char* new_default_ip){
  * \brief returned the assignedIP saved in the configuration file
  * \return the value of the assigned key or NULL if not found
  */
-gchar *get_static_assigned_IP_from_conf( const gchar *locale){
+gchar *get_static_assigned_IP_from_conf( const gchar *if_name){
 	/* Define the error pointer we will be using to check for errors in the configuration file */
     GError 		*error 	= NULL;
 
@@ -929,9 +861,13 @@ gchar *get_static_assigned_IP_from_conf( const gchar *locale){
 	 * second parameter "gchar* length" is optional*/
 	groups = g_key_file_get_groups(gkf, NULL);
 
-	assigned_ip = get_key_value_locale_string(gkf,(const gchar* const*) groups , GROUP_NAME_DEVICEINFO , KEY_NAME_ASSIGNED_IP , locale , error);
+	/* build key name from KEY_NAME_ASSIGNED_IP and if_name */
+	gchar *key_name = g_strconcat ( KEY_NAME_ASSIGNED_IP , "_", if_name ,  NULL);
+
+	assigned_ip = get_key_value_string(gkf,(const gchar* const*) groups , GROUP_NAME_DEVICEINFO , key_name , error);
 
 	close_mib_configuration_file(gkf);
+	g_free ( key_name );
 	return assigned_ip;
 
 }
@@ -940,7 +876,7 @@ gchar *get_static_assigned_IP_from_conf( const gchar *locale){
  * \brief save the value of the key "assignedIP" set by the manager in MIB into the configuration file
  * \param new_ip the new value of assignedIP
  */
-void set_static_assigned_IP_to_conf(const gchar *locale , const char* new_ip ){
+void set_static_assigned_IP_to_conf(const gchar *if_name , const char* new_ip ){
 	/* Define the error pointer we will be using to check for errors in the configuration file */
     GError 		*error 	= NULL;
 
@@ -959,9 +895,15 @@ void set_static_assigned_IP_to_conf(const gchar *locale , const char* new_ip ){
 	 * second parameter "gchar* length" is optional*/
 	groups = g_key_file_get_groups(gkf, NULL);
 
-	set_key_locale_value(gkf,(const gchar* const*) groups , GROUP_NAME_DEVICEINFO , gkf_path , KEY_NAME_ASSIGNED_IP , locale ,  new_ip , error);
+	/* build key name from KEY_NAME_ASSIGNED_IP and if_name */
+	gchar *key_name = g_strconcat ( KEY_NAME_ASSIGNED_IP , "_", if_name , NULL);
+
+
+	set_key_value(gkf,(const gchar* const*) groups , GROUP_NAME_DEVICEINFO , gkf_path , key_name ,  new_ip , error);
 
 	close_mib_configuration_file(gkf);
+
+	g_free ( key_name );
 
 }
 
