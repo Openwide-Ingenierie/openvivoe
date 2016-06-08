@@ -24,6 +24,7 @@
 
 #include "../../include/mibParameters.h"
 #include "../../include/log.h"
+#include "../../include/deviceInfo/ethernetIfTable.h"
 #include "../../include/videoFormatInfo/videoFormatTable.h"
 #include "../../include/channelControl/channelTable.h"
 #include "../../include/streaming/stream_registration.h"
@@ -277,7 +278,7 @@ static gboolean create_branch_in_pipeline( GstElement *pipeline , GstElement *in
 void set_udpsink_param( GstElement *udpsink, long channel_entry_index){
 
 	/* compute IP */
-	long ip 			= define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0], channel_entry_index);
+	long ip 			= define_vivoe_multicast( get_primary_interface_name() , channel_entry_index);
 
 	/* transform IP from long to char * */
 	struct in_addr ip_addr;

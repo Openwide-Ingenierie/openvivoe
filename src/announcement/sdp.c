@@ -234,7 +234,7 @@ gboolean create_SDP(GstSDPMessage 	*msg, struct channelTable_entry * channel_ent
 	/* connection:
 	 * c=<network type> <address type> <address>
 	 */
-    long ip  = define_vivoe_multicast(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0],channel_entry->channelIndex);
+    long ip  = define_vivoe_multicast( get_primary_interface_name() , channel_entry->channelIndex);
 	/* transform IP from long to char * */
 	struct in_addr multicast_addr;
 	multicast_addr.s_addr = ip;
