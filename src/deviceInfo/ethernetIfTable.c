@@ -21,10 +21,16 @@
  * \brief get the last element of the Table
  * \return ethernetIfTableEntry*  a pointer the last entry in the table
  */
-static struct ethernetIfTableEntry * ethernetIfTable_getLast(){
+static struct ethernetIfTableEntry * ethernetIfTable_getLast( int *nb_entry ){
+	int entry_counter = 1;
 	struct ethernetIfTableEntry *iterator = ethernetIfTable_head;
-	while(iterator->next != NULL)
-			iterator = iterator->next;
+	while(iterator->next != NULL){
+		iterator = iterator->next;
+		entry_counter ++;
+	}
+
+	/* save the number of entry in nb_entry */
+	*nb_entry = entry_counter;
 	return iterator;
 }
 
@@ -47,12 +53,12 @@ struct ethernetIfTableEntry * ethernetIfTableEntry_create(  long  ethernetIfInde
                                                             in_addr_t ethernetIfIpAddressConflict)
 {
     struct ethernetIfTableEntry *entry;
+	int nb_entry;
 
     entry = SNMP_MALLOC_TYPEDEF(struct ethernetIfTableEntry);
     if (!entry)
         return NULL;
 
-    entry->ethernetIfIndex = ethernetIfIndex;
 
     entry->ethernetIfSpeed = ethernetIfSpeed;
 
@@ -66,10 +72,13 @@ struct ethernetIfTableEntry * ethernetIfTableEntry_create(  long  ethernetIfInde
     entry->ethernetIfIpAddressConflict = ethernetIfIpAddressConflict;
 
     entry->valid = 1;
-	if( ethernetIfTable_head == NULL )
+	if( ethernetIfTable_head == NULL ){
+	    entry->ethernetIfIndex = 1; /* only one entry in the table */
 		ethernetIfTable_head = entry;
+	}
 	else{
-		struct ethernetIfTableEntry *last = ethernetIfTable_getLast();
+		struct ethernetIfTableEntry *last = ethernetIfTable_getLast(&nb_entry);
+		entry->ethernetIfIndex = nb_entry+1;
 		last->next = entry;
 		entry->next = NULL;
 	}
@@ -170,6 +179,7 @@ static void initialize_table_ethernetIfTable(void)
 			}
 
 		}else{
+
 			/* now fill the ethernetIfTable */
 			init_ethernet(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i]);
 
@@ -250,14 +260,6 @@ ethernetIfTable_get_first_data_point(void **my_loop_context,
     return ethernetIfTable_get_next_data_point(my_loop_context, my_data_context,
                                     put_index_data,  mydata );
 }
-
-
-/**
- * \brief handles ethernet IP modifications: set static IP, check for conflict, send trap if needed
- */
-//static gboolean ethernetIfIpAdress_handler () {
-//
-//}
 
 /**
  * \brief calls appropriate handler for this parameter
@@ -372,19 +374,7 @@ ethernetIfTable_handler(
 						netsnmp_set_request_error(reqinfo, requests, ret );
 						return SNMP_ERR_NOERROR;
 					}
-					/* check if device is configured in VIVOE IP assignment mode */
-					if ( !openvivoe_uses_default_IP_assignment_scheme() ){
-						/* check for conflict */
-						ip_conflict_detection(  table_entry , deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0]); /* the primary interface */
-						/* if no conflict, save the value */
-						struct in_addr new_ip;
-						new_ip.s_addr = table_entry->ethernetIfIpAddress;
-						set_static_assigned_IP_to_conf ( inet_ntoa ( new_ip ));
-					}else{
-						ret = SNMP_ERR_NOACCESS;
-						netsnmp_set_request_error(reqinfo, requests, ret );
-						return SNMP_ERR_NOERROR;
-					}
+
 					break;
             case COLUMN_ETHERNETIFSUBNETMASK:
                 /* or possibly 'netsnmp_check_vb_int_range' */
@@ -421,6 +411,12 @@ ethernetIfTable_handler(
 					netsnmp_set_request_error(reqinfo, requests,SNMP_ERR_RESOURCEUNAVAILABLE  );
 					return SNMP_ERR_NOERROR;
 				}
+				/* check if device is configured in VIVOE IP assignment mode, esle return NO ACCESS error */
+				if ( !openvivoe_uses_default_IP_assignment_scheme() ){
+					ret = SNMP_ERR_NOACCESS;
+					netsnmp_set_request_error(reqinfo, requests, ret );
+					return SNMP_ERR_NOERROR;
+				}
                 break;
             case COLUMN_ETHERNETIFSUBNETMASK:
 				if ( deviceInfo.parameters[num_DeviceMode]._value.int_val	!= maintenanceMode){
@@ -455,21 +451,28 @@ ethernetIfTable_handler(
             table_entry = (struct ethernetIfTableEntry *)
                               netsnmp_extract_iterator_context(request);
             table_info  =     netsnmp_extract_table_info(      request);
-            switch (table_info->colnum) {
-            case COLUMN_ETHERNETIFIPADDRESS:
-                table_entry->old_ethernetIfIpAddress 			= table_entry->ethernetIfIpAddress;
-                table_entry->ethernetIfIpAddress     			= *request->requestvb->val.integer;
-				/* call the hanlder for ethenetIfAdrress modifications */
-                break;
-            case COLUMN_ETHERNETIFSUBNETMASK:
-                table_entry->old_ethernetIfSubnetMask 			= table_entry->ethernetIfSubnetMask;
-                table_entry->ethernetIfSubnetMask     			= *request->requestvb->val.integer;
-                break;
-            case COLUMN_ETHERNETIFIPADDRESSCONFLICT:
-                table_entry->old_ethernetIfIpAddressConflict 	= table_entry->ethernetIfIpAddressConflict;
-                table_entry->ethernetIfIpAddressConflict     	= *request->requestvb->val.integer;
-                break;
-            }
+			switch (table_info->colnum) {
+				case COLUMN_ETHERNETIFIPADDRESS:
+					table_entry->old_ethernetIfIpAddress 			= table_entry->ethernetIfIpAddress;
+					table_entry->ethernetIfIpAddress     			= *request->requestvb->val.integer;
+					/* call the hanlder for ethenetIfAdrress modifications */
+					/* check for conflict */
+					if ( ! ip_conflict_detection(  table_entry , deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0])){
+						/* if no conflict, save the value */
+						struct in_addr new_ip;
+						new_ip.s_addr = table_entry->ethernetIfIpAddress;
+						set_static_assigned_IP_to_conf ( inet_ntoa ( new_ip ));
+					}/* otherwise, a trap will be send to the manager, do not save this conflicting IP */
+					break;
+				case COLUMN_ETHERNETIFSUBNETMASK:
+					table_entry->old_ethernetIfSubnetMask 			= table_entry->ethernetIfSubnetMask;
+					table_entry->ethernetIfSubnetMask     			= *request->requestvb->val.integer;
+					break;
+				case COLUMN_ETHERNETIFIPADDRESSCONFLICT:
+					table_entry->old_ethernetIfIpAddressConflict 	= table_entry->ethernetIfIpAddressConflict;
+					table_entry->ethernetIfIpAddressConflict     	= *request->requestvb->val.integer;
+					break;
+			}
         }
         break;
 
