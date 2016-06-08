@@ -163,13 +163,13 @@ static void initialize_table_ethernetIfTable(void)
 			/* check if an IP have already be assigned to the device */
 			const gchar* assigned_ip= get_static_assigned_IP_from_conf( deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i]  );
 
-			if ( !assigned_ip ){
-				/* otherwise set default static IP, as defined in VIVOE's IP assignment scheme */
-				assign_default_ip ( deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i] );
-			}else{
-				/* assigned the IP from conf to the device */
-				set_static_ip( deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i] , assigned_ip ) ;
-			}
+	//		if ( !assigned_ip ){
+	//			/* otherwise set default static IP, as defined in VIVOE's IP assignment scheme */
+	//			assign_default_ip ( deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i] );
+	//		}else{
+	//			/* assigned the IP from conf to the device */
+	//			set_static_ip( deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i] , assigned_ip ) ;
+	//		}
 
 			/* now fill the ethernetIfTable */
 			struct ethernetIfTableEntry *new_entry = init_ethernet(deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i]);
@@ -419,7 +419,7 @@ ethernetIfTable_handler(
 					return SNMP_ERR_NOERROR;
 				}
 				/* check if device is configured in VIVOE IP assignment mode, esle return NO ACCESS error */
-				if ( !openvivoe_uses_default_IP_assignment_scheme() ){
+				if ( openvivoe_uses_default_IP_assignment_scheme() ){
 					ret = SNMP_ERR_NOACCESS;
 					netsnmp_set_request_error(reqinfo, requests, ret );
 					return SNMP_ERR_NOERROR;
@@ -468,7 +468,7 @@ ethernetIfTable_handler(
 						/* if no conflict, save the value */
 						struct in_addr new_ip;
 						new_ip.s_addr = table_entry->ethernetIfIpAddress;
-						set_static_assigned_IP_to_conf ( deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[ table_entry->ethernetIfIndex - 1 ] , inet_ntoa ( new_ip ));
+						//set_static_assigned_IP_to_conf ( deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[ table_entry->ethernetIfIndex - 1 ] , inet_ntoa ( new_ip ));
 					}/* otherwise, a trap will be send to the manager, do not save this conflicting IP */
 					break;
 				case COLUMN_ETHERNETIFSUBNETMASK:
