@@ -110,7 +110,13 @@ static gboolean openvivoe_uses_default_IP_assignment_scheme(){
 
 }
 
-
+/**
+ * \brief get the primary interface name
+ * \return the name of the prmimary interface, i.e. the name of the first entry in the table
+ */
+gchar *get_primary_interface_name(){
+	return deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[0] ;
+}
 
 /**
  * \brief Initialize the ethernetIfTable table by defining its contents and how it's structured
