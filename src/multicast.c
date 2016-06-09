@@ -22,46 +22,25 @@
 #include <net/if.h>
 #include <arpa/inet.h>
 
+
+#include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+
 /* header file */
-#include "../include/multicast.h"
+#include "../include/deviceInfo/ethernetIfTable.h"
 #include "../include/mibParameters.h"
-
-
-/**
- * \brief Retrieve system IP address on a specific interface
- * \param iface The network interface to use to retrieve the IP
- * \param ifr a structure to store the interface information
- */
-static gboolean get_ip(const char* iface, struct ifreq* ifr){
-	int fd;
-	fd = socket(AF_INET, SOCK_DGRAM, 0);
-
-    /* IPv4 */
-    ifr->ifr_addr.sa_family = AF_INET;
-
-    /* Specify network interface */
-    strncpy(ifr->ifr_name, iface, IFNAMSIZ-1);
-
-	/* ioctl */
-	if(ioctl(fd, SIOCGIFADDR, ifr) < 0) {
-		g_error("get_ip(): ioctl failed with error message \"%s\"", strerror(errno));
-		return FALSE;
-	}
-
-    close(fd);
-	return TRUE;
-}
+#include "../include/multicast.h"
 
 /**
- * \brief Retrieve the device IP associated to the address addr
- * \param addr The addresse to use
+ * \brief Retrieve the device ID associated to the address ip_ddr
+ * \param ip_addr The addresse to use
  * \return the deviceID associated (last byte of IP address)
  */
-static uint8_t get_device_id(char* addr){
-	long int_addr 	= ntohl(inet_addr( (const char*) addr)); /* get the addresse in binary mode, in network style (as host style may changed according to host) */
+static uint8_t get_device_id(struct in_addr ip_addr){
 	long mask 		= 0xFF ; /* create the mask: 0x00.00.00.FF or 0x00.00.00.00.00.00.00.FF depending of architecture*/
 	/* return the device ID */
-	return (int_addr&mask);
+	return (htonl(ip_addr.s_addr)&mask);
 }
 
 /**
@@ -71,25 +50,25 @@ static uint8_t get_device_id(char* addr){
  * \param multicast_channel the multicast channel we wanna use
  * \return the multicast_addr in a long form
  */
-long define_vivoe_multicast(const char* multicast_iface, const short int multicast_channel)
+long define_vivoe_multicast( struct ethernetIfTableEntry *if_entry, const short int multicast_channel)
 {
-	char* 	device_ip 	= NULL;
 	short 	device_id;
-	struct 	ifreq ifr;
+	struct in_addr ip_addr;
 	/* constant values needed to build multicast address */
 	unsigned long multicast_pref = ntohl(inet_addr("239.192.0.0"));
 	unsigned long channel 		= (long) (multicast_channel << 8);
 	unsigned long result = -1; /* the multicast_addr in a binary form */
 
-	if( get_ip(multicast_iface, &ifr)){
+	if ( if_entry ){
 
-		device_ip = inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr);
-		device_id = get_device_id(device_ip);
+		/* save ip in ip_addr */
+		ip_addr.s_addr = if_entry->ethernetIfIpAddress;
+		device_id = get_device_id(ip_addr);
 		result = multicast_pref + channel + device_id;
 
 	} else{
 
-		g_error("ERROR: Failed to retrieve IP on %s", multicast_iface);
+		g_error("ERROR: Failed to retrieve IP on %s", get_primary_interface_name() );
 
 	}
 

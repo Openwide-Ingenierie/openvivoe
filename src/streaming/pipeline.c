@@ -278,7 +278,7 @@ static gboolean create_branch_in_pipeline( GstElement *pipeline , GstElement *in
 void set_udpsink_param( GstElement *udpsink, long channel_entry_index){
 
 	/* compute IP */
-	long ip 			= define_vivoe_multicast( get_primary_interface_name() , channel_entry_index);
+	long ip 			= define_vivoe_multicast( ethernetIfTable_head , channel_entry_index);
 
 	/* transform IP from long to char * */
 	struct in_addr ip_addr;

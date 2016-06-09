@@ -468,7 +468,7 @@ ethernetIfTable_handler(
 						/* if no conflict, save the value */
 						struct in_addr new_ip;
 						new_ip.s_addr = table_entry->ethernetIfIpAddress;
-						//set_static_assigned_IP_to_conf ( deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[ table_entry->ethernetIfIndex - 1 ] , inet_ntoa ( new_ip ));
+						set_static_assigned_IP_to_conf ( deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[ table_entry->ethernetIfIndex - 1 ] , inet_ntoa ( new_ip ));
 					}/* otherwise, a trap will be send to the manager, do not save this conflicting IP */
 					break;
 				case COLUMN_ETHERNETIFSUBNETMASK:
