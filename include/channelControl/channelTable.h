@@ -94,6 +94,7 @@ struct channelTable_entry {
     in_addr_t channelDefaultReceiveIpAddress;
     in_addr_t old_channelDefaultReceiveIpAddress;
 
+	/* Other values required by OpenVivoe, but not in the MIB */
 	gpointer stream_datas; /* a stream assoicated to the channel */
 	sap_data *sap_datas; /* the SAP/SDP announcement associated to the stream and the channel */
 

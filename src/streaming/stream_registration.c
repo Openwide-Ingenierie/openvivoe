@@ -22,26 +22,6 @@
 #include "../../include/streaming/stream.h"
 #include "../../include/announcement/sap.h"
 
-/*
- * \brief This function compares two entries in the videoFormatTable if those entries are equal: return TRUE, otherwise return FALSE
- * \param origin first entry to compare
- * \param new second entry to compare
- * \return TRUE if they are the same, FALSE otherwise
- */
-static gboolean compare_entries(struct videoFormatTable_entry* origin, struct videoFormatTable_entry* new){
-	 return(( !strcmp( origin->videoFormatBase 		, 	new->videoFormatBase 				)) 	&&
-			( !strcmp(origin->videoFormatSampling 	, 	new->videoFormatSampling 			)) 	&&
-			( origin->videoFormatBitDepth 			== 	new->videoFormatBitDepth 			) 	&&
-			( origin->videoFormatFps 				== 	new->videoFormatFps 				) 	&&
-			( !strcmp(origin->videoFormatColorimetry,  	new->videoFormatColorimetry 		)) 	&&
-			( origin->videoFormatInterlaced 		== 	new->videoFormatInterlaced 			) 	&&
-			( origin->videoFormatCompressionFactor 	== 	new->videoFormatCompressionFactor 	) 	&&
-			( origin->videoFormatCompressionRate 	== 	new->videoFormatCompressionRate 	) 	&&
-			( origin->videoFormatMaxHorzRes 		== 	new->videoFormatMaxHorzRes 			) 	&&
-			( origin->videoFormatMaxVertRes 		== 	new->videoFormatMaxVertRes 			)
-	   		);
-}
-
 /**
  * \brief J2K videos caps have a field names "colorspace" that can be map to a classic slampling
  * \param colorimetru the colorimetry srting value in detected caps

@@ -239,7 +239,7 @@ gboolean handle_roi( GstElement *pipeline, struct videoFormatTable_entry *video_
 	GstElement 	*vivoecaps 	= NULL;
 	gboolean 	scalable  	= FALSE ;
 
-	g_debug("handle_roi");
+	g_debug("handle_roi()");
 
 	/*
 	 * iterates though the bin source to find the element vivoecrop
@@ -278,7 +278,7 @@ gboolean handle_roi( GstElement *pipeline, struct videoFormatTable_entry *video_
 	 * This will initialize the ROI parameters to 0 if they were not specified in the configuration file
 	 */
 	if ( get_roi_values_from_conf( video_stream_info, scalable , channel_entry ) ){
-		set_parameters_to_roi_elements ( video_stream_info , vivoecrop, vivoecaps, scalable );
+		set_parameters_to_roi_elements ( video_stream_info , vivoecrop, vivoecaps , scalable );
 		return TRUE;
 	}
 	else
@@ -292,7 +292,7 @@ gboolean handle_roi( GstElement *pipeline, struct videoFormatTable_entry *video_
  * \param channel_entry the corresponding channel entry
  * \return TRUE on succes, FALSE on failure such as wrong values given in the MIB
  */
-gboolean update_pipeline_SP_on_roi_changes( gpointer stream_datas , struct channelTable_entry *channel_entry , struct videoFormatTable_entry *videoFormat_entry){
+gboolean update_pipeline_on_roi_changes( gpointer stream_datas , struct channelTable_entry *channel_entry , struct videoFormatTable_entry *videoFormat_entry){
 
 	stream_data *data 		= stream_datas;
 	GstElement 	*pipeline 	= data->pipeline;

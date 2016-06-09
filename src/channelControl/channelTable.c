@@ -14,6 +14,7 @@
 #include <arpa/inet.h>
 #include "../../include/mibParameters.h"
 #include "../../include/conf/mib-conf.h"
+#include "../../include/deviceInfo/ethernetIfTable.h"
 #include "../../include/multicast.h"
 #include "../../include/videoFormatInfo/videoFormatTable.h"
 #include "../../include/handler.h"
@@ -576,7 +577,7 @@ static gboolean roi_requests_handler( struct channelTable_entry * table_entry , 
 	struct videoFormatTable_entry *video_stream_info = NULL ;
 
 	/*
-	 * If we are a Service User, we are going to buld a "fake" videoFormat entry
+	 * If we are a Service User, we are going to build a "fake" videoFormat entry
 	 */
 	if ( table_entry->channelType == serviceUser )
 		video_stream_info = SNMP_MALLOC_TYPEDEF(struct videoFormatTable_entry);
@@ -590,7 +591,7 @@ static gboolean roi_requests_handler( struct channelTable_entry * table_entry , 
 	 * Now update pipeline
 	 * If an error occurs, we just reset the old roi parameters' values of channel and video_stream_info
 	 */
-	if ( ! update_pipeline_SP_on_roi_changes( table_entry->stream_datas ,  table_entry , video_stream_info ) )
+	if ( ! update_pipeline_on_roi_changes( table_entry->stream_datas ,  table_entry , video_stream_info ) )
 		return FALSE;
 	else{
 		/* If this is a SP we need to re-send a new SDP file, so we call the channelStatus request handler */

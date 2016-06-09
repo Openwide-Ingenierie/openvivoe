@@ -27,7 +27,6 @@
  */
 #include "../include/mibParameters.h"
 
-
 /*
  * DeviceInfo header
  */
@@ -57,16 +56,16 @@
 #include "../include/channelControl/channelNumber.h"
 #include "../include/channelControl/channelReset.h"
 #include "../include/channelControl/channelTable.h"
-/*
- * Configuration - Initialization of the MIB header
- */
-#include "../include/conf/mib-conf.h"
 
 /*
  * SAP/SDP announcement
  */
 #include "../include/announcement/sap.h"
 
+/*
+ * Configuration - Initialization of the MIB header
+ */
+#include "../include/conf/mib-conf.h"
 
 /*
  * Header of this file
@@ -131,8 +130,9 @@ int open_vivoe_daemon (char* deamon_name) {
 	g_debug("init SNMP");
 	init_snmp(basename(deamon_name));
 
-  g_info("%s is up and running.", basename(deamon_name));
-  return EXIT_SUCCESS;
+	g_info("%s is up and running.", basename(deamon_name));
+	return EXIT_SUCCESS;
+
 }
 
 gboolean handle_snmp_request( void ){

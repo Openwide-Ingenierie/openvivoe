@@ -8,7 +8,7 @@
 # define ROI_H
 
 gboolean 	handle_roi( GstElement *pipeline,  struct videoFormatTable_entry *video_stream_info, struct channelTable_entry *channel_entry );
-gboolean 	update_pipeline_SP_on_roi_changes( gpointer stream_datas , struct channelTable_entry *channel_entry , struct videoFormatTable_entry *videoFormat_entry) ;
+gboolean 	update_pipeline_on_roi_changes( gpointer stream_datas , struct channelTable_entry *channel_entry , struct videoFormatTable_entry *videoFormat_entry) ;
 
 #endif /* ROI_H */
 

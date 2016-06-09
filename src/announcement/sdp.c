@@ -19,8 +19,8 @@
 
 /* Header file */
 #include "../../include/mibParameters.h"
-#include "../../include/multicast.h"
 #include "../../include/deviceInfo/ethernetIfTable.h"
+#include "../../include/multicast.h"
 #include "../../include/videoFormatInfo/videoFormatTable.h"
 #include "../../include/channelControl/channelTable.h"
 #include "../../include/announcement/sdp.h"
