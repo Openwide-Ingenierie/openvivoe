@@ -484,7 +484,7 @@ static gchar **get_key_string_list(GKeyFile* gkf, const gchar* const* groups ,ch
 	}
 
 	if(g_key_file_has_key(gkf,group_name,key_name, &error)){
-		key_value = g_key_file_get_string_list(gkf,group_name , key_name , lenght, &error);
+		key_value = g_key_file_get_string_list(gkf,group_name , key_name , length , &error);
 		if(error != NULL)
 			g_warning("Invalid format for key %s: %s", key_name , error->message);
 	}
@@ -493,7 +493,7 @@ static gchar **get_key_string_list(GKeyFile* gkf, const gchar* const* groups ,ch
 		return NULL;
 	}
 
-	if ( !strcmp( key_value, "") ){
+	if ( *length == 0 ){
 		g_warning("invalid key value for %s in %s", key_name ,group_name );
 		return NULL;
 	}
@@ -1242,7 +1242,7 @@ static gboolean init_redirection_data(GKeyFile* gkf ){
  * \param
  * \return the command line to use to control de camera
  */
-gchar **get_camera_ctl_cmdline ( int source_index ){
+gchar **get_camera_ctl_cmdline ( int source_index, unsigned long *nb_args ){
 
 	/* Define the error pointer we will be using to check for errors in the configuration file */
 	GError 		*error 	= NULL;
@@ -1256,7 +1256,7 @@ gchar **get_camera_ctl_cmdline ( int source_index ){
 	/* Declaration of an array of gstring (gchar**) that will contain the name of the different groups
 	 * declared in the configuration file
 	 */
-	gchar 		**groups;
+	const gchar* const* groups;
 
 	/*
 	 * A variable to store the length of the list found
@@ -1269,21 +1269,28 @@ gchar **get_camera_ctl_cmdline ( int source_index ){
 	gchar 		**camera_ctl_cmdline;
 
 	/* build the GROUP_NAME */
+	gchar *string_index;
+   	if ( asprintf( &string_index , "%d", source_index) < 0 )
+		return NULL;
+
 	/* build key name from KEY_NAME_ASSIGNED_IP and if_name */
-	gchar *group_name = g_strconcat (GROUP_NAME_SOURCE ,  asprintf("%d", source_index) ,  NULL);
+	gchar *group_name = g_strconcat (GROUP_NAME_SOURCE , string_index ,  NULL);
 
 	/*first we load the different Groups of the configuration file
 	 * second parameter "gchar* length" is optional*/
-	groups = g_key_file_get_groups(gkf, NULL);
+	groups =  (const gchar* const*) g_key_file_get_groups(gkf, NULL);
 
 	/* Defined what separator will be used in the list when the parameter can have several values (for a table for example)*/
     g_key_file_set_list_separator (gkf_conf_file, (gchar) ',');
 
 	/* get the commandline and its parameters */
-	get_key_string_list ( gkf, groups, group_name , CAMERA_CTL_CMDLINE , &length, error);
+	camera_ctl_cmdline = get_key_string_list ( gkf,  groups, group_name , CAMERA_CTL_CMDLINE , &length, error);
+
+	/* save the value of lengt in nb_args */
+	*nb_args = length;
 
 	close_mib_configuration_file(gkf);
-	return assigned_ip;
+	return camera_ctl_cmdline;
 
 }
 
