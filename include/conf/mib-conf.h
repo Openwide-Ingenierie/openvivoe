@@ -76,6 +76,11 @@
 #define GST_SOURCE_CMDLINE 				"gst_source"
 
 /**
+ * \brief the command line to use for physical camera control
+ */
+#define CAMERA_CTL_CMDLINE 				"camera_ctl"
+
+/**
  * \brief the name of the Gstreamer command line used by the user to output the video
  */
 #define GST_SINK_CMDLINE 				"gst_sink"

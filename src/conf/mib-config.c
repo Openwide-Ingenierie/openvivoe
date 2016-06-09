@@ -465,6 +465,43 @@ static gchar *get_key_value_string(GKeyFile* gkf, const gchar* const* groups ,ch
 }
 
 /**
+ * \brief check if the group contains the given key, get the corresponding list of values or display appropriate error to the user
+ * \param gkf the GKeyFile openned
+ * \param groups the names of groups present in configuration file
+ * \param group_name the group's name in which we are interested
+ * \param key_name the name of the key we are loooking for
+ * \param length a variable to store the length of the list
+ * \param error a variable to store errors
+ * \return gchar* the value of the found key or NULL is the key has not been found
+ */
+static gchar **get_key_string_list(GKeyFile* gkf, const gchar* const* groups ,char *group_name, const gchar *key_name, gsize *length, GError* error){
+
+	gchar **key_value; /* a variable to store the key value */
+
+	if( !(g_strv_contains(groups, group_name )) ){
+		g_critical ("Group %s not found in configuration file - It should be written in the form [%s]", group_name ,group_name);
+		return NULL;
+	}
+
+	if(g_key_file_has_key(gkf,group_name,key_name, &error)){
+		key_value = g_key_file_get_string_list(gkf,group_name , key_name , lenght, &error);
+		if(error != NULL)
+			g_warning("Invalid format for key %s: %s", key_name , error->message);
+	}
+	else {
+		g_warning("key not found %s for group: %s", key_name ,group_name );
+		return NULL;
+	}
+
+	if ( !strcmp( key_value, "") ){
+		g_warning("invalid key value for %s in %s", key_name ,group_name );
+		return NULL;
+	}
+
+	return key_value;
+}
+
+/**
  * \brief check if the group contains the given key, get the corresponding integer value or display appropriate error to the user
  * \param gkf the GKeyFile openned
  * \param groups the names of groups present in configuration file
@@ -1197,6 +1234,56 @@ static gboolean init_redirection_data(GKeyFile* gkf ){
 	}
 
 	return TRUE;
+
+}
+
+/**
+ * \brief init the data for the phisical camera control with parameters from the configuration file
+ * \param
+ * \return the command line to use to control de camera
+ */
+gchar **get_camera_ctl_cmdline ( int source_index ){
+
+	/* Define the error pointer we will be using to check for errors in the configuration file */
+	GError 		*error 	= NULL;
+
+	/* a location to store the path of the openned configuration file */
+	gchar* gkf_path = NULL;
+
+	/* Declaration of a pointer that will contain our configuration file*/
+	GKeyFile 	*gkf 	= open_mib_configuration_file(error, &gkf_path);
+
+	/* Declaration of an array of gstring (gchar**) that will contain the name of the different groups
+	 * declared in the configuration file
+	 */
+	gchar 		**groups;
+
+	/*
+	 * A variable to store the length of the list found
+	 */
+	gsize length;
+
+	/*
+	 * the cmd line to retrieve that will be used to controle the command line
+	 */
+	gchar 		**camera_ctl_cmdline;
+
+	/* build the GROUP_NAME */
+	/* build key name from KEY_NAME_ASSIGNED_IP and if_name */
+	gchar *group_name = g_strconcat (GROUP_NAME_SOURCE ,  asprintf("%d", source_index) ,  NULL);
+
+	/*first we load the different Groups of the configuration file
+	 * second parameter "gchar* length" is optional*/
+	groups = g_key_file_get_groups(gkf, NULL);
+
+	/* Defined what separator will be used in the list when the parameter can have several values (for a table for example)*/
+    g_key_file_set_list_separator (gkf_conf_file, (gchar) ',');
+
+	/* get the commandline and its parameters */
+	get_key_string_list ( gkf, groups, group_name , CAMERA_CTL_CMDLINE , &length, error);
+
+	close_mib_configuration_file(gkf);
+	return assigned_ip;
 
 }
 
