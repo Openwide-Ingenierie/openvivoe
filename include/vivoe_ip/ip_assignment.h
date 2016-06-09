@@ -7,12 +7,6 @@
 #ifndef IP_ASSIGNMENT_H
 #define IP_ASSIGNMENT_H
 
-
-/**
- * \brief the default static IP that shoud be assgigned to a device
- */
-#define DEFAULT_STATIC_IP 	"192.168.204.254"
-
 gboolean set_static_ip( const gchar *interface, const gchar *ip) ;
 gboolean assign_default_ip( const gchar *interface) ;
 in_addr_t random_ip_for_conflict( gchar *interface) ;

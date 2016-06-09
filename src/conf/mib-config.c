@@ -10,6 +10,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+
 #include "../../include/mibParameters.h"
 #include "../../include/conf/mib-conf.h"
 
@@ -833,6 +836,23 @@ void set_default_IP_from_conf(int index, const char* new_default_ip){
 
 }
 
+static gboolean check_assignedIP_validity( gchar *ip_value){
+
+	in_addr_t ip 		= inet_addr( ip_value );
+
+	/* start by checking prefix */
+	in_addr_t ip_prefix 		= inet_addr( RANDOM_IP_PREFIX );
+
+	/* chekc if IP start with 192.168.204 */
+	if ( (ip & 0xFFFFFF00) != (ip_prefix & 0xFFFFFF00)){
+		return FALSE;
+	}
+
+	/* check if its last byte is not 192.168.2042.54 */
+	return ( ip !=  inet_addr(DEFAULT_STATIC_IP ) );
+
+}
+
 /**
  * \brief returned the assignedIP saved in the configuration file
  * \return the value of the assigned key or NULL if not found
@@ -865,6 +885,12 @@ gchar *get_static_assigned_IP_from_conf( const gchar *if_name){
 	gchar *key_name = g_strconcat ( KEY_NAME_ASSIGNED_IP , "_", if_name ,  NULL);
 
 	assigned_ip = get_key_value_string(gkf,(const gchar* const*) groups , GROUP_NAME_DEVICEINFO , key_name , error);
+
+	/* check if the IP is comprise between 192.168.204.1 and  192.168.204.253 */
+	if ( ! check_assignedIP_validity(assigned_ip) ){
+		/* if assigned is not valid, stop the program, there are no point to continue */
+		g_error ("value of %s is not a valid IP for a VIVOE device",key_name );
+	}
 
 	close_mib_configuration_file(gkf);
 	g_free ( key_name );

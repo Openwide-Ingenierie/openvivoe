@@ -76,6 +76,17 @@ typedef enum {vivoe_interlaced = 1, vivoe_progressive,  vivoe_none }interlaced_m
 
 /* removing row from table in this MIB */
 #define ALLOW_REMOVING_ROW 			0
+
+/* for IP assignment scheme */
+
+/**
+ * \brief the default static IP that shoud be assgigned to a device
+ */
+#define DEFAULT_STATIC_IP 	"192.168.204.254"
+#define RANDOM_IP_PREFIX 	"192.168.204.0"
+#define RANDOM_MIN_SUFFIX 	200
+#define RANDOM_MAX_SUFFIX 	253
+
 /*
  * Enum for the type of MIB's parameter
  */

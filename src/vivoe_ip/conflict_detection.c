@@ -34,6 +34,7 @@
 #include <ifaddrs.h>
 
 /* header file */
+#include "../../include/mibParameters.h"
 #include "../../include/trap/ipAddressConflict.h"
 #include "../../include/vivoe_ip/ip_assignment.h"
 #include "../../include/deviceInfo/ethernetIfTable.h"

@@ -29,12 +29,11 @@
 #include <ifaddrs.h>
 
 /* header file */
+#include "../../include/mibParameters.h"
 #include "../../include/deviceInfo/ethernetIfTable.h"
 #include "../../include/vivoe_ip/ip_assignment.h"
 
-#define RANDOM_IP_PREFIX 	"192.168.204.0"
-#define RANDOM_MIN_SUFFIX 	200
-#define RANDOM_MAX_SUFFIX 	253
+
 
 
 /**
