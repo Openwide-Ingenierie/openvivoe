@@ -369,6 +369,9 @@ gboolean ip_conflict_detection(  struct ethernetIfTableEntry *if_entry, gchar *i
 
 		/* if receive_arp_reply return FALSE there is a conflict, else, we are fine with this IP  */
 		if ( conflict ){
+			struct in_addr device_ip;
+			device_ip.s_addr = if_entry->ethernetIfIpAddress ;
+			g_debug("IP address %s already in use", inet_ntoa ( device_ip ));
 			/* pick up a new random IP */
 			if_entry->ethernetIfIpAddressConflict 	= if_entry->ethernetIfIpAddress ;
 			if_entry->ethernetIfIpAddress 			= random_ip_for_conflict(interface);
