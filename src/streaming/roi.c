@@ -332,8 +332,13 @@ gboolean update_pipeline_on_roi_changes( gpointer stream_datas , struct channelT
 
 }
 
-
-static gchar* camera_ctl_printf( gchar *camera_ctl , struct channelTable_entry *channel_entry ){
+/**
+ * \brief 	replace the argument %a %b %c %d of a string by the values of Roi origin and Extent parameters
+ * \param 	camera_ctl the corresponding string in which we should find '%a' '%b' '%c' '%d'
+ * \param 	channel_entry the entry from which retrieve the value of Roi origin and extent object
+ * \return 	the corresponding string where %a %b %c or %d characters have been replaced by their numerical value
+*/
+ static gchar* camera_ctl_printf( gchar *camera_ctl , struct channelTable_entry *channel_entry ){
 
 	/* parse the command line to find the correspondance to the channel entry parameters */
 	gchar *parse = strchr( (const char*) camera_ctl , '%' );
@@ -415,6 +420,9 @@ gboolean update_camera_ctl_on_roi_changes ( struct channelTable_entry *channel_e
 		g_critical("Failed to launch a the command to controle camera of source_%ld: %s", channel_entry->channelVideoFormatIndex , strerror(errno));
 		return FALSE;
 	}
+
+	/* command_line is a newly allocated string where memory have been allocated in camera_ctl_printf(), we need to free it */
+	free ( command_line );
 
 	return TRUE;
 
