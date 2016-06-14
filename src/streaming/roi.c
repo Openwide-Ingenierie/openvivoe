@@ -409,7 +409,7 @@ gboolean update_pipeline_on_roi_changes( gpointer stream_datas , struct channelT
  */
 gboolean update_camera_ctl_on_roi_changes ( struct channelTable_entry *channel_entry )
 {
-	int ret = 1;
+	int ret = 0;
 
 	/* first retrieve the command line to use to control the camera and its arguments */
 	gchar 	*camera_ctl 	= get_camera_ctl_cmdline ( channel_entry->channelVideoFormatIndex ) ;
@@ -421,9 +421,10 @@ gboolean update_camera_ctl_on_roi_changes ( struct channelTable_entry *channel_e
 	gchar *command_line = camera_ctl_printf( camera_ctl , channel_entry );
 
 	/* execute command */
-	ret = execl("/bin/sh", "sh", "-c", command_line , (char *) 0);
+	ret = system(command_line);
+
 	/* check the returned value of the command execution */
-	if ( ret < 1 )
+	if ( ret < 0 )
 	{
 		g_critical("Failed to launch a the command to controle camera of source_%ld: %s", channel_entry->channelVideoFormatIndex , strerror(errno));
 		return FALSE;
