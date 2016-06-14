@@ -331,3 +331,92 @@ gboolean update_pipeline_on_roi_changes( gpointer stream_datas , struct channelT
 	return TRUE;
 
 }
+
+
+static gchar* camera_ctl_printf( gchar *camera_ctl , struct channelTable_entry *channel_entry ){
+
+	/* parse the command line to find the correspondance to the channel entry parameters */
+	gchar *parse = strchr( (const char*) camera_ctl , '%' );
+	gchar *previous_parse = camera_ctl;
+	gchar *return_string = (gchar*) malloc( sizeof(gchar) * (strlen(camera_ctl) + 1 ) ); /* +1 for null character */
+	gchar *return_string_head = return_string;
+	gboolean end_string = FALSE;
+
+	while ( parse != NULL && end_string == FALSE ){
+		switch ( *(parse + 1) ){
+			case 'a':
+				strncpy( return_string , previous_parse , strlen (previous_parse) - strlen ( parse ) );
+				return_string +=  strlen ( previous_parse ) - strlen ( parse );
+				sprintf(return_string , "%ld", channel_entry->channelRoiOriginTop);
+				return_string++;
+				parse += 2;
+				break;
+			case 'b':
+				strncpy( return_string , previous_parse , strlen (previous_parse) - strlen ( parse ) );
+				return_string +=  strlen ( previous_parse ) - strlen ( parse );
+				sprintf(return_string , "%ld", channel_entry->channelRoiOriginLeft);
+				return_string++;
+				parse += 2;
+				break;
+			case 'c':
+				strncpy( return_string , previous_parse , strlen (previous_parse) - strlen ( parse ) );
+				return_string +=  strlen ( previous_parse ) - strlen ( parse );
+				sprintf(return_string , "%ld", channel_entry->channelRoiExtentBottom);
+				return_string++;
+				parse += 2;
+				break;
+			case 'd':
+				strncpy( return_string , previous_parse , strlen (previous_parse) - strlen ( parse ) );
+				return_string +=  strlen ( previous_parse ) - strlen ( parse );
+				sprintf(return_string , "%ld", channel_entry->channelRoiExtentRight);
+				return_string++;
+				parse += 2;
+				break;
+			default:
+				strncpy(return_string,  previous_parse , strlen (previous_parse) - strlen ( parse ) + 1);
+				return_string +=  strlen ( previous_parse ) - strlen ( parse ) + 1;
+				parse++;
+				break;
+		}
+		previous_parse = parse;
+		parse = strchr( (const char*) parse , '%' );
+	}
+
+	/* terminate string properly */
+	strncpy ( return_string, "\0", 1 );
+
+	return return_string_head;
+
+}
+
+
+/**
+ * \brief if the key camera_ctl is in configuration then ROI should configured the camera on not the gstreamer's vivoe plugins
+ */
+gboolean update_camera_ctl_on_roi_changes ( struct channelTable_entry *channel_entry )
+{
+	int ret = 1;
+
+	/* first retrieve the command line to use to control the camera and its arguments */
+	gchar 	*camera_ctl 	= get_camera_ctl_cmdline ( channel_entry->channelVideoFormatIndex ) ;
+
+	if ( !camera_ctl ){
+		g_critical("no command line found to control camera");
+		return FALSE;
+	}
+
+	gchar *command_line = camera_ctl_printf( camera_ctl , channel_entry );
+
+	/* execute command */
+	ret = execl("/bin/sh", "sh", "-c", command_line , (char *) 0);
+	/* check the returned value of the command execution */
+	if ( ret < 1 )
+	{
+		g_critical("Failed to launch a the command to controle camera of source_%ld: %s", channel_entry->channelVideoFormatIndex , strerror(errno));
+		return FALSE;
+	}
+
+	return TRUE;
+
+
+}
