@@ -573,7 +573,6 @@ gboolean channelSatus_requests_handler( struct channelTable_entry * table_entry 
  */
 static gboolean roi_requests_handler( struct channelTable_entry * table_entry , struct videoFormatTable_entry *videoFormat_entry ){
 
-
 	struct videoFormatTable_entry *video_stream_info = NULL ;
 
 	/*
@@ -628,7 +627,7 @@ channelTable_handler(
 	 * I think it is better to get the corresponding videoFormat here.
 	 * Event if in some cases it will be useless
 	 */
-	struct videoFormatTable_entry *videoFormat_entry ;
+	struct videoFormatTable_entry *videoFormat_entry = NULL;
 
     DEBUGMSGTL(("channelTable:handler", "Processing request (%d)", reqinfo->mode));
 
@@ -883,7 +882,8 @@ channelTable_handler(
                               netsnmp_extract_iterator_context(request);
             table_info  =     netsnmp_extract_table_info(      request);
 
-			videoFormat_entry =  ( struct videoFormatTable_entry *) videoFormatTable_getEntry( table_entry->channelVideoFormatIndex ) ;
+			if ( table_entry)
+				videoFormat_entry =  videoFormatTable_getEntry( table_entry->channelVideoFormatIndex ) ;
 
 			/* check if the index we are trying to modify is in the table, if no, return */
 			if ( index_out_of_range( reginfo,
@@ -946,7 +946,14 @@ channelTable_handler(
 				/* get the corresponding videoFormatTable to get the maximum value of the top parameter */
 				/* originTop + channelVertRest cannot be greater than MaxVertRes, otherwise we are outside the frame */
 				if ( table_entry->channelType != serviceUser )
-	                ret = netsnmp_check_vb_int_range ( request->requestvb , 0 , videoFormat_entry->videoFormatMaxVertRes  );
+				{
+					if ( ! videoFormat_entry ){
+						netsnmp_set_request_error( reqinfo, request, SNMP_ERR_NOSUCHNAME );
+						return SNMP_ERR_NOERROR;
+					}
+
+					ret = netsnmp_check_vb_int_range ( request->requestvb , 0 , videoFormat_entry->videoFormatMaxVertRes  );
+				}
 				else
 					ret = netsnmp_check_vb_int_range ( request->requestvb , 0 , table_entry->sdp_height  );
 				if ( ret != SNMP_ERR_NOERROR ) {
@@ -957,8 +964,13 @@ channelTable_handler(
             case COLUMN_CHANNELROIORIGINLEFT:
 				/* get the corresponding videoFormatTable to get the maximum value of the left parameter */
 				/* originLeft+ channelHorzRest cannot be greater than MaxHorzRes, otherwise we are outside the frame */
-				if ( table_entry->channelType != serviceUser )
-                	ret = netsnmp_check_vb_int_range ( request->requestvb , 0 , videoFormat_entry->videoFormatMaxHorzRes );
+				if ( table_entry->channelType != serviceUser ){
+					if ( ! videoFormat_entry ){
+						netsnmp_set_request_error( reqinfo, request, SNMP_ERR_NOSUCHNAME );
+						return SNMP_ERR_NOERROR;
+					}
+					ret = netsnmp_check_vb_int_range ( request->requestvb , 0 , videoFormat_entry->videoFormatMaxHorzRes );
+				}
 				else
 					ret = netsnmp_check_vb_int_range ( request->requestvb , 0 , table_entry->sdp_width);
 
