@@ -343,38 +343,47 @@ gboolean update_pipeline_on_roi_changes( gpointer stream_datas , struct channelT
 	/* parse the command line to find the correspondance to the channel entry parameters */
 	gchar *parse = strchr( (const char*) camera_ctl , '%' );
 	gchar *previous_parse = camera_ctl;
-	gchar *return_string = (gchar*) malloc( sizeof(gchar) * (strlen(camera_ctl) + 1 ) ); /* +1 for null character */
+	gchar *return_string = (gchar*) malloc( sizeof(gchar) * (strlen(camera_ctl) + 50 ) );
+	/*
+	 * The memory allocated for the returned string should be greater than the original string and here's why:
+	 * each time a %a or %b or %c or %d will be found its value will be replaced by its numerical correspondance according to
+	 * the values of the channel's parameters. When this parameters worth 100 or 1000 or 1000, the characters %a will be replaced
+	 * by 100, 1000, 10000. Thus this add to the string 3, 4 or 5 characters when only 2 characers are replaced: '%' and 'a'.
+	 * Thus we need to allocated more memory than the original string size. 50 more bytes should be large enough. Howver, this is a quick
+	 * fix, but it is not optimal. A optimal solution would be to realloc return_string each time the we print more than two characters into it
+	 */
 	gchar *return_string_head = return_string;
 	gboolean end_string = FALSE;
+	int wrote;
 
 	while ( parse != NULL && end_string == FALSE ){
 		switch ( *(parse + 1) ){
 			case 'a':
 				strncpy( return_string , previous_parse , strlen (previous_parse) - strlen ( parse ) );
 				return_string +=  strlen ( previous_parse ) - strlen ( parse );
-				sprintf(return_string , "%ld", channel_entry->channelRoiOriginTop);
-				return_string++;
+				wrote = sprintf(return_string , "%ld", channel_entry->channelRoiOriginTop);
+				return_string += wrote;
 				parse += 2;
 				break;
 			case 'b':
 				strncpy( return_string , previous_parse , strlen (previous_parse) - strlen ( parse ) );
 				return_string +=  strlen ( previous_parse ) - strlen ( parse );
-				sprintf(return_string , "%ld", channel_entry->channelRoiOriginLeft);
-				return_string++;
+				wrote = sprintf(return_string , "%ld", channel_entry->channelRoiOriginLeft);
+				return_string += wrote;
 				parse += 2;
 				break;
 			case 'c':
 				strncpy( return_string , previous_parse , strlen (previous_parse) - strlen ( parse ) );
 				return_string +=  strlen ( previous_parse ) - strlen ( parse );
-				sprintf(return_string , "%ld", channel_entry->channelRoiExtentBottom);
-				return_string++;
+				wrote = sprintf(return_string , "%ld", channel_entry->channelRoiExtentBottom);
+				return_string += wrote;
 				parse += 2;
 				break;
 			case 'd':
 				strncpy( return_string , previous_parse , strlen (previous_parse) - strlen ( parse ) );
 				return_string +=  strlen ( previous_parse ) - strlen ( parse );
-				sprintf(return_string , "%ld", channel_entry->channelRoiExtentRight);
-				return_string++;
+				wrote = sprintf(return_string , "%ld", channel_entry->channelRoiExtentRight);
+				return_string += wrote;
 				parse += 2;
 				break;
 			default:
@@ -406,7 +415,6 @@ gboolean update_camera_ctl_on_roi_changes ( struct channelTable_entry *channel_e
 	gchar 	*camera_ctl 	= get_camera_ctl_cmdline ( channel_entry->channelVideoFormatIndex ) ;
 
 	if ( !camera_ctl ){
-		g_critical("no command line found to control camera");
 		return FALSE;
 	}
 
@@ -425,6 +433,5 @@ gboolean update_camera_ctl_on_roi_changes ( struct channelTable_entry *channel_e
 	free ( command_line );
 
 	return TRUE;
-
 
 }
