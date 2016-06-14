@@ -1242,7 +1242,7 @@ static gboolean init_redirection_data(GKeyFile* gkf ){
  * \param
  * \return the command line to use to control de camera
  */
-gchar **get_camera_ctl_cmdline ( int source_index, unsigned long *nb_args ){
+gchar *get_camera_ctl_cmdline ( int source_index ){
 
 	/* Define the error pointer we will be using to check for errors in the configuration file */
 	GError 		*error 	= NULL;
@@ -1259,14 +1259,9 @@ gchar **get_camera_ctl_cmdline ( int source_index, unsigned long *nb_args ){
 	const gchar* const* groups;
 
 	/*
-	 * A variable to store the length of the list found
-	 */
-	gsize length;
-
-	/*
 	 * the cmd line to retrieve that will be used to controle the command line
 	 */
-	gchar 		**camera_ctl_cmdline;
+	gchar 		*camera_ctl_cmdline;
 
 	/* build the GROUP_NAME */
 	gchar *string_index;
@@ -1280,14 +1275,8 @@ gchar **get_camera_ctl_cmdline ( int source_index, unsigned long *nb_args ){
 	 * second parameter "gchar* length" is optional*/
 	groups =  (const gchar* const*) g_key_file_get_groups(gkf, NULL);
 
-	/* Defined what separator will be used in the list when the parameter can have several values (for a table for example)*/
-    g_key_file_set_list_separator (gkf_conf_file, (gchar) ',');
-
 	/* get the commandline and its parameters */
-	camera_ctl_cmdline = get_key_string_list ( gkf,  groups, group_name , CAMERA_CTL_CMDLINE , &length, error);
-
-	/* save the value of lengt in nb_args */
-	*nb_args = length;
+	camera_ctl_cmdline = get_key_value_string( gkf,  groups, group_name , CAMERA_CTL_CMDLINE , error);
 
 	close_mib_configuration_file(gkf);
 	return camera_ctl_cmdline;

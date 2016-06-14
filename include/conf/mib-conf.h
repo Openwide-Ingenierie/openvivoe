@@ -125,7 +125,7 @@ gchar 		*get_default_IP_from_conf(int index); /* get the defaultReceiveIP for th
 void 		set_default_IP_from_conf(int index, const char* new_default_ip); /* set the defaultReceiveIP for the defaultStartUp mode for Service User */
 gchar 		*get_static_assigned_IP_from_conf( const gchar *if_name );
 void 		set_static_assigned_IP_to_conf( const gchar *if_name , const char* new_ip ) ;
-gchar 		**get_camera_ctl_cmdline ( int source_index, unsigned long *nb_args ) ;
+gchar 		*get_camera_ctl_cmdline ( int source_index ) ;
 
 #endif /* MIB_CONF_H */
 
