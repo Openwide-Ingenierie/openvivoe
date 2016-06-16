@@ -484,6 +484,51 @@ GstElement *append_SP_pipeline_for_redirection(GstCaps *caps, long videoFormatIn
 			channel_entry->channelIndex
 			);
 
+#if 0
+
+	if (udpsink == NULL){
+		g_critical("Failed to create pipeline");
+		return NULL;
+	}
+
+	GstElement *typefind_roi = type_detection_element_for_roi(GST_BIN( pipeline) );
+
+	if ( !typefind_roi ){
+		g_critical("Failed to create pipeline");
+		return NULL;
+	}
+
+	/*
+	 * If the videoFormat is a ROI, create the branch from RTP elment, branch 1 is UDP element, branch 2 is typefind_roi element
+	 * rtp and updsink will be link there.
+	 * Otherwise juist link udp source to payloader.
+	 *
+	 */
+
+	if ( video_stream_info->videoFormatType == roi ){
+
+		if ( !create_branch_in_pipeline( pipeline , last , udpsink , typefind_roi ) ){
+			g_critical("Failed to create pipeline");
+			return NULL;
+		}
+
+	}
+	else
+	{
+		/* we link the elements together */
+		if ( !gst_element_link_log (last , udpsink))
+			return NULL;
+	}
+
+
+	last = udpsink;
+
+	data->udp_elem = last;
+	/* Before returning, free the entry created at the begging*/
+	free(video_stream_info);
+	return last;
+#endif //if 0
+
 	if (last == NULL){
 		g_critical("Failed to create pipeline");
 		return NULL;
@@ -499,6 +544,8 @@ GstElement *append_SP_pipeline_for_redirection(GstCaps *caps, long videoFormatIn
 	data->udp_elem = last;
 	channel_entry->stream_datas = data;
 	return last;
+
+
 }
 
 /**
@@ -809,7 +856,8 @@ static GstElement *parse_conf_for_redirection( GstElement *pipeline, GstElement 
 static GstElement* addSink_SU( 	GstElement 					*pipeline, 		GstBus 		*bus,
 								guint 						bus_watch_id, 	GstElement 	*input,
 								struct channelTable_entry 	*channel_entry, gchar 		*cmdline,
-								redirect_data 				*redirect, 		GstCaps 	*caps
+								redirect_data 				*redirect, 		GstCaps 	*caps,
+								struct videoFormatTable_entry *video_stream_info
 								){
 
 	GError 		*error 				= NULL; /* an Object to save errors when they occurs */
@@ -869,6 +917,16 @@ static GstElement* addSink_SU( 	GstElement 					*pipeline, 		GstBus 		*bus,
 	if ( !gst_bin_add(GST_BIN (pipeline), sink )){
 		g_critical("Unable to add %s to pipeline", gst_element_get_name(sink));
 		return NULL;
+	}
+
+	/*
+	 * Then, after sink has been added, handle the ROI
+	 * To do so, we need to copy to the videoFormat the value of channelRoiOrigin and channelRoiExtent parameters
+	 */
+	if (handle_roi ( pipeline , video_stream_info, channel_entry ) ){
+		if ( redirect ){
+			redirect->roi_presence = TRUE;
+		}
 	}
 
 	/* we link the elements together */
@@ -936,23 +994,13 @@ GstElement* create_pipeline_serviceUser( gpointer 					stream_datas,
 	 */
 
 	fill_entry ( gst_caps_get_structure ( caps , 0 ), video_stream_info, data);
-	last = addSink_SU( pipeline, bus, bus_watch_id, last, channel_entry, cmdline, redirect , caps );
+	last = addSink_SU( pipeline, bus, bus_watch_id, last, channel_entry, cmdline, redirect , caps , video_stream_info);
 	fill_entry ( gst_caps_get_structure ( caps , 0 ), video_stream_info, data);
 
 	/*
 	 * Fill the channel Table with parameters from the video_format_table , copy them
 	 */
 	channelTable_fill_entry(channel_entry, video_stream_info);
-
-	/*
-	 * Then, after sink has been added, handle the ROI
-	 * To do so, we need to copy to the videoFormat the value of channelRoiOrigin and channelRoiExtent parameters
-	 */
-	if (handle_roi ( pipeline , video_stream_info, channel_entry ) ){
-		if ( redirect ){
-			redirect->roi_presence = TRUE;
-		}
-	}
 
 	/*
 	 * As we are a Service User, we are registering the resolution of the VIDEO contained in SDP
