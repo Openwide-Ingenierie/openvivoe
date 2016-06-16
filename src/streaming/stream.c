@@ -110,14 +110,12 @@ static redirect_data *SP_is_redirection(long videoFormatIndex){
  * \param channelIndex the index of the channel to check
  * \return the corresponding redirect_data if found or NULL
  */
-static redirect_data  *SU_is_redirection(long channelIndex, long *videoFormatIndex){
+static redirect_data  *SU_is_redirection(long channelIndex){
 
 	int i = 0;
 	for ( i = 0; i < redirection.size; i ++ ){
-		if (redirection.redirect_channels[i]->channel_SU_index == channelIndex ){ /* if found, then returns */
-			*videoFormatIndex = redirection.redirect_channels[i]->video_SP_index;
+		if (redirection.redirect_channels[i]->channel_SU_index == channelIndex ) /* if found, then returns */
 			return redirection.redirect_channels[i];
-		}
 	}
 
 	return NULL; /* if not found, returns NULL */
@@ -375,21 +373,14 @@ int init_stream_SU( GstCaps *caps, struct channelTable_entry *channel_entry)
 		return EXIT_FAILURE;
 
 	/* declare a variable where we will store the corresponding potential entry of redirect_channels */
-	redirect_data *redirection_data;
+	redirect_data *redirection_data = NULL;
 
-	long videoFormatIndex = -1 ;
+	 redirection_data = SU_is_redirection( channel_entry->channelIndex);
+
 	/*
-	 * check if this is a redirection, if so the mapping of the videoFormatIndex of the source to which redirect the stream will be
-	 * stored in videoFormatIndex
+	 * if redirection_data is NULL, this will be handeld in the functions it is used in
+	 * do not exit
 	 */
-
-	 redirection_data = SU_is_redirection( channel_entry->channelIndex, &videoFormatIndex );
-
-	/* check is the mapping have been done succesfully */
-	if ( redirection_data  && videoFormatIndex == -1 ){
-			g_critical("no source was found to redirect the stream of service Users's channel: %ld", channel_entry->channelIndex);
-			return EXIT_FAILURE;
-	}
 
 	/* Create pipeline  - save videoFormatIndex into stream_data data*/
 	last = create_pipeline_serviceUser( data, caps, channel_entry, cmdline, redirection_data );
@@ -412,9 +403,9 @@ int init_stream_SU( GstCaps *caps, struct channelTable_entry *channel_entry)
 	 * on this source after is pipeline has been completed.
 	 */
 	if ( redirection_data ){
-		if ( !append_SP_pipeline_for_redirection( caps,  videoFormatIndex) )
+		if ( !append_SP_pipeline_for_redirection( caps,  redirection_data->video_SP_index ) )
 			return EXIT_FAILURE;
-		handle_SP_default_StartUp_mode( videoFormatIndex ) ;
+		handle_SP_default_StartUp_mode( redirection_data->video_SP_index ) ;
 	}
 
    	return EXIT_SUCCESS;
