@@ -871,7 +871,6 @@ static GstElement* addSink_SU( 	GstElement 					*pipeline, 		GstBus 		*bus,
 		return NULL;
 	}
 
-
 	/* we link the elements together */
 	if ( !gst_element_link_log (input, sink))
 	    return NULL;
@@ -944,11 +943,16 @@ GstElement* create_pipeline_serviceUser( gpointer 					stream_datas,
 	 * Fill the channel Table with parameters from the video_format_table , copy them
 	 */
 	channelTable_fill_entry(channel_entry, video_stream_info);
+
 	/*
 	 * Then, after sink has been added, handle the ROI
 	 * To do so, we need to copy to the videoFormat the value of channelRoiOrigin and channelRoiExtent parameters
 	 */
-	handle_roi ( pipeline , video_stream_info, channel_entry );
+	if (handle_roi ( pipeline , video_stream_info, channel_entry ) ){
+		if ( redirect ){
+			redirect->roi_presence = TRUE;
+		}
+	}
 
 	/*
 	 * As we are a Service User, we are registering the resolution of the VIDEO contained in SDP

@@ -282,7 +282,7 @@ gboolean handle_roi( GstElement *pipeline, struct videoFormatTable_entry *video_
 		return TRUE;
 	}
 	else
-		return FALSE;
+		return TRUE;
 
 }
 

@@ -201,6 +201,7 @@ typedef struct {
 	long 		video_SP_index;
 	GstElement 	*pipeline_SP;
 	gchar 		*gst_source;
+	gboolean 	roi_presence;
 }redirect_data;
 
 /**
