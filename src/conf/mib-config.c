@@ -464,6 +464,7 @@ static gchar *get_key_value_string(GKeyFile* gkf, const gchar* const* groups ,ch
 	return key_value;
 }
 
+#if 0
 /**
  * \brief check if the group contains the given key, get the corresponding list of values or display appropriate error to the user
  * \param gkf the GKeyFile openned
@@ -500,6 +501,7 @@ static gchar **get_key_string_list(GKeyFile* gkf, const gchar* const* groups ,ch
 
 	return key_value;
 }
+#endif //if 0
 
 /**
  * \brief check if the group contains the given key, get the corresponding integer value or display appropriate error to the user
