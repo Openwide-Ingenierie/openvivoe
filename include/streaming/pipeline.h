@@ -8,7 +8,7 @@
 # define PIPELINE_H
 
 void set_udpsink_param( GstElement *udpsink, long channel_entry_index);
-void set_udpsrc_param( GstElement *udpsrc, struct channelTable_entry * channel_entry, GstCaps* caps ) ; 
+void set_udpsrc_param( GstElement *udpsrc, struct channelTable_entry * channel_entry, GstCaps* caps ) ;
 GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
 											GstElement* input,
 											long videoChannelIndex);
@@ -16,12 +16,11 @@ GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
 
 GstElement* create_pipeline_serviceUser( 	gpointer 					stream_datas,
 										 	GstCaps 					*caps,
-										 	struct channelTable_entry 	*channel_entry, 
-										 	gchar 						*cmdline, 
+										 	struct channelTable_entry 	*channel_entry,
+										 	gchar 						*cmdline,
 											redirect_data 				*redirect);
 
-GstElement *append_SP_pipeline_for_redirection( GstCaps *caps, 
-												long videoFormatIndex);
+GstElement *append_SP_pipeline_for_redirection(GstCaps *caps, long videoFormatIndex, redirect_data *redirection );
 
 
 #endif /* PIPELINE_H */

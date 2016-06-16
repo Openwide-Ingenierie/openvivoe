@@ -9,10 +9,10 @@
 
 #include "../../include/videoFormatInfo/videoFormatTable.h"
 typedef struct{
-	long 	rtp_type; /* for all video Formats */
-	int 	clock_rate; /* for all video Formats */
-	char 	*profile_level_id; /* Only for MPEG-4 */
-	char 	*config; /* Only for MPEG-4 */
+	long 	rtp_type; 			/* for all video Formats */
+	int 	clock_rate; 		/* for all video Formats */
+	char 	*profile_level_id; 	/* Only for MPEG-4 */
+	char 	*config; 			/* Only for MPEG-4 */
 }rtp_data ;
 
 /**
@@ -23,7 +23,7 @@ typedef struct{
 #define colo_GRAY 		"GRAY"
 
 /**
- * \brief the mapped values for videoFormatSampling field of viddeoFormatTable_entry 
+ * \brief the mapped values for videoFormatSampling field of viddeoFormatTable_entry
  */
 #define sampling_RGB 	"RGB"
 #define sampling_YUV 	"YCbCr-4:2:2"

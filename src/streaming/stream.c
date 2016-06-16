@@ -403,7 +403,7 @@ int init_stream_SU( GstCaps *caps, struct channelTable_entry *channel_entry)
 	 * on this source after is pipeline has been completed.
 	 */
 	if ( redirection_data ){
-		if ( !append_SP_pipeline_for_redirection( caps,  redirection_data->video_SP_index ) )
+		if ( !append_SP_pipeline_for_redirection( caps,  redirection_data->video_SP_index, redirection_data  ) )
 			return EXIT_FAILURE;
 		handle_SP_default_StartUp_mode( redirection_data->video_SP_index ) ;
 	}

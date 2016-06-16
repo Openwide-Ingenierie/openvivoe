@@ -444,7 +444,7 @@ GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
  * \param videoFormatIndex the VF of the redirection's SP
  * \return last element added in pipeline, so udpsink if everything goes well
  */
-GstElement *append_SP_pipeline_for_redirection(GstCaps *caps, long videoFormatIndex ){
+GstElement *append_SP_pipeline_for_redirection(GstCaps *caps, long videoFormatIndex, redirect_data *redirection ){
 
 	GstElement 		*last;
 
@@ -467,6 +467,7 @@ GstElement *append_SP_pipeline_for_redirection(GstCaps *caps, long videoFormatIn
 	 * gst_source commmand line given by the user in vivoe-mib.conf configuration file */
 
 	last = addRTP(data->pipeline , data->bus , data->bus_watch_id , data->udp_elem  , videoFormat_entry , data , caps);
+
 	if(last == NULL){
 		g_critical("Failed to append pipeline for redirection");
 		return NULL;
@@ -484,30 +485,21 @@ GstElement *append_SP_pipeline_for_redirection(GstCaps *caps, long videoFormatIn
 			channel_entry->channelIndex
 			);
 
-#if 0
-
 	if (udpsink == NULL){
 		g_critical("Failed to create pipeline");
 		return NULL;
 	}
 
-	GstElement *typefind_roi = type_detection_element_for_roi(GST_BIN( pipeline) );
+	if ( redirection->roi_presence ){
+		videoFormat_entry->videoFormatType = roi;
+		GstElement *typefind_roi = type_detection_element_for_roi(GST_BIN(data->pipeline) );
 
-	if ( !typefind_roi ){
-		g_critical("Failed to create pipeline");
-		return NULL;
-	}
+		if ( !typefind_roi ){
+			g_critical("Failed to create pipeline");
+			return NULL;
+		}
 
-	/*
-	 * If the videoFormat is a ROI, create the branch from RTP elment, branch 1 is UDP element, branch 2 is typefind_roi element
-	 * rtp and updsink will be link there.
-	 * Otherwise juist link udp source to payloader.
-	 *
-	 */
-
-	if ( video_stream_info->videoFormatType == roi ){
-
-		if ( !create_branch_in_pipeline( pipeline , last , udpsink , typefind_roi ) ){
+		if ( !create_branch_in_pipeline( data->pipeline , last , udpsink , typefind_roi ) ){
 			g_critical("Failed to create pipeline");
 			return NULL;
 		}
@@ -515,19 +507,21 @@ GstElement *append_SP_pipeline_for_redirection(GstCaps *caps, long videoFormatIn
 	}
 	else
 	{
+		if (last == NULL){
+			g_critical("Failed to create pipeline");
+			return NULL;
+		}
 		/* we link the elements together */
 		if ( !gst_element_link_log (last , udpsink))
 			return NULL;
 	}
 
-
 	last = udpsink;
-
 	data->udp_elem = last;
-	/* Before returning, free the entry created at the begging*/
-	free(video_stream_info);
+	channel_entry->stream_datas = data;
+
 	return last;
-#endif //if 0
+#if 0
 
 	if (last == NULL){
 		g_critical("Failed to create pipeline");
@@ -540,11 +534,10 @@ GstElement *append_SP_pipeline_for_redirection(GstCaps *caps, long videoFormatIn
 
 	last = udpsink;
 
-	/* foe convenience sinl contained the source element "intervideosrc" but it is not it purposes */
 	data->udp_elem = last;
 	channel_entry->stream_datas = data;
 	return last;
-
+#endif //if 0
 
 }
 
