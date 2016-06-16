@@ -280,8 +280,10 @@ gboolean update_videoFormat_entry_roi_from_channelTable_entry ( struct videoForm
 {
 
 	/* only the ROI parameters of the videoFormat_entry can be modifies, otherwise nothing could */
-	videoFormat_entry->videoFormatMaxHorzRes 		= channel_entry->sdp_width; 				/* Set Res from SDP, usefull to vivoecrop */
-	videoFormat_entry->videoFormatMaxVertRes 		= channel_entry->sdp_height; 				/* Set Res from SDP, usefull to vivoecrop */
+	if ( channel_entry->channelType == serviceUser ){
+		videoFormat_entry->videoFormatMaxHorzRes 		= channel_entry->sdp_width; 				/* Set Res from SDP, usefull to vivoecrop */
+		videoFormat_entry->videoFormatMaxVertRes 		= channel_entry->sdp_height; 				/* Set Res from SDP, usefull to vivoecrop */
+	}
 	videoFormat_entry->videoFormatRoiHorzRes 		= channel_entry->channelHorzRes ;
 	videoFormat_entry->videoFormatRoiVertRes 		= channel_entry->channelVertRes ;
 	videoFormat_entry->videoFormatRoiOriginTop 		= channel_entry->channelRoiOriginTop ;
@@ -294,6 +296,18 @@ gboolean update_videoFormat_entry_roi_from_channelTable_entry ( struct videoForm
 
 }
 
+#define WIDTH_SDP 			"width"
+
+#define HEIGTH_SDP 			"height"
+
+#define ROITOP_SDP 			"roitop"
+
+#define ROILEFT_SDP 		"roileft"
+
+#define ROIBOTTOM_SDP "roiextentbottom"
+
+#define ROIRIGTH_SDP 	"roiextentright"
+
 /**
  * \brief update the content of the channelTable_entry with the new caps receive
  * \param entry the entry in channelTable to update
@@ -303,32 +317,47 @@ gboolean update_videoFormat_entry_roi_from_channelTable_entry ( struct videoForm
 void update_channelTable_entry_roi_from_caps ( struct channelTable_entry *channel_entry , GstCaps *caps )
 {
 
+	const gchar *temp;
+
+	g_debug("update_channelTable_entry_roi_from_caps()");
+
 	/* only the ROI parameters of the videoFormat_entry can be modifies, otherwise nothing could */
 	GstStructure *caps_str = gst_caps_get_structure	(caps , 0) ;
 
-	const gchar *temp = g_value_get_string( gst_structure_get_value(caps_str , "width"));
-	if ( temp )
-		channel_entry->channelHorzRes = (long) strtol( temp , NULL, 10) ;
+	if ( gst_structure_has_field(caps_str , WIDTH_SDP ) ){
+		temp = g_value_get_string( gst_structure_get_value(caps_str , "width"));
+		if ( temp )
+			channel_entry->channelHorzRes = (long) strtol( temp , NULL, 10) ;
+	}
+	if ( gst_structure_has_field(caps_str , HEIGTH_SDP ) ){
+		temp = g_value_get_string( gst_structure_get_value(caps_str , "height")) ;
+		if ( temp )
+			channel_entry->channelVertRes = (long) strtol( temp , NULL, 10) ;
+	}
 
-	temp = g_value_get_string( gst_structure_get_value(caps_str , "height")) ;
-	if ( temp )
-		channel_entry->channelVertRes = (long) strtol( temp , NULL, 10) ;
+	if ( gst_structure_has_field(caps_str , ROITOP_SDP ) ){
+		temp = g_value_get_string( gst_structure_get_value(caps_str , "roitop")) ;
+		if ( temp )
+			channel_entry->channelRoiOriginTop = (long) strtol( temp , NULL, 10) ;
+	}
 
-	temp = g_value_get_string( gst_structure_get_value(caps_str , "roitop")) ;
-	if ( temp )
-		channel_entry->channelRoiOriginTop = (long) strtol( temp , NULL, 10) ;
+	if ( gst_structure_has_field(caps_str , ROILEFT_SDP ) ){
+		temp = g_value_get_string( gst_structure_get_value(caps_str , "roileft")) ;
+		if ( temp )
+			channel_entry->channelRoiOriginLeft = (long) strtol( temp , NULL, 10) ;
+	}
 
-	temp = g_value_get_string( gst_structure_get_value(caps_str , "roileft")) ;
-	if ( temp )
-	channel_entry->channelRoiOriginLeft = (long) strtol( temp , NULL, 10) ;
+	if ( gst_structure_has_field(caps_str , ROIBOTTOM_SDP ) ){
+		temp = g_value_get_string( gst_structure_get_value(caps_str , "roibottom")) ;
+		if ( temp )
+			channel_entry->channelRoiExtentBottom = (long) strtol( temp , NULL, 10) ;
+	}
 
-	temp = g_value_get_string( gst_structure_get_value(caps_str , "roibottom")) ;
-	if ( temp )
-		channel_entry->channelRoiExtentBottom = (long) strtol( temp , NULL, 10) ;
-
-	temp = g_value_get_string( gst_structure_get_value(caps_str , "roiright")) ;
-	if ( temp )
-		channel_entry->channelRoiExtentRight = (long) strtol( temp , NULL, 10) ;
+	if ( gst_structure_has_field(caps_str , ROIRIGTH_SDP ) ){
+		temp = g_value_get_string( gst_structure_get_value(caps_str , "roiright")) ;
+		if ( temp )
+			channel_entry->channelRoiExtentRight = (long) strtol( temp , NULL, 10) ;
+	}
 
 	/*
 	 * This function is only used on the Service Users side, so there is no need to update the corresponding
@@ -575,6 +604,8 @@ static gboolean roi_requests_handler( struct channelTable_entry * table_entry , 
 
 	struct videoFormatTable_entry *video_stream_info = NULL ;
 
+	g_debug("roi_requests_handler()");
+
 	/*
 	 * If we are a Service User, we are going to build a "fake" videoFormat entry
 	 */
@@ -590,7 +621,7 @@ static gboolean roi_requests_handler( struct channelTable_entry * table_entry , 
 	 * Now update pipeline
 	 * If an error occurs, we just reset the old roi parameters' values of channel and video_stream_info
 	 */
-	if ( ! update_pipeline_on_roi_changes( table_entry->stream_datas ,  table_entry , video_stream_info ) )
+	if ( ! update_pipeline_on_roi_changes( table_entry->stream_datas ,  table_entry , video_stream_info )  && ! update_camera_ctl_on_roi_changes ( table_entry ) )
 		return FALSE;
 	else{
 		/* If this is a SP we need to re-send a new SDP file, so we call the channelStatus request handler */
@@ -951,7 +982,6 @@ channelTable_handler(
 						netsnmp_set_request_error( reqinfo, request, SNMP_ERR_NOSUCHNAME );
 						return SNMP_ERR_NOERROR;
 					}
-
 					ret = netsnmp_check_vb_int_range ( request->requestvb , 0 , videoFormat_entry->videoFormatMaxVertRes  );
 				}
 				else

@@ -360,21 +360,25 @@ gboolean receive_announcement(){
 		/* if caps are null, a problem occured or this is not a SAP/SDP announcement from the right channel */
 		if(caps == NULL )
 			return TRUE; /* we cannot return FALSE, cause we need to keep on listenning for our SAP/SDP annoucement */
+
 		struct channelTable_entry* iterator = channelTable_SU_head;
-		while (iterator != NULL ){
-			if (iterator->channelReceiveIpAddress == multicast_addr){
+		while (iterator != NULL )
+		{
+			if (iterator->channelReceiveIpAddress == multicast_addr)
+			{
 				/* Now we are sure that this is our SAP/SDP annoucement */
 				/* check if the SAP message is a deletion message */
 				if( udp_payload[0] == SAP_header_deletion ){
 					delete_steaming_data(iterator); /* delet streaming has it is stopped */
 				}
-				else{
-
+				else
+				{
 					stream_data 	*data 	=  iterator->stream_datas;
 					/*
 					 * If pipeline is not created yet, create it and start to display the stream
 					 */
-					if ( data == NULL ){
+					if ( data == NULL )
+					{
 						if ( !init_stream_SU ( caps, iterator ) )
 							start_streaming ( iterator->stream_datas, iterator->channelVideoFormatIndex );
 						/* init the video channelUserDesc field */
@@ -384,7 +388,8 @@ gboolean receive_announcement(){
 					/*
 					 * otherwise, replace udpsrc element's caps with the caps extracted from SDP file
 					 */
-					else{
+					else
+					{
 						GstCaps *current_caps;
 						g_object_get ( G_OBJECT ( data->udp_elem ) , "caps" , &current_caps , NULL ) ;
 						if ( ! gst_caps_is_equal ( caps, current_caps ) ){
