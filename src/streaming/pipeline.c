@@ -479,15 +479,21 @@ GstElement *append_SP_pipeline_for_redirection(GstCaps *caps, long videoFormatIn
 	channelTable_fill_entry ( channel_entry , videoFormat_entry );
 
 	/* Add UDP element */
-	last = addUDP(  data->pipeline, 	data->bus,
-					data->bus_watch_id, last,
-					channel_entry->channelIndex
-				);
+	GstElement *udpsink = addUDP(  data->pipeline, 	data->bus,
+			data->bus_watch_id, last,
+			channel_entry->channelIndex
+			);
 
 	if (last == NULL){
 		g_critical("Failed to create pipeline");
 		return NULL;
 	}
+
+	/* we link the elements together */
+	if ( !gst_element_link_log (last , udpsink))
+			return NULL;
+
+	last = udpsink;
 
 	/* foe convenience sinl contained the source element "intervideosrc" but it is not it purposes */
 	data->udp_elem = last;
