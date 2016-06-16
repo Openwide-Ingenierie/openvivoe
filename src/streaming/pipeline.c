@@ -923,15 +923,38 @@ static GstElement* addSink_SU( 	GstElement 					*pipeline, 		GstBus 		*bus,
 	 * Then, after sink has been added, handle the ROI
 	 * To do so, we need to copy to the videoFormat the value of channelRoiOrigin and channelRoiExtent parameters
 	 */
-	if (handle_roi ( pipeline , video_stream_info, channel_entry ) ){
-		if ( redirect ){
-			redirect->roi_presence = TRUE;
-		}
-	}
+	if (handle_roi ( pipeline , video_stream_info, channel_entry ) && redirect ){
 
-	/* we link the elements together */
-	if ( !gst_element_link_log (input, sink))
-	    return NULL;
+			redirect->roi_presence = TRUE;
+
+			GstElement *typefind_roi = type_detection_element_for_roi(GST_BIN( pipeline) );
+
+			if ( !typefind_roi ){
+				g_critical("Failed to create pipeline");
+				return NULL;
+			}
+
+			/*
+			 * If the videoFormat is a ROI, create the branch from RTP elment, branch 1 is UDP element, branch 2 is typefind_roi element
+			 * rtp and updsink will be link there.
+			 * Otherwise juist link udp source to payloader.
+			 *
+			 */
+
+			if ( video_stream_info->videoFormatType == roi ){
+				if ( !create_branch_in_pipeline( pipeline , input , sink , typefind_roi ) ){
+					g_critical("Failed to create pipeline");
+					return NULL;
+				}
+
+			}
+
+	}else{
+
+		/* we link the elements together */
+		if ( !gst_element_link_log (input, sink))
+			return NULL;
+	}
 
 	return sink;
 }
