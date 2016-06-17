@@ -366,6 +366,10 @@ gboolean update_pipeline_on_roi_changes( gpointer stream_datas , struct channelT
 	GstElement 	*pipeline 	= data->pipeline;
 	gboolean 	scalable 	= FALSE;
 
+	/* check if this is a redirection */
+	redirect_data *redirection  = SU_is_redirection(channel_entry->channelIndex);
+
+
 	/*
 	 * return if the stream data or pipeline have not been initialize
 	 */
@@ -388,15 +392,13 @@ gboolean update_pipeline_on_roi_changes( gpointer stream_datas , struct channelT
 
 	set_parameters_to_roi_elements ( videoFormat_entry , vivoecrop, vivoecaps, scalable );
 
-	if (  (! strcmp( channel_entry->channelVideoFormat , MPEG4_NAME )) && channel_entry->channelType != serviceUser ){
+	if (  (! strcmp( channel_entry->channelVideoFormat , MPEG4_NAME )) && channel_entry->channelType != serviceUser && redirection == NULL ){
 		/*
 		 * call handle MPEG4 config update
 		 */
 		if ( !update_stream_data (stream_datas, videoFormat_entry ))
 			return FALSE;
 	}
-
-	redirect_data *redirection  = SU_is_redirection(channel_entry->channelIndex);
 
 	if ( redirection ){
 		if (redirection->roi_presence ){

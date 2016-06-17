@@ -864,6 +864,9 @@ static GstElement* addSink_SU( 	GstElement 					*pipeline, 		GstBus 		*bus,
 		sink  = gst_parse_bin_from_description (cmdline,
 												TRUE,
 												&error);
+		if ( !sink )
+			return NULL;
+
 		g_object_set(sink, "name", "gst_sink", NULL);
 
 	}
