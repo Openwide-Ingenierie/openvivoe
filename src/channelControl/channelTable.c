@@ -621,7 +621,7 @@ static gboolean roi_requests_handler( struct channelTable_entry * table_entry , 
 	 * Now update pipeline
 	 * If an error occurs, we just reset the old roi parameters' values of channel and video_stream_info
 	 */
-	if ( ! update_pipeline_on_roi_changes( table_entry->stream_datas ,  table_entry , video_stream_info )  && ! update_camera_ctl_on_roi_changes ( table_entry ) )
+	if ( ! update_pipeline_on_roi_changes( table_entry->stream_datas ,  table_entry , video_stream_info )  && ! update_camera_ctl_on_roi_changes ( table_entry ))
 		return FALSE;
 	else{
 		/* If this is a SP we need to re-send a new SDP file, so we call the channelStatus request handler */
@@ -1300,23 +1300,28 @@ channelTable_handler(
 				/*
 				 *  If we go there, then something went wrong on the ROI changes. We may want to reset the ROI parameters in
 				 *  the videoFormatTable for them to be identical to the ROI parameters in channelTable
+				 *  If videoFormat_entry is NULL, then we must be a Service User and there is nothing to reset.
 				 */
-				update_videoFormat_entry_roi_from_channelTable_entry ( videoFormat_entry , table_entry );
+				if ( videoFormat_entry )
+					update_videoFormat_entry_roi_from_channelTable_entry ( videoFormat_entry , table_entry );
                 break;
             case COLUMN_CHANNELROIORIGINLEFT:
                 table_entry->channelRoiOriginLeft     			= table_entry->old_channelRoiOriginLeft;
                 table_entry->old_channelRoiOriginLeft 			= 0;
-				update_videoFormat_entry_roi_from_channelTable_entry ( videoFormat_entry , table_entry );
+				if ( videoFormat_entry )
+					update_videoFormat_entry_roi_from_channelTable_entry ( videoFormat_entry , table_entry );
                 break;
             case COLUMN_CHANNELROIEXTENTBOTTOM:
                 table_entry->channelRoiExtentBottom     		= table_entry->old_channelRoiExtentBottom;
                 table_entry->old_channelRoiExtentBottom 		= 0;
-				update_videoFormat_entry_roi_from_channelTable_entry ( videoFormat_entry , table_entry );
+				if ( videoFormat_entry )
+					update_videoFormat_entry_roi_from_channelTable_entry ( videoFormat_entry , table_entry );
                 break;
             case COLUMN_CHANNELROIEXTENTRIGHT:
                 table_entry->channelRoiExtentRight     			= table_entry->old_channelRoiExtentRight;
                 table_entry->old_channelRoiExtentRight 			= 0;
-				update_videoFormat_entry_roi_from_channelTable_entry ( videoFormat_entry , table_entry );
+				if ( videoFormat_entry )
+					update_videoFormat_entry_roi_from_channelTable_entry ( videoFormat_entry , table_entry );
                 break;
             case COLUMN_CHANNELRECEIVEIPADDRESS:
                 table_entry->channelReceiveIpAddress     		= table_entry->old_channelReceiveIpAddress;
