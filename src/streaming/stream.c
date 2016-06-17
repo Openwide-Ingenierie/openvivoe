@@ -110,7 +110,7 @@ static redirect_data *SP_is_redirection(long videoFormatIndex){
  * \param channelIndex the index of the channel to check
  * \return the corresponding redirect_data if found or NULL
  */
-static redirect_data  *SU_is_redirection(long channelIndex){
+redirect_data  *SU_is_redirection(long channelIndex){
 
 	int i = 0;
 	for ( i = 0; i < redirection.size; i ++ ){
@@ -375,7 +375,7 @@ int init_stream_SU( GstCaps *caps, struct channelTable_entry *channel_entry)
 	/* declare a variable where we will store the corresponding potential entry of redirect_channels */
 	redirect_data *redirection_data = NULL;
 
-	 redirection_data = SU_is_redirection( channel_entry->channelIndex);
+	redirection_data = SU_is_redirection( channel_entry->channelIndex);
 
 	/*
 	 * if redirection_data is NULL, this will be handeld in the functions it is used in
@@ -403,6 +403,8 @@ int init_stream_SU( GstCaps *caps, struct channelTable_entry *channel_entry)
 	 * on this source after is pipeline has been completed.
 	 */
 	if ( redirection_data ){
+		/* As this is a redirection, save it pipeline in the redirection data */
+		redirection_data->pipeline_SU = pipeline;
 		if ( !append_SP_pipeline_for_redirection( caps,  redirection_data->video_SP_index, redirection_data  ) )
 			return EXIT_FAILURE;
 		handle_SP_default_StartUp_mode( redirection_data->video_SP_index ) ;

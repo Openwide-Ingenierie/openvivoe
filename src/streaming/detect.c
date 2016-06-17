@@ -156,7 +156,7 @@ GstElement *type_detection_element_for_roi( GstBin *pipeline ) {
 }
 
 /**
- * \brief this function just detect the caps between an element and a sink already in pipeline and already link to each other
+ * \brief this function just detect the caps between an element and a sink already in pipeline 
  */
 GstStructure* type_detection_for_roi(GstBin *pipeline , GstElement *sink ){
 

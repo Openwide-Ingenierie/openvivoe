@@ -18,6 +18,7 @@ typedef struct{
 	rtp_data 		*rtp_datas;
 }stream_data;
 
+redirect_data  *SU_is_redirection(long channelIndex);
 int handle_SP_default_StartUp_mode( long videoFormatIndex );
 int init_stream_SP( int videoFormatIndex );
 int init_stream_SU( GstCaps *caps, struct channelTable_entry *channel_entry);

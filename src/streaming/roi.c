@@ -107,12 +107,12 @@ static gboolean get_roi_values_from_conf( struct videoFormatTable_entry* videoFo
 }
 
 /**
- * \brief update the "config" propoerty stored in rtp_data of the given stream_data using a typefind
+ * \brief update stream_data using a typefind
  * \param the steam_data we will use to detect caps and we will update
  * \param the corresponding videoformat_entry to fill
  * \return  TRUE on succes, FALSE on failure ( as caps not found for example )
  */
-static gboolean SP_roi_mp4_config_update (gpointer stream_datas,  struct videoFormatTable_entry * videoFormat_entry ) {
+static gboolean update_stream_data (gpointer stream_datas,  struct videoFormatTable_entry * videoFormat_entry ) {
 
 	/* get the stream_data from the channel */
 	stream_data 	*data 			= stream_datas;
@@ -135,6 +135,74 @@ static gboolean SP_roi_mp4_config_update (gpointer stream_datas,  struct videoFo
 	 * fill rtp data and other mib parameters in needed
 	 */
 	fill_entry(video_caps, videoFormat_entry , stream_datas);
+
+	return TRUE;
+
+}
+
+static gboolean handle_redirection_roi ( redirect_data *redirection ){
+
+	g_debug("handle_redirection_roi()");
+
+	/* first run a type find to get new caps in SU's pipeline before appsink */
+	GstElement *appsink = gst_bin_get_by_name ( GST_BIN(redirection->pipeline_SU) , APPSINK_NAME );
+	if ( !appsink ){
+		g_critical("Failed to retrieve %s in a redirection pipeline", APPSINK_NAME );
+		return FALSE;
+	}
+
+	GstStructure 	*video_caps;
+	/*
+	 * detect the new video caps
+	 */
+	video_caps = type_detection_for_roi( GST_BIN(redirection->pipeline_SU) , appsink  ) ;
+	if ( !video_caps ){
+		g_critical ("Failed to adapt MPEG-4 pipeline for ROI");
+		return FALSE;
+	}
+
+	/* then pass them to the Service Provider's pipeline */
+
+	/* Fisrt get appsrc element */
+	GstElement *appsrc = gst_bin_get_by_name ( GST_BIN(redirection->pipeline_SP) , APPSRC_NAME );
+	if ( !appsrc ){
+		g_critical("Failed to retrieve %s in a redirection pipeline", APPSRC_NAME );
+		return FALSE;
+	}
+
+	GstCaps *caps = gst_caps_new_full( gst_structure_copy ( video_caps ) , NULL );
+	g_object_set ( appsrc , "caps" ,  caps , NULL) ;
+	video_caps = gst_caps_get_structure( caps, 0 );
+
+	/* Get updsink element of SP pipeline */
+	GstElement *udpsink = gst_bin_get_by_name ( GST_BIN(redirection->pipeline_SP) , UDPSINK_NAME );
+
+	if ( !udpsink ){
+		g_critical("Failed to retrieve %s in a redirection pipeline", UDPSINK_NAME );
+		return FALSE;
+	}
+
+	/* Now run the typefind on the SP pipeline to update the caps for the SDP file */
+	video_caps = type_detection_for_roi( GST_BIN(redirection->pipeline_SP) , udpsink ) ;
+
+	if ( !video_caps ){
+		g_critical ("Failed to adapt MPEG-4 pipeline for ROI");
+		return FALSE;
+	}
+
+	/* get videoFormatEntry of SP */
+	struct videoFormatTable_entry *SP_videoFormat_entry = videoFormatTable_getEntry( redirection->video_SP_index );
+
+	/*
+	 * fill rtp data and other mib parameters in needed
+	 */
+	fill_entry(video_caps, SP_videoFormat_entry , SP_videoFormat_entry->stream_datas);
+
+	/*
+	 * finally update the corresponding channel entry
+	 */
+	struct channelTable_entry *SP_channel_entry = channelTable_get_from_VF_index( redirection->video_SP_index );
+	channelTable_fill_entry ( SP_channel_entry , SP_videoFormat_entry );
 
 	return TRUE;
 
@@ -324,8 +392,18 @@ gboolean update_pipeline_on_roi_changes( gpointer stream_datas , struct channelT
 		/*
 		 * call handle MPEG4 config update
 		 */
-		if ( !SP_roi_mp4_config_update (stream_datas, videoFormat_entry ))
+		if ( !update_stream_data (stream_datas, videoFormat_entry ))
 			return FALSE;
+	}
+
+	redirect_data *redirection  = SU_is_redirection(channel_entry->channelIndex);
+
+	if ( redirection ){
+		if (redirection->roi_presence ){
+			if ( ! handle_redirection_roi ( redirection )){
+				return FALSE;
+			}
+		}
 	}
 
 	return TRUE;
