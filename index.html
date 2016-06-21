@@ -236,7 +236,7 @@
 			<h3 class="sub-title text-center">Try OpenVivoe</h3>
 			<div class="block">
 				<h4 class="sub-title text-center">Configure net-snmp</h4>
-				<p>First, you need to configure net-snmp for OpenVivoe. Net-SNMP is the library used by VIVOE to implement SNMP, the protocol used to control  the streams.<a href="https://fr.wikipedia.org/wiki/Simple_Network_Management_Protocol" target="_blank"> SNMPv2 protcol</a> works with a Management Information Base "MIB", which acts as a data base. VIVOE implements its own. Furthermore, Net-SNMP cames with several configuration files. To simplify the configuration we already have wrote all those files. First, create a directory <strong>".snmp"</strong> in your home folder and copy the content of the <strong>"conf"</strong> directory in there.</p>
+				<p>First, you need to configure net-snmp for OpenVivoe. Net-SNMP is the library used by VIVOE to implement SNMP, the protocol used to control  the streams.<a href="https://fr.wikipedia.org/wiki/Simple_Network_Management_Protocol" target="_blank"> SNMPv2 protcol</a> works with a Management Information Base "MIB", which acts as a data base. VIVOE implements its own. Furthermore, Net-SNMP cames with several configuration files. To simplify the configuration we already have wrote all those files. First, create a directory <strong>".snmp"</strong> in your home folder and copy the content of the <strong>"conf"</strong>directory in there. For the configuration of the SNMP deamon, you probably want do it yourself. However, a minimal snmpd.conf is supplied in the <strong>"conf"</strong>folder. You can copy it in <strong>"/etc/snmp/"</strong>in order to make OpenVivoe work.</p>
 				<div class="code-block">
 					<pre><code class="language-markup">
 	~$ mkdir $HOME/.snmp
