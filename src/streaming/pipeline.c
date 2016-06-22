@@ -199,7 +199,8 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 	if (caps == NULL ){
 
 		/* Filters out non VIVOE videos, and link input to RTP if video has a valid format*/
-		if (!filter_VIVOE(type_detection(GST_BIN(pipeline), input,NULL),input, rtp))
+		video_caps = type_detection(GST_BIN(pipeline), input,NULL);
+		if (!filter_VIVOE(video_caps,input, rtp))
 			return NULL;
 
 		/* Now that we have added the RTP payloader to the pipeline, we can get the new caps of the video stream*/
@@ -221,6 +222,8 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 		input = rtp ;
 
 		video_caps = type_detection(GST_BIN(pipeline), input ,NULL);
+		if ( !video_caps )
+			return NULL;
 
 		/*Fill the MIB a second time after creating payload, this is needed to get rtp_data needed to build SDP files */
 		fill_entry(video_caps, video_info, stream_datas);
@@ -770,6 +773,9 @@ static GstElement *handle_redirection_SU_pipeline ( GstElement *pipeline, GstCap
 	 * redirection. Update caps in consequence
 	 */
 	video_caps = type_detection(GST_BIN(pipeline), input, NULL);
+	if( !video_caps )
+		return NULL;
+
 	gst_caps_append_structure( caps , gst_structure_copy ( video_caps ) );
 	gst_caps_remove_structure ( caps, 0 ) ;
 
@@ -909,6 +915,9 @@ static GstElement* addSink_SU( 	GstElement 					*pipeline, 		GstBus 		*bus,
 	/* detect the caps of the video after the gstreamer pipeline given by the user in gst_sink command line in vivoe-mib.conf */
 	GstStructure *video_caps;
 	video_caps = type_detection(GST_BIN(pipeline), input, NULL);
+	if ( !video_caps )
+		return NULL;
+
 	gst_caps_append_structure( caps , gst_structure_copy ( video_caps ) );
 	gst_caps_remove_structure ( caps, 0 ) ;
 	GstElement *last = handle_redirection_SU_pipeline(pipeline, caps, input);
