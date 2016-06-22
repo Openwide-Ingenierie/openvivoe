@@ -144,7 +144,7 @@
                     </div>
                     <div class="content">
                         <h3 class="sub-title">Still under development</h3>
-                        <p>Please keep in mind that OpenVivoe is still under development, no stable version has been released yet. Besides, not all the features of DefStan 00-82 are implemented, as an example, in the current version, Region Of Interest is not implemented.</p>
+                        <p>Please keep in mind that OpenVivoe is still under development, no stable version has been released yet. All the features should be implemented very soon.</p>
                     </div><!--//content-->
                 </div><!--//item-->           
                 <div class="item col-md-4 col-sm-6 col-xs-12">
@@ -175,7 +175,7 @@
             <h2 class="title">Dependencies</h2>
             <ul class="feature-list list-unstyled">
 				<li><i class="fa fa-check"></i> Requires <a href="https://cmake.org" target="_blank"> Cmake 3.5.0</a></li>
-                <li><i class="fa fa-check"></i> Streaming based on <a href="https://gstreamer.freedesktop.org/" target="_blank"> Gstreamer 1.6.3</a></li>
+                <li><i class="fa fa-check"></i> Streaming based on <a href="https://gstreamer.freedesktop.org/" target="_blank"> Gstreamer 1.8.0</a></li>
                 <li><i class="fa fa-check"></i> Configuration based on <a href="https://developer.gnome.org/glib/2.46/" target="_blank"> Glib 2.46.2</a></li>
                 <li><i class="fa fa-check"></i> Management based on <a href="http://www.net-snmp.org/" target="_blank"> NET-SNMP 5.7.3</a></li>
             </ul>
@@ -189,7 +189,7 @@
             <h2 class="title text-center">Get Started</h2>            
             <div class="block">
                 <h3 class="sub-title text-center">Project's installation</h3>
-                <p>To install and use OpenVivoe on Debian based distributions we first need to make a few verifications. We need to install glib2.0 2.46.2 gstreamer1.0 1.6.3 and net-snmp 5.7.3. This packages are only available from the testing Debian release. So please, first make sure that you will downloading the package for testing Debian. Then follows these steps:
+                <p>To install and use OpenVivoe on Debian based distributions we first need to make a few verifications. We need to install glib2.0 2.46.2 gstreamer1.0 1.8.0 and net-snmp 5.7.3. This packages are only available from the testing Debian release. So please, first make sure that you will downloading the package for testing Debian. Then follows these steps:
 				</p>
                 <div class="code-block">
                     <!--//Use Prismjs - http://prismjs.com/index.html#basic-usage -->
@@ -236,7 +236,7 @@
 			<h3 class="sub-title text-center">Try OpenVivoe</h3>
 			<div class="block">
 				<h4 class="sub-title text-center">Configure net-snmp</h4>
-				<p>First, you need to configure net-snmp for OpenVivoe. Net-SNMP is the library used by VIVOE to implement SNMP, the protocol used to control  the streams.<a href="https://fr.wikipedia.org/wiki/Simple_Network_Management_Protocol" target="_blank"> SNMPv2 protcol</a> works with a Management Information Base "MIB", which acts as a data base. VIVOE implements its own. Furthermore, Net-SNMP cames with several configuration files. To simplify the configuration we already have wrote all those files. First, create a directory <strong>".snmp"</strong> in your home folder and copy the content of the <strong>"conf"</strong> directory in there.</p>
+				<p>First, you need to configure net-snmp for OpenVivoe. Net-SNMP is the library used by VIVOE to implement SNMP, the protocol used to control  the streams.<a href="https://fr.wikipedia.org/wiki/Simple_Network_Management_Protocol" target="_blank"> SNMPv2 protcol</a> works with a Management Information Base "MIB", which acts as a data base. VIVOE implements its own. Furthermore, Net-SNMP cames with several configuration files. To simplify the configuration we already have wrote all those files. First, create a directory <strong>".snmp"</strong> in your home folder and copy the content of the <strong>"conf"</strong>directory in there. For the configuration of the SNMP deamon, you probably want do it yourself. However, a minimal snmpd.conf is supplied in the <strong>"conf"</strong>folder. You can copy it in <strong>"/etc/snmp/"</strong>in order to make OpenVivoe work.</p>
 				<div class="code-block">
 					<pre><code class="language-markup">
 	~$ mkdir $HOME/.snmp
@@ -260,11 +260,15 @@
 			</div><!--//block--> 
 			<div class="block">
                 <h3 class="sub-title text-center">Full Documentation</h3>
-                <p>For more detail information go and visit our wiki! </p>
+                <p>For more detail information go and visit our wiki!</p>
                 <p class="text-center">
                     <a class="btn btn-cta-primary" href="https://github.com/Openwide-Ingenierie/openvivoe/wiki" target="_blank">More on GitHub</a>
                 </p>
 				<p> You will find information about <a href="https://github.com/Openwide-Ingenierie/openvivoe/wiki/vivoe-mibs.conf-configuration-file" target="_blank">how to configure OpenVivoe</a>, <a href="https://github.com/Openwide-Ingenierie/openvivoe/wiki/Control-stream-using-SNMP" target="_blank">how to use SNMP</a> to control your steam. You will also find helpful information about a brand new feature that OpenVIVoe implements: <a href="https://github.com/Openwide-Ingenierie/openvivoe/wiki/The-redirection" target="_blank">the redirection</a>!</p>
+				<p>Want to see more? Here is a presentation about OpenVive!</p>
+				<p class="text-center">
+                    <a class="btn btn-cta-primary" href="https://github.com/Openwide-Ingenierie/openvivoe/blob/gh-pages/openvivoe_presentation.pdf" target="_blank">OpenVivoe presentation</a>
+                </p>
             </div><!--//block-->
             
             </div><!--//docs-inner-->         
