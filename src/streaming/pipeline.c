@@ -43,6 +43,22 @@
 #define JPEG_FORMAT_NUMBER_SUPPORTED 	3
 static const gchar* J2K_STR_NAMES[JPEG_FORMAT_NUMBER_SUPPORTED] = {"image/x-j2c", "image/x-jpc", "image/jp2"};
 
+
+/**
+ * \brief get the allowed kinds of rtpj2kpay on source pad
+ * \return the caps allowed on pad of rtpj2kpay
+ */
+static GstCaps *get_rtpj2kpay_allowed_caps(){
+	GstElement 	*rtpj2kpay 	= gst_element_factory_make_log ( "rtpj2kpay", NULL);
+	GstPad 		*pad 		= gst_element_get_static_pad( rtpj2kpay , "sink" );
+	GstCaps *allowed_caps 	= gst_pad_get_pad_template_caps ( pad );
+	gst_object_unref (rtpj2kpay);
+	gst_object_unref (pad);
+	return allowed_caps;
+
+}
+
+
 /**
  * \brief This function add the RTP element to the pipeline for service provider * \param pipeline the pipeline associated to this SP
  * \param bus the bus the channel
@@ -733,17 +749,17 @@ static GstElement *handle_redirection_SU_pipeline ( GstElement *pipeline, GstCap
 
 		GstElement *capsfilter = gst_element_factory_make_log("capsfilter", CAPSFITER_J2K_NAME );
 
-		GstCaps *caps_jpeg2000 = gst_caps_new_empty_simple("image/x-jpc");
+		GstCaps *caps_jpeg2000 = get_rtpj2kpay_allowed_caps();
 
 		/* Put the source in the pipeline */
-		g_object_set (capsfilter, "caps",caps_jpeg2000 , NULL);
+		g_object_set (capsfilter, "caps", caps_jpeg2000 , NULL);
 
 		g_debug("add %s to pipeline", CAPSFITER_J2K_NAME );
 
 		gst_bin_add(GST_BIN(pipeline),capsfilter);
 
 		if ( !gst_element_link_log(input,capsfilter )){
-			g_critical("JPEG2000 format can only be x-jpc");
+			g_critical("JPEG2000 format can only be %s", gst_caps_to_string( caps_jpeg2000 ) );
 			return NULL;
 		}
 
@@ -896,7 +912,6 @@ static GstElement* addSink_SU( 	GstElement 					*pipeline, 		GstBus 		*bus,
 	video_caps = type_detection(GST_BIN(pipeline), input, NULL);
 	gst_caps_append_structure( caps , gst_structure_copy ( video_caps ) );
 	gst_caps_remove_structure ( caps, 0 ) ;
-
 	GstElement *last = handle_redirection_SU_pipeline(pipeline, caps, input);
 	/* update input element to link to appsink */
 	input = last ;
@@ -1011,11 +1026,9 @@ GstElement* create_pipeline_serviceUser( gpointer 					stream_datas,
 	/*
 	 * Gather a maximum of information from caps into the MIB
 	 */
-
 	fill_entry ( gst_caps_get_structure ( caps , 0 ), video_stream_info, data);
 	last = addSink_SU( pipeline, bus, bus_watch_id, last, channel_entry, cmdline, redirect , caps , video_stream_info);
 	fill_entry ( gst_caps_get_structure ( caps , 0 ), video_stream_info, data);
-
 	/*
 	 * Fill the channel Table with parameters from the video_format_table , copy them
 	 */
