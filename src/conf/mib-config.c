@@ -883,7 +883,7 @@ static gboolean check_assignedIP_validity( gchar *ip_value){
 	in_addr_t ip_prefix 		= inet_addr( RANDOM_IP_PREFIX );
 
 	/* chekc if IP start with 192.168.204 */
-	if ( (ip & 0xFFFFFF00) != (ip_prefix & 0xFFFFFF00)){
+	if ( ( htonl(ip) & 0xFFFFFF00 )  != ( htonl (ip_prefix ) & 0xFFFFFF00) ) {
 		return FALSE;
 	}
 
