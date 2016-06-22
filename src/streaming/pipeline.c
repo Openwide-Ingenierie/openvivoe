@@ -163,8 +163,7 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 		 */
 
 		GstElement *capsfilter = gst_element_factory_make_log("capsfilter", CAPSFITER_J2K_NAME ) ;
-
-		GstCaps *caps_jpeg2000 = gst_caps_new_empty_simple("image/x-jpc");
+		GstCaps *caps_jpeg2000 = get_rtpj2kpay_allowed_caps();
 
 		/* Put the source in the pipeline */
 		g_object_set (capsfilter, "caps",caps_jpeg2000 , NULL);
