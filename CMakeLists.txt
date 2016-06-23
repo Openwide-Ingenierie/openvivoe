@@ -33,6 +33,17 @@ pkg_check_modules(GST 	REQUIRED gstreamer-1.0>=1.6.3)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}")
 find_package(NetSnmp)
 
+#Find doxygen package, required to make doc
+find_package(Doxygen)
+if(DOXYGEN_FOUND)
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile @ONLY)
+	add_custom_target(doc ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile
+		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc
+		COMMENT "Generating API documentation with Doxygen" VERBATIM
+)
+endif(DOXYGEN_FOUND)
+
+
 #add source and header
 file(GLOB_RECURSE openvivoe_SRC 	src/*)
 file(GLOB_RECURSE openvivoe_HEADER 	include/*)
@@ -63,7 +74,7 @@ execute_process(COMMAND "pkg-config" "--libs" "glib-2.0"
 #link for Gstreamer-1.0
 execute_process(COMMAND "pkg-config" "--libs" "gstreamer-1.0"
 	WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-	OUTPUT_VARIABLE GST_LIBS				
+	OUTPUT_VARIABLE GST_LIBS
 	OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 #link for Gstreamer-sdp-1.0
@@ -89,7 +100,6 @@ execute_process(COMMAND "pkg-config" "--libs" "gstreamer-app-1.0"
 	WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 	OUTPUT_VARIABLE GST_APP_LIBS
 	OUTPUT_STRIP_TRAILING_WHITESPACE)
-
 
 #link librairies
 target_link_libraries(openvivoe ${SNMP_LIBS} ${SNMPAGENT_LIBS} ${GLIB} ${GST_LIBS} ${GST_VIDEO_LIBS} ${GST_SDP_LIBS} ${GST_RTP_LIBS} ${GST_APP_LIBS})
