@@ -77,9 +77,9 @@
  * Authentication Length: 		--> + 	1 byte
  * Message Identifier Hash: 	--> + 	2 bytes
  * Operating Source: 			--> + 	4 bytes
- * Optional Payload Type: 		--> + 	16 bytes
+ * Optional Payload Type: 		--> +  16 bytes
  * 									_____________
- * Total: 								24 bytes
+ * Total: 							   24 bytes
  */
 #define SAP_header_size 			24
 #define SAP_header_OS_position		4
@@ -133,6 +133,10 @@ void init_sap_multicast(){
 	uint8_t ttl = 1;
 	setsockopt(sap_socket.udp_socket_fd, IPPROTO_IP, IP_MULTICAST_TTL, &ttl, sizeof(ttl));
 
+	struct in_addr default_interface;
+	default_interface.s_addr = ethernetIfTable_head->ethernetIfIpAddress;
+    setsockopt (sap_socket.udp_socket_fd, IPPROTO_IP, IP_MULTICAST_IF, &default_interface, sizeof(default_interface));
+
 	status = bind( 	sap_socket.udp_socket_fd_rec,
 		   			(struct sockaddr *)&(sap_socket.multicast_addr),
 					//sizeof(sap_socket.multicast_addr) );
@@ -141,10 +145,13 @@ void init_sap_multicast(){
 	/* check for binding errors */
 	if ( status < 0 )
 		g_error("Failed to bind socket: %s\n", strerror(errno));
+
+
 	struct ip_mreq 		imreq;
 	/* set content of struct saddr and imreq to zero */
 	memset(&imreq, 0, sizeof(struct ip_mreq));
 	imreq.imr_multiaddr.s_addr = inet_addr(sap_multi_addr); /* multicast group to join*/
+
 	imreq.imr_interface.s_addr = ethernetIfTable_head->ethernetIfIpAddress; /* use DEFAULT interface */
 	/* JOIN multicast group on default interface - pass the ip_multicast_request to kernel */
 	status = setsockopt(sap_socket.udp_socket_fd_rec,
@@ -152,6 +159,8 @@ void init_sap_multicast(){
 						IP_ADD_MEMBERSHIP,
 						(const void *)&imreq,
 						sizeof(struct ip_mreq) );
+
+
 }
 
 

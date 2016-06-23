@@ -304,8 +304,13 @@ void set_udpsink_param( GstElement *udpsink, long channel_entry_index){
 
 	g_debug("set new %s param", UDPSINK_NAME );
 
+	/* set the default multicast-interface */
+	struct in_addr multicast_iface;
+	multicast_iface.s_addr = ethernetIfTable_head->ethernetIfIpAddress;
+
 	/*Set UDP sink properties */
     g_object_set(   G_OBJECT(udpsink),
+					"multicast-iface", 	inet_ntoa( multicast_iface ),
                     "host", inet_ntoa(ip_addr),
                     "port", DEFAULT_MULTICAST_PORT,
 					"sync", FALSE,
@@ -570,11 +575,17 @@ void set_udpsrc_param( GstElement *udpsrc, struct channelTable_entry * channel_e
 	struct in_addr multicast_group;
 	multicast_group.s_addr = channel_entry->channelReceiveIpAddress;
 
+	/* set the default multicast-interface */
+	struct in_addr multicast_iface;
+	multicast_iface.s_addr = ethernetIfTable_head->ethernetIfIpAddress;
+
+
 	g_debug("set new %s param", UDPSRC_NAME );
 
 	/*Set UDP sink properties */
     g_object_set(   G_OBJECT(udpsrc),
-                	"multicast-group", 	inet_ntoa( multicast_group ),
+					"multicast-iface", 	inet_ntoa( multicast_iface ),
+                	"address", 	inet_ntoa( multicast_group ),
                     "port", 			DEFAULT_MULTICAST_PORT,
 					"caps", 			caps,
                     NULL);
