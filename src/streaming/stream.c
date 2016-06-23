@@ -162,7 +162,7 @@ static void init_redirection( gpointer stream_datas, long videoFormatIndex ){
 /**
  * \brief get the command line to use to get the source from configuration file
  * \param pipeline the pipeline to wich adding the bin made from the cmd line description
- * return GstElement* the last element added in the pipeline: the bin made
+ * return the last element added in the pipeline: the bin made
  */
 static GstElement *get_source( GstElement* pipeline, long videoFormatIndex){
 	GError 		*error 				= NULL; /* an Object to save errors when they occurs */
@@ -465,7 +465,7 @@ int delete_steaming_data(gpointer channel_entry){
 		gst_element_set_state (data->pipeline, GST_STATE_PAUSED);
 		gst_element_set_state (data->pipeline, GST_STATE_READY);
 		gst_element_set_state (data->pipeline, GST_STATE_NULL);
-		gst_object_unref (GST_OBJECT (data->pipeline));
+		gst_object_unref (GST_OBJECT (data->pipeline)); /* unref pipeline */
 		g_source_remove (data->bus_watch_id);
 		/* free rtp_data */
 		free(data->rtp_datas);
