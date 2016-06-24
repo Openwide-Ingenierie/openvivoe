@@ -1,0 +1,77 @@
+\hypertarget{main_8c}{}\section{/home/hoel/\+Documents/\+V\+I\+V\+O\+E-\/project/openvivoe/src/main.c File Reference}
+\label{main_8c}\index{/home/hoel/\+Documents/\+V\+I\+V\+O\+E-\/project/openvivoe/src/main.\+c@{/home/hoel/\+Documents/\+V\+I\+V\+O\+E-\/project/openvivoe/src/main.\+c}}
+{\ttfamily \#include $<$stdio.\+h$>$}\\*
+{\ttfamily \#include $<$stdlib.\+h$>$}\\*
+{\ttfamily \#include $<$glib-\/unix.\+h$>$}\\*
+{\ttfamily \#include $<$gio/gio.\+h$>$}\\*
+{\ttfamily \#include $<$glib-\/2.\+0/glib.\+h$>$}\\*
+{\ttfamily \#include $<$gstreamer-\/1.\+0/gst/gst.\+h$>$}\\*
+{\ttfamily \#include $<$string.\+h$>$}\\*
+{\ttfamily \#include $<$unistd.\+h$>$}\\*
+{\ttfamily \#include $<$errno.\+h$>$}\\*
+{\ttfamily \#include $<$net-\/snmp/net-\/snmp-\/config.\+h$>$}\\*
+{\ttfamily \#include $<$net-\/snmp/net-\/snmp-\/includes.\+h$>$}\\*
+{\ttfamily \#include $<$net-\/snmp/agent/net-\/snmp-\/agent-\/includes.\+h$>$}\\*
+{\ttfamily \#include \char`\"{}../include/mib\+Parameters.\+h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}../include/device\+Info/ethernet\+If\+Table.\+h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}../include/video\+Format\+Info/video\+Format\+Table.\+h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}../include/channel\+Control/channel\+Table.\+h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}../include/announcement/sap.\+h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}../include/multicast.\+h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}../include/streaming/plugin/vivoecrop/gstvivoecrop.\+h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}../include/streaming/plugin/vivoecaps/vivoecaps.\+h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}../include/streaming/stream\+\_\+registration.\+h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}../include/streaming/stream.\+h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}../include/daemon.\+h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}../include/log.\+h\char`\"{}}\\*
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structstop__program__data}{stop\+\_\+program\+\_\+data}
+\begin{DoxyCompactList}\small\item\em the data needed to pass to functions used to exit the program nicely \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+gboolean {\bfseries vivoe\+\_\+gstreamer\+\_\+initiation} (int argc, char $\ast$argv\mbox{[}$\,$\mbox{]})\hypertarget{main_8c_af2ab414e10f49e542b51c015f10008cb}{}\label{main_8c_af2ab414e10f49e542b51c015f10008cb}
+
+\item 
+int \hyperlink{main_8c_a0ddf1224851353fc92bfbff6f499fa97}{main} (int argc, char $\ast$argv\mbox{[}$\,$\mbox{]})
+\begin{DoxyCompactList}\small\item\em the data needed to pass to functions used to exit the program nicely \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+gboolean {\bfseries internal\+\_\+error} = F\+A\+L\+SE\hypertarget{main_8c_a06bb0b2301d5e34ec4ccd0da87a6628d}{}\label{main_8c_a06bb0b2301d5e34ec4ccd0da87a6628d}
+
+\item 
+gboolean {\bfseries was\+\_\+running} = F\+A\+L\+SE\hypertarget{main_8c_a3a10dc2f65b683f84ad981acbff281a3}{}\label{main_8c_a3a10dc2f65b683f84ad981acbff281a3}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\index{main.\+c@{main.\+c}!main@{main}}
+\index{main@{main}!main.\+c@{main.\+c}}
+\subsubsection[{\texorpdfstring{main(int argc, char $\ast$argv[])}{main(int argc, char *argv[])}}]{\setlength{\rightskip}{0pt plus 5cm}int main (
+\begin{DoxyParamCaption}
+\item[{int}]{argc, }
+\item[{char $\ast$}]{argv\mbox{[}$\,$\mbox{]}}
+\end{DoxyParamCaption}
+)}\hypertarget{main_8c_a0ddf1224851353fc92bfbff6f499fa97}{}\label{main_8c_a0ddf1224851353fc92bfbff6f499fa97}
+
+
+the data needed to pass to functions used to exit the program nicely 
+
+
+\begin{DoxyParams}{Parameters}
+{\em argc} & the number of argument \\
+\hline
+{\em argv} & argument given to the program \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 as it\textquotesingle{}s our main function 
+\end{DoxyReturn}
+
+
+Definition at line 146 of file main.\+c.
+
