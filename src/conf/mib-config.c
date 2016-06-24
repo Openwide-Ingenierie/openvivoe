@@ -133,7 +133,7 @@ gchar** check_mib_group(GKeyFile *gkf, GError *error){
  * \param error a Gerror to check if errors occurs
  * \return EXIT_FAILURE (1) on failure, EXIT_SUCCES (0) on sucess
  */
-static int init_deviceInfo(GKeyFile* gkf, gchar* group_name, GError* error){
+static gboolean init_deviceInfo(GKeyFile* gkf, gchar* group_name, GError* error){
 
 	/*Declaration of a  gsize variable, that will be used to get the size of the list associated to some keys*/
      gsize length;
@@ -171,7 +171,7 @@ static int init_deviceInfo(GKeyFile* gkf, gchar* group_name, GError* error){
     parameter deviceNatoStockNumber         = {"deviceNatoStockNumber",         STRING,     1};
     parameter deviceMode                    = {"deviceMode",                    INTEGER,    1};
     parameter deviceReset                   = {"deviceReset",                   INTEGER,    0};
-    parameter ethernetInterface             = {"ethernetInterface",             T_STRING,   1};
+    parameter ethernetInterface             = {"ethernetInterface",             T_STRING,   0};
     parameter ethernetIfNumber       	    = {"ethernetIfNumber",             	STRING, 	1};
 
 
@@ -196,7 +196,7 @@ static int init_deviceInfo(GKeyFile* gkf, gchar* group_name, GError* error){
                     case INTEGER:
                             deviceInfo_parameters[i]._value.int_val = (int) g_key_file_get_integer(gkf, group_name, (const gchar*) deviceInfo_parameters[i]._name, &error);
                             if(error != NULL){
-                                g_warning("Invalid format for %s: %s\n", (const gchar*) deviceInfo_parameters[i]._name, error->message);
+                                g_critical("Invalid format for %s: %s\n", (const gchar*) deviceInfo_parameters[i]._name, error->message);
                                 error = NULL; /* resetting the error pointer*/
                                 error_occured = TRUE; /*set the error boolean to*/
                             }
@@ -204,7 +204,7 @@ static int init_deviceInfo(GKeyFile* gkf, gchar* group_name, GError* error){
                     case STRING:
                             deviceInfo_parameters[i]._value.string_val = (char*) g_key_file_get_string(gkf, group_name, (const gchar*) deviceInfo_parameters[i]._name, &error);
                             if(error != NULL){
-                                g_warning("Invalid format for %s: %s\n", (const gchar*) deviceInfo_parameters[i]._name, error->message);
+                                g_critical("Invalid format for %s: %s\n", (const gchar*) deviceInfo_parameters[i]._name, error->message);
                                 error = NULL; /* resetting the error pointer*/
                                 error_occured = TRUE; /*set the error boolean to*/
                             }
@@ -212,7 +212,7 @@ static int init_deviceInfo(GKeyFile* gkf, gchar* group_name, GError* error){
                     case T_INTEGER:
                             deviceInfo_parameters[i]._value.array_int_val = (int*) g_key_file_get_integer_list(gkf, group_name, (const gchar*) deviceInfo_parameters[i]._name, &length,  &error);
                             if(error != NULL){
-                                g_warning("Invalid format for %s: %s\n", (const gchar*) deviceInfo_parameters[i]._name, error->message);
+                                g_critical("Invalid format for %s: %s\n", (const gchar*) deviceInfo_parameters[i]._name, error->message);
                                 error = NULL; /* resetting the error pointer*/
                                 error_occured = TRUE; /*set the error boolean to*/
                             }
@@ -220,7 +220,7 @@ static int init_deviceInfo(GKeyFile* gkf, gchar* group_name, GError* error){
                     case T_STRING: /* only case here is ethernetInterface, from that we should compute ethernetIfNumber */
                             deviceInfo_parameters[i]._value.array_string_val =  (char**) g_key_file_get_string_list(gkf, group_name, (const gchar*) deviceInfo_parameters[i]._name, &length, &error);
                             if(error != NULL){
-                                g_warning("Invalid format for %s: %s\n", (const gchar*) deviceInfo_parameters[i]._name, error->message);
+                                g_critical("Invalid format for %s: %s\n", (const gchar*) deviceInfo_parameters[i]._name, error->message);
                                 error = NULL; /* resetting the error pointer*/
                                 error_occured = TRUE; /*set the error boolean to*/
                             }
@@ -232,8 +232,8 @@ static int init_deviceInfo(GKeyFile* gkf, gchar* group_name, GError* error){
         }else{
             /*if the parameter is mandatory, print an error message to the user, and exit the program*/
             if(!deviceInfo_parameters[i]._optional){
-                g_warning("Parameter %s mandatory and not found: %s\n", (const gchar*)deviceInfo_parameters[i]._name, error->message);
-                return EXIT_FAILURE;
+                g_critical("Parameter %s mandatory and not found", (const gchar*)deviceInfo_parameters[i]._name);
+                return FALSE;
             }
             /*if the parameter is optional, do not do anything special, just keep running!*/
         }
@@ -243,9 +243,9 @@ static int init_deviceInfo(GKeyFile* gkf, gchar* group_name, GError* error){
     deviceInfo.parameters  = (parameter*) malloc(deviceInfo.number*sizeof(parameter));
     memcpy(deviceInfo.parameters ,deviceInfo_parameters, sizeof(deviceInfo_parameters));
     if(error_occured==FALSE){
-        return EXIT_FAILURE;
+        return TRUE;
     }else{
-        return EXIT_SUCCESS;
+        return FALSE;
     }
 }
 
@@ -1289,9 +1289,9 @@ gchar *get_camera_ctl_cmdline ( int source_index ){
  * \brief this function is used to get the information to place in the VIVOE MIB
  * from the configuration file associated to it: "vivoe-mib.conf". It will
  * get the values of the different parameters of the MIB, check their validity
- * \return error messages for the parameters that are not Valid, and initialize the other
+ * \return FALSE if failure, TRUE if success
  */
-int init_mib_content(){
+gboolean init_mib_content(){
 
 	/* Define the error pointer we will be using to check for errors in the configuration file */
     GError* error = NULL;
@@ -1316,13 +1316,13 @@ int init_mib_content(){
     g_key_file_set_list_separator (gkf_conf_file, (gchar) ';');
 
 	if ( !init_deviceInfo(gkf_conf_file, GROUP_NAME_DEVICEINFO , error))
-		return EXIT_FAILURE;
+		return FALSE;
 	if ( !init_channelNumber_param(gkf_conf_file, groups , error))
-		return EXIT_FAILURE;
+		return FALSE;
 	if ( !init_videoFormatNumber_param(gkf_conf_file, groups, error) )
-		return EXIT_FAILURE;
+		return FALSE;
 	if ( !init_ethernetIpAssignment_param(gkf_conf_file, GROUP_NAME_DEVICEINFO, error))
-		return EXIT_FAILURE;
+		return FALSE;
 
 	/* free the memory allocated for the array of strings groups */
 	 g_strfreev(groups);
@@ -1333,5 +1333,5 @@ int init_mib_content(){
 	/* parse gstreamer's command line to see if there will be redirection */
 	init_redirection_data( gkf_conf_file );
 
-	return EXIT_SUCCESS;
+	return TRUE;
 }

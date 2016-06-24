@@ -106,7 +106,7 @@
 #define VIVOE_ROI_PROPERTY_NAME			"scalable"
 
 /*functions' definitions*/
-int 		init_mib_content(); /*check the groups, key and values of the MIB's parameters*/
+gboolean 	init_mib_content(); /*check the groups, key and values of the MIB's parameters*/
 void 		close_mib_configuration_file(GKeyFile *gkf) ; /* close the openned configuration file */
 gboolean 	get_roi_parameters_for_sources (
 		int index, 						gboolean scalable,
