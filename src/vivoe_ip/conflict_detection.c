@@ -29,6 +29,7 @@
 #include <net/ethernet.h> /* the L2 protocols */
 #include <netinet/ip.h>       /* IP_MAXPACKET (65535) */
 #include <time.h>
+#include <fcntl.h>
 
 /* to get the network interfaces*/
 #include <ifaddrs.h>
@@ -240,6 +241,8 @@ gboolean send_arp_request( struct ethernetIfTableEntry *if_entry , gboolean prob
 	/* close the socket */
 	close ( socket_fd ) ;
 
+	free(eth_frame);
+
 	return TRUE;
 
 }
@@ -255,14 +258,22 @@ static gboolean receive_arp_reply(  ) {
 	struct ether_header *eh;
 	struct arp_packet *arp_pkt;
 
-	g_debug("receive_arp_packet()");
+	g_debug("receive_arp_reply()");
 
 	/* Allocate memory for various arrays. */
 	ether_frame = malloc (IP_MAXPACKET);
 
 	/* Submit request for a raw socket descriptor. */
 	if ((sd = socket (PF_PACKET, SOCK_RAW, htons (ETH_P_ALL))) < 0) {
-		g_critical ("receive_arp_packet(): cannot open socket: %s", strerror(errno));
+		g_critical ("receive_arp_reply(): cannot open socket: %s", strerror(errno));
+		return FALSE;
+	}
+
+	struct timeval tv;
+	tv.tv_sec = ANNOUNCE_WAIT;
+	tv.tv_usec = 0;
+	if (setsockopt( sd , SOL_SOCKET , SO_RCVTIMEO , &tv , sizeof(tv) ) < 0) {
+		g_critical("could not set socket option\n");
 		return FALSE;
 	}
 
@@ -282,8 +293,12 @@ static gboolean receive_arp_reply(  ) {
 				g_debug("receive_arp_packet(): we have been interrupted while receiving ARP reponse");
 				memset (ether_frame, 0, IP_MAXPACKET * sizeof (uint8_t));
 				continue;  /* Something weird happened, but let's try again. */
-			} else {
-				g_critical (" receive_arp_packet() failed");
+			}
+	//	   	else if ( errno == EWOULDBLOCK){
+	//			continue;
+	//		}
+			else {
+				g_critical (" receive_arp_reply() failed");
 				return FALSE;
 			}
 		}
@@ -301,8 +316,9 @@ static gboolean receive_arp_reply(  ) {
 			}
 		}
 
-		/* check how many time we have wait, if ANNOUNCE_WAIT has been reach then return FALSE : no conflict */
-		if ( g_timer_elapsed ( timer, NULL ) > ANNOUNCE_WAIT )
+	//	/* check how many time we have wait, if ANNOUNCE_WAIT has been reach then return FALSE : no conflict */
+	//	printf("%f\n", g_timer_elapsed ( timer, NULL ) );
+	//	if ( g_timer_elapsed ( timer, NULL ) > ANNOUNCE_WAIT )
 			return FALSE;
 
 	}
@@ -310,6 +326,8 @@ static gboolean receive_arp_reply(  ) {
 	/* close the socket */
 	close (sd);
 
+
+	free( ether_frame );
 	return TRUE;
 
 }
