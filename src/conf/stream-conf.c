@@ -10,8 +10,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "../../include/mibParameters.h"
-#include "../../include/conf/stream-conf.h"
+#include "include/mibParameters.h"
+#include "include/conf/stream-conf.h"
 
 /**
  * \brief the number of video formats supported in VIVOE ( for now 3: RAW, MPEG-4, JPEG2000)

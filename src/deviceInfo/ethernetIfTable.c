@@ -10,12 +10,12 @@
 #include <sys/socket.h>
 #include <ctype.h>
 #include <glib-2.0/glib.h>
-#include "../../include/mibParameters.h"
-#include "../../include/conf/mib-conf.h"
-#include "../../include/deviceInfo/ethernetIfTable.h"
-#include "../../include/vivoe_ip/ip_assignment.h"
-#include "../../include/vivoe_ip/conflict_detection.h"
-#include "../../include/handler.h"
+#include "include/mibParameters.h"
+#include "include/conf/mib-conf.h"
+#include "include/deviceInfo/ethernetIfTable.h"
+#include "include/vivoe_ip/ip_assignment.h"
+#include "include/vivoe_ip/conflict_detection.h"
+#include "include/handler.h"
 
 /**
  * \brief get the last element of the Table

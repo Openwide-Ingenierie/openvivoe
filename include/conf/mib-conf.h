@@ -5,7 +5,7 @@
  *     - hoel <hoel.vasseur@openwide.fr>
  */
 #ifndef MIB_CONF_H
-# define MIB_CONF_H
+#define MIB_CONF_H
 
 /**
  * \brief This is the name of the configuration file to use for the subAgent handling the VIVOE MIB

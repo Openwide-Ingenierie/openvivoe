@@ -10,7 +10,7 @@
 #include <gstreamer-1.0/gst/gst.h>
 #include <stdio.h>
 #include <string.h>
-#include "../include/trap/deviceError.h"
+#include "include/trap/deviceError.h"
 
 
 /**

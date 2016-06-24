@@ -14,13 +14,13 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
-#include "../../include/mibParameters.h"
-#include "../../include/videoFormatInfo/videoFormatTable.h"
-#include "../../include/conf/mib-conf.h"
-#include "../../include/channelControl/channelTable.h"
-#include "../../include/streaming/stream_registration.h"
-#include "../../include/streaming/stream.h"
-#include "../../include/announcement/sap.h"
+#include "include/mibParameters.h"
+#include "include/videoFormatInfo/videoFormatTable.h"
+#include "include/conf/mib-conf.h"
+#include "include/channelControl/channelTable.h"
+#include "include/streaming/stream_registration.h"
+#include "include/streaming/stream.h"
+#include "include/announcement/sap.h"
 
 /**
  * \brief J2K videos caps have a field names "colorspace" that can be map to a classic slampling

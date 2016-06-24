@@ -9,13 +9,13 @@
 #include <glib-2.0/glib.h>
 #include <glib-unix.h>
 #include <gstreamer-1.0/gst/gst.h>
-#include "../../include/mibParameters.h"
-#include "../../include/videoFormatInfo/videoFormatTable.h"
-#include "../../include/handler.h"
-#include "../../include/channelControl/channelTable.h"
-#include "../../include/streaming/stream_registration.h"
-#include "../../include/streaming/pipeline.h"
-#include "../../include/streaming/stream.h"
+#include "include/mibParameters.h"
+#include "include/videoFormatInfo/videoFormatTable.h"
+#include "include/handler.h"
+#include "include/channelControl/channelTable.h"
+#include "include/streaming/stream_registration.h"
+#include "include/streaming/pipeline.h"
+#include "include/streaming/stream.h"
 
 /**
  * \brief Initializes the videoFormatTable module

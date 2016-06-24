@@ -29,9 +29,9 @@
 #include <ifaddrs.h>
 
 /* header file */
-#include "../../include/mibParameters.h"
-#include "../../include/deviceInfo/ethernetIfTable.h"
-#include "../../include/vivoe_ip/ip_assignment.h"
+#include "include/mibParameters.h"
+#include "include/deviceInfo/ethernetIfTable.h"
+#include "include/vivoe_ip/ip_assignment.h"
 
 
 

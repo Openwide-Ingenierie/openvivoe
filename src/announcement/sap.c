@@ -24,15 +24,15 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 /* Header file */
-#include "../../include/mibParameters.h"
-#include "../../include/deviceInfo/ethernetIfTable.h"
-#include "../../include/videoFormatInfo/videoFormatTable.h"
-#include "../../include/channelControl/channelTable.h"
-#include "../../include/announcement/sap.h"
-#include "../../include/announcement/sdp.h"
-#include "../../include/streaming/stream_registration.h"
-#include "../../include/streaming/stream.h"
-#include "../../include/streaming/pipeline.h"
+#include "include/mibParameters.h"
+#include "include/deviceInfo/ethernetIfTable.h"
+#include "include/videoFormatInfo/videoFormatTable.h"
+#include "include/channelControl/channelTable.h"
+#include "include/announcement/sap.h"
+#include "include/announcement/sdp.h"
+#include "include/streaming/stream_registration.h"
+#include "include/streaming/stream.h"
+#include "include/streaming/pipeline.h"
 
 /*
  * BYTE 0:

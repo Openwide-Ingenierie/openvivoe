@@ -6,9 +6,9 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
-#include "../../include/videoFormatInfo/videoFormatNumber.h"
-#include "../../include/mibParameters.h"
-#include "../../include/handler.h"
+#include "include/videoFormatInfo/videoFormatNumber.h"
+#include "include/mibParameters.h"
+#include "include/handler.h"
 
 /**
  * \brief Initializes the videoFormatNumber module

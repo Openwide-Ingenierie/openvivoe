@@ -27,7 +27,7 @@
 #include <ifaddrs.h>
 
 /* header file */
-#include "../include/deviceInfo/ethernetIfTable.h"
+#include "include/deviceInfo/ethernetIfTable.h"
 
 /** \brief Retrieve parameters of a specific interface used in VIVOE MIB
  *  \param iface The name of  network interface to use to retrieve the IP

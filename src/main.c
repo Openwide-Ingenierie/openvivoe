@@ -22,18 +22,18 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 /* header file */
-#include "../include/mibParameters.h"
-#include "../include/deviceInfo/ethernetIfTable.h"
-#include "../include/videoFormatInfo/videoFormatTable.h"
-#include "../include/channelControl/channelTable.h"
-#include "../include/announcement/sap.h"
-#include "../include/multicast.h"
-#include "../include/streaming/plugin/vivoecrop/gstvivoecrop.h"
-#include "../include/streaming/plugin/vivoecaps/vivoecaps.h"
-#include "../include/streaming/stream_registration.h"
-#include "../include/streaming/stream.h"
-#include "../include/daemon.h"
-#include "../include/log.h"
+#include "include/mibParameters.h"
+#include "include/deviceInfo/ethernetIfTable.h"
+#include "include/videoFormatInfo/videoFormatTable.h"
+#include "include/channelControl/channelTable.h"
+#include "include/announcement/sap.h"
+#include "include/multicast.h"
+#include "include/streaming/plugin/vivoecrop/gstvivoecrop.h"
+#include "include/streaming/plugin/vivoecaps/vivoecaps.h"
+#include "include/streaming/stream_registration.h"
+#include "include/streaming/stream.h"
+#include "include/daemon.h"
+#include "include/log.h"
 
 /**
  * \brief the data needed to pass to functions used to exit the program nicely

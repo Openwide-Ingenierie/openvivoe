@@ -25,52 +25,52 @@
 /*
  * mib parameters
  */
-#include "../include/mibParameters.h"
+#include "include/mibParameters.h"
 
 /*
  * DeviceInfo header
  */
-#include "../include/deviceInfo/deviceDesc.h"
-#include "../include/deviceInfo/deviceManufacturer.h"
-#include "../include/deviceInfo/devicePartNumber.h"
-#include "../include/deviceInfo/deviceSerialNumber.h"
-#include "../include/deviceInfo/deviceHardwareVersion.h"
-#include "../include/deviceInfo/deviceSoftwareVersion.h"
-#include "../include/deviceInfo/deviceFirmwareVersion.h"
-#include "../include/deviceInfo/deviceMibVersion.h"
-#include "../include/deviceInfo/deviceType.h"
-#include "../include/deviceInfo/deviceUserDesc.h"
-#include "../include/deviceInfo/ethernetIfNumber.h"
-#include "../include/deviceInfo/ethernetIfTable.h"
-#include "../include/deviceInfo/deviceNatoStockNumber.h"
-#include "../include/deviceInfo/deviceMode.h"
-#include "../include/deviceInfo/deviceReset.h"
+#include "include/deviceInfo/deviceDesc.h"
+#include "include/deviceInfo/deviceManufacturer.h"
+#include "include/deviceInfo/devicePartNumber.h"
+#include "include/deviceInfo/deviceSerialNumber.h"
+#include "include/deviceInfo/deviceHardwareVersion.h"
+#include "include/deviceInfo/deviceSoftwareVersion.h"
+#include "include/deviceInfo/deviceFirmwareVersion.h"
+#include "include/deviceInfo/deviceMibVersion.h"
+#include "include/deviceInfo/deviceType.h"
+#include "include/deviceInfo/deviceUserDesc.h"
+#include "include/deviceInfo/ethernetIfNumber.h"
+#include "include/deviceInfo/ethernetIfTable.h"
+#include "include/deviceInfo/deviceNatoStockNumber.h"
+#include "include/deviceInfo/deviceMode.h"
+#include "include/deviceInfo/deviceReset.h"
 /*
  * videoFormatInfo header
  */
-#include "../include/videoFormatInfo/videoFormatNumber.h"
-#include "../include/videoFormatInfo/videoFormatTable.h"
+#include "include/videoFormatInfo/videoFormatNumber.h"
+#include "include/videoFormatInfo/videoFormatTable.h"
 /*
  * channelControl header
  */
-#include "../include/channelControl/channelNumber.h"
-#include "../include/channelControl/channelReset.h"
-#include "../include/channelControl/channelTable.h"
+#include "include/channelControl/channelNumber.h"
+#include "include/channelControl/channelReset.h"
+#include "include/channelControl/channelTable.h"
 
 /*
  * SAP/SDP announcement
  */
-#include "../include/announcement/sap.h"
+#include "include/announcement/sap.h"
 
 /*
  * Configuration - Initialization of the MIB header
  */
-#include "../include/conf/mib-conf.h"
+#include "include/conf/mib-conf.h"
 
 /*
  * Header of this file
  */
-#include "../include/daemon.h"
+#include "include/daemon.h"
 
 /**
  * \brief start deamon for the MIB subAgent

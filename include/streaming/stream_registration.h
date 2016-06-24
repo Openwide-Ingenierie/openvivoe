@@ -7,7 +7,7 @@
 #ifndef STREAM_REGISTRATION_H
 # define STREAM_REGISTRATION_H
 
-#include "../../include/videoFormatInfo/videoFormatTable.h"
+#include "include/videoFormatInfo/videoFormatTable.h"
 typedef struct{
 	long 	rtp_type; 			/* for all video Formats */
 	int 	clock_rate; 		/* for all video Formats */

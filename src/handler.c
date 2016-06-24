@@ -8,8 +8,8 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
-#include "../include/mibParameters.h"
-#include "../include/handler.h"
+#include "include/mibParameters.h"
+#include "include/handler.h"
 
 /*For 16 bytes string handler*/
 #define DislayString16 16

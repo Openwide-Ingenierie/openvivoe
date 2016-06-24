@@ -6,7 +6,7 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
-#include "../../include/trap/deviceError.h"
+#include "include/trap/deviceError.h"
 
 extern const oid snmptrap_oid[];
 extern const size_t snmptrap_oid_len;
