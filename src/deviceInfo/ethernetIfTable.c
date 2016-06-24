@@ -168,7 +168,9 @@ static void initialize_table_ethernetIfTable(void)
 				assign_default_ip ( deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i] );
 			}else{
 				/* assigned the IP from conf to the device */
-				set_static_ip( deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i] , assigned_ip ) ;
+				if ( ! set_static_ip( deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[i] , assigned_ip )){
+					exit(1); /* then exit program */
+				}
 			}
 
 			/* now fill the ethernetIfTable */
