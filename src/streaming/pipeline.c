@@ -585,7 +585,7 @@ void set_udpsrc_param( GstElement *udpsrc, struct channelTable_entry * channel_e
 	/*Set UDP sink properties */
     g_object_set(   G_OBJECT(udpsrc),
 					"multicast-iface", 	inet_ntoa( multicast_iface ),
-                	"address", 	inet_ntoa( multicast_group ),
+                	"address", 			inet_ntoa( multicast_group ),
                     "port", 			DEFAULT_MULTICAST_PORT,
 					"caps", 			caps,
                     NULL);
