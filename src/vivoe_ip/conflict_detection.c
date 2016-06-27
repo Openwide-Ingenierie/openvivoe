@@ -165,12 +165,12 @@ static void build_arp_anouncement_packet(struct ethernetIfTableEntry *if_entry, 
 	/*
 	 * In ARP anouncment packet, sender IP address
 	 */
-	memset( pkt->arp_spa, if_entry->ethernetIfIpAddress , IP_ADDR_LEN * sizeof (uint8_t) );
+	memcpy( pkt->arp_spa, &if_entry->ethernetIfIpAddress , IP_ADDR_LEN * sizeof (uint8_t) );
 
 	/*
 	 * Set the Target Hardware Address: all 0 in ARP Probe
 	 */
-	memset (pkt->arp_tha , ETH_PROBE_ADRRESS_BYTE , ETHER_ADDR_LEN * sizeof (uint8_t));
+	memset (pkt->arp_tha ,ETH_PROBE_ADRRESS_BYTE  , ETHER_ADDR_LEN * sizeof (uint8_t));
 
 	/*
 	 * Set the Target IP Address: in a anouncement Message this is the IP address being used
@@ -180,19 +180,112 @@ static void build_arp_anouncement_packet(struct ethernetIfTableEntry *if_entry, 
 }
 
 /**
+ * \brief build the ethernet frame to send the ARP Probe or ARP announcement
+ * \param if_entry the ethernet interface modified
+ * \param pkt the ARP paket to payload in the ethernet frame
+ * \param ethernet_frame_length a varaiable to save the ethernet frame build
+ * \param probe a boolean, set to TRUE to build ARP PRobe request, to FALSE to build ARP announcement request
+ * \return the ethernet fram build
+ */
+static uint8_t *init_ethernet_frame (struct ethernetIfTableEntry *if_entry , struct arp_packet *pkt, int *ethernet_frame_length, gboolean probe ){
+
+	int eth_header_length 	= sizeof( struct ether_header);
+	int eth_frame_length 	=  ( eth_header_length + sizeof( struct arp_packet ) );
+	uint8_t *eth_frame		= malloc ( eth_frame_length * sizeof ( uint8_t));
+	struct ether_header *eh =  (struct ether_header *) eth_frame;
+
+	if ( !if_entry){
+		g_critical("ethernetIfTableEntry provided is NULL");
+		return NULL;
+	}
+
+	/* build arp packet to send */
+	if ( probe )
+		build_arp_probe_packet ( if_entry, pkt);
+	else
+		build_arp_anouncement_packet ( if_entry, pkt);
+
+	/* field Ethernet Header */
+	memset( eh->ether_dhost , ETH_BRD_ADD_BYTE , ETHER_ADDR_LEN ); /* destination eth address */
+	memcpy( eh->ether_shost , if_entry->ethernetIfMacAddress, if_entry->ethernetIfMacAddress_len); /* source ethernet address */
+	eh->ether_type =  htons( ETH_P_ARP ); /* Next is ethernet type code (ETH_P_ARP for ARP) */
+
+	/* copy ethernet header in ethernet frame */
+	memcpy(eth_frame, eh, eth_header_length );
+
+	/* copy ARP packet in ETHERNET payload */
+	memcpy( eth_frame + eth_header_length, pkt , sizeof( struct arp_packet ));
+
+	/* save values */
+	*ethernet_frame_length  	= eth_frame_length;
+
+	return eth_frame;
+}
+
+static gboolean prepare_arp_request_socket (struct ethernetIfTableEntry *if_entry , int *sd,  struct sockaddr_ll *sa ){
+
+	int socket_fd;
+
+	/* open the socket */
+	socket_fd = socket( AF_PACKET , SOCK_RAW , IPPROTO_RAW ) ;
+	if ( socket_fd < 0 ){
+		g_critical("send_arp_packet(): cannot open socket: %s", strerror(errno));
+		return FALSE;
+	}
+
+	struct ifreq ifr;
+	gchar* if_name = get_interface_name ( if_entry );
+	size_t if_name_len=strlen(if_name);
+	if (if_name_len<sizeof(ifr.ifr_name)) {
+		memcpy(ifr.ifr_name,if_name,if_name_len);
+		ifr.ifr_name[if_name_len]=0;
+	} else {
+		g_error("ethernet interface name too loong, cannot get interface index");
+	}
+	if (ioctl(socket_fd,SIOCGIFINDEX,&ifr)==-1) {
+		g_error("cannot get interface index: %s", strerror(errno));
+	}
+
+	/* build socket information */
+	sa->sll_ifindex = ifr.ifr_ifindex;
+
+	/* Address length*/
+	sa->sll_halen = htons( ETH_ALEN ) ;
+
+	/* Destination MAC */
+	memset( sa->sll_addr , ETH_BRD_ADD_BYTE , ETHER_ADDR_LEN );
+
+	*sd = socket_fd;
+
+	return TRUE;
+
+}
+
+static gboolean send_arp_request ( int socket_fd, uint8_t *eth_frame, int eth_frame_length, struct sockaddr_ll sa ){
+	int bytes;
+	if ((bytes = sendto (socket_fd , eth_frame , eth_frame_length , 0, (struct sockaddr *) &sa, sizeof (sa))) <= 0) {
+		g_critical("send_arp_packet(): failed to send ARP packet: %s", strerror (errno));
+		return FALSE;
+	}else
+		return TRUE;
+
+}
+
+#if 0
+/**
  * \brief send an ARP request: PROBE msg or ANOUNCE msg
  * \param if_entry the MIB entry of the ethernet interface
  * \param probe specify the kind of ARP packet to send TRUE for PROBE, FALSE for ANOUNCE
  * \return TRUE if the request could be sent, FALSE otherwise
  */
-gboolean send_arp_request( struct ethernetIfTableEntry *if_entry , gboolean probe ) {
+gboolean prepare_arp_request_socket( struct ethernetIfTableEntry *if_entry , int sending_socket , uint8_t *ethernet_frame, int ethernet_frame_length , struct sockaddr_ll sock_addr,  gboolean probe ) {
 
 	struct arp_packet pkt;
 	struct sockaddr_ll sa;
 	int socket_fd;
-	int eth_header_length = sizeof( struct ether_header);
-	int eth_frame_length =  ( eth_header_length + sizeof( struct arp_packet ) );
-	uint8_t *eth_frame	= malloc ( eth_frame_length * sizeof ( uint8_t));
+	int eth_header_length 	= sizeof( struct ether_header);
+	int eth_frame_length 	=  ( eth_header_length + sizeof( struct arp_packet ) );
+	uint8_t *eth_frame		= malloc ( eth_frame_length * sizeof ( uint8_t));
 	struct ether_header *eh =  (struct ether_header *) eth_frame;
 	int bytes; /* number of bytes send */
 
@@ -209,7 +302,7 @@ gboolean send_arp_request( struct ethernetIfTableEntry *if_entry , gboolean prob
 	/* copy ethernet header in ethernet frame */
 	memcpy(eth_frame, eh, eth_header_length );
 
-	/* Build ARP packet to send */
+	/* build arp packet to send */
 	if ( probe )
 		build_arp_probe_packet ( if_entry, &pkt);
 	else
@@ -225,33 +318,50 @@ gboolean send_arp_request( struct ethernetIfTableEntry *if_entry , gboolean prob
 		return FALSE;
 	}
 
+	struct ifreq ifr;
+	gchar* if_name = get_interface_name ( if_entry );
+	size_t if_name_len=strlen(if_name);
+	if (if_name_len<sizeof(ifr.ifr_name)) {
+		memcpy(ifr.ifr_name,if_name,if_name_len);
+		ifr.ifr_name[if_name_len]=0;
+	} else {
+		g_error("ethernet interface name too loong, cannot get interface index");
+	}
+	if (ioctl(socket_fd,SIOCGIFINDEX,&ifr)==-1) {
+		g_error("cannot get interface index: %s", strerror(errno));
+	}
+
 	/* build socket information */
-	sa.sll_ifindex = if_entry->ethernetIfIndex;
+	sa.sll_ifindex = ifr.ifr_ifindex;
+
+
 	/* Address length*/
 	sa.sll_halen = htons( ETH_ALEN ) ;
+
 	/* Destination MAC */
 	memset( sa.sll_addr , ETH_BRD_ADD_BYTE , ETHER_ADDR_LEN );
 
-	/* Send ethernet frame to socket.*/
-	if ((bytes = sendto (socket_fd , eth_frame , eth_frame_length , 0, (struct sockaddr *) &sa, sizeof (sa))) <= 0) {
-		g_critical("send_arp_packet(): failed to sent ARP packet");
-		return FALSE;
-	}
+//	/* Send ethernet frame to socket.*/
+//	if ((bytes = sendto (socket_fd , eth_frame , eth_frame_length , 0, (struct sockaddr *) &sa, sizeof (sa))) <= 0) {
+//		g_critical("send_arp_packet(): failed to sent ARP packet");
+//		return FALSE;
+//	}
 
-	/* close the socket */
-	close ( socket_fd ) ;
 
-	free(eth_frame);
-
+//	free(eth_frame);
+	sending_socket = socket_fd;
+	ethernet_frame = eth_frame,
+	ethernet_frame_length = eth_frame_length;
+	sock_addr = sa;
 	return TRUE;
 
 }
-
+#endif //if 0
 /**
  * \brief receive an ARP message, check if it is our reply
  * \return TRUE if this is a reply to our previous PROBE message, and s if there is a conflict, FALSE otherwise
  */
-static gboolean receive_arp_reply(  ) {
+static gboolean receive_arp_reply( ) {
 
 	int sd, status;
 	uint8_t *ether_frame;
@@ -285,7 +395,6 @@ static gboolean receive_arp_reply(  ) {
 	arp_pkt = (struct arp_packet *) (ether_frame + sizeof (struct arp_packet) );
 	eh 		= (struct  ether_header*) ether_frame;
 
-	GTimer *timer = g_timer_new();
 	while ((ntohs (arp_pkt->arp_hdr.ar_op) != ETH_P_ARP) && (ntohs (arp_pkt->arp_hdr.ar_op) != ARPOP_REPLY)) {
 
 		if ((status  = recvfrom(sd , ether_frame ,IP_MAXPACKET , 0, NULL, NULL)) < 0) {
@@ -294,9 +403,6 @@ static gboolean receive_arp_reply(  ) {
 				memset (ether_frame, 0, IP_MAXPACKET * sizeof (uint8_t));
 				continue;  /* Something weird happened, but let's try again. */
 			}
-	//	   	else if ( errno == EWOULDBLOCK){
-	//			continue;
-	//		}
 			else {
 				g_critical (" receive_arp_reply() failed");
 				return FALSE;
@@ -316,16 +422,10 @@ static gboolean receive_arp_reply(  ) {
 			}
 		}
 
-	//	/* check how many time we have wait, if ANNOUNCE_WAIT has been reach then return FALSE : no conflict */
-	//	printf("%f\n", g_timer_elapsed ( timer, NULL ) );
-	//	if ( g_timer_elapsed ( timer, NULL ) > ANNOUNCE_WAIT )
-			return FALSE;
-
 	}
 
 	/* close the socket */
 	close (sd);
-
 
 	free( ether_frame );
 	return TRUE;
@@ -361,7 +461,27 @@ gboolean ip_conflict_detection(  struct ethernetIfTableEntry *if_entry, gchar *i
 		time_passed = g_timer_elapsed ( timer, NULL );
 	}
 
+	int sending_socket_fd;
+	struct sockaddr_ll sa;
+	if ( !prepare_arp_request_socket (if_entry , &sending_socket_fd , &sa )){
+		g_critical("cannot prepare socket for ARP request");
+		return FALSE;
+	}
+
+	/* variable for the ethernet frame to build */
+	struct arp_packet pkt;
+	int ethernet_frame_length;
+	uint8_t *ethernet_frame;
+
 	while ( conflict ){
+
+		/* build the ethernet frame */
+		ethernet_frame = init_ethernet_frame (if_entry , &pkt, &ethernet_frame_length, TRUE );
+		if ( !ethernet_frame  ){
+			g_critical("cannot build ethernet frame for ARP request");
+			return FALSE;
+		}
+
 		/* wait PROBE_MIN */
 		g_debug ("waiting %d second(s)", PROBE_MIN);
 		g_timer_reset( timer );
@@ -380,7 +500,7 @@ gboolean ip_conflict_detection(  struct ethernetIfTableEntry *if_entry, gchar *i
 				time_passed = g_timer_elapsed ( timer, NULL );
 			}
 
-			send_arp_request( if_entry , TRUE );
+			send_arp_request( sending_socket_fd , ethernet_frame, ethernet_frame_length, sa );
 
 		}
 
@@ -398,9 +518,18 @@ gboolean ip_conflict_detection(  struct ethernetIfTableEntry *if_entry, gchar *i
 			   return TRUE;
 			/* send trap */
 			send_ipAddressConflict_trap();
-		}else
-			return FALSE;
+		}
 	}
+
+	/* build and send probe message */
+	ethernet_frame = init_ethernet_frame (if_entry , &pkt, &ethernet_frame_length, FALSE );
+	send_arp_request( sending_socket_fd , ethernet_frame, ethernet_frame_length, sa );
+
+	/* close sockets */
+	close ( sending_socket_fd );
+
+	/* free the ethernet frame build */
+	free(ethernet_frame);
 
 	return FALSE;
 
