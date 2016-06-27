@@ -6,13 +6,13 @@
 #define ETHERNETIFTABLE_H
 
 /* function declarations */
-struct ethernetIfTableEntry * ethernetIfTableEntry_create(  long  ethernetIfIndex,
-                                                            long ethernetIfSpeed,
-                                                            u_char ethernetIfMacAddress[6],
-                                                            size_t ethernetIfMacAddress_len,
-                                                            in_addr_t ethernetIfIpAddress,
-                                                            in_addr_t ethernetIfSubnetMask,
-                                                            in_addr_t ethernetIfIpAddressConflict);
+struct ethernetIfTableEntry
+	*ethernetIfTableEntry_create( long ethernetIfSpeed,
+		u_char ethernetIfMacAddress[6],
+		size_t ethernetIfMacAddress_len,
+		in_addr_t ethernetIfIpAddress,
+		in_addr_t ethernetIfSubnetMask,
+		in_addr_t ethernetIfIpAddressConflict);
 
 //gboolean select_interfaces();
 void init_ethernetIfTable(void);
@@ -38,7 +38,7 @@ Netsnmp_Next_Data_Point 	ethernetIfTable_get_next_data_point;
 
 /* Typical data structure for a row entry */
 struct ethernetIfTableEntry {
-    /* Index values */
+    /* Index values this is the index of the EthernetIfEntry in the table */
     long ethernetIfIndex;
 
     /* Column values */

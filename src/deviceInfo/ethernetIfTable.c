@@ -44,8 +44,7 @@ static struct ethernetIfTableEntry * ethernetIfTable_getLast( int *nb_entry ){
  * \param ethernetIfIpAddressConflict a variable to save the confilcting IP
  * \return the ethernetIfTableEntry added in the table
  */
-struct ethernetIfTableEntry * ethernetIfTableEntry_create(  long  ethernetIfIndex,
-                                                            long ethernetIfSpeed,
+struct ethernetIfTableEntry * ethernetIfTableEntry_create(  long ethernetIfSpeed,
                                                             u_char ethernetIfMacAddress[6],
                                                             size_t ethernetIfMacAddress_len,
                                                             in_addr_t ethernetIfIpAddress,

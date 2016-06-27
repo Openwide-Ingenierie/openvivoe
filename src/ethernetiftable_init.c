@@ -139,7 +139,7 @@ gboolean select_interfaces(char*** if_used){
 }
 #endif
 /* define the number of ioctl calls to make */
-#define calls_num 		5
+#define calls_num 		4
 /**
  * \brief Retrieve parameters of ethernet interface and initiate the MIB with it
  * \param iface the interface name from which retirev
@@ -149,7 +149,6 @@ struct ethernetIfTableEntry *init_ethernet(const char* iface){
 
 	/* the structure to use for retrieving information */
 	struct 		ifreq ifr;
-	long  		ethernetIfIndex 							= 0;
 	long 		ethernetIfSpeed 							= 0;
 	u_char 		ethernetIfMacAddress[MAC_ADDRESS_SIZE];
 	size_t 		ethernetIfMacAddress_len 					= MAC_ADDRESS_SIZE;
@@ -157,15 +156,12 @@ struct ethernetIfTableEntry *init_ethernet(const char* iface){
 	in_addr_t 	ethernetIfSubnetMask 						= 0;
 	in_addr_t 	ethernetIfIpAddressConflict 				= 0;
 	/* A array with the different call to ioctl to make */
-	int ioctl_call[calls_num] = {SIOCGIFINDEX,SIOCGIFMTU, SIOCGIFHWADDR, SIOCGIFADDR, SIOCGIFNETMASK };
+	int ioctl_call[calls_num] = {SIOCGIFMTU, SIOCGIFHWADDR, SIOCGIFADDR, SIOCGIFNETMASK };
 	int i; /* loop variable */
 	/* Get interface IP Address */
    for(i = 0; i<calls_num; i++){
 		if( get_interface_info(iface, &ifr, ioctl_call[i])){
 			switch(ioctl_call[i]){
-				case SIOCGIFINDEX:
-					ethernetIfIndex 		= (ifr.ifr_ifindex);
-					break;
 				case SIOCGIFMTU:
 					ethernetIfSpeed 		= (ifr.ifr_mtu);
 					break;
@@ -191,8 +187,7 @@ struct ethernetIfTableEntry *init_ethernet(const char* iface){
 	/* now we can create an entry in the ethernetIfTable */
 	/* create an null Ip conflict */
 	ethernetIfIpAddressConflict = inet_netof(inet_makeaddr (0 , inet_addr("0.0.0.0")));
-	return ethernetIfTableEntry_create( ethernetIfIndex,
-                                 ethernetIfSpeed,
+	return ethernetIfTableEntry_create( ethernetIfSpeed,
 			                     ethernetIfMacAddress,
             			         ethernetIfMacAddress_len,
 			                     ethernetIfIpAddress,
