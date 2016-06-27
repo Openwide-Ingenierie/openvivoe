@@ -55,9 +55,11 @@ struct ethernetIfTableEntry {
     /* Illustrate using a simple linked list */
     int   valid;
     struct ethernetIfTableEntry *next;
+
 };
 
 struct ethernetIfTableEntry  *ethernetIfTable_head;
 void ethernetIfTableEntry_delete();
 gchar *get_primary_interface_name();
+gchar *get_interface_name(struct ethernetIfTableEntry *entry);
 #endif /* ETHERNETIFTABLE_H */

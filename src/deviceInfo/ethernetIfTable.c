@@ -118,6 +118,17 @@ gchar *get_primary_interface_name(){
 }
 
 /**
+ * \brief get the interface name according to its table index
+ * \return the name of the interface or NULL if not entry exists for this index
+ */
+gchar *get_interface_name(struct ethernetIfTableEntry *entry){
+	if ( deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[ entry->ethernetIfIndex - 1 ] )
+		return deviceInfo.parameters[num_ethernetInterface]._value.array_string_val[ entry->ethernetIfIndex - 1] ;
+	else
+		return NULL;
+}
+
+/**
  * \brief Initialize the ethernetIfTable table by defining its contents and how it's structured
  */
 static void initialize_table_ethernetIfTable(void)
