@@ -139,7 +139,6 @@ void init_sap_multicast(){
 
 	status = bind( 	sap_socket.udp_socket_fd_rec,
 		   			(struct sockaddr *)&(sap_socket.multicast_addr),
-					//sizeof(sap_socket.multicast_addr) );
 					sizeof( struct sockaddr_in));
 
 	/* check for binding errors */
