@@ -80,7 +80,7 @@ static GstElement* addRTP( 	GstElement 						*pipeline, 		GstBus *bus,
 	GstElement *parser;
 	GstStructure *video_caps;
 
-	g_debug("addRTP");
+	g_debug("addRTP: add RTP payloader to Service Provider's pipeline");
 
 	if (caps == NULL){
 
@@ -302,7 +302,7 @@ void set_udpsink_param( GstElement *udpsink, long channel_entry_index){
 	struct in_addr ip_addr;
 	ip_addr.s_addr = ip;
 
-	g_debug("set new %s param", UDPSINK_NAME );
+	g_debug("set new parameters to %s ", UDPSINK_NAME );
 
 	/* set the default multicast-interface */
 	struct in_addr multicast_iface;
@@ -334,7 +334,7 @@ static GstElement* addUDP( 	GstElement *pipeline, 	GstBus *bus,
 	/*Create element that will be add to the pipeline */
 	GstElement *udpsink;
 
-	g_debug("add %s in SP pipeline", UDPSINK_NAME);
+	g_debug("add %s in Service Provider's pipeline", UDPSINK_NAME);
 
 	/* Create the UDP sink */
     udpsink = gst_element_factory_make_log ("udpsink", UDPSINK_NAME );
@@ -371,7 +371,7 @@ GstElement* create_pipeline_videoChannel( 	gpointer stream_datas,
 	video_stream_info = SNMP_MALLOC_TYPEDEF(struct videoFormatTable_entry);
 	video_stream_info->videoFormatIndex = videoChannelIndex;
 
-	g_debug("create SP pipeline");
+	g_debug("create Service Provider's pipeline");
 
 	if( !video_stream_info){
 		g_critical("Failed to create temporary empty entry for the table");
@@ -471,7 +471,7 @@ GstElement *append_SP_pipeline_for_redirection(GstCaps *caps, long videoFormatIn
 
 	GstElement 		*last;
 
-	g_debug("append_SP_pipeline_for_redirection source_%ld", videoFormatIndex );
+	g_debug("append_SP_pipeline_for_redirection: append Service Provider's pipeline for source_%ld", videoFormatIndex );
 
 	/* get the entry in videoFormatTable that corresponds to the mapping */
 	struct videoFormatTable_entry* videoFormat_entry = videoFormatTable_getEntry(videoFormatIndex);
@@ -544,23 +544,6 @@ GstElement *append_SP_pipeline_for_redirection(GstCaps *caps, long videoFormatIn
 	channel_entry->stream_datas = data;
 
 	return last;
-#if 0
-
-	if (last == NULL){
-		g_critical("Failed to create pipeline");
-		return NULL;
-	}
-
-	/* we link the elements together */
-	if ( !gst_element_link_log (last , udpsink))
-			return NULL;
-
-	last = udpsink;
-
-	data->udp_elem = last;
-	channel_entry->stream_datas = data;
-	return last;
-#endif //if 0
 
 }
 
@@ -580,7 +563,7 @@ void set_udpsrc_param( GstElement *udpsrc, struct channelTable_entry * channel_e
 	multicast_iface.s_addr = ethernetIfTable_head->ethernetIfIpAddress;
 
 
-	g_debug("set new %s param", UDPSRC_NAME );
+	g_debug("set new parameters to %s ", UDPSRC_NAME );
 
 	/*Set UDP sink properties */
     g_object_set(   G_OBJECT(udpsrc),
@@ -608,7 +591,7 @@ static GstElement* addUDP_SU( 	GstElement *pipeline, 	GstBus *bus,
 	/*Create element that will be add to the pipeline */
 	GstElement *udpsrc;
 
-	g_debug("add %s to SU pipeline", UDPSRC_NAME );
+	g_debug("add %s to Service Users's pipeline", UDPSRC_NAME );
 
 	/* Create the UDP sink */
     udpsrc = gst_element_factory_make_log ("udpsrc", UDPSRC_NAME );
@@ -649,6 +632,8 @@ static GstElement* addRTP_SU( 	GstElement *pipeline, 						GstBus *bus,
 	GstElement 		*last = NULL;
 	GstStructure 	*video_caps 	= gst_caps_get_structure(caps, 0);
 	char 			*encoding  		= (char*) gst_structure_get_string(video_caps, "encoding-name");
+
+	g_debug("addRTP_SU: add RTP payloader to Service Users's pipeline");
 
 	/* Fill the MIB a first Time */
 	fill_entry(video_caps, video_info, stream_datas);
@@ -737,7 +722,7 @@ static GstElement *handle_redirection_SU_pipeline ( GstElement *pipeline, GstCap
 
 	GstStructure *video_caps = gst_caps_get_structure( caps , 0 );
 
-	g_debug("handle_redirection_SU_pipeline");
+	g_debug("handle_redirection_SU_pipeline: checks and handles Service User's pipeline for redirection");
 
 	/* in case MPEG4 video type has been detected */
 	if  (gst_structure_has_name( video_caps, "video/mpeg")){
@@ -806,7 +791,7 @@ static GstElement *parse_conf_for_redirection( GstElement *pipeline, GstElement 
 	gchar *sink_suffix = g_strrstr(redirect->gst_sink, "!");
 	gchar *sink_remaning_pipeline = NULL;
 
-	g_info("Parsing configuration file to get redirection data");
+	g_debug("parse_conf_for_redirection: Parsing configuration file to get redirection data");
 
 	if ( sink_suffix )
 		sink_remaning_pipeline 	= g_strndup (redirect->gst_sink , strlen(redirect->gst_sink) - strlen(g_strrstr(redirect->gst_sink, "!")));
@@ -887,6 +872,8 @@ static GstElement* addSink_SU( 	GstElement 					*pipeline, 		GstBus 		*bus,
 
 	GError 		*error 				= NULL; /* an Object to save errors when they occurs */
 	GstElement 	*sink 				= NULL; /* to return last element of pipeline */
+
+	g_debug("addSink_SU: add sink element to Service User's pipeline");
 
 	/*
 	 * Classic case
@@ -1014,7 +1001,7 @@ GstElement* create_pipeline_serviceUser( gpointer 					stream_datas,
 		return NULL;
 	}
 
-	g_debug("Create SU pipeline");
+	g_debug("Create Service User's pipeline");
 
 	GstElement 	*pipeline 		= data->pipeline;
 	GstBus 		*bus 			= data->bus;

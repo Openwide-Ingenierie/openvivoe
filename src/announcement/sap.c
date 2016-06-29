@@ -345,7 +345,7 @@ gboolean receive_announcement(){
 
 	if (status == -1)
 	{
-		g_critical("Failed to receive: %s\n", strerror(errno));
+		g_debug("Failed to receive: %s", strerror(errno));
 		return TRUE;
 	}
 	else if ( status == sizeof(udp_payload ))

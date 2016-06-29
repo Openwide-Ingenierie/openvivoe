@@ -42,6 +42,8 @@ static gboolean get_roi_values_from_conf( struct videoFormatTable_entry* videoFo
 	long 		roi_extent_bottom;
 	long 		roi_extent_right;
 
+	g_debug("get_roi_values_from_conf: parse configuration file to get ROI parameters value");
+
 	/*
 	 * If channel_entry is  not NULL, this is a SU ROI so look for sink ROI parameters
 	 */
@@ -120,6 +122,8 @@ static gboolean update_stream_data (gpointer stream_datas,  struct videoFormatTa
 	/* A structure to save the new detected caps */
 	GstStructure 	*video_caps;
 
+	g_debug("update_stream_data: run typefind to detect new caps for ROI");
+
 	/*
 	 * detect the new video caps
 	 */
@@ -142,7 +146,7 @@ static gboolean update_stream_data (gpointer stream_datas,  struct videoFormatTa
 
 static gboolean handle_redirection_roi ( redirect_data *redirection ){
 
-	g_debug("handle_redirection_roi()");
+	g_debug("handle_redirection_roi: handle a pipeline for both ROI and redirection");
 
 	/* first run a type find to get new caps in SU's pipeline before appsink */
 	GstElement *appsink = gst_bin_get_by_name ( GST_BIN(redirection->pipeline_SU) , APPSINK_NAME );
@@ -307,7 +311,7 @@ gboolean handle_roi( GstElement *pipeline, struct videoFormatTable_entry *video_
 	GstElement 	*vivoecaps 	= NULL;
 	gboolean 	scalable  	= FALSE ;
 
-	g_debug("handle_roi()");
+	g_debug("handle_roi: check for ROI in pipeline");
 
 	/*
 	 * iterates though the bin source to find the element vivoecrop
@@ -365,6 +369,8 @@ gboolean update_pipeline_on_roi_changes( gpointer stream_datas , struct channelT
 	stream_data *data 		= stream_datas;
 	GstElement 	*pipeline 	= data->pipeline;
 	gboolean 	scalable 	= FALSE;
+
+	g_debug("update_pipeline_on_roi_changes()");
 
 	/* check if this is a redirection */
 	redirect_data *redirection  = SU_is_redirection(channel_entry->channelIndex);
@@ -424,6 +430,9 @@ gboolean update_pipeline_on_roi_changes( gpointer stream_datas , struct channelT
 	gchar *parse = strchr( (const char*) camera_ctl , '%' );
 	gchar *previous_parse = camera_ctl;
 	gchar *return_string = (gchar*) malloc( sizeof(gchar) * (strlen(camera_ctl) + 50 ) );
+
+	g_debug("camera_ctl_printf: parse command line of camera_ctl in conf file");
+
 	/*
 	 * The memory allocated for the returned string should be greater than the original string and here's why:
 	 * each time a %a or %b or %c or %d will be found its value will be replaced by its numerical correspondance according to
@@ -490,6 +499,8 @@ gboolean update_pipeline_on_roi_changes( gpointer stream_datas , struct channelT
 gboolean update_camera_ctl_on_roi_changes ( struct channelTable_entry *channel_entry )
 {
 	int ret = 0;
+
+	g_debug("update_camera_ctl_on_roi_changes: run command line to control camera with new value");
 
 	/* first retrieve the command line to use to control the camera and its arguments */
 	gchar 	*camera_ctl 	= get_camera_ctl_cmdline ( channel_entry->channelVideoFormatIndex ) ;

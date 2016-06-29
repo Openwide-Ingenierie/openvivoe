@@ -59,6 +59,8 @@ long define_vivoe_multicast( struct ethernetIfTableEntry *if_entry, const short 
 	unsigned long channel 		= (long) (multicast_channel << 8);
 	unsigned long result = -1; /* the multicast_addr in a binary form */
 
+	g_debug("define_vivoe_multicast: compute multicast IP address for channel %d", multicast_channel);
+
 	if ( if_entry ){
 
 		/* save ip in ip_addr */
