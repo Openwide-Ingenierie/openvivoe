@@ -21,20 +21,17 @@
 /*
  * \brief open the configuration GKeyfile
  * \return A pointer to the openned GKeyfile
- */  
+ */
 GKeyFile* open_configuration_file(){
 
 /* Declaration of a pointer that will contain our configuration file*/
-	GKeyFile* gkf; 
+	GKeyFile* gkf;
 
 	/* Define the error pointer we will be using to check for errors in the configuration file */
 	GError* error = NULL;
 
 	/*define a pointer to the full path were the vivoe-mib.conf file is located*/
 	gchar* gkf_path = NULL;
-
-	/*defined the paths from were we should retrieve our configuration files */
-	const gchar* search_dirs[] = {CONFIG_FILE_1, CONFIG_FILE_2, CONFIG_FILE_3, CONFIG_FILE_4, NULL};
 
 	/*initialization of the variable, this perform a malloc, do not forget to free it when closing file! */
 	gkf = g_key_file_new();

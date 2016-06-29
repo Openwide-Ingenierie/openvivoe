@@ -22,6 +22,12 @@
 #define MAINTENANCE_GROUP_SIZE 	19
 
 /**
+ * \brief the path where to search for configuration files
+ */
+const gchar* search_dirs[] = {(gchar*)"./conf",(gchar*)"/etc/vivoe",(gchar*)".", NULL};
+
+
+/**
  * \brief set the mainenance flag to one for the given parameter if necesseray, otherwise, set it to false
  * \param param the MIB parameter that need to be modify
  * \return TRUE if the param is in the maintenance group, FALSE otherwise
@@ -60,9 +66,6 @@ static GKeyFile * open_mib_configuration_file(GError* error, gchar** gkf_path){
 
 	GKeyFile* gkf;
 
-    /*defined the paths from were we should retrieve our configuration files */
-    const gchar* search_dirs[] = {(gchar*)"./conf",(gchar*)"/etc/vivoe",(gchar*)"$HOME/.vivoe",(gchar*)".", NULL};
-
     /*initialization of the variable */
     gkf = g_key_file_new();
 
@@ -71,7 +74,7 @@ static GKeyFile * open_mib_configuration_file(GError* error, gchar** gkf_path){
      * or if user doesn't have read permission to it.
      * If a problem occurs, print it and exit.
      */
-    if (!g_key_file_load_from_dirs(gkf,CONFIG_FILE, search_dirs, gkf_path,G_KEY_FILE_KEEP_COMMENTS, &error)){
+    if (!g_key_file_load_from_dirs( gkf , CONFIG_FILE , search_dirs , gkf_path, G_KEY_FILE_KEEP_COMMENTS , &error )){
         fprintf (stderr, "Could not read config file %s\n%s\n",CONFIG_FILE,error->message);
         return NULL;
     }
