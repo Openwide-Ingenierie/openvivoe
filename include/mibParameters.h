@@ -7,8 +7,8 @@
 #include <glib-2.0/glib.h>
 #include <gstreamer-1.0/gst/gst.h>
 
-# ifndef MIBPARAMETERS_H
-# define MIBPARAMETERS_H
+#ifndef MIBPARAMETERS_H
+#define MIBPARAMETERS_H
 
 /* define general parameters for the MIB_management */
 #define DisplayString16 			16
@@ -233,4 +233,11 @@ extern gboolean 	internal_error;
  * \brief a boolean to save the fact the main loop was runnig: this is mostly to be able to perform typefind even when the MainLoop is already started
  */
 extern gboolean 	was_running;
+
+
+/**
+ * \brief the paths for configuration file
+ */
+extern const gchar* search_dirs[];
+
 #endif /* MIBPARAMETERS_H */

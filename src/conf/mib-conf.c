@@ -26,7 +26,6 @@
  */
 const gchar* search_dirs[] = {(gchar*)"./conf",(gchar*)"/etc/vivoe",(gchar*)".", NULL};
 
-
 /**
  * \brief set the mainenance flag to one for the given parameter if necesseray, otherwise, set it to false
  * \param param the MIB parameter that need to be modify

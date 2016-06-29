@@ -12,17 +12,6 @@
  */
 #define CONFIG_FILE_NAME "vivoe-stream.conf"
 
-/*
- * This is a list of path where the configuration should be found
- */
-#define WORKING_DIR 	"."
-#define DEBUG_DIR 		WORKING_DIR"/bin/Debug/"
-
-#define CONFIG_FILE_1 	WORKING_DIR"/conf"
-#define CONFIG_FILE_2 	DEBUG_DIR"/conf"
-#define CONFIG_FILE_3 	"/usr/share/vivoe/conf"
-#define CONFIG_FILE_4 	"$HOME/.vivoe/conf"
-
 #define RAW_GROUP_NAME 		"RAW"
 #define MPEG4_GROUP_NAME 	"MPEG-4"
 #define J2K_GROUP_NAME 		"JPEG2000"
@@ -34,5 +23,5 @@ gchar** get_raw_encoding(GKeyFile* gkf);
 gchar** get_raw_res(GKeyFile* gkf);
 gchar** get_mp4_res(GKeyFile* gkf);
 gchar** get_j2k_res(GKeyFile* gkf);
-	
+
 #endif /* STREAM_CONF_H */
