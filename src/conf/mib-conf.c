@@ -277,6 +277,7 @@ static gboolean init_channelNumber_param(GKeyFile* gkf, gchar **groups, GError* 
 			break;
 	}
 
+	free(receiver_name);
 	channelNumber._value.int_val = i -1 ;
 	if( channelNumber._value.int_val < 0 )
 		return FALSE;
@@ -312,6 +313,7 @@ static gboolean init_videoFormatNumber_param(GKeyFile *gkf, gchar **groups, GErr
 
 	videoFormatNumber._value.int_val = i -1 ;
 
+	free(source_name);
 	if ( videoFormatNumber._value.int_val < 0 )
 		return FALSE;
 	else
@@ -642,7 +644,7 @@ gchar *init_sources_from_conf(int index){
 	cmdline = get_key_value_string(gkf_conf_file,(const gchar* const*) groups , source_name ,GST_SOURCE_CMDLINE , error);
 
 	free(source_name);
-	//close_mib_configuration_file(gkf);
+
 	return cmdline;
 }
 
