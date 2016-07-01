@@ -24,7 +24,7 @@
 /**
  * \brief the path where to search for configuration files
  */
-const gchar* search_dirs[] = {(gchar*)"./conf",(gchar*)"/etc/vivoe",(gchar*)".", NULL};
+const gchar* search_dirs[] = {(gchar*)"./conf",(gchar*)"/etc/openvivoe",(gchar*)".", NULL};
 
 /**
  * \brief set the mainenance flag to one for the given parameter if necesseray, otherwise, set it to false
