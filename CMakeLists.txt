@@ -168,6 +168,10 @@ else()
 	SET( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)#default version
 endif()
 
+# the install rules for OpenVivoe
+INSTALL( TARGETS openvivoe DESTINATION bin PERMISSIONS OWNER_EXECUTE )
+INSTALL( FILES conf/vivoe-mib.conf conf/vivoe-stream.conf DESTINATION /etc/openvivoe )
+
 #display info to user
 message(STATUS "CMAKE_GENERATOR 	: ${CMAKE_GENERATOR}")
 message(STATUS "PRJ 			: ${PROJECT_NAME}")
