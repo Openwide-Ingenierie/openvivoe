@@ -21,17 +21,17 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
-#include "include/mibParameters.h"
-#include "include/log.h"
-#include "include/videoFormatInfo/videoFormatTable.h"
-#include "include/channelControl/channelTable.h"
-#include "include/conf/mib-conf.h"
-#include "include/streaming/plugin/vivoecaps/vivoecaps.h"
-#include "include/streaming/plugin/vivoecrop/gstvivoecrop.h"
-#include "include/streaming/name.h"
-#include "include/streaming/detect.h"
-#include "include/streaming/stream_registration.h"
-#include "include/streaming/stream.h"
+#include "mibParameters.h"
+#include "log.h"
+#include "videoFormatInfo/videoFormatTable.h"
+#include "channelControl/channelTable.h"
+#include "conf/mib-conf.h"
+#include "streaming/plugin/vivoecaps/vivoecaps.h"
+#include "streaming/plugin/vivoecrop/gstvivoecrop.h"
+#include "streaming/name.h"
+#include "streaming/detect.h"
+#include "streaming/stream_registration.h"
+#include "streaming/stream.h"
 
 static gboolean get_roi_values_from_conf( struct videoFormatTable_entry* videoFormat_entry , gboolean scalable , struct channelTable_entry *channel_entry){
 

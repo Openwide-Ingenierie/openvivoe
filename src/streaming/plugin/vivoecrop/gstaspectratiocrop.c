@@ -41,7 +41,7 @@
 #include <gstreamer-1.0/gst/gst.h>
 #include <gst/video/video.h>
 
-#include "include/streaming/plugin/vivoecrop/gstaspectratiocrop.h"
+#include "streaming/plugin/vivoecrop/gstaspectratiocrop.h"
 
 //#include "gstreamer-1.0/gst/glib-compat-private.h"
 

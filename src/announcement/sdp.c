@@ -18,15 +18,15 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 /* Header file */
-#include "include/mibParameters.h"
-#include "include/deviceInfo/ethernetIfTable.h"
-#include "include/multicast.h"
-#include "include/videoFormatInfo/videoFormatTable.h"
-#include "include/channelControl/channelTable.h"
-#include "include/announcement/sdp.h"
-#include "include/streaming/stream_registration.h"
-#include "include/streaming/stream.h"
-#include "include/announcement/gstreamer_function.h"
+#include "mibParameters.h"
+#include "deviceInfo/ethernetIfTable.h"
+#include "multicast.h"
+#include "videoFormatInfo/videoFormatTable.h"
+#include "channelControl/channelTable.h"
+#include "announcement/sdp.h"
+#include "streaming/stream_registration.h"
+#include "streaming/stream.h"
+#include "announcement/gstreamer_function.h"
 
 
 /**

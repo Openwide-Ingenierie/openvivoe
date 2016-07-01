@@ -28,9 +28,9 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 /* header file */
-#include "include/deviceInfo/ethernetIfTable.h"
-#include "include/mibParameters.h"
-#include "include/multicast.h"
+#include "deviceInfo/ethernetIfTable.h"
+#include "mibParameters.h"
+#include "multicast.h"
 
 /**
  * \brief Retrieve the device ID associated to the address ip_ddr

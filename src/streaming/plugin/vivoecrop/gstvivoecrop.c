@@ -64,12 +64,12 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
-#include "include/mibParameters.h"
-#include "include/videoFormatInfo/videoFormatTable.h"
+#include "mibParameters.h"
+#include "videoFormatInfo/videoFormatTable.h"
 
-#include "include/streaming/plugin/plugin.h"
-#include "include/streaming/plugin/vivoecrop/gstvivoecrop.h"
-#include "include/streaming/plugin/vivoecrop/gstaspectratiocrop.h"
+#include "streaming/plugin/plugin.h"
+#include "streaming/plugin/vivoecrop/gstvivoecrop.h"
+#include "streaming/plugin/vivoecrop/gstaspectratiocrop.h"
 
 
 

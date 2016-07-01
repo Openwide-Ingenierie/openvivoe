@@ -12,19 +12,19 @@
 #include <gstreamer-1.0/gst/sdp/gstsdpmessage.h>
 #include <gstreamer-1.0/gst/gst.h>
 #include <arpa/inet.h>
-#include "include/mibParameters.h"
-#include "include/conf/mib-conf.h"
-#include "include/deviceInfo/ethernetIfTable.h"
-#include "include/multicast.h"
-#include "include/videoFormatInfo/videoFormatTable.h"
-#include "include/handler.h"
-#include "include/channelControl/channelTable.h"
-#include "include/announcement/sap.h"
-#include "include/announcement/sdp.h"
-#include "include/streaming/stream_registration.h"
-#include "include/streaming/pipeline.h"
-#include "include/streaming/stream.h"
-#include "include/streaming/roi.h"
+#include "mibParameters.h"
+#include "conf/mib-conf.h"
+#include "deviceInfo/ethernetIfTable.h"
+#include "multicast.h"
+#include "videoFormatInfo/videoFormatTable.h"
+#include "handler.h"
+#include "channelControl/channelTable.h"
+#include "announcement/sap.h"
+#include "announcement/sdp.h"
+#include "streaming/stream_registration.h"
+#include "streaming/pipeline.h"
+#include "streaming/stream.h"
+#include "streaming/roi.h"
 
 
 

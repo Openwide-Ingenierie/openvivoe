@@ -11,10 +11,10 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "include/mibParameters.h"
-#include "include/streaming/name.h"
-#include "include/streaming/detect.h"
-#include "include/log.h"
+#include "mibParameters.h"
+#include "streaming/name.h"
+#include "streaming/detect.h"
+#include "log.h"
 
 /**
  * \brief This is needed to exit the video type detection function

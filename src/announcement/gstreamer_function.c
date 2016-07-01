@@ -12,7 +12,7 @@
 #include <gstreamer-1.0/gst/gst.h>
 #include <gstreamer-1.0/gst/sdp/gstsdpmessage.h>
 #include <gstreamer-1.0/gst/rtp/gstrtppayloads.h>
-#include "include/announcement/gstreamer_function.h"
+#include "announcement/gstreamer_function.h"
 
 static const gchar *
 gst_sdp_get_attribute_for_pt (const GstSDPMedia * media, const gchar * name,

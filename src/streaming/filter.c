@@ -12,10 +12,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "include/conf/stream-conf.h"
-#include "include/streaming/detect.h"
-#include "include/streaming/filter.h"
-#include "include/log.h"
+#include "conf/stream-conf.h"
+#include "streaming/detect.h"
+#include "streaming/filter.h"
+#include "log.h"
 
 
 #define KEY_NO_FILTER_VALUE 	"no-filter"

@@ -48,8 +48,8 @@
 #endif
 
 //#include "../../gst/gst-i18n-lib.h"
-#include "include/streaming/plugin/plugin.h"
-#include "include/streaming/plugin/vivoecaps/vivoecaps.h"
+#include "streaming/plugin/plugin.h"
+#include "streaming/plugin/vivoecaps/vivoecaps.h"
 
 enum
 {

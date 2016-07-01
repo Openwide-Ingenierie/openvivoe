@@ -22,20 +22,20 @@
 
 #include <arpa/inet.h>
 
-#include "include/mibParameters.h"
-#include "include/log.h"
-#include "include/deviceInfo/ethernetIfTable.h"
-#include "include/videoFormatInfo/videoFormatTable.h"
-#include "include/channelControl/channelTable.h"
-#include "include/streaming/stream_registration.h"
-#include "include/multicast.h"
-#include "include/mibParameters.h"
-#include "include/streaming/name.h"
-#include "include/streaming/filter.h"
-#include "include/streaming/detect.h"
-#include "include/streaming/roi.h"
-#include "include/streaming/pipeline.h"
-#include "include/streaming/stream.h"
+#include "mibParameters.h"
+#include "log.h"
+#include "deviceInfo/ethernetIfTable.h"
+#include "videoFormatInfo/videoFormatTable.h"
+#include "channelControl/channelTable.h"
+#include "streaming/stream_registration.h"
+#include "multicast.h"
+#include "mibParameters.h"
+#include "streaming/name.h"
+#include "streaming/filter.h"
+#include "streaming/detect.h"
+#include "streaming/roi.h"
+#include "streaming/pipeline.h"
+#include "streaming/stream.h"
 
 /**
  * \brief the J2K's media type we could have after a J2K encoder (onlu x-jpc can be linked to rtp payloader however)

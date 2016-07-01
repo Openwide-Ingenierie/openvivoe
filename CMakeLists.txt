@@ -17,9 +17,9 @@ set (Tutorial_VERSION_MINOR 1)
 
 #add directories of project
 include_directories(
-  openvivoe/src
-  openvivoe/bin
-  openvivoe/include
+  src
+  bin
+  include
   /usr/local/include
   /usr/include
 )
@@ -155,9 +155,9 @@ execute_process(COMMAND "pkg-config" "--cflags" "gstreamer-app-1.0"
 				OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 set(CFLAGS "${CFLAGS} ${SNMP_FLAGS} ${GLIBC_FLAGS} ${GST_FLAGS} ${GST_VIDEO_FLAGS} ${GST_SDP_FLAGS} ${GST_RTP_FLAGS} ${GST_APP_FLAGS}")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -I. ${CFLAGS}") #always
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall ${CFLAGS}") #always
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -00 -v -da -Q") #for debugging
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -I.")#for release
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall ")#for release
 
 #set ouput directory based on build type
 if( CMAKE_BUILD_TYPE STREQUAL DEBUG)

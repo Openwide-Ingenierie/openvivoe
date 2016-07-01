@@ -13,8 +13,8 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
-#include "include/mibParameters.h"
-#include "include/conf/mib-conf.h"
+#include "mibParameters.h"
+#include "conf/mib-conf.h"
 
 /**
  * \brief the number of parameters in the maintenance group
