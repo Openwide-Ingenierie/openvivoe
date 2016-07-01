@@ -169,7 +169,7 @@ else()
 endif()
 
 # the install rules for OpenVivoe
-INSTALL( TARGETS openvivoe DESTINATION bin PERMISSIONS OWNER_EXECUTE )
+INSTALL( TARGETS openvivoe DESTINATION bin )
 INSTALL( FILES conf/vivoe-mib.conf conf/vivoe-stream.conf DESTINATION /etc/openvivoe )
 
 #display info to user
