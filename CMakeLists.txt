@@ -20,8 +20,6 @@ include_directories(
   src
   bin
   include
-  /usr/local/include
-  /usr/include
 )
 
 #Check dependencies
