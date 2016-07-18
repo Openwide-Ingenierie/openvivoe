@@ -108,6 +108,7 @@ endif()
 # the install rules for OpenVivoe
 INSTALL( TARGETS openvivoe DESTINATION bin )
 INSTALL( FILES conf/vivoe-mib.conf conf/vivoe-stream.conf DESTINATION /etc/openvivoe )
+INSTALL( FILES conf/mibs/VIVOE-MIB DESTINATION /usr/share/snmp/mibs )
 
 #display info to user
 message(STATUS "CMAKE_GENERATOR 	: ${CMAKE_GENERATOR}")
