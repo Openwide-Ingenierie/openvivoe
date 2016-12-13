@@ -20,14 +20,12 @@ include_directories(
   src
   bin
   include
-  /usr/local/include
-  /usr/include
 )
 
 #Check dependencies
 include(FindPkgConfig)
-pkg_check_modules(GLIB2 REQUIRED glib-2.0>=2.46.2)
-pkg_check_modules(GST 	REQUIRED gstreamer-1.0>=1.6.3)
+pkg_check_modules(GLIB2     REQUIRED glib-2.0>=2.46.2)
+pkg_check_modules(GST       REQUIRED gstreamer-1.0>=1.6.3 gstreamer-video-1.0>=1.6.3 gstreamer-rtp-1.0>=1.6.3  gstreamer-sdp-1.0>=1.6.3 gstreamer-app-1.0>=1.6.3)
 
 #Special case of net-snmp (that is not referenced by pkg-config)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}")
@@ -75,44 +73,19 @@ execute_process(COMMAND "net-snmp-config" "--agent-libs"
 				OUTPUT_VARIABLE SNMPAGENT_LIBS
 				OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-#link that need to be set up to compile the Glibc, needed for the management of configuration files
-execute_process(COMMAND "pkg-config" "--libs" "glib-2.0"
-				WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-				OUTPUT_VARIABLE GLIB
-				OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-#link for Gstreamer-1.0
-execute_process(COMMAND "pkg-config" "--libs" "gstreamer-1.0"
-	WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-	OUTPUT_VARIABLE GST_LIBS
-	OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-#link for Gstreamer-sdp-1.0
-execute_process(COMMAND "pkg-config" "--libs" "gstreamer-video-1.0"
-	WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-	OUTPUT_VARIABLE GST_VIDEO_LIBS
-	OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-#link for Gstreamer-sdp-1.0
-execute_process(COMMAND "pkg-config" "--libs" "gstreamer-sdp-1.0"
-	WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-	OUTPUT_VARIABLE GST_SDP_LIBS
-	OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-#link for Gstreamer-sdp-1.0
-execute_process(COMMAND "pkg-config" "--libs" "gstreamer-rtp-1.0"
-	WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-	OUTPUT_VARIABLE GST_RTP_LIBS
-	OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-#link for Gstreamer-app-1.0
-execute_process(COMMAND "pkg-config" "--libs" "gstreamer-app-1.0"
-	WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-	OUTPUT_VARIABLE GST_APP_LIBS
-	OUTPUT_STRIP_TRAILING_WHITESPACE)
-
 #link librairies
-target_link_libraries(openvivoe ${SNMP_LIBS} ${SNMPAGENT_LIBS} ${GLIB} ${GST_LIBS} ${GST_VIDEO_LIBS} ${GST_SDP_LIBS} ${GST_RTP_LIBS} ${GST_APP_LIBS})
+target_link_libraries(openvivoe
+	${SNMP_LIBS}
+	${SNMPAGENT_LIBS}
+	${GLIB2_LIBRARIES}
+	${GST_LIBRARIES}
+	)
+
+#include directories
+target_include_directories(openvivoe PUBLIC ${GLIB2_INCLUDE_DIRS} ${GST_INCLUDE_DIRS})
+
+#compile flags
+target_compile_options(openvivoe PUBLIC ${GLIB2_OTHER_CFLAGS} ${GST_OTHER_CFLAGS})
 
 #set debug as default configuration, to buld release run "cmake -DCMAKE_BUILD_TYPE=Release" or simply the alias cmakerelease
 if( NOT CMAKE_BUILD_TYPE )
@@ -128,43 +101,7 @@ execute_process(COMMAND "net-snmp-config" "--cflags"
 				OUTPUT_VARIABLE SNMP_FLAGS
 				OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-#Cflags needed for the Glibc
-execute_process(COMMAND "pkg-config" "--cflags" "glib-2.0"
-				WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-				OUTPUT_VARIABLE GLIBC_FLAGS
-				OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-#Cflags for Gstreamer-1.0
-execute_process(COMMAND "pkg-config" "--cflags" "gstreamer-1.0"
-				WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-				OUTPUT_VARIABLE GST_FLAGS
-				OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-#Cflags for Gstreamer-sdp-1.0
-execute_process(COMMAND "pkg-config" "--cflags" "gstreamer-video-1.0"
-				WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-				OUTPUT_VARIABLE GST_VIDEO_FLAGS
-				OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-#Cflags for Gstreamer-sdp-1.0
-execute_process(COMMAND "pkg-config" "--cflags" "gstreamer-sdp-1.0"
-				WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-				OUTPUT_VARIABLE GST_SDP_FLAGS
-				OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-#Cflags for Gstreamer-app-1.0
-execute_process(COMMAND "pkg-config" "--cflags" "gstreamer-rtp-1.0"
-				WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-				OUTPUT_VARIABLE GST_RTP_FLAGS
-				OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-#Cflags for Gstreamer-app-1.0
-execute_process(COMMAND "pkg-config" "--cflags" "gstreamer-app-1.0"
-				WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-				OUTPUT_VARIABLE GST_APP_FLAGS
-				OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-set(CFLAGS "${CFLAGS} ${SNMP_FLAGS} ${GLIBC_FLAGS} ${GST_FLAGS} ${GST_VIDEO_FLAGS} ${GST_SDP_FLAGS} ${GST_RTP_FLAGS} ${GST_APP_FLAGS}")
+set(CFLAGS "${CFLAGS} ${SNMP_FLAGS}")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall ${CFLAGS}") #always
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -00 -v -da -Q") #for debugging
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall ")#for release
@@ -181,6 +118,7 @@ endif()
 # the install rules for OpenVivoe
 INSTALL( TARGETS openvivoe DESTINATION bin )
 INSTALL( FILES conf/vivoe-mib.conf conf/vivoe-stream.conf DESTINATION /etc/openvivoe )
+INSTALL( FILES conf/mibs/VIVOE-MIB DESTINATION /usr/share/snmp/mibs )
 
 #display info to user
 message(STATUS "CMAKE_GENERATOR 	: ${CMAKE_GENERATOR}")
@@ -189,5 +127,3 @@ message(STATUS "BINARY_DIR 		: ${EXECUTABLE_OUTPUT_PATH}")
 message(STATUS "SRC_DIR 		: ${PROJECT_SOURCE_DIR}/src")
 message(STATUS "SYSTEM_NAME 		: ${CMAKE_SYSTEM_NAME}")
 message(STATUS "BUILD_TYPE 		: ${CMAKE_BUILD_TYPE}")
-message(STATUS "LIBS 		:${SNMP_LIBS} ${SNMPAGENT_LIBS} ${GLIB} ${GST_LIBS}")
-message(STATUS "CFLAGS 		: ${CFLAGS}")

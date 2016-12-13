@@ -8,3 +8,4 @@ For project's installation, please visit the "Docs" section of the [website](htt
 
 For information about how to use OpenVivoe, please visit our [wiki](https://github.com/Openwide-Ingenierie/openvivoe/wiki)!
 
+If you are interested in cross-compiling or just compiling easily OpenVivoe and its dependencies, you can dowload our [Yocto layer](https://github.com/Openwide-Ingenierie/meta-openvivoe)!
