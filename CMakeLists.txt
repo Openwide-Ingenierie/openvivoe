@@ -49,6 +49,16 @@ file(GLOB_RECURSE openvivoe_SRC 	src/*)
 file(GLOB_RECURSE openvivoe_HEADER 	include/*)
 add_executable(openvivoe ${openvivoe_SRC} ${openvivoe_HEADER} )
 
+#check if net-snmp types are well defined and included
+include(CheckIncludeFiles)
+
+CHECK_INCLUDE_FILES( inttypes.h HAVE_INTTYPES_H)
+CHECK_INCLUDE_FILES( stdint.h HAVE_STDINT_H)
+CHECK_INCLUDE_FILES( unistd.h HAVE_UNISTD_H)
+CHECK_INCLUDE_FILES( string.h HAVE_STRING_H)
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/config.h)
+
+
 #
 #Link specific libraries to target
 #
