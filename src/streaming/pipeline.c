@@ -298,15 +298,20 @@ void set_udpsink_param( GstElement *udpsink, long channel_entry_index){
 	/* compute IP */
 	long ip 			= define_vivoe_multicast( ethernetIfTable_head , channel_entry_index);
 
+
 	/* transform IP from long to char * */
 	struct in_addr ip_addr;
-	ip_addr.s_addr = ip;
+	ip_addr.s_addr =  ethernetIfTable_head->ethernetIfIpAddress;
 
 	g_debug("set new parameters to %s ", UDPSINK_NAME );
 
 	/* set the default multicast-interface */
 	struct in_addr multicast_iface;
-	multicast_iface.s_addr = ethernetIfTable_head->ethernetIfIpAddress;
+	multicast_iface.s_addr = ip;// ethernetIfTable_head->ethernetIfIpAddress;
+
+
+	g_debug("set mutlicast-iface to   %s ",  inet_ntoa(multicast_iface) );
+	g_debug("set host ip to  %s ",  inet_ntoa(ip_addr) );
 
 	/*Set UDP sink properties */
     g_object_set(   G_OBJECT(udpsink),
@@ -559,15 +564,15 @@ void set_udpsrc_param( GstElement *udpsrc, struct channelTable_entry * channel_e
 	multicast_group.s_addr = channel_entry->channelReceiveIpAddress;
 
 	/* set the default multicast-interface */
-	struct in_addr multicast_iface;
-	multicast_iface.s_addr = ethernetIfTable_head->ethernetIfIpAddress;
+	// struct in_addr multicast_iface;
+	// multicast_iface.s_addr = ethernetIfTable_head->ethernetIfIpAddress;
 
 
 	g_debug("set new parameters to %s ", UDPSRC_NAME );
 
 	/*Set UDP sink properties */
     g_object_set(   G_OBJECT(udpsrc),
-					"multicast-iface", 	inet_ntoa( multicast_iface ),
+					"multicast-iface", get_primary_interface_name(),
                 	"address", 			inet_ntoa( multicast_group ),
                     "port", 			DEFAULT_MULTICAST_PORT,
 					"caps", 			caps,

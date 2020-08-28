@@ -157,7 +157,7 @@ initialize_table_videoFormatTable(void)
     netsnmp_register_table_iterator( reg, iinfo );
 
 	/* get all the source configuration for configuration file, init the corresponding streams */
-	if( deviceInfo.parameters[num_DeviceType]._value.int_val != device_SP ){
+	if( deviceInfo.parameters[num_DeviceType]._value.int_val != device_SU ){
 		for(int i=1; i<=videoFormatNumber._value.int_val; i++)
 			init_stream_SP( i );
 	}
